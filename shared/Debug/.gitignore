@@ -1,0 +1,6 @@
+*
+!/shared/
+!makefile
+!objects.mk
+!sources.mk
+!.gitignore
