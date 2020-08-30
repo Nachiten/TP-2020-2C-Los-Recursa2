@@ -1,10 +1,3 @@
-/*
- * utilidades.h
- *
- *  Created on: 28 may. 2020
- *      Author: utnso
- */
-
 #ifndef SHARED_UTILIDADES_H_
 #define SHARED_UTILIDADES_H_
 

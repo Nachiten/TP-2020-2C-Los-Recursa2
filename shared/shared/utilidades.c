@@ -1,10 +1,3 @@
-/*
- * utilidades.c
- *
- *  Created on: 28 may. 2020
- *      Author: utnso
- */
-
 #include "utilidades.h"
 
 uint32_t elevar_a(uint32_t a, uint32_t b)
@@ -47,10 +40,31 @@ uint32_t cambia_a_int(char* enString)
 
 void bytesRecibidos (int32_t cantidad)
 {
-	printf("Recibí %d bytes sin crashear (Todavía).\n",cantidad);
+	if(cantidad == 0)
+	{
+		puts("Conexión finalizada (0).\n");
+	}
+
+	if(cantidad == -1)
+	{
+		puts("La conexión está caida (-1).\n");
+	}
+
+	if(cantidad > 0)
+	{
+		printf("Recibí %d bytes sin crashear (Todavía).\n",cantidad);
+	}
 }
 
 void bytesEnviados (int32_t cantidad)
 {
-	printf("Envié %d bytes sin crashear (Todavía).\n",cantidad);
+	if(cantidad == -1)
+	{
+		puts("No se pudo enviar el mensaje, la conexión no está activa (-1).\n");
+	}
+
+	if(cantidad > 0)
+	{
+		printf("Envié %d bytes sin crashear (Todavía).\n",cantidad);
+	}
 }

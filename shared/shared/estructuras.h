@@ -11,15 +11,14 @@
 #include "commons/config.h"
 #include "commons/log.h"
 
-
 typedef enum
 {
-	CONSULTAR_R = 1,
-	SELECCIONAR_R,
-	OBTENER_R,
+	CONSULTAR_RESTAURANTE = 1,
+	SELECCIONAR_RESTAURANTE,
+	OBTENER_RESTAURANTE,
 	CONSULTAR_PLATOS,
 	GUARDAR_PLATO,
-	A_PLATO,
+	A_PLATO,//(AÑADIR PLATO)
 	PLATO_LISTO,
 	CREAR_PEDIDO,
 	GUARDAR_PEDIDO,
@@ -27,11 +26,36 @@ typedef enum
 	CONSULTAR_PEDIDO,
 	OBTENER_PEDIDO,
 	FINALIZAR_PEDIDO,//estos 2 hay que consultarlos (finalizar y terminar)
-	TERMINAR_PEDIDO,
+	TERMINAR_PEDIDO,//estos 2 hay que consultarlos (finalizar y terminar)
+	RESPUESTA_CONSULTAR_R,
+	RESPUESTA_SELECCIONAR_R,
+	RESPUESTA_OBTENER_R,
+	RESPUESTA_CONSULTAR_PLATOS,
+	RESPUESTA_GUARDAR_PLATO,
+	RESPUESTA_A_PLATO, //(RESPUESTA AÑADIR PLATO)
+	RESPUESTA_PLATO_LISTO,
+	RESPUESTA_CREAR_PEDIDO,
+	RESPUESTA_GUARDAR_PEDIDO,
+	RESPUESTA_CONFIRMAR_PEDIDO,
+	RESPUESTA_CONSULTAR_PEDIDO,
+	RESPUESTA_OBTENER_PEDIDO,
+	RESPUESTA_FINALIZAR_PEDIDO,
+	RESPUESTA_TERMINAR_PEDIDO,
 	ERROR = -1,
 	DESCONEXION = 0
 }codigo_operacion;
 
+typedef struct
+{
+	uint32_t size;
+	void* stream;
+} t_buffer;
+
+typedef struct
+{
+	codigo_operacion codigo_op;
+	t_buffer* buffer;
+} t_paquete;
 
 typedef struct{
 	uint32_t IDCocinero;
