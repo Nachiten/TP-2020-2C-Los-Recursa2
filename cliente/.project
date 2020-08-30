@@ -4,6 +4,7 @@
 	<comment></comment>
 	<projects>
 		<project>shared</project>
+		<project>commons</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

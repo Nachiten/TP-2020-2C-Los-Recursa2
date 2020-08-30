@@ -4,13 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../shared/shared.c 
+../shared/socket.c \
+../shared/utilidades.c 
 
 OBJS += \
-./shared/shared.o 
+./shared/socket.o \
+./shared/utilidades.o 
 
 C_DEPS += \
-./shared/shared.d 
+./shared/socket.d \
+./shared/utilidades.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
