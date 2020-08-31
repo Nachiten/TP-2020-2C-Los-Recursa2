@@ -10,4 +10,9 @@
 
 #include "sindicato.h"
 
+void inicializarFileSystem();
+char* crearCarpetaEn(char*, char*);
+void crearBloques();
+
+
 #endif /* SRC_INICIARFS_H_ */
