@@ -11,21 +11,8 @@
 #include "shared/estructuras.h"
 #include "commons/string.h"
 
-typedef struct datosRestaurant{
-	char* nombre;
-	int cantCocineros;
-	char* posicion;
-	char* afinidad;
-	char* platos;
-	char* preciosPlatos;
-	int cantHornos;
-}datosRestaurant;
-
-typedef struct datosPasos{
-	char* nombre;
-	char* pasos;
-	char* tiempoPasos;
-}datosPasos;
+// Header files mios
+#include "consola.h"
 
 int cantidadDeElementosEnArray(char**);
 
