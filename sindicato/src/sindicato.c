@@ -15,11 +15,29 @@ int cantidadDeElementosEnArray(char** array){
 	return i;
 }
 
+// Hacer free de un array con cosas
+void freeDeArray(char** array){
+	int cantidadElementosArray = cantidadDeElementosEnArray(array);
+
+	int i;
+
+	for (i = cantidadElementosArray; i>= 0; i--){
+		free(array[i]);
+	}
+
+	free(array);
+}
+
 int main(){
 	printf("Comienzo sindicato\n");
 
-	while(1)
+	// Leer input de consola
+	//while(1)
 	obtenerInputConsola();
+
+	// Iniciar FS
+
+
 
 	return 0;
 }

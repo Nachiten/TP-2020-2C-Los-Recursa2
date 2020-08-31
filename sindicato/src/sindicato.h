@@ -13,7 +13,9 @@
 
 // Header files mios
 #include "consola.h"
+#include "iniciarFS.h"
 
 int cantidadDeElementosEnArray(char**);
+void freeDeArray(char**);
 
 #endif /* SRC_SINDICATO_H_ */

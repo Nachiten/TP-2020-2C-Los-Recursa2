@@ -113,6 +113,9 @@ void obtenerInputConsola(){
 		printf("ERROR | El comando ingresado no es valido. Los comandos posibles son: CrearRestaurante, CrearReceta.\n");
 		return;
 	}
+
+	// Libero las palabras separadas
+	freeDeArray(palabrasSeparadas);
 }
 
 void printearDatosRestaurant(datosRestaurant unRestaurant){
@@ -138,11 +141,14 @@ int checkearLongitudArraysStrings(char* array1, char* array2){
 	char** elementos1 = string_get_string_as_array(array1);
 	char** elementos2 = string_get_string_as_array(array2);
 
+	int retorno = 0;
+
 	if (cantidadDeElementosEnArray(elementos1) == cantidadDeElementosEnArray(elementos2)){
-		return 1;
-	} else {
-		return 0;
+		retorno = 1;
 	}
 
+	freeDeArray(elementos1);
+	freeDeArray(elementos2);
 
+	return retorno;
 }
