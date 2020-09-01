@@ -83,35 +83,114 @@ t_config* leerMetadataBin(){
 	return metadataBin;
 }
 
+void testingEscribirBloqueRestaurant(){
+
+	int bloqueSig = 3;
+
+	FILE* bloque = fopen( "25.AFIP" , "w" );
+
+	fwrite(&bloqueSig, sizeof(bloqueSig), 1, bloque);
+
+	fclose(bloque);
+
+}
+
+void testingLeerBloqueRestaurant(){
+
+	int* dato = malloc(sizeof(int));
+
+	FILE* bloque = fopen( "25.AFIP" , "r" );
+
+	fread(dato, sizeof(dato), 1, bloque);
+
+	printf("Dato leido: %i", *dato);
+
+	fclose(bloque);
+}
+
+char* generarSringInfoRestaurant(datosRestaurant unRestaurant){
+
+	// Strings que se usan para guardar los datos
+	char* CANTIDAD_COCINEROS = "CANTIDAD_COCINEROS=";
+	char* POSICION = "POSICION=";
+	char* AFINIDAD_COCINEROS = "AFINIDAD_COCINEROS=";
+	char* PLATOS = "PLATOS=";
+	char* PRECIO_PLATOS = "PRECIO_PLATOS=";
+	char* CANTIDAD_HORNOS = "CANTIDAD_HORNOS=";
+
+	// String donde se guardaran los datos despues del =
+	char* cantCocineros;
+	char* posicion;
+	char* afinidadCocineros;
+	char* platos;
+	char* preciosPlatos;
+	char* cantHornos;
+
+	asprintf(&cantCocineros, "%i\n", unRestaurant.cantCocineros);
+	asprintf(&posicion, "%s\n", unRestaurant.posicion);
+	asprintf(&afinidadCocineros, "%s\n", unRestaurant.afinidad);
+	asprintf(&platos, "%s\n", unRestaurant.platos);
+	asprintf(&preciosPlatos, "%s\n", unRestaurant.preciosPlatos);
+	asprintf(&cantHornos, "%i\n", unRestaurant.cantHornos);
+
+	char* stringCompleto = malloc(strlen(CANTIDAD_COCINEROS) + strlen(POSICION) + strlen(AFINIDAD_COCINEROS) +
+			strlen(PLATOS) + strlen(PRECIO_PLATOS) + strlen(CANTIDAD_HORNOS) +
+			strlen(cantCocineros) + strlen(posicion) + strlen(afinidadCocineros) +
+			strlen(platos) + strlen(preciosPlatos) + strlen(cantHornos) + 1
+			);
+
+	strcpy(stringCompleto, CANTIDAD_COCINEROS);
+	strcat(stringCompleto, cantCocineros);
+	strcat(stringCompleto, POSICION);
+	strcat(stringCompleto, posicion);
+	strcat(stringCompleto, AFINIDAD_COCINEROS);
+	strcat(stringCompleto, afinidadCocineros);
+	strcat(stringCompleto, PLATOS);
+	strcat(stringCompleto, platos);
+	strcat(stringCompleto, PRECIO_PLATOS);
+	strcat(stringCompleto, preciosPlatos);
+	strcat(stringCompleto, CANTIDAD_HORNOS);
+	strcat(stringCompleto, cantHornos);
+
+	free(cantCocineros);
+	free(posicion);
+	free(afinidadCocineros);
+	free(platos);
+	free(preciosPlatos);
+	free(cantHornos);
+
+	printf("String completo:\n%s", stringCompleto);
+	printf("Tamaño total: %i\n", strlen(stringCompleto));
+
+	return stringCompleto;
+}
+
 int main(){
 	printf("Comienzo sindicato\n");
 
 	// Leer input de consola
 	//while(1)
-	//obtenerInputConsola();
+	obtenerInputConsola();
 
 	char* PUNTO_MONTAJE;
 	t_config* config = leerConfig(&PUNTO_MONTAJE);
 
 	// puntoMontaje/Metadata
 	pathMetadata = crearCarpetaEn(PUNTO_MONTAJE, "/Metadata");
-	// puntoMontaje/Blocks
-	pathBloques = crearCarpetaEn(PUNTO_MONTAJE, "/Blocks");
-	// puntoMontaje/Restaurantes
-	pathRestaurantes = crearCarpetaEn(PUNTO_MONTAJE, "/Restaurantes");
-	// puntoMontaje/Recetas
-	pathRecetas = crearCarpetaEn(PUNTO_MONTAJE, "/Recetas");
 
 	// Funcion para leer metadata.bin
 	t_config* metadataBin = leerMetadataBin();
 
-	// Si no existe el filesystem
+	// Si existe el filesystem no se hace nada
 	if (existeFilesystem()){
 		printf("El filesystem ya existe. No se debe inicializar.\n");
+	// Si no existe se genera bitmap y demas verduras
 	} else {
 		printf("No existe filesystem... inicializando.\n");
-		inicializarFileSystem();
+		inicializarFileSystem(PUNTO_MONTAJE);
 	}
+
+	//testingEscribirBloqueRestaurant();
 
 	// Liberaciones finales (a las que nunca se llega)
 	config_destroy(config);

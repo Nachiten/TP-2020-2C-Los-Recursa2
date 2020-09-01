@@ -73,6 +73,7 @@ void obtenerInputConsola(){
 			printearDatosRestaurant(restaurantNuevo);
 
 			// TODO Se llama a la funcion que genera el restaurant
+			generarSringInfoRestaurant(restaurantNuevo);
 
 		} else {
 			printf("ERROR | Sintaxis incorecta: El comando es de la forma:\nCrearRestaurante [NOMBRE] "

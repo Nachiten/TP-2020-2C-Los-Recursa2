@@ -7,7 +7,14 @@
 
 #include "iniciarFS.h"
 
-void inicializarFileSystem(){
+void inicializarFileSystem(char* PUNTO_MONTAJE){
+
+	// puntoMontaje/Blocks
+	pathBloques = crearCarpetaEn(PUNTO_MONTAJE, "/Blocks");
+	// puntoMontaje/Restaurantes
+	pathRestaurantes = crearCarpetaEn(PUNTO_MONTAJE, "/Restaurantes");
+	// puntoMontaje/Recetas
+	pathRecetas = crearCarpetaEn(PUNTO_MONTAJE, "/Recetas");
 
 	char* BITARRAY = malloc(BLOCKS / 8);
 

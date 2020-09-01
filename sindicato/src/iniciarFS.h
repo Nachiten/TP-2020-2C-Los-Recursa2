@@ -13,6 +13,7 @@
 void inicializarFileSystem();
 char* crearCarpetaEn(char*, char*);
 void crearBloques();
+int existeFilesystem();
 
 
 #endif /* SRC_INICIARFS_H_ */

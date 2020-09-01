@@ -8,6 +8,11 @@
 #ifndef SRC_SINDICATO_H_
 #define SRC_SINDICATO_H_
 
+// Para que no me salte la warning de asprintf()
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
+
 #include <sys/stat.h> // Para tener mkdir
 #include "shared/estructuras.h"
 #include "shared/cargador.h"
@@ -23,6 +28,7 @@ char* PUERTO_ESCUCHA;
 
 int cantidadDeElementosEnArray(char**);
 void freeDeArray(char**);
+char* generarSringInfoRestaurant(datosRestaurant);
 
 char* pathMetadata;
 char* pathRestaurantes;
