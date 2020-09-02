@@ -14,26 +14,53 @@
 #endif
 
 #include <sys/stat.h> // Para tener mkdir
+#include <semaphore.h> // para los semaforos
 #include "shared/estructuras.h"
 #include "shared/cargador.h"
 #include "commons/string.h"
 #include "commons/bitarray.h"
+#include "commons/collections/list.h"
 
 // Header files mios
 #include "consola.h"
 #include "iniciarFS.h"
 #include "bitarray.h"
 
+typedef struct{
+	int cantCocineros;
+	char* posicion;
+	char* afinidad;
+	char* platos;
+	char* preciosPlatos;
+	int cantHornos;
+}datosRestaurant;
+
+typedef struct{
+	char* nombre;
+	char* pasos;
+	char* tiempoPasos;
+}datosPasos;
+
 char* PUERTO_ESCUCHA;
 
 int cantidadDeElementosEnArray(char**);
 void freeDeArray(char**);
-char* generarSringInfoRestaurant(datosRestaurant);
 
 // Creacion restaurantes
-void crearRestaurant(char* nombreRestaurant);
+void crearRestaurant(char*, datosRestaurant);
 char* crearCarpetaRestaurant(char*);
-void crearArchivoVacioEn(char*, char*);
+char* crearArchivoVacioEn(char*, char*);
+void llenarBloquesRestaurant(char*, datosRestaurant hola);
+char* generarSringInfoRestaurant(datosRestaurant hola);
+
+t_list* separarStringEnBloques(char*, int);
+
+void escribirDatoEnBloque(char*, int, int);
+void escribirLineasEnBloques(t_list*, t_list*);
+
+void fijarValorArchivoA(char*, int, char*);
+
+t_list* obtenerPrimerosLibresDeBitmap(int cantidad);
 
 char* pathMetadata;
 char* pathRestaurantes;

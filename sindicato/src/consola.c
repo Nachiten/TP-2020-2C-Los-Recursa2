@@ -69,17 +69,10 @@ void obtenerInputConsola(){
 			restaurantNuevo.preciosPlatos = palabrasSeparadas[6];
 			restaurantNuevo.cantHornos = cantidadHornos;
 
-			printearDatosRestaurant(restaurantNuevo);
-
-			// TODO Se llama a la funcion que genera el restaurant
-			char* stringRestaurant = generarSringInfoRestaurant(restaurantNuevo);
+			//printearDatosRestaurant(restaurantNuevo);
 
 			// Crear un nuevo restaurant vacio con el nombre
-			crearRestaurant(palabrasSeparadas[1]);
-
-			//escribirStringEnBloques();
-
-			free(stringRestaurant);
+			crearRestaurant(palabrasSeparadas[1], restaurantNuevo);
 
 		} else {
 			printf("ERROR | Sintaxis incorecta: El comando es de la forma:\nCrearRestaurante [NOMBRE] "

@@ -9,8 +9,6 @@
 
 void inicializarFileSystem(char* PUNTO_MONTAJE){
 
-	printf("PathRestaurantes: %s", pathRestaurantes);
-
 	// puntoMontaje/Recetas
 	pathRecetas = crearCarpetaEn(PUNTO_MONTAJE, "/Files/Recetas");
 

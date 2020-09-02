@@ -124,6 +124,7 @@ void testingLeerBloqueRestaurant(){
 	fclose(bloque);
 }
 
+// Generar el string que se debe pegar en los bloques
 char* generarSringInfoRestaurant(datosRestaurant unRestaurant){
 
 	// Strings que se usan para guardar los datos
@@ -175,22 +176,163 @@ char* generarSringInfoRestaurant(datosRestaurant unRestaurant){
 	free(preciosPlatos);
 	free(cantHornos);
 
-	printf("String completo:\n%s", stringCompleto);
+	//printf("String completo:\n%s", stringCompleto);
 	printf("Tamaño total: %i\n", strlen(stringCompleto));
 
 	return stringCompleto;
 }
 
-void crearRestaurant(char* nombreRestaurant){
+void crearRestaurant(char* nombreRestaurant, datosRestaurant unRestaurant){
 	// Crear la carpeta del nuevo restaurant
 	char* pathCarpetaRestaurant = crearCarpetaRestaurant(nombreRestaurant);
 	// Crear el archivo Info.AFIP
-	crearArchivoVacioEn(pathCarpetaRestaurant, "Info.AFIP");
+	char* pathArchivoRestaurant = crearArchivoVacioEn(pathCarpetaRestaurant, "Info.AFIP");
+
+	llenarBloquesRestaurant(pathArchivoRestaurant, unRestaurant);
 
 	free(pathCarpetaRestaurant);
 }
 
-void crearArchivoVacioEn(char* pathCarpeta, char* nombreArchivo){
+void llenarBloquesRestaurant(char* pathArchivoRestaurant, datosRestaurant unRestaurant){
+
+	// Armo el string enorme de datos que tengo que escribir
+	char* stringRestaurant = generarSringInfoRestaurant(unRestaurant);
+
+	// Calculo la cantidad de bloques necesarios
+	int cantBloquesNecesarios = cantidadDeBloquesQueOcupa(strlen(stringRestaurant));
+
+	// Me genero una lista con todos los bloques asignados
+	t_list* bloquesAsignados = obtenerPrimerosLibresDeBitmap(cantBloquesNecesarios);
+
+	// Me genero una lista con los datos separados
+	t_list* datosSeparadosBloques = separarStringEnBloques(stringRestaurant, cantBloquesNecesarios);
+
+	escribirLineasEnBloques(bloquesAsignados, datosSeparadosBloques);
+
+	// TODO | Llenar SIZE e INICIAL_BLOCK del archivo
+
+	// Fijo el SIZE del archivo
+	fijarValorArchivoA(pathArchivoRestaurant, strlen(stringRestaurant), "SIZE");
+
+	int* bloqueInicial = list_get(bloquesAsignados, 0);
+
+	// Fijo el INICIAL_BLOCK del archivo
+	fijarValorArchivoA(pathArchivoRestaurant, *bloqueInicial, "INITIAL_BLOCK");
+
+	free(stringRestaurant);
+	list_clean_and_destroy_elements(bloquesAsignados, (void*)free);
+	list_clean_and_destroy_elements(datosSeparadosBloques, (void*)free);
+}
+
+void fijarValorArchivoA(char* pathArchivo, int numero, char* valor){
+	t_config* datosMetadata = config_create(pathArchivo);
+
+	char* numeroEnString;
+
+	asprintf(&numeroEnString, "%i", numero);
+
+	config_set_value(datosMetadata, valor, numeroEnString);
+
+	config_save(datosMetadata);
+
+	config_destroy(datosMetadata);
+
+	free(numeroEnString);
+}
+
+// Escribir las lineas en listaDatosBloques en los bloques listaBloquesAOcupar
+void escribirLineasEnBloques(t_list* listaBloquesAOcupar, t_list* listaDatosBloques){
+	if (list_size(listaBloquesAOcupar) != list_size(listaDatosBloques)){
+		printf("ERROR | La cantidad de bloques a escribir debe coincidir con la cantidad de datos a escribir");
+	}
+
+	int i;
+
+	// Se recorre la lista de bloques que se deben ocupar
+	for (i = 0 ; i < list_size(listaBloquesAOcupar) ; i++){
+		char* datoAEscribir = list_get(listaDatosBloques, i);
+		int* bloqueAOcupar = list_get(listaBloquesAOcupar, i);
+
+		int siguienteBloque;
+
+		// Si es el ultimo bloque => siguiente bloque es 0
+		if (i == list_size(listaBloquesAOcupar) - 1){
+			siguienteBloque = 0;
+		// Si no es el ultimo bloque => siguienteBloque es el numero del siguiente bloque
+		} else {
+			int* punteroSiguienteBloque = list_get(listaBloquesAOcupar, i + 1);
+		    siguienteBloque = *punteroSiguienteBloque;
+		}
+
+		// Testing
+		//printf("En el bloque %i se escribira el dato:\n%s\n", *bloqueAOcupar , datoAEscribir );
+
+		escribirDatoEnBloque(datoAEscribir, *bloqueAOcupar, siguienteBloque);
+	}
+}
+
+// Escribir un dato en un bloque determinado
+void escribirDatoEnBloque(char* dato, int numBloque, int siguienteBloque){
+	// Array de chars para meter el int convertido a array
+	char* enteroEnLetras;
+
+	// Genero un array de chars que es el numero de bloque pasado a string
+	asprintf(&enteroEnLetras, "%i", numBloque);
+
+	char* extension = ".AFIP";
+
+	// Longitud del entero pasado a char + la extension + / + \n
+	char* nombreArchivo = malloc( strlen(enteroEnLetras) + strlen(extension) + 2 );
+
+	// El nombre de archivo es de la forma /{num}.bin | Ejemplo: /35.bin
+	strcpy(nombreArchivo, "/");
+	strcat(nombreArchivo, enteroEnLetras);
+	strcat(nombreArchivo, extension);
+
+	// Creo una copia del path de /Blocks para no modificarlo
+	char* pathBloque = malloc(strlen(pathBloques) + strlen(nombreArchivo) + 1);
+
+	// Le pego el path de /Blocks
+	strcpy(pathBloque, pathBloques);
+
+	// Le pego el valor hardcodeado 1.bin
+	strcat(pathBloque, nombreArchivo);
+
+	FILE* bloque = fopen( pathBloque , "w" );
+
+	// TODO Aparte de escribir el dato se debe escribir la referencia al siguiente bloque
+	fwrite(dato, strlen(dato) + 1, 1, bloque);
+
+	if (siguienteBloque != 0)
+	fwrite(&siguienteBloque, sizeof(int), 1, bloque);
+
+	fclose(bloque);
+	free(nombreArchivo);
+	free(pathBloque);
+	free(enteroEnLetras);
+}
+
+t_list* separarStringEnBloques(char* lineaAEscribir, int cantBloques){
+
+	t_list* listaStrings = list_create();
+
+	int i;
+
+	for (i = 0; i < cantBloques; i++){
+		// Recortar la longitud del bloque del string
+		char* stringSeparado = string_substring(lineaAEscribir, i * (BLOCK_SIZE - 4), BLOCK_SIZE - 4);
+
+		// Agrego el bloque recortado a la lista de strings
+		list_add(listaStrings, stringSeparado);
+
+		//printf("STRING SEPARADO %i: %s\n", i, stringSeparado);
+	}
+
+	return listaStrings;
+
+}
+
+char* crearArchivoVacioEn(char* pathCarpeta, char* nombreArchivo){
 
 	// {puntoMontaje}/Files/pathCarpeta/nombreArchivo
 	char* pathCompleto = malloc( strlen(pathCarpeta) + strlen(nombreArchivo) + 2);
@@ -218,7 +360,7 @@ void crearArchivoVacioEn(char* pathCarpeta, char* nombreArchivo){
 
 	config_destroy(datosArchivo);
 
-	free(pathCompleto);
+	return pathCompleto;
 }
 
 char* crearCarpetaRestaurant(char* nombreRestaurant){
@@ -236,19 +378,40 @@ char* crearCarpetaRestaurant(char* nombreRestaurant){
 	return pathCarpetaRestaurant;
 }
 
+void leerUnBloque(){
+	char* datosLeidos = malloc(BLOCK_SIZE - 4 + 1);
+	int* bloqueSiguiente = malloc(sizeof(int));
+
+	char* pathBloque = "/home/utnso/Escritorio/afip/Blocks/2.AFIP";
+
+	FILE* bloque = fopen( pathBloque , "r" );
+
+	// TODO Aparte de escribir el dato se debe escribir la referencia al siguiente bloque
+	fread(datosLeidos, BLOCK_SIZE - 4 + 1, 1, bloque);
+
+	fread(bloqueSiguiente, sizeof(int), 1, bloque);
+
+	printf("datosLeidos: %s", datosLeidos);
+	printf("bloqueSiguiente: %i", *bloqueSiguiente);
+}
+
 int main(){
 	printf("Comienzo sindicato\n");
+
+	// Inicializar semaforo bitmap
+	//semBitmap = malloc(sizeof(sem_t));
+	//sem_init(semBitmap, 0, 1);
 
 	char* PUNTO_MONTAJE;
 	t_config* config = leerConfig(&PUNTO_MONTAJE);
 
-	// puntoMontaje/Metadata
+	// {puntoMontaje}/Metadata
 	pathMetadata = crearCarpetaEn(PUNTO_MONTAJE, "/Metadata");
-	// puntoMontaje/Blocks
+	// {puntoMontaje}/Blocks
 	pathBloques = crearCarpetaEn(PUNTO_MONTAJE, "/Blocks");
-	// puntoMontaje/Restaurantes
+	// {puntoMontaje}/Restaurantes
 	pathFiles = crearCarpetaEn(PUNTO_MONTAJE, "/Files");
-	// puntoMontaje/Restaurantes
+	// {puntoMontaje}/Restaurantes
 	pathRestaurantes = crearCarpetaEn(PUNTO_MONTAJE, "/Files/Restaurantes");
 
 	// Funcion para leer metadata.bin
@@ -266,9 +429,9 @@ int main(){
 	// ---- A partir de aca el FS ya existe ----
 
 	// Leer input de consola
-	obtenerInputConsola();
+	//obtenerInputConsola();
 
-	//testingEscribirBloqueRestaurant();
+	leerUnBloque();
 
 	// Liberaciones finales (a las que nunca se llega)
 	config_destroy(config);

@@ -10,8 +10,12 @@
 
 #include "sindicato.h"
 
+sem_t* semBitmap;
+
 t_bitarray* crearBitArray(char*);
 void vaciarBitArray(t_bitarray*);
 void guardarBitArrayEnArchivo(char*);
+void leerBitArrayDeArchivo(char** bitArray);
+void liberarUnBloque(int index);
 
 #endif /* SRC_BITARRAY_H_ */

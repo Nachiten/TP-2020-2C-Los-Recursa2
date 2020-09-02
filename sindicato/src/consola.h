@@ -10,21 +10,6 @@
 
 #include "sindicato.h"
 
-typedef struct datosRestaurant{
-	int cantCocineros;
-	char* posicion;
-	char* afinidad;
-	char* platos;
-	char* preciosPlatos;
-	int cantHornos;
-}datosRestaurant;
-
-typedef struct datosPasos{
-	char* nombre;
-	char* pasos;
-	char* tiempoPasos;
-}datosPasos;
-
 void obtenerInputConsola();
 void printearDatosRestaurant(datosRestaurant);
 void printearDatosPasos(datosPasos);
