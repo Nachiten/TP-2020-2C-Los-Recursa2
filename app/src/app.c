@@ -7,10 +7,12 @@ int main(){
 
 void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t sizeAAllocar)  {
 		switch (cod_op) {
-		case 0://DESCONEXION:
+		case DESCONEXION:
 			pthread_exit(NULL);
-		case 1://ERROR:
+		case ERROR:
 			pthread_exit(NULL);
+		default:
+			break;
 		}
 }
 
@@ -98,3 +100,4 @@ void iniciar_server(char* ip, char* puerto)
     }
 
 }
+

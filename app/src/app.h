@@ -11,9 +11,9 @@
 #include<pthread.h>
 #include <inttypes.h> // Para tener el uint32_t
 #include <semaphore.h> // para los semaforos
-//#include "shared/estructuras.h"
-//#include"shared/cargador.h"
-//#include"shared/socket.h"
+#include "shared/estructuras.h"
+#include"shared/cargador.h"
+#include"shared/socket.h"
 
 // ***SERVIDOR***
 void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t sizeAAllocar) ;

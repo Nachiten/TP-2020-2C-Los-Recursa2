@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lcommons -lpthread -lshared
+LIBS := -lshared -lcommons -lpthread
 
