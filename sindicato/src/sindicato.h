@@ -30,10 +30,16 @@ int cantidadDeElementosEnArray(char**);
 void freeDeArray(char**);
 char* generarSringInfoRestaurant(datosRestaurant);
 
+// Creacion restaurantes
+void crearRestaurant(char* nombreRestaurant);
+char* crearCarpetaRestaurant(char*);
+void crearArchivoVacioEn(char*, char*);
+
 char* pathMetadata;
 char* pathRestaurantes;
 char* pathRecetas;
 char* pathBloques;
+char* pathFiles;
 
 int BLOCKS;
 int BLOCK_SIZE;

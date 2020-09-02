@@ -9,12 +9,10 @@
 
 void inicializarFileSystem(char* PUNTO_MONTAJE){
 
-	// puntoMontaje/Blocks
-	pathBloques = crearCarpetaEn(PUNTO_MONTAJE, "/Blocks");
-	// puntoMontaje/Restaurantes
-	pathRestaurantes = crearCarpetaEn(PUNTO_MONTAJE, "/Restaurantes");
+	printf("PathRestaurantes: %s", pathRestaurantes);
+
 	// puntoMontaje/Recetas
-	pathRecetas = crearCarpetaEn(PUNTO_MONTAJE, "/Recetas");
+	pathRecetas = crearCarpetaEn(PUNTO_MONTAJE, "/Files/Recetas");
 
 	char* BITARRAY = malloc(BLOCKS / 8);
 

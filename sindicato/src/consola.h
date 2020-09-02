@@ -11,7 +11,6 @@
 #include "sindicato.h"
 
 typedef struct datosRestaurant{
-	char* nombre;
 	int cantCocineros;
 	char* posicion;
 	char* afinidad;

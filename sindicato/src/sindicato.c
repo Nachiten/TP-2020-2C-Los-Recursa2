@@ -7,6 +7,22 @@
 
 #include "sindicato.h"
 
+// Devuelve la cantidad de bloques que necesito para un string a escribir
+int cantidadDeBloquesQueOcupa(int pesoEnBytes){
+
+	int cantBloques = 0;
+
+	// Se calcula cuantos bloques ocupa en base al peso y al tamaño
+	while (pesoEnBytes > 0){
+		// El - 4 es ya que cada bloque solo puede utilizar 4 bytes menos del total
+		pesoEnBytes-= BLOCK_SIZE - 4;
+		cantBloques++;
+	}
+
+	printf("La cantidad de bloques es: %i\n", cantBloques);
+	return cantBloques;
+}
+
 int cantidadDeElementosEnArray(char** array){
 	int i = 0;
 	while(array[i] != NULL && strcmp(array[i], "\n") != 0){
@@ -165,18 +181,75 @@ char* generarSringInfoRestaurant(datosRestaurant unRestaurant){
 	return stringCompleto;
 }
 
+void crearRestaurant(char* nombreRestaurant){
+	// Crear la carpeta del nuevo restaurant
+	char* pathCarpetaRestaurant = crearCarpetaRestaurant(nombreRestaurant);
+	// Crear el archivo Info.AFIP
+	crearArchivoVacioEn(pathCarpetaRestaurant, "Info.AFIP");
+
+	free(pathCarpetaRestaurant);
+}
+
+void crearArchivoVacioEn(char* pathCarpeta, char* nombreArchivo){
+
+	// {puntoMontaje}/Files/pathCarpeta/nombreArchivo
+	char* pathCompleto = malloc( strlen(pathCarpeta) + strlen(nombreArchivo) + 2);
+
+	strcpy(pathCompleto, pathCarpeta);
+	strcat(pathCompleto, "/");
+	strcat(pathCompleto, nombreArchivo);
+
+	FILE* archivo = fopen( pathCompleto , "w" );
+
+	if (archivo == NULL){
+		printf("No se pudo crear el archivo %s\n", pathCompleto);
+		exit(3);
+	}
+
+	fclose(archivo);
+
+	t_config* datosArchivo = config_create(pathCompleto);
+
+	// Valores default del archivo
+	config_set_value(datosArchivo, "SIZE", "0");
+	config_set_value(datosArchivo, "INITIAL_BLOCK", "0");
+
+	config_save(datosArchivo);
+
+	config_destroy(datosArchivo);
+
+	free(pathCompleto);
+}
+
+char* crearCarpetaRestaurant(char* nombreRestaurant){
+
+	char* pathCarpetaRestaurant = malloc(strlen(pathRestaurantes) + strlen(nombreRestaurant) + 2);
+
+	// {puntoMontaje}/Files/Restaurantes/Restaurante1
+
+	strcpy(pathCarpetaRestaurant, pathRestaurantes);
+	strcat(pathCarpetaRestaurant, "/");
+	strcat(pathCarpetaRestaurant, nombreRestaurant);
+
+	mkdir(pathCarpetaRestaurant, 0777);
+
+	return pathCarpetaRestaurant;
+}
+
 int main(){
 	printf("Comienzo sindicato\n");
-
-	// Leer input de consola
-	//while(1)
-	obtenerInputConsola();
 
 	char* PUNTO_MONTAJE;
 	t_config* config = leerConfig(&PUNTO_MONTAJE);
 
 	// puntoMontaje/Metadata
 	pathMetadata = crearCarpetaEn(PUNTO_MONTAJE, "/Metadata");
+	// puntoMontaje/Blocks
+	pathBloques = crearCarpetaEn(PUNTO_MONTAJE, "/Blocks");
+	// puntoMontaje/Restaurantes
+	pathFiles = crearCarpetaEn(PUNTO_MONTAJE, "/Files");
+	// puntoMontaje/Restaurantes
+	pathRestaurantes = crearCarpetaEn(PUNTO_MONTAJE, "/Files/Restaurantes");
 
 	// Funcion para leer metadata.bin
 	t_config* metadataBin = leerMetadataBin();
@@ -189,6 +262,11 @@ int main(){
 		printf("No existe filesystem... inicializando.\n");
 		inicializarFileSystem(PUNTO_MONTAJE);
 	}
+
+	// ---- A partir de aca el FS ya existe ----
+
+	// Leer input de consola
+	obtenerInputConsola();
 
 	//testingEscribirBloqueRestaurant();
 

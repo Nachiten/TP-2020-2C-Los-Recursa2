@@ -62,7 +62,6 @@ void obtenerInputConsola(){
 			datosRestaurant restaurantNuevo;
 
 			// Inserto los datos obtenidos en struct
-			restaurantNuevo.nombre = palabrasSeparadas[1];
 			restaurantNuevo.cantCocineros = cantidadCocineros;
 			restaurantNuevo.posicion = palabrasSeparadas[3];
 			restaurantNuevo.afinidad = palabrasSeparadas[4];
@@ -74,6 +73,11 @@ void obtenerInputConsola(){
 
 			// TODO Se llama a la funcion que genera el restaurant
 			char* stringRestaurant = generarSringInfoRestaurant(restaurantNuevo);
+
+			// Crear un nuevo restaurant vacio con el nombre
+			crearRestaurant(palabrasSeparadas[1]);
+
+			//escribirStringEnBloques();
 
 			free(stringRestaurant);
 
@@ -122,7 +126,6 @@ void obtenerInputConsola(){
 }
 
 void printearDatosRestaurant(datosRestaurant unRestaurant){
-	printf("Nombre: %s\n",            unRestaurant.nombre);
 	printf("CantidadCocineros: %i\n", unRestaurant.cantCocineros);
 	printf("Posicion: %s\n",          unRestaurant.posicion);
 	printf("AfinidadCocineros: %s\n", unRestaurant.afinidad);
