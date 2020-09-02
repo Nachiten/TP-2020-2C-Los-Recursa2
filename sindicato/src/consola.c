@@ -71,8 +71,13 @@ void obtenerInputConsola(){
 
 			//printearDatosRestaurant(restaurantNuevo);
 
-			// Crear un nuevo restaurant vacio con el nombre
-			crearRestaurant(palabrasSeparadas[1], restaurantNuevo);
+			// Si el restaurant no existe
+			if (!existeRestaurant(palabrasSeparadas[1])){
+				// Crear un nuevo restaurant vacio con el nombre
+				crearRestaurant(palabrasSeparadas[1], restaurantNuevo);
+			} else {
+				printf("El restaurant que se quiere crear ya existe. Aborting.");
+			}
 
 		} else {
 			printf("ERROR | Sintaxis incorecta: El comando es de la forma:\nCrearRestaurante [NOMBRE] "

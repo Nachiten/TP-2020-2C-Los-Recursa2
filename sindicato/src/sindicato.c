@@ -395,6 +395,40 @@ void leerUnBloque(){
 	printf("bloqueSiguiente: %i", *bloqueSiguiente);
 }
 
+// Checkea si la carpeta nombreParticular existe dentro de la carpeta nombreCarpeta
+// Retorna 1 si la carpeta existe, 0 si no existe
+int existeRestaurant(char* nombreRestaurant){
+
+	char* pathCarpetaCompleto = malloc(strlen(pathRestaurantes) + strlen(nombreRestaurant) + 2);
+
+	// {punto_montaje}/Files/Restaurantes/NombreRestaurant
+
+	strcpy(pathCarpetaCompleto, pathRestaurantes);
+	strcat(pathCarpetaCompleto, "/");
+	strcat(pathCarpetaCompleto, nombreRestaurant);
+
+	//printf("Path carpeta pokemon: %s\n", pathCarpetaPokemon);
+
+	int retorno;
+
+	DIR* dir = opendir(pathCarpetaCompleto);
+	if (dir) {
+		// La carpeta existe
+		retorno = 1;
+	} else if (ENOENT == errno) {
+		// La carpeta no existe
+		retorno = 0;
+	} else {
+		printf("Hubo un error inesperado al abrir una carpeta pokemon D:");
+		retorno = -1;
+	}
+
+	closedir(dir);
+
+	free(pathCarpetaCompleto);
+	return retorno;
+}
+
 int main(){
 	printf("Comienzo sindicato\n");
 
@@ -429,9 +463,9 @@ int main(){
 	// ---- A partir de aca el FS ya existe ----
 
 	// Leer input de consola
-	//obtenerInputConsola();
+	obtenerInputConsola();
 
-	leerUnBloque();
+	//leerUnBloque();
 
 	// Liberaciones finales (a las que nunca se llega)
 	config_destroy(config);

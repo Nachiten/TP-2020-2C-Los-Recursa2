@@ -15,6 +15,8 @@
 
 #include <sys/stat.h> // Para tener mkdir
 #include <semaphore.h> // para los semaforos
+#include <dirent.h> // Para poder escanear carpetas
+#include <errno.h> // Para checkear el error al escanear una carpeta
 #include "shared/estructuras.h"
 #include "shared/cargador.h"
 #include "commons/string.h"
