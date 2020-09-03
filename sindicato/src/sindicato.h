@@ -17,6 +17,7 @@
 #include <semaphore.h> // para los semaforos
 #include <dirent.h> // Para poder escanear carpetas
 #include <errno.h> // Para checkear el error al escanear una carpeta
+#include <pthread.h> // Para los hilos
 #include "shared/estructuras.h"
 #include "shared/cargador.h"
 #include "shared/utilidades.h"
@@ -39,31 +40,11 @@ typedef struct{
 }datosRestaurant;
 
 typedef struct{
-	char* nombre;
 	char* pasos;
 	char* tiempoPasos;
-}datosPasos;
+}datosReceta;
 
 char* PUERTO_ESCUCHA;
-
-int cantidadDeElementosEnArray(char**);
-void freeDeArray(char**);
-
-// Creacion restaurantes
-void crearRestaurant(char*, datosRestaurant);
-char* crearCarpetaRestaurant(char*);
-char* crearArchivoVacioEn(char*, char*);
-void llenarBloquesRestaurant(char*, datosRestaurant hola);
-char* generarSringInfoRestaurant(datosRestaurant hola);
-
-t_list* separarStringEnBloques(char*, int);
-
-void escribirDatoEnBloque(char*, int, int);
-void escribirLineasEnBloques(t_list*, t_list*);
-
-void fijarValorArchivoA(char*, int, char*);
-
-t_list* obtenerPrimerosLibresDeBitmap(int cantidad);
 
 char* pathMetadata;
 char* pathRestaurantes;
@@ -74,5 +55,32 @@ char* pathFiles;
 int BLOCKS;
 int BLOCK_SIZE;
 char* MAGIC_NUMBER;
+
+t_log* logger;
+
+// Arrays
+int cantidadDeElementosEnArray(char**);
+void freeDeArray(char**);
+
+// Restaurantes
+void crearRestaurant(char*, datosRestaurant);
+char* crearCarpetaRestaurant(char*);
+char* generarSringInfoRestaurant(datosRestaurant hola);
+int existeRestaurant(char*);
+
+// Recetas
+void crearReceta(char*, datosReceta unaReceta);
+char* generarStringInfoReceta(datosReceta unaReceta);
+int existeReceta(char*);
+
+// Bloques/Archivos
+void escribirDatoEnBloque(char*, int, int);
+void escribirLineasEnBloques(t_list*, t_list*);
+char* crearArchivoVacioEn(char*, char*);
+void llenarBloquesConString(char*, char*, char*);
+t_list* separarStringEnBloques(char*, int);
+void fijarValorArchivoA(char*, int, char*);
+void loguearAsignacionBloques(char*, t_list*);
+
 
 #endif /* SRC_SINDICATO_H_ */

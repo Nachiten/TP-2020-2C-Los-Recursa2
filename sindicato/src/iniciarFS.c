@@ -2,15 +2,12 @@
  * iniciarFS.c
  *
  *  Created on: 31 ago. 2020
- *      Author: utnso
+ *      Author: Nachiten
  */
 
 #include "iniciarFS.h"
 
 void inicializarFileSystem(char* PUNTO_MONTAJE){
-
-	// puntoMontaje/Recetas
-	pathRecetas = crearCarpetaEn(PUNTO_MONTAJE, "/Files/Recetas");
 
 	char* BITARRAY = malloc(BLOCKS / 8);
 
@@ -42,6 +39,7 @@ char* crearCarpetaEn(char* pathPuntoMontaje, char* nombreCarpeta){
 	// Agrego el path de la carpeta /nombreCarpeta
 	strcat(pathCarpeta, nombreCarpeta);
 
+	// Crear el directorio
 	mkdir(pathCarpeta, 0777);
 
 	return pathCarpeta;

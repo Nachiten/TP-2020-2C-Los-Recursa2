@@ -12,7 +12,7 @@
 
 void obtenerInputConsola();
 void printearDatosRestaurant(datosRestaurant);
-void printearDatosPasos(datosPasos);
+void printearDatosPasos(datosReceta);
 int checkearLongitudArraysStrings(char*, char*);
 int existeRestaurant(char*);
 

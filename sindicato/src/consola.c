@@ -2,125 +2,131 @@
  * consola.c
  *
  *  Created on: 31 ago. 2020
- *      Author: utnso
+ *      Author: Nachiten
  */
 
 #include "consola.h"
 
 void obtenerInputConsola(){
 
-	char* lineaEntera = NULL;
-	size_t longitud = 0;
+	while(1){
 
-	printf("Inserte un comando:\n");
+		char* lineaEntera = NULL;
+		size_t longitud = 0;
 
-	// Leer una linea completa de la consola
-	getline(&lineaEntera, &longitud, stdin);
+		printf("Inserte un comando:\n");
 
-	// Recorto los espacios que puedan entrar (basura) y el \n del final
-	string_trim(&lineaEntera);
+		// Leer una linea completa de la consola
+		getline(&lineaEntera, &longitud, stdin);
 
-	// Separo el comando ingresado en cada uno de los parametros
-	char** palabrasSeparadas = string_split( lineaEntera , " ");
+		// Recorto los espacios que puedan entrar (basura) y el \n del final
+		string_trim(&lineaEntera);
 
-	// El nombre del comando es la primer palabra
-	char* comandoIngresado = palabrasSeparadas[0];
+		// Separo el comando ingresado en cada uno de los parametros
+		char** palabrasSeparadas = string_split( lineaEntera , " ");
 
-	if ( strcmp(comandoIngresado, "CrearRestaurante") == 0 ){
-		printf("El comando ingresado es: CrearRestaurante\n");
+		// El nombre del comando es la primer palabra
+		char* comandoIngresado = palabrasSeparadas[0];
 
-		int cantidadPalabras = cantidadDeElementosEnArray(palabrasSeparadas);
+		if ( strcmp(comandoIngresado, "CrearRestaurante") == 0 ){
+			printf("El comando ingresado es: CrearRestaurante\n");
 
-		//printf("Cantidad Palabras: %i\n", cantidadPalabras);
+			int cantidadPalabras = cantidadDeElementosEnArray(palabrasSeparadas);
 
-		if (cantidadPalabras == 8){
-			printf("La cantidad de argumentos es correcta.. obteniendo datos.\n");
+			//printf("Cantidad Palabras: %i\n", cantidadPalabras);
 
-			// Convierto la tercer palabra a entero
-			int cantidadCocineros = atoi(palabrasSeparadas[2]);
+			if (cantidadPalabras == 8){
+				printf("La cantidad de argumentos es correcta.. obteniendo datos.\n");
 
-			if (cantidadCocineros <= 0){
-				printf("ERROR | La cantidad de cocineros debe ser un numero entero mayor a 0\n");
-				return;
-			}
+				// Convierto la tercer palabra a entero
+				int cantidadCocineros = atoi(palabrasSeparadas[2]);
 
-			// Convierto la ultima palabra a entero
-			int cantidadHornos = atoi(palabrasSeparadas[7]);
+				if (cantidadCocineros <= 0){
+					printf("ERROR | La cantidad de cocineros debe ser un numero entero mayor a 0\n");
+					return;
+				}
 
-			if (cantidadHornos <= 0){
-				printf("ERROR | La cantidad de hornos debe ser un numero entero mayor a 0\n");
-				return;
-			}
+				// Convierto la ultima palabra a entero
+				int cantidadHornos = atoi(palabrasSeparadas[7]);
 
-			// Checkear que la cantidad de platos sea igual a la cantidad de precios platos
-			if (!checkearLongitudArraysStrings(palabrasSeparadas[5], palabrasSeparadas[6])){
-				printf("ERROR | La cantidad de platos y de preciosPlatos debe ser la misma\n");
-				return;
-			}
+				if (cantidadHornos <= 0){
+					printf("ERROR | La cantidad de hornos debe ser un numero entero mayor a 0\n");
+					return;
+				}
 
-			// Struct con datos del restaurant
-			datosRestaurant restaurantNuevo;
+				// Checkear que la cantidad de platos sea igual a la cantidad de precios platos
+				if (!checkearLongitudArraysStrings(palabrasSeparadas[5], palabrasSeparadas[6])){
+					printf("ERROR | La cantidad de platos y de preciosPlatos debe ser la misma\n");
+					return;
+				}
 
-			// Inserto los datos obtenidos en struct
-			restaurantNuevo.cantCocineros = cantidadCocineros;
-			restaurantNuevo.posicion = palabrasSeparadas[3];
-			restaurantNuevo.afinidad = palabrasSeparadas[4];
-			restaurantNuevo.platos = palabrasSeparadas[5];
-			restaurantNuevo.preciosPlatos = palabrasSeparadas[6];
-			restaurantNuevo.cantHornos = cantidadHornos;
+				// Struct con datos del restaurant
+				datosRestaurant restaurantNuevo;
 
-			//printearDatosRestaurant(restaurantNuevo);
+				// Inserto los datos obtenidos en struct
+				restaurantNuevo.cantCocineros = cantidadCocineros;
+				restaurantNuevo.posicion = palabrasSeparadas[3];
+				restaurantNuevo.afinidad = palabrasSeparadas[4];
+				restaurantNuevo.platos = palabrasSeparadas[5];
+				restaurantNuevo.preciosPlatos = palabrasSeparadas[6];
+				restaurantNuevo.cantHornos = cantidadHornos;
 
-			// Si el restaurant no existe
-			if (!existeRestaurant(palabrasSeparadas[1])){
-				// Crear un nuevo restaurant vacio con el nombre
-				crearRestaurant(palabrasSeparadas[1], restaurantNuevo);
+				//printearDatosRestaurant(restaurantNuevo);
+
+				// Si el restaurant no existe
+				if (!existeRestaurant(palabrasSeparadas[1])){
+					// Crear un nuevo restaurant vacio con el nombre
+					crearRestaurant(palabrasSeparadas[1], restaurantNuevo);
+				} else {
+					printf("El restaurant que se quiere crear ya existe. Aborting.\n");
+				}
+
 			} else {
-				printf("El restaurant que se quiere crear ya existe. Aborting.");
+				printf("ERROR | Sintaxis incorecta: El comando es de la forma:\nCrearRestaurante [NOMBRE] "
+						"[CANTIDAD_COCINEROS] [POSICION] [AFINIDAD_COCINEROS] [PLATOS] [PRECIO_PLATOS] [CANTIDAD_HORNOS]\n");
+			}
+
+		} else if ( strcmp(comandoIngresado, "CrearReceta") == 0 ){
+			printf("El comando ingresado es: CrearReceta\n");
+
+			int cantidadPalabras = cantidadDeElementosEnArray(palabrasSeparadas);
+
+			if (cantidadPalabras == 4){
+				printf("La cantidad de argumentos es correcta.. obteniendo datos.\n");
+
+
+				// Checkear que la cantidad de pasos sea igual a la cantidad de tiemposPasos
+				if (!checkearLongitudArraysStrings(palabrasSeparadas[2], palabrasSeparadas[3])){
+					printf("ERROR | La cantidad de pasos y tiemposPasos debe ser la misma\n");
+					return;
+				}
+
+				// Struct con datos de los pasos
+				datosReceta unaReceta;
+
+				unaReceta.pasos = palabrasSeparadas[2];
+				unaReceta.tiempoPasos = palabrasSeparadas[3];
+
+				// Si no existe receta con ese nombre
+				if (!existeReceta(palabrasSeparadas[1])){
+					// Crear nueva receta con ese nombre
+					crearReceta(palabrasSeparadas[1], unaReceta);
+				} else {
+					printf("La receta que se quiere crear ya existe. Aborting.\n");
+				}
+
+			} else {
+				printf("ERROR | Sintaxis incorecta: El comando es de la forma:\nCrearReceta [NOMBRE] [PASOS] [TIEMPO_PASOS]\n");
 			}
 
 		} else {
-			printf("ERROR | Sintaxis incorecta: El comando es de la forma:\nCrearRestaurante [NOMBRE] "
-					"[CANTIDAD_COCINEROS] [POSICION] [AFINIDAD_COCINEROS] [PLATOS] [PRECIO_PLATOS] [CANTIDAD_HORNOS]\n");
+			printf("ERROR | El comando ingresado no es valido. Los comandos posibles son: CrearRestaurante, CrearReceta.\n");
+			return;
 		}
 
-	} else if ( strcmp(comandoIngresado, "CrearReceta") == 0 ){
-		printf("El comando ingresado es: CrearReceta\n");
-
-		int cantidadPalabras = cantidadDeElementosEnArray(palabrasSeparadas);
-
-		if (cantidadPalabras == 4){
-			printf("La cantidad de argumentos es correcta.. obteniendo datos.\n");
-
-
-			// Checkear que la cantidad de pasos sea igual a la cantidad de tiemposPasos
-			if (!checkearLongitudArraysStrings(palabrasSeparadas[2], palabrasSeparadas[3])){
-				printf("ERROR | La cantidad de pasos y tiemposPasos debe ser la misma\n");
-				return;
-			}
-
-			// Struct con datos de los pasos
-			datosPasos unosPasos;
-
-			unosPasos.nombre = palabrasSeparadas[1];
-			unosPasos.pasos = palabrasSeparadas[2];
-			unosPasos.tiempoPasos = palabrasSeparadas[3];
-
-			printearDatosPasos(unosPasos);
-
-			// TODO Se llama a la funcion que genera la receta
-
-		} else {
-			printf("ERROR | Sintaxis incorecta: El comando es de la forma:\nCrearReceta [NOMBRE] [PASOS] [TIEMPO_PASOS]\n");
-		}
-
-	} else {
-		printf("ERROR | El comando ingresado no es valido. Los comandos posibles son: CrearRestaurante, CrearReceta.\n");
-		return;
+		// Libero las palabras separadas
+		freeDeArray(palabrasSeparadas);
 	}
-
-	// Libero las palabras separadas
-	freeDeArray(palabrasSeparadas);
 }
 
 void printearDatosRestaurant(datosRestaurant unRestaurant){
@@ -132,8 +138,7 @@ void printearDatosRestaurant(datosRestaurant unRestaurant){
 	printf("CantidadHornos: %i\n",    unRestaurant.cantHornos);
 }
 
-void printearDatosPasos(datosPasos unosPasos){
-	printf("Nombre: %s\n", unosPasos.nombre);
+void printearDatosPasos(datosReceta unosPasos){
 	printf("Pasos: %s\n", unosPasos.pasos);
 	printf("Tiempo Pasos: %s\n", unosPasos.tiempoPasos);
 }

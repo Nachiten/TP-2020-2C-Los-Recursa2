@@ -2,7 +2,7 @@
  * bitarray.c
  *
  *  Created on: 31 ago. 2020
- *      Author: utnso
+ *      Author: Nachiten
  */
 
 #include "bitarray.h"

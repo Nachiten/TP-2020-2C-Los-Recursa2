@@ -2,7 +2,7 @@
  * sindicato.c
  *
  *  Created on: 29 ago. 2020
- *      Author: utnso
+ *      Author: Nachiten
  */
 
 #include "sindicato.h"
@@ -23,6 +23,7 @@ int cantidadDeBloquesQueOcupa(int pesoEnBytes){
 	return cantBloques;
 }
 
+// Cuenta la cantidad de elementos en un array
 int cantidadDeElementosEnArray(char** array){
 	int i = 0;
 	while(array[i] != NULL && strcmp(array[i], "\n") != 0){
@@ -182,48 +183,130 @@ char* generarSringInfoRestaurant(datosRestaurant unRestaurant){
 	return stringCompleto;
 }
 
+char* generarStringInfoReceta(datosReceta unaReceta){
+	// Strings que se usan para guardar los datos
+	char* PASOS = "PASOS=";
+	char* TIEMPO_PASOS = "TIEMPO_PASOS=";
+
+	// String donde se guardaran los datos despues del =
+	char* pasos;
+	char* tiempoPasos;
+
+	asprintf(&pasos, "%s\n", unaReceta.pasos);
+	asprintf(&tiempoPasos, "%s\n", unaReceta.tiempoPasos);
+
+	char* stringCompleto = malloc(strlen(PASOS) + strlen(TIEMPO_PASOS) +
+			strlen(pasos) + strlen(tiempoPasos) + 1);
+
+	strcpy(stringCompleto, PASOS);
+	strcat(stringCompleto, pasos);
+	strcat(stringCompleto, TIEMPO_PASOS);
+	strcat(stringCompleto, tiempoPasos);
+
+	free(pasos);
+	free(tiempoPasos);
+
+	return stringCompleto;
+}
+
 void crearRestaurant(char* nombreRestaurant, datosRestaurant unRestaurant){
 	// Crear la carpeta del nuevo restaurant
 	char* pathCarpetaRestaurant = crearCarpetaRestaurant(nombreRestaurant);
 	// Crear el archivo Info.AFIP
 	char* pathArchivoRestaurant = crearArchivoVacioEn(pathCarpetaRestaurant, "Info.AFIP");
 
-	llenarBloquesRestaurant(pathArchivoRestaurant, unRestaurant);
-
-	free(pathCarpetaRestaurant);
-	free(pathArchivoRestaurant);
-}
-
-void llenarBloquesRestaurant(char* pathArchivoRestaurant, datosRestaurant unRestaurant){
-
 	// Armo el string enorme de datos que tengo que escribir
 	char* stringRestaurant = generarSringInfoRestaurant(unRestaurant);
 
+	llenarBloquesConString(pathArchivoRestaurant, stringRestaurant, nombreRestaurant);
+
+	log_info(logger, "Se creo un nuevo restaurant llamado %s", nombreRestaurant);
+
+	free(pathCarpetaRestaurant);
+	free(pathArchivoRestaurant);
+	free(stringRestaurant);
+}
+
+void crearReceta(char* nombreReceta, datosReceta unaReceta){
+
+	char* extension = ".AFIP";
+
+	char* nombreArchivoReceta = malloc(strlen(nombreReceta) + strlen(extension) + 1);
+
+	strcpy(nombreArchivoReceta, nombreReceta);
+	strcat(nombreArchivoReceta, extension);
+
+	char* pathArchivoReceta = crearArchivoVacioEn(pathRecetas, nombreArchivoReceta);
+
+	// Armo el string completo de datos a escribir en los bloques
+	char* stringReceta = generarStringInfoReceta(unaReceta);
+
+	llenarBloquesConString(pathArchivoReceta, stringReceta, nombreReceta);
+
+	log_info(logger, "Se creo una nueva receta llamada %s", nombreReceta);
+
+	free(nombreArchivoReceta);
+	free(pathArchivoReceta);
+	free(stringReceta);
+}
+
+
+void llenarBloquesConString(char* pathArchivo, char* stringAEscribir, char* nombre){
+
 	// Calculo la cantidad de bloques necesarios
-	int cantBloquesNecesarios = cantidadDeBloquesQueOcupa(strlen(stringRestaurant));
+	int cantBloquesNecesarios = cantidadDeBloquesQueOcupa(strlen(stringAEscribir));
 
 	// Me genero una lista con todos los bloques asignados
 	t_list* bloquesAsignados = obtenerPrimerosLibresDeBitmap(cantBloquesNecesarios);
 
-	// Me genero una lista con los datos separados
-	t_list* datosSeparadosBloques = separarStringEnBloques(stringRestaurant, cantBloquesNecesarios);
+	loguearAsignacionBloques(nombre, bloquesAsignados);
 
+	// Me genero una lista con los datos separados
+	t_list* datosSeparadosBloques = separarStringEnBloques(stringAEscribir, cantBloquesNecesarios);
+
+	// Escribo los datos en los bloques
 	escribirLineasEnBloques(bloquesAsignados, datosSeparadosBloques);
 
-	// TODO | Llenar SIZE e INICIAL_BLOCK del archivo
-
 	// Fijo el SIZE del archivo
-	fijarValorArchivoA(pathArchivoRestaurant, strlen(stringRestaurant), "SIZE");
+	fijarValorArchivoA(pathArchivo, strlen(stringAEscribir), "SIZE");
 
 	int* bloqueInicial = list_get(bloquesAsignados, 0);
 
 	// Fijo el INICIAL_BLOCK del archivo
-	fijarValorArchivoA(pathArchivoRestaurant, *bloqueInicial, "INITIAL_BLOCK");
-
-	free(stringRestaurant);
+	fijarValorArchivoA(pathArchivo, *bloqueInicial, "INITIAL_BLOCK");
 
 	destuirListaElementos(bloquesAsignados);
 	destuirListaElementos(datosSeparadosBloques);
+}
+
+void loguearAsignacionBloques(char* nombreEntidad, t_list* listaBloquesAsignados){
+
+	char* stringBloques = string_new();
+
+	int i;
+	// Genero un string de la forma 1, 3, 4, 5
+	for(i = 0; i< list_size(listaBloquesAsignados); i++){
+		char* stringBloque;
+
+		// Obtengo el bloque
+		int* punteroABloque = list_get(listaBloquesAsignados, i);
+
+		if (i == list_size(listaBloquesAsignados) - 1)
+			// Si es el ultimo elemento no agrego una , al final
+			asprintf(&stringBloque, "%i", *punteroABloque);
+		else
+			// Caso contrario va una coma
+			asprintf(&stringBloque, "%i,", *punteroABloque);
+
+		// Pego el string creado al string total de bloques
+		string_append(&stringBloques, stringBloque);
+
+		free(stringBloque);
+	}
+
+	log_info(logger, "Se le asignan los bloques %s a %s", stringBloques, nombreEntidad);
+
+	free(stringBloques);
 }
 
 void fijarValorArchivoA(char* pathArchivo, int numero, char* valor){
@@ -329,6 +412,7 @@ t_list* separarStringEnBloques(char* lineaAEscribir, int cantBloques){
 	return listaStrings;
 }
 
+// Crear un nuevo archivo de SIZE e INICIAL_BLOCK vacio
 char* crearArchivoVacioEn(char* pathCarpeta, char* nombreArchivo){
 
 	// {puntoMontaje}/Files/pathCarpeta/nombreArchivo
@@ -341,7 +425,7 @@ char* crearArchivoVacioEn(char* pathCarpeta, char* nombreArchivo){
 	FILE* archivo = fopen( pathCompleto , "w" );
 
 	if (archivo == NULL){
-		printf("No se pudo crear el archivo %s\n", pathCompleto);
+		printf("ERROR | No se pudo crear el archivo %s\n", pathCompleto);
 		exit(3);
 	}
 
@@ -360,6 +444,7 @@ char* crearArchivoVacioEn(char* pathCarpeta, char* nombreArchivo){
 	return pathCompleto;
 }
 
+// Crear la carpeta de un nuevo restaurant
 char* crearCarpetaRestaurant(char* nombreRestaurant){
 
 	char* pathCarpetaRestaurant = malloc(strlen(pathRestaurantes) + strlen(nombreRestaurant) + 2);
@@ -375,6 +460,7 @@ char* crearCarpetaRestaurant(char* nombreRestaurant){
 	return pathCarpetaRestaurant;
 }
 
+// TESTING | Probando leer un bloque y accediendo al numero del siguiente
 void leerUnBloque(){
 	char* datosLeidos = malloc(BLOCK_SIZE - 4 + 1);
 	int* bloqueSiguiente = malloc(sizeof(int));
@@ -393,8 +479,8 @@ void leerUnBloque(){
 	printf("bloqueSiguiente: %i", *bloqueSiguiente);
 }
 
-// Checkea si la carpeta nombreParticular existe dentro de la carpeta nombreCarpeta
-// Retorna 1 si la carpeta existe, 0 si no existe
+// Checkea si la existe el restaurant con nombre nombreRestaurant
+// Retorna 1 si existe, 0 si no existe
 int existeRestaurant(char* nombreRestaurant){
 
 	char* pathCarpetaCompleto = malloc(strlen(pathRestaurantes) + strlen(nombreRestaurant) + 2);
@@ -427,6 +513,33 @@ int existeRestaurant(char* nombreRestaurant){
 	return retorno;
 }
 
+// Checkea la existencia de una receta en el FS con nombre nombreReceta
+// Retorna 1 si existe, 0 si no existe
+int existeReceta(char* nombreReceta){
+
+	char* extension = ".AFIP";
+
+	char* pathRecetaCompleto = malloc(strlen(pathRecetas) + strlen(nombreReceta) + strlen(extension) + 2);
+
+	// {puntoMontaje}/Files/Recetas/nombreReceta.AFIP
+	strcpy(pathRecetaCompleto, pathRecetas);
+	strcat(pathRecetaCompleto, "/");
+	strcat(pathRecetaCompleto, nombreReceta);
+	strcat(pathRecetaCompleto, extension);
+
+	FILE * archivoReceta = NULL;
+
+	archivoReceta = fopen(pathRecetaCompleto, "r");
+
+	// El archivo receta no existe
+	if (archivoReceta == NULL){
+		return 0;
+	// El archivo si existe
+	} else {
+		return 1;
+	}
+}
+
 int main(){
 	printf("Comienzo sindicato\n");
 
@@ -435,18 +548,25 @@ int main(){
 	//sem_init(semBitmap, 0, 1);
 
 	char* PUNTO_MONTAJE;
+	// Leer la config
 	t_config* config = leerConfig(&PUNTO_MONTAJE);
 
+	// Crear logger
+	logger = cargarUnLog("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/sindicato/Logs/sindicato.log", "SINDICATO");
+
+	// Crear carpetas del FS
 	// {puntoMontaje}/Metadata
 	pathMetadata = crearCarpetaEn(PUNTO_MONTAJE, "/Metadata");
 	// {puntoMontaje}/Blocks
 	pathBloques = crearCarpetaEn(PUNTO_MONTAJE, "/Blocks");
-	// {puntoMontaje}/Restaurantes
+	// {puntoMontaje}/Files
 	pathFiles = crearCarpetaEn(PUNTO_MONTAJE, "/Files");
-	// {puntoMontaje}/Restaurantes
+	// {puntoMontaje}/Files/Restaurantes
 	pathRestaurantes = crearCarpetaEn(PUNTO_MONTAJE, "/Files/Restaurantes");
+	// {puntoMontaje}/Files/Recetas
+	pathRecetas = crearCarpetaEn(PUNTO_MONTAJE, "/Files/Recetas");
 
-	// Funcion para leer metadata.bin
+	// Funcion para leer Metadata.AFIP
 	t_config* metadataBin = leerMetadataBin();
 
 	// Si existe el filesystem no se hace nada
@@ -460,14 +580,17 @@ int main(){
 
 	// ---- A partir de aca el FS ya existe ----
 
-	// Leer input de consola
-	obtenerInputConsola();
+	pthread_t hiloConsola;
+	// Hilo para leer el input de la consola
+    pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
 
-	//leerUnBloque();
+    // Espero al hilo
+    pthread_join(hiloConsola, NULL);
 
 	// Liberaciones finales (a las que nunca se llega)
 	config_destroy(config);
 	config_destroy(metadataBin);
+	log_destroy(logger);
 
 	return 0;
 }
