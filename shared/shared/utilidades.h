@@ -24,6 +24,6 @@ void bytesRecibidos (int32_t cantidad);
 //muestra por pantalla los bytes enviados de SEND
 void bytesEnviados (int32_t cantidad);
 // Hace free de cada uno de los elementos y de la lista misma
-void destuirListaElementos(t_list* unaLista);
+void destruirListaYElementos(t_list* unaLista);
 
 #endif /* SHARED_UTILIDADES_H_ */

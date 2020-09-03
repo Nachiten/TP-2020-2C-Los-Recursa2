@@ -275,8 +275,8 @@ void llenarBloquesConString(char* pathArchivo, char* stringAEscribir, char* nomb
 	// Fijo el INICIAL_BLOCK del archivo
 	fijarValorArchivoA(pathArchivo, *bloqueInicial, "INITIAL_BLOCK");
 
-	destuirListaElementos(bloquesAsignados);
-	destuirListaElementos(datosSeparadosBloques);
+	destruirListaYElementos(bloquesAsignados);
+	destruirListaYElementos(datosSeparadosBloques);
 }
 
 void loguearAsignacionBloques(char* nombreEntidad, t_list* listaBloquesAsignados){
