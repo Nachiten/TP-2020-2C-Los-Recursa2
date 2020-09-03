@@ -68,3 +68,9 @@ void bytesEnviados (int32_t cantidad)
 		printf("Envié %d bytes sin crashear (Todavía).\n",cantidad);
 	}
 }
+
+// Hace free de cada uno de los elementos y de la lista misma
+void destuirListaElementos(t_list* unaLista){
+	list_clean_and_destroy_elements(unaLista, free);
+	list_destroy(unaLista);
+}

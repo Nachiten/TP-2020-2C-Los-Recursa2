@@ -191,6 +191,7 @@ void crearRestaurant(char* nombreRestaurant, datosRestaurant unRestaurant){
 	llenarBloquesRestaurant(pathArchivoRestaurant, unRestaurant);
 
 	free(pathCarpetaRestaurant);
+	free(pathArchivoRestaurant);
 }
 
 void llenarBloquesRestaurant(char* pathArchivoRestaurant, datosRestaurant unRestaurant){
@@ -220,8 +221,9 @@ void llenarBloquesRestaurant(char* pathArchivoRestaurant, datosRestaurant unRest
 	fijarValorArchivoA(pathArchivoRestaurant, *bloqueInicial, "INITIAL_BLOCK");
 
 	free(stringRestaurant);
-	list_clean_and_destroy_elements(bloquesAsignados, (void*)free);
-	list_clean_and_destroy_elements(datosSeparadosBloques, (void*)free);
+
+	destuirListaElementos(bloquesAsignados);
+	destuirListaElementos(datosSeparadosBloques);
 }
 
 void fijarValorArchivoA(char* pathArchivo, int numero, char* valor){
