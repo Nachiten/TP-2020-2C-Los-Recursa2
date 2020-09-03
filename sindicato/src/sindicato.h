@@ -19,6 +19,7 @@
 #include <errno.h> // Para checkear el error al escanear una carpeta
 #include "shared/estructuras.h"
 #include "shared/cargador.h"
+#include "shared/utilidades.h"
 #include "commons/string.h"
 #include "commons/bitarray.h"
 #include "commons/collections/list.h"

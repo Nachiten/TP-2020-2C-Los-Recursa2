@@ -302,9 +302,10 @@ void escribirDatoEnBloque(char* dato, int numBloque, int siguienteBloque){
 
 	FILE* bloque = fopen( pathBloque , "w" );
 
-	// TODO Aparte de escribir el dato se debe escribir la referencia al siguiente bloque
+	// Se escribe el dato en el bloque
 	fwrite(dato, strlen(dato) + 1, 1, bloque);
 
+	// Si no es el ultimo bloque se escrie la referencia al siguiente
 	if (siguienteBloque != 0)
 	fwrite(&siguienteBloque, sizeof(int), 1, bloque);
 
@@ -317,21 +318,15 @@ void escribirDatoEnBloque(char* dato, int numBloque, int siguienteBloque){
 t_list* separarStringEnBloques(char* lineaAEscribir, int cantBloques){
 
 	t_list* listaStrings = list_create();
-
 	int i;
 
 	for (i = 0; i < cantBloques; i++){
 		// Recortar la longitud del bloque del string
 		char* stringSeparado = string_substring(lineaAEscribir, i * (BLOCK_SIZE - 4), BLOCK_SIZE - 4);
-
 		// Agrego el bloque recortado a la lista de strings
 		list_add(listaStrings, stringSeparado);
-
-		//printf("STRING SEPARADO %i: %s\n", i, stringSeparado);
 	}
-
 	return listaStrings;
-
 }
 
 char* crearArchivoVacioEn(char* pathCarpeta, char* nombreArchivo){
@@ -388,9 +383,10 @@ void leerUnBloque(){
 
 	FILE* bloque = fopen( pathBloque , "r" );
 
-	// TODO Aparte de escribir el dato se debe escribir la referencia al siguiente bloque
+	// Leyendo bloque
 	fread(datosLeidos, BLOCK_SIZE - 4 + 1, 1, bloque);
 
+	// Leyendo referencia a siguiente bloque
 	fread(bloqueSiguiente, sizeof(int), 1, bloque);
 
 	printf("datosLeidos: %s", datosLeidos);

@@ -14,5 +14,6 @@ void obtenerInputConsola();
 void printearDatosRestaurant(datosRestaurant);
 void printearDatosPasos(datosPasos);
 int checkearLongitudArraysStrings(char*, char*);
+int existeRestaurant(char*);
 
 #endif /* SRC_CONSOLA_H_ */
