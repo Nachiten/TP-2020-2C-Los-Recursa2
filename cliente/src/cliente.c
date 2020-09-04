@@ -51,6 +51,15 @@ int main(){
 	//ToDo hay que levantarlo como hilo, y agregar toda la parte del accept, recibir mensaje y el manejo del mensaje recibido
 
 
+	//Preparar consola que se mantendra activa hasta la terminacion del proceso (hilo)  WIP
+    obtenerInputConsolaCliente();
+
+
+
+
+
+
+
 
 	//levantar sockets cada vez que se quiere mandar un mensaje
 
