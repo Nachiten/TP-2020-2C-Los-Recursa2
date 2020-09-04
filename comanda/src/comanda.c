@@ -1,18 +1,239 @@
-/*
- * comanda.c
- *
- *  Created on: 29 ago. 2020
- *      Author: utnso
- */
-
-
-#include <stdlib.h>
-#include <stdio.h>
-#include "shared/shared.h"
+#include "comanda.h"
 
 int main(){
-	printf("Funciona comanda");
+	PIDCoMAnda = getpid();
+	socketEscucha = 0;
+	printf("CoMAnda PID: %u.\n", PIDCoMAnda);
+	MEMORIA_PRINCIPAL = NULL;
+	AREA_DE_SWAP = NULL;
 
-	probarLasShared();
-	return 0;
+	//Cargo las configuraciones del .config
+	config = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/comanda.config");
+	if(config != NULL)
+	{
+		puts("Archivo de configuración cargado correctamente.");
+	}
+	else
+	{
+		puts("Error al cargar archivo de configuración, abortando...\n");
+		abort();
+	}
+
+	//cargo el path del archivo log
+	LOG_PATH = config_get_string_value(config,"LOG_FILE_PATH");
+	//Dejo cargado un logger para loguear los eventos.
+	logger = cargarUnLog(LOG_PATH, "Cliente");
+	if(logger != NULL)
+	{
+		puts("Archivo de LOGS cargado correctamente.");
+	}
+	else
+	{
+		puts("Error al cargar archivo de LOGS, abortando...");
+		abort();
+	}
+	//cargo IPs y Puertos...
+	cliente_IP = config_get_string_value(config,"IP_CLIENTE");
+	app_IP = config_get_string_value(config,"IP_APP");
+	mi_puerto = config_get_string_value(config,"MI_PUERTO");
+	app_puerto = config_get_string_value(config,"PUERTO_APP");
+	cliente_puerto = config_get_string_value(config,"PUERTO_CLIENTE");
+
+	puts("Cargando configuraciones de memoria...");
+	puts("****************************************");
+	TAMANIO_MEMORIA_PRINCIPAL = config_get_int_value(config,"TAMANIO_MEMORIA");
+	printf("Tamaño de memoria principal: %u bytes.\n", TAMANIO_MEMORIA_PRINCIPAL);
+	TAMANIO_AREA_DE_SWAP = config_get_int_value(config,"TAMANIO_SWAP");
+	printf("Tamaño del área de swapping: %u bytes.\n", TAMANIO_AREA_DE_SWAP);
+	FRECUENCIA_COMPACTACION = config_get_int_value(config,"FRECUENCIA_COMPACTACION");
+	printf("Frecuencia de compactación: %u.\n", FRECUENCIA_COMPACTACION);
+	ALGOR_REEMPLAZO = config_get_string_value(config,"ALGORITMO_REEMPLAZO");
+	printf("Algoritmo de reemplazo: %s.\n", ALGOR_REEMPLAZO);
+	puts("****************************************");
+
+
+	//meter en hilo de memoria
+	MEMORIA_PRINCIPAL = malloc(TAMANIO_MEMORIA_PRINCIPAL);
+	if(MEMORIA_PRINCIPAL != NULL)
+	{
+		puts("Memoria Principal inicializada.");
+	}
+	else
+	{
+		log_error(logger, "Error al inicializar Memoria Principal.");
+		puts("Abortando...");
+		abort();
+	}
+	AREA_DE_SWAP = malloc(TAMANIO_AREA_DE_SWAP);
+	if(MEMORIA_PRINCIPAL != NULL)
+	{
+		puts("Área de SWAP inicializada.");
+	}
+	else
+	{
+		log_error(logger, "Error al inicializar el área de SWAP.");
+		puts("Abortando...");
+		abort();
+	}
+
+
+
+
+
+
+
+
+
+	//liberamos las memorias reservadas
+	free(MEMORIA_PRINCIPAL);
+	free(AREA_DE_SWAP);
+
+
+
+	return EXIT_SUCCESS;
 }
+
+
+//TODO
+//meter en hilo para recepcion de mensajes***************************************************************
+
+	//int32_t socketApp;
+	//int32_t socketCliente;
+
+
+void recepcion_mensajes(void* argumento_de_adorno)
+{
+	socketEscucha = reservarSocket(mi_puerto);
+
+	while(1)
+	{
+		esperar_conexiones(socketEscucha);
+	}
+}
+
+void esperar_conexiones(int32_t miSocket)
+{
+	int32_t socket_conexion_establecida;
+	struct sockaddr_in dir_cliente;
+	socklen_t tam_direccion = sizeof(struct sockaddr_in);
+
+	//espera una conexion
+	socket_conexion_establecida = accept(miSocket, (void*) &dir_cliente, &tam_direccion);
+
+	//una vez se establece una conexion, se intenta recibir un mensaje
+	escuchar_mensajes(socket_conexion_establecida);
+}
+
+//void escuchar_mensajes(datosHiloColas* parametros)
+void escuchar_mensajes(int32_t socket_conexion_establecida)
+{
+	int32_t bytesRecibidosCodOP = 0;
+	int32_t recibidosSize = 0;
+	int32_t sizeAAllocar;
+	codigo_operacion cod_op;
+
+	//recibo codigo de op
+	bytesRecibidosCodOP = recv(socket_conexion_establecida, &cod_op, sizeof(cod_op), MSG_WAITALL);
+	bytesRecibidos(bytesRecibidosCodOP);
+
+	//si se cayo la conexion, basicamente no hacemos hada
+	if(bytesRecibidosCodOP < 1)
+	{
+		cod_op = 0;
+	}
+
+	//recibo tamaño de lo que sigue
+	recibidosSize = recv(socket_conexion_establecida, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
+	bytesRecibidos(recibidosSize);
+
+	//si se cayo la conexion, no se hace nada con esto
+	if(recibidosSize < 1)
+	{
+		sizeAAllocar = 0;
+	}
+
+	printf("Tamaño del Payload: %i.\n", sizeAAllocar);
+
+	//mando lo que me llego para que lo procesen
+	procesar_mensaje(cod_op, sizeAAllocar, socket_conexion_establecida);
+}
+
+//ToDo
+void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t socket)
+{
+	guardar_pedido* recibidoGuardarPedido;
+	guardar_plato* recibidoGuardarPlato;
+	obtener_pedido* recibidoObtenerPedido;
+	confirmar_pedido* recibidoConfirmarPedido;
+	plato_listo* recibidoPlatoListo;
+	finalizar_pedido* recibidoFinalizarPedido;
+
+	/*
+	 CODIGOS DE OPERACION QUE PUEDO RECIBIR
+	 GUARDAR_PEDIDO
+	 GUARDAR_PLATO
+	 OBTENER_PEDIDO
+	 CONFIRMAR_PEDIDO
+	 PLATO_LISTO
+	 FINALIZAR_PEDIDO -> a consultar porque finalizar pedido y terminar pedido son practicamente lo mismo
+	 */
+    switch(cod_op)
+    {
+        case GUARDAR_PEDIDO:
+        	recibidoGuardarPedido = malloc(sizeAAllocar);
+        	recibir_mensaje(recibidoGuardarPedido, cod_op, socket);
+
+
+			free(recibidoGuardarPedido);
+        	break;
+
+        case GUARDAR_PLATO:
+        	recibidoGuardarPlato = malloc(sizeAAllocar);
+        	recibir_mensaje(recibidoGuardarPlato, cod_op, socket);
+
+
+			free(recibidoGuardarPlato);
+        	break;
+
+        case OBTENER_PEDIDO:
+        	recibidoObtenerPedido = malloc(sizeAAllocar);
+        	recibir_mensaje(recibidoObtenerPedido, cod_op, socket);
+
+			free(recibidoObtenerPedido);
+        	break;
+
+        case CONFIRMAR_PEDIDO:
+        	recibidoConfirmarPedido = malloc(sizeAAllocar);
+        	recibir_mensaje(recibidoConfirmarPedido, cod_op, socket);
+
+
+        	free(recibidoConfirmarPedido);
+        	break;
+
+        case PLATO_LISTO:
+        	recibidoPlatoListo = malloc(sizeAAllocar);
+			recibir_mensaje(recibidoPlatoListo, cod_op, socket);
+
+
+			free(recibidoPlatoListo);
+
+        	break;
+
+        case FINALIZAR_PEDIDO:
+        	recibidoFinalizarPedido = malloc(sizeAAllocar);
+        	recibir_mensaje(recibidoFinalizarPedido, cod_op, socket);
+
+			free(recibidoFinalizarPedido);
+
+        	break;
+
+        case DESCONEXION:
+        	//no hago un carajo porque se cerro la conexion
+        	break;
+
+        default://no deberia pasar nunca por aca, solo esta para que desaparezca el warning
+        	puts("PASE POR EL CASO DEFAULT DEL SWITCH DE PROCESAR MENSAJE!!!! BUSCAR ERROR!!!!");
+        	break;
+    }
+}
+

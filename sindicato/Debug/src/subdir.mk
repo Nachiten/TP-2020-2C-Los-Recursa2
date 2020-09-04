@@ -4,12 +4,21 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/bitarray.c \
+../src/consola.c \
+../src/iniciarFS.c \
 ../src/sindicato.c 
 
 OBJS += \
+./src/bitarray.o \
+./src/consola.o \
+./src/iniciarFS.o \
 ./src/sindicato.o 
 
 C_DEPS += \
+./src/bitarray.d \
+./src/consola.d \
+./src/iniciarFS.d \
 ./src/sindicato.d 
 
 

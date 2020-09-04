@@ -104,7 +104,7 @@ typedef struct{
 typedef struct{
 	char* nombrePlato;
 	uint32_t idPedido;
-}a_plato;
+}a_plato;//añadir plato
 
 typedef struct{//ToDo hay que ver si dejamos el PID de restaurante, o un string
 	char* nombreRestaurante;
