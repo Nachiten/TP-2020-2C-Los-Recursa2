@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include "estructurasCoMAnda.h"
 #include "shared/estructuras.h"
 #include "shared/cargador.h"
 #include "shared/socket.h"
@@ -33,6 +35,12 @@ void* AREA_DE_SWAP;
 
 
 
+
+//para manejo de mensajes que llegan
+void recepcion_mensajes(void* argumento_de_adorno);
+void esperar_conexiones(int32_t miSocket);
+void escuchar_mensajes(int32_t socket_conexion_establecida);
+void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t socket);
 
 
 

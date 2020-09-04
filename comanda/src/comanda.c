@@ -51,6 +51,8 @@ int main(){
 	printf("Algoritmo de reemplazo: %s.\n", ALGOR_REEMPLAZO);
 	puts("****************************************");
 
+
+	//meter en hilo de memoria
 	MEMORIA_PRINCIPAL = malloc(TAMANIO_MEMORIA_PRINCIPAL);
 	if(MEMORIA_PRINCIPAL != NULL)
 	{
@@ -77,15 +79,161 @@ int main(){
 
 
 
-	//int32_t socketApp;
-	//int32_t socketCliente;
 
 
 
 
 
+	//liberamos las memorias reservadas
+	free(MEMORIA_PRINCIPAL);
+	free(AREA_DE_SWAP);
 
 
 
 	return EXIT_SUCCESS;
 }
+
+
+//TODO
+//meter en hilo para recepcion de mensajes***************************************************************
+
+	//int32_t socketApp;
+	//int32_t socketCliente;
+
+
+void recepcion_mensajes(void* argumento_de_adorno)
+{
+	socketEscucha = reservarSocket(mi_puerto);
+
+	while(1)
+	{
+		esperar_conexiones(socketEscucha);
+	}
+}
+
+void esperar_conexiones(int32_t miSocket)
+{
+	int32_t socket_conexion_establecida;
+	struct sockaddr_in dir_cliente;
+	socklen_t tam_direccion = sizeof(struct sockaddr_in);
+
+	//espera una conexion
+	socket_conexion_establecida = accept(miSocket, (void*) &dir_cliente, &tam_direccion);
+
+	//una vez se establece una conexion, se intenta recibir un mensaje
+	escuchar_mensajes(socket_conexion_establecida);
+}
+
+//void escuchar_mensajes(datosHiloColas* parametros)
+void escuchar_mensajes(int32_t socket_conexion_establecida)
+{
+	int32_t bytesRecibidosCodOP = 0;
+	int32_t recibidosSize = 0;
+	int32_t sizeAAllocar;
+	codigo_operacion cod_op;
+
+	//recibo codigo de op
+	bytesRecibidosCodOP = recv(socket_conexion_establecida, &cod_op, sizeof(cod_op), MSG_WAITALL);
+	bytesRecibidos(bytesRecibidosCodOP);
+
+	//si se cayo la conexion, basicamente no hacemos hada
+	if(bytesRecibidosCodOP < 1)
+	{
+		cod_op = 0;
+	}
+
+	//recibo tamaño de lo que sigue
+	recibidosSize = recv(socket_conexion_establecida, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
+	bytesRecibidos(recibidosSize);
+
+	//si se cayo la conexion, no se hace nada con esto
+	if(recibidosSize < 1)
+	{
+		sizeAAllocar = 0;
+	}
+
+	printf("Tamaño del Payload: %i.\n", sizeAAllocar);
+
+	//mando lo que me llego para que lo procesen
+	procesar_mensaje(cod_op, sizeAAllocar, socket_conexion_establecida);
+}
+
+//ToDo
+void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t socket)
+{
+	guardar_pedido* recibidoGuardarPedido;
+	guardar_plato* recibidoGuardarPlato;
+	obtener_pedido* recibidoObtenerPedido;
+	confirmar_pedido* recibidoConfirmarPedido;
+	plato_listo* recibidoPlatoListo;
+	finalizar_pedido* recibidoFinalizarPedido;
+
+	/*
+	 CODIGOS DE OPERACION QUE PUEDO RECIBIR
+	 GUARDAR_PEDIDO
+	 GUARDAR_PLATO
+	 OBTENER_PEDIDO
+	 CONFIRMAR_PEDIDO
+	 PLATO_LISTO
+	 FINALIZAR_PEDIDO -> a consultar porque finalizar pedido y terminar pedido son practicamente lo mismo
+	 */
+    switch(cod_op)
+    {
+        case GUARDAR_PEDIDO:
+        	recibidoGuardarPedido = malloc(sizeAAllocar);
+        	recibir_mensaje(recibidoGuardarPedido, cod_op, socket);
+
+
+			free(recibidoGuardarPedido);
+        	break;
+
+        case GUARDAR_PLATO:
+        	recibidoGuardarPlato = malloc(sizeAAllocar);
+        	recibir_mensaje(recibidoGuardarPlato, cod_op, socket);
+
+
+			free(recibidoGuardarPlato);
+        	break;
+
+        case OBTENER_PEDIDO:
+        	recibidoObtenerPedido = malloc(sizeAAllocar);
+        	recibir_mensaje(recibidoObtenerPedido, cod_op, socket);
+
+			free(recibidoObtenerPedido);
+        	break;
+
+        case CONFIRMAR_PEDIDO:
+        	recibidoConfirmarPedido = malloc(sizeAAllocar);
+        	recibir_mensaje(recibidoConfirmarPedido, cod_op, socket);
+
+
+        	free(recibidoConfirmarPedido);
+        	break;
+
+        case PLATO_LISTO:
+        	recibidoPlatoListo = malloc(sizeAAllocar);
+			recibir_mensaje(recibidoPlatoListo, cod_op, socket);
+
+
+			free(recibidoPlatoListo);
+
+        	break;
+
+        case FINALIZAR_PEDIDO:
+        	recibidoFinalizarPedido = malloc(sizeAAllocar);
+        	recibir_mensaje(recibidoFinalizarPedido, cod_op, socket);
+
+			free(recibidoFinalizarPedido);
+
+        	break;
+
+        case DESCONEXION:
+        	//no hago un carajo porque se cerro la conexion
+        	break;
+
+        default://no deberia pasar nunca por aca, solo esta para que desaparezca el warning
+        	puts("PASE POR EL CASO DEFAULT DEL SWITCH DE PROCESAR MENSAJE!!!! BUSCAR ERROR!!!!");
+        	break;
+    }
+}
+
