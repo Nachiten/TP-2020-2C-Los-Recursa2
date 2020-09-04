@@ -19,7 +19,7 @@ int cantidadDeBloquesQueOcupa(int pesoEnBytes){
 		cantBloques++;
 	}
 
-	printf("La cantidad de bloques es: %i\n", cantBloques);
+	//printf("La cantidad de bloques es: %i\n", cantBloques);
 	return cantBloques;
 }
 
@@ -719,7 +719,7 @@ int main(){
 
     //obtenerRestaurante("ElDestino");
 
-    guardarPedido("ElDestino");
+    //guardarPedido("ElDestino");
 
     // Espero al hilo
     pthread_join(hiloConsola, NULL);
