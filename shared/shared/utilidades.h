@@ -7,6 +7,7 @@
 #include<signal.h>
 #include<unistd.h>
 #include<string.h>
+#include<commons/collections/list.h>
 #include"estructuras.h"
 
 //las proximas 2 funciones son para transformar de STRING a INT----------------
@@ -22,5 +23,7 @@ uint32_t cambia_a_int(char* enString);
 void bytesRecibidos (int32_t cantidad);
 //muestra por pantalla los bytes enviados de SEND
 void bytesEnviados (int32_t cantidad);
+// Hace free de cada uno de los elementos y de la lista misma
+void destruirListaYElementos(t_list* unaLista);
 
 #endif /* SHARED_UTILIDADES_H_ */
