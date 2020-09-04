@@ -7,18 +7,21 @@ C_SRCS += \
 ../src/bitarray.c \
 ../src/consola.c \
 ../src/iniciarFS.c \
+../src/mensajes.c \
 ../src/sindicato.c 
 
 OBJS += \
 ./src/bitarray.o \
 ./src/consola.o \
 ./src/iniciarFS.o \
+./src/mensajes.o \
 ./src/sindicato.o 
 
 C_DEPS += \
 ./src/bitarray.d \
 ./src/consola.d \
 ./src/iniciarFS.d \
+./src/mensajes.d \
 ./src/sindicato.d 
 
 

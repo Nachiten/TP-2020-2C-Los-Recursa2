@@ -29,6 +29,7 @@
 #include "consola.h"
 #include "iniciarFS.h"
 #include "bitarray.h"
+#include "mensajes.h"
 
 typedef struct{
 	int cantCocineros;
@@ -63,7 +64,6 @@ int cantidadDeElementosEnArray(char**);
 void freeDeArray(char**);
 
 // Restaurantes
-void crearRestaurant(char*, datosRestaurant);
 char* crearCarpetaRestaurant(char*);
 char* generarSringInfoRestaurant(datosRestaurant hola);
 int existeRestaurant(char*);
@@ -72,7 +72,6 @@ char* generarPathInfoRestaurant(char*);
 char* leerBloquesRestaurant(int, int);
 
 // Recetas
-void crearReceta(char*, datosReceta unaReceta);
 char* generarStringInfoReceta(datosReceta unaReceta);
 int existeReceta(char*);
 
@@ -83,8 +82,12 @@ char* crearArchivoVacioEn(char*, char*);
 void llenarBloquesConString(char*, char*, char*);
 t_list* separarStringEnBloques(char*, int);
 void fijarValorArchivoA(char*, int, char*);
+int leerValorArchivo(char*, char*);
 void loguearAsignacionBloques(char*, t_list*);
 char* generarPathABloque(int numeroBloque);
+char* leerDatosBloques(int, int);
+int obtenerUltimoPedido(char*);
+
 
 
 #endif /* SRC_SINDICATO_H_ */

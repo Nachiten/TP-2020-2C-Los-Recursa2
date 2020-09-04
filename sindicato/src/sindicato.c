@@ -209,48 +209,6 @@ char* generarStringInfoReceta(datosReceta unaReceta){
 	return stringCompleto;
 }
 
-void crearRestaurant(char* nombreRestaurant, datosRestaurant unRestaurant){
-	// Crear la carpeta del nuevo restaurant
-	char* pathCarpetaRestaurant = crearCarpetaRestaurant(nombreRestaurant);
-	// Crear el archivo Info.AFIP
-	char* pathArchivoRestaurant = crearArchivoVacioEn(pathCarpetaRestaurant, "Info.AFIP");
-
-	// Armo el string enorme de datos que tengo que escribir
-	char* stringRestaurant = generarSringInfoRestaurant(unRestaurant);
-
-	llenarBloquesConString(pathArchivoRestaurant, stringRestaurant, nombreRestaurant);
-
-	log_info(logger, "Se creo un nuevo restaurant llamado %s", nombreRestaurant);
-
-	free(pathCarpetaRestaurant);
-	free(pathArchivoRestaurant);
-	free(stringRestaurant);
-}
-
-void crearReceta(char* nombreReceta, datosReceta unaReceta){
-
-	char* extension = ".AFIP";
-
-	char* nombreArchivoReceta = malloc(strlen(nombreReceta) + strlen(extension) + 1);
-
-	strcpy(nombreArchivoReceta, nombreReceta);
-	strcat(nombreArchivoReceta, extension);
-
-	char* pathArchivoReceta = crearArchivoVacioEn(pathRecetas, nombreArchivoReceta);
-
-	// Armo el string completo de datos a escribir en los bloques
-	char* stringReceta = generarStringInfoReceta(unaReceta);
-
-	llenarBloquesConString(pathArchivoReceta, stringReceta, nombreReceta);
-
-	log_info(logger, "Se creo una nueva receta llamada %s", nombreReceta);
-
-	free(nombreArchivoReceta);
-	free(pathArchivoReceta);
-	free(stringReceta);
-}
-
-
 void llenarBloquesConString(char* pathArchivo, char* stringAEscribir, char* nombre){
 
 	// Calculo la cantidad de bloques necesarios
@@ -490,10 +448,7 @@ void leerUnBloque(){
 	printf("bloqueSiguiente: %i", *bloqueSiguiente);
 }
 
-// Checkea si la existe el restaurant con nombre nombreRestaurant
-// Retorna 1 si existe, 0 si no existe
-int existeRestaurant(char* nombreRestaurant){
-
+char* generarPathCarpetaRestaurant(char* nombreRestaurant){
 	char* pathCarpetaCompleto = malloc(strlen(pathRestaurantes) + strlen(nombreRestaurant) + 2);
 
 	// {punto_montaje}/Files/Restaurantes/NombreRestaurant
@@ -502,7 +457,14 @@ int existeRestaurant(char* nombreRestaurant){
 	strcat(pathCarpetaCompleto, "/");
 	strcat(pathCarpetaCompleto, nombreRestaurant);
 
-	//printf("Path carpeta pokemon: %s\n", pathCarpetaPokemon);
+	return pathCarpetaCompleto;
+}
+
+// Checkea si la existe el restaurant con nombre nombreRestaurant
+// Retorna 1 si existe, 0 si no existe
+int existeRestaurant(char* nombreRestaurant){
+
+	char* pathCarpetaCompleto = generarPathCarpetaRestaurant(nombreRestaurant);
 
 	int retorno;
 
@@ -549,23 +511,6 @@ int existeReceta(char* nombreReceta){
 	} else {
 		return 1;
 	}
-}
-
-void obtenerRestaurante(char* nombreRestaurante){
-	if ( !existeRestaurant(nombreRestaurante)){
-		printf("ERROR | No existe el restaurant buscado.");
-		return;
-	}
-
-	char* pathInfoRestaurant = generarPathInfoRestaurant(nombreRestaurante);
-
-	int sizeBytes = leerValorArchivo(pathInfoRestaurant, "SIZE");
-	int bloqueInicial = leerValorArchivo(pathInfoRestaurant, "INITIAL_BLOCK");
-
-	printf("Size: %i\n", sizeBytes);
-	printf("BloqueInicial: %i\n", bloqueInicial);
-
-	char* datosLeidos = leerDatosBloques(sizeBytes, bloqueInicial);
 }
 
 char* generarPathInfoRestaurant(char* nombreRestaurante){
@@ -661,6 +606,73 @@ char* generarPathABloque(int numeroBloque){
 	return pathCompleto;
 }
 
+int obtenerUltimoPedido(char* nombreRestaurant){
+	struct dirent *archivoLeido;
+
+	//{punto_montaje}/Files/nombreRestaurant
+	char* pathRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
+
+	// Retorna un puntero al directorio
+	DIR *dr = opendir(pathRestaurant);
+
+	if (dr == NULL)
+	{
+		printf("ERROR | No se pudo abrir el directorio del restaurant\n");
+		exit(4);
+	}
+
+	int ultimoPedido = 0;
+
+	while ((archivoLeido = readdir(dr)) != NULL)
+	{
+		// Nombre del archivo leido dentro del directorio
+		char* punteroANombre = archivoLeido->d_name;
+
+		// Pedido1.AFIP
+		// Separo con . => cosa[0] = Pedido1 ---> Separo Pedido1 --> Desde indice 6
+		// cosa[1] = .AFIP
+
+		// Si el archivo es . .. o Info.AFIP es ignorado
+		if (strcmp(punteroANombre, ".") == 0 || strcmp(punteroANombre, "..") == 0 || strcmp(punteroANombre, "Info.AFIP") == 0 ){
+			continue;
+		}
+
+		char** stringSeparado = string_split(punteroANombre, ".");
+
+		char* numeroPedidoString = string_substring_from(stringSeparado[0], 6);
+
+		int numeroPedido = atoi(numeroPedidoString);
+
+		if (numeroPedido > ultimoPedido){
+			ultimoPedido = numeroPedido;
+		}
+
+		freeDeArray(stringSeparado);
+		free(numeroPedidoString);
+
+	}
+
+	closedir(dr);
+	free(pathRestaurant);
+
+	return ultimoPedido;
+
+}
+
+char* generarStringPedidoDefault(){
+	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
+			"LISTA_PLATOS=[]\n"
+			"CANTIDAD_PLATOS=[]\n"
+			"CANTIDAD_LISTA=[]\n"
+			"PRECIO_TOTAL=0\n";
+
+	char* pedidoDefault = malloc(strlen(stringPedidoDefault) + 1);
+
+	strcpy(pedidoDefault, stringPedidoDefault);
+
+	return pedidoDefault;
+}
+
 int main(){
 	printf("Comienzo sindicato\n");
 
@@ -705,7 +717,9 @@ int main(){
 	// Hilo para leer el input de la consola
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
 
-    obtenerRestaurante("ElDestino");
+    //obtenerRestaurante("ElDestino");
+
+    guardarPedido("ElDestino");
 
     // Espero al hilo
     pthread_join(hiloConsola, NULL);
