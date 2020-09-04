@@ -309,20 +309,31 @@ void loguearAsignacionBloques(char* nombreEntidad, t_list* listaBloquesAsignados
 	free(stringBloques);
 }
 
-void fijarValorArchivoA(char* pathArchivo, int numero, char* valor){
+void fijarValorArchivoA(char* pathArchivo, int valor, char* clave){
 	t_config* datosMetadata = config_create(pathArchivo);
 
 	char* numeroEnString;
 
-	asprintf(&numeroEnString, "%i", numero);
+	asprintf(&numeroEnString, "%i", valor);
 
-	config_set_value(datosMetadata, valor, numeroEnString);
+	config_set_value(datosMetadata, clave, numeroEnString);
 
 	config_save(datosMetadata);
 
 	config_destroy(datosMetadata);
 
 	free(numeroEnString);
+}
+
+int leerValorArchivo(char* pathArchivo, char* clave){
+
+	t_config* datosArchivo = config_create(pathArchivo);
+
+	int valorLeido = config_get_int_value(datosArchivo, clave);
+
+	config_destroy(datosArchivo);
+
+	return valorLeido;
 }
 
 // Escribir las lineas en listaDatosBloques en los bloques listaBloquesAOcupar
@@ -540,6 +551,116 @@ int existeReceta(char* nombreReceta){
 	}
 }
 
+void obtenerRestaurante(char* nombreRestaurante){
+	if ( !existeRestaurant(nombreRestaurante)){
+		printf("ERROR | No existe el restaurant buscado.");
+		return;
+	}
+
+	char* pathInfoRestaurant = generarPathInfoRestaurant(nombreRestaurante);
+
+	int sizeBytes = leerValorArchivo(pathInfoRestaurant, "SIZE");
+	int bloqueInicial = leerValorArchivo(pathInfoRestaurant, "INITIAL_BLOCK");
+
+	printf("Size: %i\n", sizeBytes);
+	printf("BloqueInicial: %i\n", bloqueInicial);
+
+	char* datosLeidos = leerDatosBloques(sizeBytes, bloqueInicial);
+}
+
+char* generarPathInfoRestaurant(char* nombreRestaurante){
+
+	char* archivoInfo = "/Info.AFIP";
+
+	char* pathInfoRestaurant = malloc(strlen(pathRestaurantes) + strlen(nombreRestaurante) + strlen(archivoInfo) + 2);
+
+	// {puntoMontaje}/Files/Restaurantes/nombreRestaurante/Info.AFIP
+
+	strcpy(pathInfoRestaurant, pathRestaurantes);
+	strcat(pathInfoRestaurant, "/");
+	strcat(pathInfoRestaurant, nombreRestaurante);
+	strcat(pathInfoRestaurant, archivoInfo);
+
+	return pathInfoRestaurant;
+}
+
+char* leerDatosBloques(int sizeBytes, int bloqueInicial){
+
+	char* datosCompletosLeidos = string_new();
+
+	char* pathSiguienteBloque = generarPathABloque(bloqueInicial);
+
+	int cantidadBloquesALeer = cantidadDeBloquesQueOcupa(sizeBytes);
+
+	int i;
+
+	int cantidadALeer = sizeBytes;
+
+	for (i = 0; i < cantidadBloquesALeer; i++){
+
+		FILE* bloqueALeer = fopen(pathSiguienteBloque, "r");
+
+		char* lineaActualLeida;
+
+		// Estoy leyendo el ultimo bloque
+		if (i == cantidadBloquesALeer - 1){
+			lineaActualLeida = malloc(cantidadALeer + 1);
+
+			// Leo solo lo que me queda por leer (sin leer puntero a ningun bloque)
+			fread(lineaActualLeida, cantidadALeer + 1, 1, bloqueALeer);
+
+		// No es el ultimo bloque
+		} else {
+			lineaActualLeida = malloc(BLOCK_SIZE - 4 + 1);
+
+			// Leo el tamaño completo del bloque
+			fread(lineaActualLeida, BLOCK_SIZE - 4 + 1, 1, bloqueALeer);
+
+			free(pathSiguienteBloque);
+
+			int* siguienteBloque = malloc(sizeof(int));
+
+			// Leo el puntero al siguiente bloque para la proxima iteracion
+			fread(siguienteBloque, sizeof(int), 1, bloqueALeer);
+
+			pathSiguienteBloque = generarPathABloque(*siguienteBloque);
+
+			free(siguienteBloque);
+
+			cantidadALeer -= BLOCK_SIZE - 4;
+		}
+
+		// Pego el bloque leido al string total
+		string_append(&datosCompletosLeidos, lineaActualLeida);
+
+		fclose(bloqueALeer);
+		free(lineaActualLeida);
+	}
+
+	return datosCompletosLeidos;
+}
+
+char* generarPathABloque(int numeroBloque){
+	char* numeroEnString;
+
+	char* extension = ".AFIP";
+
+	asprintf(&numeroEnString, "%i", numeroBloque);
+
+	// pathBloques/numeroEnString.AFIP
+
+	char* pathCompleto = malloc(strlen(pathBloques) + strlen(numeroEnString) + strlen(extension) + 2);
+
+	strcpy(pathCompleto, pathBloques);
+	strcat(pathCompleto, "/");
+	strcat(pathCompleto, numeroEnString);
+	strcat(pathCompleto, extension);
+
+	free(numeroEnString);
+
+	return pathCompleto;
+}
+
 int main(){
 	printf("Comienzo sindicato\n");
 
@@ -583,6 +704,8 @@ int main(){
 	pthread_t hiloConsola;
 	// Hilo para leer el input de la consola
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
+
+    obtenerRestaurante("ElDestino");
 
     // Espero al hilo
     pthread_join(hiloConsola, NULL);

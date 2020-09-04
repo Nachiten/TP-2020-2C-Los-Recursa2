@@ -68,6 +68,9 @@ char* crearCarpetaRestaurant(char*);
 char* generarSringInfoRestaurant(datosRestaurant hola);
 int existeRestaurant(char*);
 
+char* generarPathInfoRestaurant(char*);
+char* leerBloquesRestaurant(int, int);
+
 // Recetas
 void crearReceta(char*, datosReceta unaReceta);
 char* generarStringInfoReceta(datosReceta unaReceta);
@@ -81,6 +84,7 @@ void llenarBloquesConString(char*, char*, char*);
 t_list* separarStringEnBloques(char*, int);
 void fijarValorArchivoA(char*, int, char*);
 void loguearAsignacionBloques(char*, t_list*);
+char* generarPathABloque(int numeroBloque);
 
 
 #endif /* SRC_SINDICATO_H_ */
