@@ -11,7 +11,7 @@
 #include "sindicato.h"
 
 void obtenerRestaurante(char*);
-void guardarPedido(char* nombreRestaurante);
+void guardarPedido(char*, int);
 //void crearReceta(char*, datosReceta);
 //void crearRestaurant(char*, datosRestaurant);
 

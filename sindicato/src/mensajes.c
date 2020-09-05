@@ -33,20 +33,23 @@ void obtenerRestaurante(char* nombreRestaurante){
 }
 
 // Generar un nuevo pedido vacio en el restaurante
-void guardarPedido(char* nombreRestaurante){
+void guardarPedido(char* nombreRestaurante, int IDPedido){
 	if (!existeRestaurant(nombreRestaurante)){
 		printf("ERROR | No existe el restaurant solicitado.\n");
 		// TODO | Se debe enviar un mensaje con respuesta negativa (Fail)
 		return;
 	}
 
-	int pedidoAGenerar = obtenerUltimoPedido(nombreRestaurante) + 1;
-
-	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurante);
+	if (existePedido(nombreRestaurante, IDPedido)){
+		printf("ERROR | Ya existe el pedido con ID solicitado.\n");
+		// TODO | Se debe enviar un mensaje con respuesta negativa (Fail)
+		return;
+	}
+	//int pedidoAGenerar = obtenerUltimoPedido(nombreRestaurante) + 1;
 
 	char* numeroPedidoString;
 
-	asprintf(&numeroPedidoString, "%i", pedidoAGenerar);
+	asprintf(&numeroPedidoString, "%i", IDPedido);
 
 	char* pedido = "Pedido";
 	char* extension = ".AFIP";
@@ -57,6 +60,8 @@ void guardarPedido(char* nombreRestaurante){
 	strcpy(nombrePedido, pedido);
 	strcat(nombrePedido, numeroPedidoString);
 	strcat(nombrePedido, extension);
+
+	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurante);
 
 	char* pathPedido = crearArchivoVacioEn(pathCarpetaRestaurant, nombrePedido);
 

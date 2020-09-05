@@ -606,6 +606,53 @@ char* generarPathABloque(int numeroBloque){
 	return pathCompleto;
 }
 
+int existePedido(char* nombreRestaurante, int IDPedido){
+	int retorno = 0;
+
+	struct dirent *archivoLeido;
+
+	//{punto_montaje}/Files/nombreRestaurant
+	char* pathRestaurant = generarPathCarpetaRestaurant(nombreRestaurante);
+
+	// Retorna un puntero al directorio
+	DIR *dr = opendir(pathRestaurant);
+
+	if (dr == NULL)
+	{
+		printf("ERROR | No se pudo abrir el directorio del restaurant %i\n", nombreRestaurante);
+		exit(4);
+	}
+
+	char* IDenString;
+
+	// Pedido1.AFIP
+	char* pedido = "Pedido";
+	char* extension = ".AFIP";
+
+	asprintf(&IDenString, "%i", IDPedido);
+
+	char* archivoBuscado = malloc(strlen(pedido) + strlen(IDenString) + strlen(extension) + 1);
+
+	strcpy(archivoBuscado, pedido);
+	strcat(archivoBuscado, IDenString);
+	strcat(archivoBuscado, extension);
+
+	while ((archivoLeido = readdir(dr)) != NULL)
+	{
+		// Nombre del archivo leido dentro del directorio
+		char* nombreArchivo = archivoLeido->d_name;
+
+		if (strcmp(nombreArchivo, archivoBuscado) == 0){
+			retorno = 1;
+		}
+	}
+
+	closedir(dr);
+	free(pathRestaurant);
+
+	return retorno;
+}
+
 int obtenerUltimoPedido(char* nombreRestaurant){
 	struct dirent *archivoLeido;
 
@@ -719,7 +766,11 @@ int main(){
 
     //obtenerRestaurante("ElDestino");
 
-    //guardarPedido("ElDestino");
+    guardarPedido("ElDestino", 1);
+    guardarPedido("ElDestino", 2);
+    guardarPedido("ElDestino", 3);
+    guardarPedido("ElDestino", 2);
+    guardarPedido("ElDestino", 3);
 
     // Espero al hilo
     pthread_join(hiloConsola, NULL);
