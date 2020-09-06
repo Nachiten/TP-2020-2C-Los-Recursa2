@@ -77,28 +77,28 @@ typedef struct{
 //ESTRUCTURAS PARA MANDAR MENSAJES-------------------------------------------------------------------------------------------------
 
 typedef struct{
-//ToDo ver si poner algo
+//ToDo esto me parece que vuela a la mierda, mejor que solo mandemos el Cod. Operacion y listo
 }consultar_restaurante;
 
 //Todo respuesta a consultar restaurante?
 
 typedef struct{
 	uint32_t cliente; //seria el PID del cliente
-	uint32_t restaurante; //seria el PID del restaurante
+	uint32_t largoNombreRestaurante;
+	char* restaurante;
 }seleccionar_restaurante;
 
 typedef struct{
-	uint32_t restaurante; //seria el PID del restaurante
-	//en cualquier otro caso que no sea de Restaurante al Sindicato, poner 0
+	uint32_t largoNombreRestaurante;
+	char* restaurante;
 }obtener_restaurante;
 
 //ToDo crear pedido no tiene estructura? hay que poner una estructura para devolver la ID del pedido
 
 typedef struct{
+	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
 	uint32_t idPedido;
-
-	uint32_t restaurante; //seria el PID del restaurante. ToDO ver si dejar esto aca
 }guardar_pedido;
 
 typedef struct{
@@ -106,10 +106,9 @@ typedef struct{
 	uint32_t idPedido;
 }a_plato;//añadir plato
 
-typedef struct{//ToDo hay que ver si dejamos el PID de restaurante, o un string
+typedef struct{
+	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
-	uint32_t restaurante; //seria el PID del restaurante. ToDO ver si dejar esto aca
-
 	uint32_t idPedido;
 	char* nombrePlato; //comida?
 	uint32_t cantidadPlatos;
@@ -120,8 +119,8 @@ typedef struct{
 }confirmar_pedido;
 
 typedef struct{
+	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
-	uint32_t restaurante; //seria el PID del restaurante. ToDO ver si dejar esto aca
 	uint32_t idPedido;
 	char* nombrePlato; //comida?
 }plato_listo;
@@ -131,14 +130,14 @@ typedef struct{
 }consultar_pedido;
 
 typedef struct{
+	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
-	uint32_t restaurante; //seria el PID del restaurante. ToDO ver si dejar esto aca
 	uint32_t idPedido;
 }obtener_pedido;
 
 typedef struct{
+	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
-	uint32_t restaurante; //seria el PID del restaurante. ToDO ver si dejar esto aca
 	uint32_t idPedido;
 }finalizar_pedido; //seria exactamente lo mismo para terminar_pedido. hace falta separarlos?
 
@@ -171,8 +170,8 @@ typedef struct{
 }respuesta_crear_pedido;
 
 typedef struct{
+	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
-	uint32_t restaurante; //seria el PID del restaurante. ToDO ver si dejar esto aca
 	uint32_t repartidor;
 	uint32_t estado; //ver como implementan la planificacion
 	uint32_t cantidadPlatos;

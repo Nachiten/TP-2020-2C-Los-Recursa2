@@ -1,6 +1,7 @@
 #include "comanda.h"
 
-int main(){
+int main()
+{
 	PIDCoMAnda = getpid();
 	socketEscucha = 0;
 	printf("CoMAnda PID: %u.\n", PIDCoMAnda);
@@ -42,17 +43,29 @@ int main(){
 	puts("Cargando configuraciones de memoria...");
 	puts("****************************************");
 	TAMANIO_MEMORIA_PRINCIPAL = config_get_int_value(config,"TAMANIO_MEMORIA");
-	printf("Tamaño de memoria principal: %u bytes.\n", TAMANIO_MEMORIA_PRINCIPAL);
+	printf("Tamaño de Memoria Principal: %u bytes.\n", TAMANIO_MEMORIA_PRINCIPAL);
 	TAMANIO_AREA_DE_SWAP = config_get_int_value(config,"TAMANIO_SWAP");
-	printf("Tamaño del área de swapping: %u bytes.\n", TAMANIO_AREA_DE_SWAP);
+	printf("Tamaño del Área de Swapping: %u bytes.\n", TAMANIO_AREA_DE_SWAP);
 	FRECUENCIA_COMPACTACION = config_get_int_value(config,"FRECUENCIA_COMPACTACION");
 	printf("Frecuencia de compactación: %u.\n", FRECUENCIA_COMPACTACION);
 	ALGOR_REEMPLAZO = config_get_string_value(config,"ALGORITMO_REEMPLAZO");
 	printf("Algoritmo de reemplazo: %s.\n", ALGOR_REEMPLAZO);
 	puts("****************************************");
 
+	if(TAMANIO_MEMORIA_PRINCIPAL < 32)
+	{
+		puts("Tamaño de Memoria Principal demasiado chico, ingresar como mínimo 32 bytes.");
+		abort();
+	}
 
-	//meter en hilo de memoria
+	if(TAMANIO_AREA_DE_SWAP < 32)
+	{
+		puts("Tamaño de Memoria de Swap demasiado chico, ingresar como mínimo 32 bytes.");
+		abort();
+	}
+
+
+	//meter en hilo de memoria??
 	MEMORIA_PRINCIPAL = malloc(TAMANIO_MEMORIA_PRINCIPAL);
 	if(MEMORIA_PRINCIPAL != NULL)
 	{
@@ -67,7 +80,7 @@ int main(){
 	AREA_DE_SWAP = malloc(TAMANIO_AREA_DE_SWAP);
 	if(MEMORIA_PRINCIPAL != NULL)
 	{
-		puts("Área de SWAP inicializada.");
+		puts("Área de SWAP inicializada.\n");
 	}
 	else
 	{
@@ -76,32 +89,37 @@ int main(){
 		abort();
 	}
 
+	//inicializamos la tabla de segmentos
+	tabla_de_segmentos = malloc(sizeof(segmentos));
+	inicializar_tabla_de_segmentos(tabla_de_segmentos);
+	//ToDo matar la tabla de segmentos
+	//ToDo matar las tablas de paginas
 
 
 
-
+	//puts("antes recepcion");
+	recepcion_mensajes();
+	//puts("despues recepcion");
 
 
 
 
 	//liberamos las memorias reservadas
 	free(MEMORIA_PRINCIPAL);
+	puts("Memoria Principal Liberada Correctamente.");
 	free(AREA_DE_SWAP);
-
+	puts("Área de Swap Liberada Correctamente.");
 
 
 	return EXIT_SUCCESS;
 }
 
-
-//TODO
-//meter en hilo para recepcion de mensajes***************************************************************
-
+//ToDo ver si estos 2 sirven para algo (seguro que si)
 	//int32_t socketApp;
 	//int32_t socketCliente;
 
 
-void recepcion_mensajes(void* argumento_de_adorno)
+void recepcion_mensajes()
 {
 	socketEscucha = reservarSocket(mi_puerto);
 
@@ -121,7 +139,9 @@ void esperar_conexiones(int32_t miSocket)
 	socket_conexion_establecida = accept(miSocket, (void*) &dir_cliente, &tam_direccion);
 
 	//una vez se establece una conexion, se intenta recibir un mensaje
-	escuchar_mensajes(socket_conexion_establecida);
+	//escuchar_mensajes(socket_conexion_establecida);
+	pthread_create(&hilo_recibir_mensajes,NULL,(void*)escuchar_mensajes,&socket_conexion_establecida);
+	pthread_detach(hilo_recibir_mensajes);
 }
 
 //void escuchar_mensajes(datosHiloColas* parametros)
@@ -158,7 +178,6 @@ void escuchar_mensajes(int32_t socket_conexion_establecida)
 	procesar_mensaje(cod_op, sizeAAllocar, socket_conexion_establecida);
 }
 
-//ToDo
 void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t socket)
 {
 	guardar_pedido* recibidoGuardarPedido;
@@ -168,14 +187,15 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	plato_listo* recibidoPlatoListo;
 	finalizar_pedido* recibidoFinalizarPedido;
 
-	/*
-	 CODIGOS DE OPERACION QUE PUEDO RECIBIR
+	uint32_t numeroDeSegmento;
+
+	/*ToDo CODIGOS DE OPERACION QUE FALTAN CODEAR:
 	 GUARDAR_PEDIDO
 	 GUARDAR_PLATO
 	 OBTENER_PEDIDO
 	 CONFIRMAR_PEDIDO
 	 PLATO_LISTO
-	 FINALIZAR_PEDIDO -> a consultar porque finalizar pedido y terminar pedido son practicamente lo mismo
+	 FINALIZAR_PEDIDO -> finalizar pedido y terminar pedido son practicamente lo mismo
 	 */
     switch(cod_op)
     {
@@ -183,7 +203,15 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibidoGuardarPedido = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoGuardarPedido, cod_op, socket);
 
+        	//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se crea
+        	numeroDeSegmento = buscar_segmento_de_restaurante(tabla_de_segmentos, recibidoGuardarPedido->nombreRestaurante);
 
+        	//al segmento que corresponde al restaurante, se le agrega el nuevo pedido
+        	agregarPedidoARestaurante(tabla_de_segmentos, numeroDeSegmento, recibidoGuardarPedido->idPedido);
+
+        	//ToDo por ultimo avisamos que el pedido fue agregado correctamente
+
+        	free(recibidoGuardarPedido->nombreRestaurante); //shit, esto me va a armar quilombo ToDo revisar
 			free(recibidoGuardarPedido);
         	break;
 
