@@ -4,13 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/comanda.c 
+../src/comanda.c \
+../src/manejoMemoria.c 
 
 OBJS += \
-./src/comanda.o 
+./src/comanda.o \
+./src/manejoMemoria.o 
 
 C_DEPS += \
-./src/comanda.d 
+./src/comanda.d \
+./src/manejoMemoria.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

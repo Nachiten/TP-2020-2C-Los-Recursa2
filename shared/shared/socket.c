@@ -141,12 +141,16 @@ uint32_t serializar_paquete_seleccionar_restaurante(t_paquete* paquete, seleccio
 	memcpy(paquete->buffer->stream + desplazamiento, &(estructura->cliente), sizeof(estructura->cliente));
 	desplazamiento += sizeof(estructura->cliente);
 
-	//meto el PID del Restaurante
-	memcpy(paquete->buffer->stream + desplazamiento, &(estructura->restaurante), sizeof(estructura->restaurante));
-	desplazamiento += sizeof(estructura->restaurante);
+	//meto el largo del nombre del Restaurante
+	memcpy(paquete->buffer->stream + desplazamiento, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante));
+	desplazamiento += sizeof(estructura->largoNombreRestaurante);
+
+	//meto el nombre del restaurante
+	memcpy(paquete->buffer->stream + desplazamiento, estructura->restaurante, estructura->largoNombreRestaurante+1);
+	desplazamiento += estructura->largoNombreRestaurante+1;
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
-	pesoDeElementosAEnviar = sizeof(estructura->cliente) + sizeof(estructura->restaurante);
+	pesoDeElementosAEnviar = sizeof(estructura->cliente) + sizeof(estructura->largoNombreRestaurante) + estructura->largoNombreRestaurante + 1;
 
 	if(desplazamiento != pesoDeElementosAEnviar)
 	{
@@ -210,10 +214,17 @@ void desserializar_seleccionar_restaurante(seleccionar_restaurante* estructura, 
 	//saco el PID del cliente
 	bytesRecibidos(recv(socket_cliente, &(estructura->cliente), sizeof(estructura->cliente), MSG_WAITALL));
 
-	//saco el PID del restaurante
-	bytesRecibidos(recv(socket_cliente, &(estructura->restaurante), sizeof(estructura->restaurante), MSG_WAITALL));
+	//saco el largo del nombre del restaurante
+	bytesRecibidos(recv(socket_cliente, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante), MSG_WAITALL));
+
+	//preparo un espacio de memoria del tamaño del nombre para poder guardarlo
+	estructura->restaurante = malloc(estructura->largoNombreRestaurante+1);
+
+	//saco el nombre del restaurante en si
+	bytesRecibidos(recv(socket_cliente, estructura->restaurante, estructura->largoNombreRestaurante+1, MSG_WAITALL));
 
 	printf("el PID del cliente es: %u\n", estructura->cliente);
-	printf("el PID del restaurante es: %u\n", estructura->restaurante);
+	printf("el largo del nombre del restaurante es: %u\n", estructura->largoNombreRestaurante);
+	printf("el nombre del restaurante es: %s.\n", estructura->restaurante);
 }
 
