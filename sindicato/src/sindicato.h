@@ -65,11 +65,9 @@ void freeDeArray(char**);
 
 // Restaurantes
 char* crearCarpetaRestaurant(char*);
-char* generarSringInfoRestaurant(datosRestaurant hola);
+char* generarSringInfoRestaurant(datosRestaurant restaurant);
 int existeRestaurant(char*);
-
 char* generarPathInfoRestaurant(char*);
-char* leerBloquesRestaurant(int, int);
 
 // Recetas
 char* generarStringInfoReceta(datosReceta unaReceta);
@@ -86,8 +84,9 @@ int leerValorArchivo(char*, char*);
 void loguearAsignacionBloques(char*, t_list*);
 char* generarPathABloque(int numeroBloque);
 char* leerDatosBloques(int, int);
-int obtenerUltimoPedido(char*);
 
+// Pedidos
+int existePedido(char*, int);
 
 
 #endif /* SRC_SINDICATO_H_ */

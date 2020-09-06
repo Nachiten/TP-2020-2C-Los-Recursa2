@@ -619,7 +619,7 @@ int existePedido(char* nombreRestaurante, int IDPedido){
 
 	if (dr == NULL)
 	{
-		printf("ERROR | No se pudo abrir el directorio del restaurant %i\n", nombreRestaurante);
+		printf("ERROR | No se pudo abrir el directorio del restaurant %s\n", nombreRestaurante);
 		exit(4);
 	}
 
@@ -653,71 +653,78 @@ int existePedido(char* nombreRestaurante, int IDPedido){
 	return retorno;
 }
 
-int obtenerUltimoPedido(char* nombreRestaurant){
-	struct dirent *archivoLeido;
-
-	//{punto_montaje}/Files/nombreRestaurant
-	char* pathRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
-
-	// Retorna un puntero al directorio
-	DIR *dr = opendir(pathRestaurant);
-
-	if (dr == NULL)
-	{
-		printf("ERROR | No se pudo abrir el directorio del restaurant\n");
-		exit(4);
-	}
-
-	int ultimoPedido = 0;
-
-	while ((archivoLeido = readdir(dr)) != NULL)
-	{
-		// Nombre del archivo leido dentro del directorio
-		char* punteroANombre = archivoLeido->d_name;
-
-		// Pedido1.AFIP
-		// Separo con . => cosa[0] = Pedido1 ---> Separo Pedido1 --> Desde indice 6
-		// cosa[1] = .AFIP
-
-		// Si el archivo es . .. o Info.AFIP es ignorado
-		if (strcmp(punteroANombre, ".") == 0 || strcmp(punteroANombre, "..") == 0 || strcmp(punteroANombre, "Info.AFIP") == 0 ){
-			continue;
-		}
-
-		char** stringSeparado = string_split(punteroANombre, ".");
-
-		char* numeroPedidoString = string_substring_from(stringSeparado[0], 6);
-
-		int numeroPedido = atoi(numeroPedidoString);
-
-		if (numeroPedido > ultimoPedido){
-			ultimoPedido = numeroPedido;
-		}
-
-		freeDeArray(stringSeparado);
-		free(numeroPedidoString);
-
-	}
-
-	closedir(dr);
-	free(pathRestaurant);
-
-	return ultimoPedido;
-
-}
-
 char* generarStringPedidoDefault(){
+	// TODO | Esta modificado incorrecto para testear
 	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
-			"LISTA_PLATOS=[]\n"
-			"CANTIDAD_PLATOS=[]\n"
-			"CANTIDAD_LISTA=[]\n"
-			"PRECIO_TOTAL=0\n";
+			"LISTA_PLATOS=[Empanada, Milanesa, Lasagna]\n"
+			"CANTIDAD_PLATOS=[3,5,20]\n"
+			"CANTIDAD_LISTA=[0,2,5]\n"
+			"PRECIO_TOTAL=500\n";
+
+	// VERSION CORRECTA
+//	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
+//				"LISTA_PLATOS=[]\n"
+//				"CANTIDAD_PLATOS=[]\n"
+//				"CANTIDAD_LISTA=[]\n"
+//				"PRECIO_TOTAL=0\n";
 
 	char* pedidoDefault = malloc(strlen(stringPedidoDefault) + 1);
 
 	strcpy(pedidoDefault, stringPedidoDefault);
 
 	return pedidoDefault;
+}
+
+char* leerDatosRestaurant(char* nombreRestaurante){
+	char* pathInfoRestaurant = generarPathInfoRestaurant(nombreRestaurante);
+
+	// TODO | Abrir archivo con semaforos
+
+	int sizeBytes = leerValorArchivo(pathInfoRestaurant, "SIZE");
+	int bloqueInicial = leerValorArchivo(pathInfoRestaurant, "INITIAL_BLOCK");
+
+	printf("Size: %i\n", sizeBytes);
+	printf("BloqueInicial: %i\n", bloqueInicial);
+
+	free(pathInfoRestaurant);
+
+	return leerDatosBloques(sizeBytes, bloqueInicial);
+}
+
+char* leerDatosPedido(char* nombreRestaurant, int IDPedido){
+
+	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
+
+	char* IDenString;
+
+	// Pedido1.AFIP
+	char* pedido = "Pedido";
+	char* extension = ".AFIP";
+
+	asprintf(&IDenString, "%i", IDPedido);
+
+	char* nombreArchivoPedido = malloc(strlen(pedido) + strlen(IDenString) + strlen(extension) + 1);
+
+	strcpy(nombreArchivoPedido, pedido);
+	strcat(nombreArchivoPedido, IDenString);
+	strcat(nombreArchivoPedido, extension);
+
+	char* pathAPedido = malloc(strlen(pathCarpetaRestaurant) + strlen(nombreArchivoPedido) + 2);
+
+	//pathRestaurantes/nombreRestaurant/Pedido1.AFIP
+	strcpy(pathAPedido, pathCarpetaRestaurant);
+	strcat(pathAPedido, "/");
+	strcat(pathAPedido, nombreArchivoPedido);
+
+	int sizeBytes = leerValorArchivo(pathAPedido, "SIZE");
+	int bloqueInicial = leerValorArchivo(pathAPedido, "INITIAL_BLOCK");
+
+	free(pathCarpetaRestaurant);
+	free(IDenString);
+	free(nombreArchivoPedido);
+	free(pathAPedido);
+
+	return leerDatosBloques(sizeBytes, bloqueInicial);
 }
 
 int main(){
@@ -766,11 +773,13 @@ int main(){
 
     //obtenerRestaurante("ElDestino");
 
-    guardarPedido("ElDestino", 1);
-    guardarPedido("ElDestino", 2);
-    guardarPedido("ElDestino", 3);
-    guardarPedido("ElDestino", 2);
-    guardarPedido("ElDestino", 3);
+//    guardarPedido("ElDestino", 1);
+//    guardarPedido("ElDestino", 2);
+//    guardarPedido("ElDestino", 3);
+//    guardarPedido("ElDestino", 2);
+    guardarPedido("ElDestino", 4);
+
+    obtenerPedido("ElDestino", 4);
 
     // Espero al hilo
     pthread_join(hiloConsola, NULL);

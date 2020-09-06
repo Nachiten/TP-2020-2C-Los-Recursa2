@@ -72,7 +72,7 @@ typedef struct{
 	char* nombrePlato; //comida?
 	uint32_t cantidadPlatos;
 	uint32_t cantLista; //Todo preguntar a los ayudantes
-}item_pedido;
+}plato;
 
 //ESTRUCTURAS PARA MANDAR MENSAJES-------------------------------------------------------------------------------------------------
 
@@ -162,7 +162,7 @@ typedef struct{//Todo ver con los ayudantes PORQUE ESTA PICANTE
 
 typedef struct{
 	uint32_t cantidadPlatos;
-	char** listaplatos[];
+	plato listaplatos[];
 }respuesta_consultar_platos;
 
 typedef struct{
@@ -179,7 +179,8 @@ typedef struct{
 }respuesta_consultar_pedido;
 
 typedef struct{
-	item_pedido platos_pedido;//esto es una lista
+	uint32_t cantPlatos;
+	plato platos_pedido[];//esto es una lista
 }respuesta_obtener_pedido;
 
 
