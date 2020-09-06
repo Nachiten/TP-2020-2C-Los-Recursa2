@@ -80,6 +80,8 @@ void agregarPedidoARestaurante(segmentos* laTablaDeSegmentos, uint32_t numeroDeS
 
 	//toDo  terminar cuando inicialice tabla de paginas
 	//segmentoSeleccionado->mi_tabla->
+
+
 }
 
 
