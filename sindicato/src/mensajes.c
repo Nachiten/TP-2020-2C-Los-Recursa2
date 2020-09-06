@@ -19,6 +19,8 @@ void obtenerRestaurante(char* nombreRestaurante){
 
 	char* pathInfoRestaurant = generarPathInfoRestaurant(nombreRestaurante);
 
+	// TODO | Abrir archivo con semaforos
+
 	int sizeBytes = leerValorArchivo(pathInfoRestaurant, "SIZE");
 	int bloqueInicial = leerValorArchivo(pathInfoRestaurant, "INITIAL_BLOCK");
 
@@ -27,7 +29,11 @@ void obtenerRestaurante(char* nombreRestaurante){
 
 	char* datosLeidos = leerDatosBloques(sizeBytes, bloqueInicial);
 
+	// TODO | Cerrar archivo con semaforos
+
 	// TODO | Se debe procesar los datos leidos y devolver la respuesta
+
+	respuesta_obtener_restaurante respuesta;
 
 	printf("Datos leidos:\n%s", datosLeidos);
 }

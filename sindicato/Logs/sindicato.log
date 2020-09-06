@@ -28,3 +28,10 @@
 [INFO] 12:37:01:518 SINDICATO/(7288:7288): Se creo un nuevo pedido llamado Pedido2.AFIP de ElDestino
 [INFO] 12:37:01:520 SINDICATO/(7288:7288): Se le asignan los bloques 11,12 a Pedido3.AFIP de ElDestino
 [INFO] 12:37:01:535 SINDICATO/(7288:7288): Se creo un nuevo pedido llamado Pedido3.AFIP de ElDestino
+[INFO] 15:02:17:276 SINDICATO/(3947:3948): Se le asignan los bloques 23,24,25 a ElDestino3
+[INFO] 15:05:16:277 SINDICATO/(4248:4249): Se le asignan los bloques 26,27,28 a ElDestino4
+[INFO] 15:06:07:463 SINDICATO/(4367:4368): Se le asignan los bloques 29,30,31 a ElDestino5
+[INFO] 15:16:02:203 SINDICATO/(3613:3613): Se le asignan los bloques 32,33 a Pedido3.AFIP de ElDestino
+[INFO] 15:16:02:227 SINDICATO/(3613:3613): Se creo un nuevo pedido llamado Pedido3.AFIP de ElDestino
+[INFO] 15:16:22:478 SINDICATO/(3613:3614): Se le asignan los bloques 34,35,36 a Bataglia2
+[INFO] 15:16:22:478 SINDICATO/(3613:3614): Se creo un nuevo restaurant llamado Bataglia2
