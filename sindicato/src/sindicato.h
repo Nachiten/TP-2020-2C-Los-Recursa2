@@ -87,6 +87,7 @@ char* leerDatosBloques(int, int);
 
 // Pedidos
 int existePedido(char*, int);
+int pedidoEstaEnEstado(char*, char*);
 
 
 #endif /* SRC_SINDICATO_H_ */

@@ -13,14 +13,43 @@ void consultarPlatos(char* nombreRestaurante){
 	// NO PUEDO PORQUE HAY ERROR EN LA CONSIGNA D:
 }
 
+void confirmarPedido(char* nombreRestaurant, int IDPedido){
+
+	// TODO | Explota | Revisar
+
+	if ( !existeRestaurant(nombreRestaurant) ){
+		printf("ERROR | No existe el restaurant buscado.\n");
+		// TODO | Retornar fail
+		return;
+	}
+
+	if( !existePedido(nombreRestaurant, IDPedido) ){
+		printf("ERROR | No existe el pedido solicitado");
+		// TODO | Retornar fail
+		return;
+	}
+
+	char* datosPedido = leerDatosPedido(nombreRestaurant, IDPedido);
+
+	if(!pedidoEstaEnEstado("Pendiente", datosPedido)){
+		printf("ERROR | No esta en estado pendiente");
+		// TODO | Retornar fail
+		return;
+	}
+
+	char* nuevosDatosPedido = cambiarEstadoA("Confirmado", datosPedido);
+
+	printf("Nuevos datos pedido:\n%s", nuevosDatosPedido);
+
+	// TODO | Terminar
+}
+
 void obtenerPedido(char* nombreRestaurant, int IDPedido){
 	if ( !existeRestaurant(nombreRestaurant)){
 		printf("ERROR | No existe el restaurant buscado.\n");
 		// TODO | Retornar valor default (no se cual es)
 		return;
 	}
-
-	//char* datosRestaurant = leerDatosRestaurant(nombreRestaurante);
 
 	if(!existePedido(nombreRestaurant, IDPedido)){
 		printf("ERROR | No existe el pedido solicitado");

@@ -727,6 +727,53 @@ char* leerDatosPedido(char* nombreRestaurant, int IDPedido){
 	return leerDatosBloques(sizeBytes, bloqueInicial);
 }
 
+int pedidoEstaEnEstado(char* nombreEstado, char* datosPedido){
+	int retorno = 0;
+
+	// Separo cada linea en un array
+	char** datosSeparados = string_split(datosPedido, "\n");
+
+	// lineaEstado[0] = "ESTADO", lineaEstado[1] = "Pendiente"
+	char** lineaEstado = string_split(datosSeparados[0], "=");
+
+	// Si el estado actual es Pendiente
+	if (strcmp(lineaEstado[1], nombreEstado) == 0){
+		retorno = 1;
+	}
+
+	freeDeArray(datosSeparados);
+	freeDeArray(lineaEstado);
+
+	return retorno;
+}
+
+char* cambiarEstadoA(char* nombreEstado, char* datosPedido){
+
+	// ESTADO_PEDIDO=Confirmado|\n
+
+	// Desde indice 24 hasta el final.
+
+	// char*   string_substring_from(char *text, int start);
+
+	char* datosSinLineaPedido = string_substring_from(datosPedido, 24);
+
+	char* lineaPedido = "ESTADO_PEDIDO=";
+
+	char* lineaPedidoCompleta = malloc(strlen(lineaPedido) + strlen(nombreEstado) + 1);
+
+	strcpy(lineaPedidoCompleta, lineaPedido);
+	strcat(lineaPedidoCompleta, nombreEstado);
+
+	//void 	string_append(char ** original, char * string_to_add);
+
+	string_append(&lineaPedidoCompleta, datosSinLineaPedido);
+
+	free(datosSinLineaPedido);
+	free(lineaPedido);
+
+	return lineaPedidoCompleta;
+}
+
 int main(){
 	printf("Comienzo sindicato\n");
 
@@ -777,9 +824,11 @@ int main(){
 //    guardarPedido("ElDestino", 2);
 //    guardarPedido("ElDestino", 3);
 //    guardarPedido("ElDestino", 2);
-    guardarPedido("ElDestino", 4);
+    //guardarPedido("ElDestino", 4);
 
-    obtenerPedido("ElDestino", 4);
+    //obtenerPedido("ElDestino", 4);
+
+    confirmarPedido("ElDestino", 4);
 
     // Espero al hilo
     pthread_join(hiloConsola, NULL);
