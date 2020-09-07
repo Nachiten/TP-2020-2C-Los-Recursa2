@@ -24,7 +24,7 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 	}
 
 	if( !existePedido(nombreRestaurant, IDPedido) ){
-		printf("ERROR | No existe el pedido solicitado");
+		printf("ERROR | No existe el pedido solicitado.\n");
 		// TODO | Retornar fail
 		return;
 	}
@@ -41,7 +41,53 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 
 	printf("Nuevos datos pedido:\n%s", nuevosDatosPedido);
 
-	// TODO | Terminar
+	t_list* listaBloquesActual = obtenerListaBloquesPedido(nombreRestaurant, IDPedido);
+
+//	int i;
+//	for (i = 0; i< list_size(listaBloquesActual); i++){
+//		int* punteroABloque = list_get(listaBloquesActual, i);
+//		printf("Bloque actual: %i\n", *punteroABloque);
+//	}
+
+	int cantidadBloquesNecesarios = cantidadDeBloquesQueOcupa(strlen(nuevosDatosPedido));
+
+	int cantidadBloquesActuales = list_size(listaBloquesActual);
+
+	// Si necesito agregar bloques nuevos
+	if (cantidadBloquesNecesarios > cantidadBloquesActuales){
+		int cantidadBloquesAPedir = cantidadBloquesNecesarios - cantidadBloquesActuales;
+
+		t_list* bloquesPedidos = obtenerPrimerosLibresDeBitmap(cantidadBloquesAPedir);
+
+		list_add_all(listaBloquesActual, bloquesPedidos);
+	// No tiene sentido que esto pase
+	} else if (cantidadBloquesNecesarios < cantidadBloquesActuales){
+		printf("ERROR | No puede necesitarse menos bloques al confirmar un pedido.\n");
+		exit(5);
+	}
+
+	t_list* listaDatosSeparados = separarStringEnBloques(nuevosDatosPedido, cantidadBloquesNecesarios);
+
+	escribirLineasEnBloques(listaBloquesActual, listaDatosSeparados);
+
+	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
+
+	char* pathAPedido = generarPathAPedido(pathCarpetaRestaurant, IDPedido);
+
+	fijarValorArchivoA(pathAPedido, strlen(nuevosDatosPedido), "SIZE");
+
+	/*
+	 * 1 - Calcular cantidad de bloques a utilizar
+	 * 2 - Obtener bloques actuales
+	 * 3 - Pedir bloques si es necesario
+	 * 4 - Escribir nuevos datos en bloques
+	 */
+
+	// TODO | Retornar OK
+
+	free(datosPedido);
+	free(nuevosDatosPedido);
+	destruirListaYElementos(listaBloquesActual);
 }
 
 void obtenerPedido(char* nombreRestaurant, int IDPedido){

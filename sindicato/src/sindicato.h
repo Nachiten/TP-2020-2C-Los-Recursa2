@@ -88,6 +88,7 @@ char* leerDatosBloques(int, int);
 // Pedidos
 int existePedido(char*, int);
 int pedidoEstaEnEstado(char*, char*);
+char* generarPathAPedido(char* pathRestaurant, int IDPedido);
 
 
 #endif /* SRC_SINDICATO_H_ */

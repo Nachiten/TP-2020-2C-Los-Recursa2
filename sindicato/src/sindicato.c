@@ -529,6 +529,56 @@ char* generarPathInfoRestaurant(char* nombreRestaurante){
 	return pathInfoRestaurant;
 }
 
+t_list* leerListaBloquesAsignados(sizeBytes, bloqueInicial){
+	t_list* listaBloques = list_create();
+
+	char* pathSiguienteBloque = generarPathABloque(bloqueInicial);
+
+	int* punteroABloqueInicial = malloc(sizeof(int));
+
+	*punteroABloqueInicial = bloqueInicial;
+
+	list_add(listaBloques, punteroABloqueInicial);
+
+	int cantidadBloquesALeer = cantidadDeBloquesQueOcupa(sizeBytes);
+
+	int i;
+
+	int cantidadALeer = sizeBytes;
+
+	for (i = 0; i < cantidadBloquesALeer; i++){
+
+		FILE* bloqueALeer = fopen(pathSiguienteBloque, "r");
+
+		// Estoy leyendo el ultimo bloque
+		if (i == cantidadBloquesALeer - 1){
+		// No es el ultimo bloque
+		} else {
+			//lineaActualLeida = malloc(BLOCK_SIZE - 4 + 1);
+
+			// Me muevo a la posicion donde empieza el numero que apunta al siguiente bloque
+			fseek(bloqueALeer, BLOCK_SIZE - 4 + 1, SEEK_SET);
+
+			free(pathSiguienteBloque);
+
+			int* siguienteBloque = malloc(sizeof(int));
+
+			// Leo el puntero al siguiente bloque para la proxima iteracion
+			fread(siguienteBloque, sizeof(int), 1, bloqueALeer);
+
+			pathSiguienteBloque = generarPathABloque(*siguienteBloque);
+
+			list_add(listaBloques, siguienteBloque);
+
+			cantidadALeer -= BLOCK_SIZE - 4;
+		}
+
+		fclose(bloqueALeer);
+	}
+
+	return listaBloques;
+}
+
 char* leerDatosBloques(int sizeBytes, int bloqueInicial){
 
 	char* datosCompletosLeidos = string_new();
@@ -583,6 +633,23 @@ char* leerDatosBloques(int sizeBytes, int bloqueInicial){
 	}
 
 	return datosCompletosLeidos;
+}
+
+t_list* obtenerListaBloquesPedido(char* nombreRestaurant, int IDPedido){
+
+	char* pathRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
+
+	char* pathAPedido = generarPathAPedido(pathRestaurant, IDPedido);
+
+	int sizeBytes = leerValorArchivo(pathAPedido, "SIZE");
+	int bloqueInicial = leerValorArchivo(pathAPedido, "INITIAL_BLOCK");
+
+	t_list* listaBloques = leerListaBloquesAsignados(sizeBytes, bloqueInicial);
+
+	free(pathRestaurant);
+	free(pathAPedido);
+
+	return listaBloques;
 }
 
 char* generarPathABloque(int numeroBloque){
@@ -656,7 +723,7 @@ int existePedido(char* nombreRestaurante, int IDPedido){
 char* generarStringPedidoDefault(){
 	// TODO | Esta modificado incorrecto para testear
 	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
-			"LISTA_PLATOS=[Empanada, Milanesa, Lasagna]\n"
+			"LISTA_PLATOS=[Empand,Mila,dLa]\n"
 			"CANTIDAD_PLATOS=[3,5,20]\n"
 			"CANTIDAD_LISTA=[0,2,5]\n"
 			"PRECIO_TOTAL=500\n";
@@ -691,10 +758,7 @@ char* leerDatosRestaurant(char* nombreRestaurante){
 	return leerDatosBloques(sizeBytes, bloqueInicial);
 }
 
-char* leerDatosPedido(char* nombreRestaurant, int IDPedido){
-
-	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
-
+char* generarPathAPedido(char* pathRestaurant, int IDPedido){
 	char* IDenString;
 
 	// Pedido1.AFIP
@@ -709,19 +773,29 @@ char* leerDatosPedido(char* nombreRestaurant, int IDPedido){
 	strcat(nombreArchivoPedido, IDenString);
 	strcat(nombreArchivoPedido, extension);
 
-	char* pathAPedido = malloc(strlen(pathCarpetaRestaurant) + strlen(nombreArchivoPedido) + 2);
+	char* pathAPedido = malloc(strlen(pathRestaurant) + strlen(nombreArchivoPedido) + 2);
 
 	//pathRestaurantes/nombreRestaurant/Pedido1.AFIP
-	strcpy(pathAPedido, pathCarpetaRestaurant);
+	strcpy(pathAPedido, pathRestaurant);
 	strcat(pathAPedido, "/");
 	strcat(pathAPedido, nombreArchivoPedido);
+
+	free(nombreArchivoPedido);
+	free(IDenString);
+
+	return pathAPedido;
+}
+
+char* leerDatosPedido(char* nombreRestaurant, int IDPedido){
+
+	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
+
+	char* pathAPedido = generarPathAPedido(pathCarpetaRestaurant, IDPedido);
 
 	int sizeBytes = leerValorArchivo(pathAPedido, "SIZE");
 	int bloqueInicial = leerValorArchivo(pathAPedido, "INITIAL_BLOCK");
 
 	free(pathCarpetaRestaurant);
-	free(IDenString);
-	free(nombreArchivoPedido);
 	free(pathAPedido);
 
 	return leerDatosBloques(sizeBytes, bloqueInicial);
@@ -749,27 +823,23 @@ int pedidoEstaEnEstado(char* nombreEstado, char* datosPedido){
 
 char* cambiarEstadoA(char* nombreEstado, char* datosPedido){
 
-	// ESTADO_PEDIDO=Confirmado|\n
+	// ESTADO_PEDIDO=Pendiente|\n
 
-	// Desde indice 24 hasta el final.
+	// Desde indice 23 hasta el final.
 
-	// char*   string_substring_from(char *text, int start);
-
-	char* datosSinLineaPedido = string_substring_from(datosPedido, 24);
+	char* datosSinLineaPedido = string_substring_from(datosPedido, 23);
 
 	char* lineaPedido = "ESTADO_PEDIDO=";
 
-	char* lineaPedidoCompleta = malloc(strlen(lineaPedido) + strlen(nombreEstado) + 1);
+	char* lineaPedidoCompleta = malloc(strlen(lineaPedido) + strlen(nombreEstado) + strlen(datosSinLineaPedido) + 1);
 
 	strcpy(lineaPedidoCompleta, lineaPedido);
 	strcat(lineaPedidoCompleta, nombreEstado);
+	strcat(lineaPedidoCompleta, datosSinLineaPedido);
 
 	//void 	string_append(char ** original, char * string_to_add);
 
-	string_append(&lineaPedidoCompleta, datosSinLineaPedido);
-
 	free(datosSinLineaPedido);
-	free(lineaPedido);
 
 	return lineaPedidoCompleta;
 }
@@ -820,17 +890,17 @@ int main(){
 
     //obtenerRestaurante("ElDestino");
 
-//    guardarPedido("ElDestino", 1);
+    //guardarPedido("ElDestino", 1);
 //    guardarPedido("ElDestino", 2);
-//    guardarPedido("ElDestino", 3);
 //    guardarPedido("ElDestino", 2);
     //guardarPedido("ElDestino", 4);
 
     //obtenerPedido("ElDestino", 4);
 
-    confirmarPedido("ElDestino", 4);
+    confirmarPedido("ElDestino", 1);
 
-    // Espero al hilo
+    // 37,38,39
+
     pthread_join(hiloConsola, NULL);
 
 	// Liberaciones finales (a las que nunca se llega)
