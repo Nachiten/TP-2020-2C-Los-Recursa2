@@ -48,6 +48,8 @@ void consultarPlatos(char* nombreRestaurant){
 	// lineaPlatos[1] = lo q esta despues del = --> [Milanesas,Empanadas,Ensalada]
 	char** lineaPlatos = string_split(datosSeparados[3], "=");
 
+	// lineaPlatos[1] es el array con los nombres
+
 	// Separo [a,b,c] en char** a, b, c
 	char** platosComoArray = string_get_string_as_array(lineaPlatos[1]);
 

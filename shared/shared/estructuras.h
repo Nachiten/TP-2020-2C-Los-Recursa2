@@ -69,6 +69,7 @@ typedef struct{
 }receta;
 
 typedef struct{
+	uint32_t longitudNombrePlato;
 	char* nombrePlato; //comida?
 	uint32_t cantidadPlatos;
 	uint32_t cantLista; //Todo preguntar a los ayudantes
@@ -161,8 +162,8 @@ typedef struct{//Todo ver con los ayudantes PORQUE ESTA PICANTE
 }respuesta_obtener_restaurante;
 
 typedef struct{
-	uint32_t cantidadPlatos;
-	char** nombresPlatos;
+	uint32_t longitudNombresPlatos;
+	char* nombresPlatos;
 }respuesta_consultar_platos;
 
 typedef struct{
