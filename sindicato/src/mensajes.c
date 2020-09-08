@@ -9,13 +9,70 @@
 
 // ---- MENSAJES POR SOCKET ----
 
-void consultarPlatos(char* nombreRestaurante){
-	// NO PUEDO PORQUE HAY ERROR EN LA CONSIGNA D:
+/*
+ * Mensajes Hechos:
+ *
+ * Consultar platos - Interno listo, falta envio de mensaje
+ * Guardar pedido - Interno listo, falta envio mensaje
+ * Guardar plato - X
+ * Confirmar pedido - Interno listo, falta envio mensaje
+ * Obtener pedido - Interno listo, falta envio mensaje
+ * Obtener restaurante - Interno listo, falta envio mensaje
+ * Plato listo - X
+ * Obtener receta - X
+ * Terminar pedido - X
+ *
+ */
+
+
+void consultarPlatos(char* nombreRestaurant){
+
+	if ( !existeRestaurant(nombreRestaurant) ){
+		printf("ERROR | No existe el restaurant buscado.\n");
+		// TODO | Retornar valor default (no se cual es)
+		return;
+	}
+
+	/*
+	 * 1 - Leer datos del restaurant
+	 * 2 - Obtener la lista de platos
+	 * 3 - Genearar mensaje rta
+	 * 4 - Devolver el mensaje
+	 */
+
+	char* datosRestaurante = leerDatosRestaurant(nombreRestaurant);
+
+	// datosSeparados[3] = PLATOS=[Milanesas,Empanadas,Ensalada]
+	char** datosSeparados = string_split(datosRestaurante, "\n");
+
+	// lineaPlatos[1] = lo q esta despues del = --> [Milanesas,Empanadas,Ensalada]
+	char** lineaPlatos = string_split(datosSeparados[3], "=");
+
+	// Separo [a,b,c] en char** a, b, c
+	char** platosComoArray = string_get_string_as_array(lineaPlatos[1]);
+
+	int cantidadPlatos = cantidadDeElementosEnArray(platosComoArray);
+
+	respuesta_consultar_platos* respuestaPlatos = malloc(sizeof(respuesta_consultar_platos) + sizeof(char*) * cantidadPlatos);
+
+	respuestaPlatos->cantidadPlatos = cantidadPlatos;
+
+	int i;
+	for (i = 0; i<cantidadPlatos; i++){
+		respuestaPlatos->nombresPlatos[i] = platosComoArray[i];
+	}
+
+	printearRespuestaConsultarPlatos(respuestaPlatos);
+
+	// TODO | Enviar respuesta
+
+	freeDeArray(datosSeparados);
+	freeDeArray(lineaPlatos);
+	freeDeArray(platosComoArray);
+	free(datosRestaurante);
 }
 
 void confirmarPedido(char* nombreRestaurant, int IDPedido){
-
-	// TODO | Explota | Revisar
 
 	if ( !existeRestaurant(nombreRestaurant) ){
 		printf("ERROR | No existe el restaurant buscado.\n");
@@ -32,7 +89,7 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 	char* datosPedido = leerDatosPedido(nombreRestaurant, IDPedido);
 
 	if(!pedidoEstaEnEstado("Pendiente", datosPedido)){
-		printf("ERROR | No esta en estado pendiente");
+		printf("ERROR | No esta en estado pendiente.\n");
 		// TODO | Retornar fail
 		return;
 	}
@@ -49,45 +106,59 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 //		printf("Bloque actual: %i\n", *punteroABloque);
 //	}
 
+	/*
+		 * 1 - Calcular cantidad de bloques a utilizar
+		 * 2 - Obtener bloques actuales
+		 * 3 - Pedir bloques si es necesario
+		 * 4 - Escribir nuevos datos en bloques
+		 * 5 - Fijar size nuevo
+	 */
+
+	// Calculo cantidad de bloques que necesito
 	int cantidadBloquesNecesarios = cantidadDeBloquesQueOcupa(strlen(nuevosDatosPedido));
 
+	// Calculo cantidad de bloques que tengo
 	int cantidadBloquesActuales = list_size(listaBloquesActual);
 
 	// Si necesito agregar bloques nuevos
 	if (cantidadBloquesNecesarios > cantidadBloquesActuales){
 		int cantidadBloquesAPedir = cantidadBloquesNecesarios - cantidadBloquesActuales;
 
+		// Pido la cantidad de bloques que necesito
 		t_list* bloquesPedidos = obtenerPrimerosLibresDeBitmap(cantidadBloquesAPedir);
 
+		// Agrego los bloques nuevos a la lista de bloques
 		list_add_all(listaBloquesActual, bloquesPedidos);
+
+		list_destroy(bloquesPedidos);
 	// No tiene sentido que esto pase
 	} else if (cantidadBloquesNecesarios < cantidadBloquesActuales){
 		printf("ERROR | No puede necesitarse menos bloques al confirmar un pedido.\n");
 		exit(5);
 	}
 
+	// Separar los datos en una lista
 	t_list* listaDatosSeparados = separarStringEnBloques(nuevosDatosPedido, cantidadBloquesNecesarios);
 
+	// Escribir los datos
 	escribirLineasEnBloques(listaBloquesActual, listaDatosSeparados);
 
+	// Generar el path al pedido
 	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
-
 	char* pathAPedido = generarPathAPedido(pathCarpetaRestaurant, IDPedido);
 
+	// Fijar el size correcto
 	fijarValorArchivoA(pathAPedido, strlen(nuevosDatosPedido), "SIZE");
-
-	/*
-	 * 1 - Calcular cantidad de bloques a utilizar
-	 * 2 - Obtener bloques actuales
-	 * 3 - Pedir bloques si es necesario
-	 * 4 - Escribir nuevos datos en bloques
-	 */
 
 	// TODO | Retornar OK
 
 	free(datosPedido);
 	free(nuevosDatosPedido);
 	destruirListaYElementos(listaBloquesActual);
+	destruirListaYElementos(listaDatosSeparados);
+	free(pathCarpetaRestaurant);
+	free(pathAPedido);
+
 }
 
 void obtenerPedido(char* nombreRestaurant, int IDPedido){
@@ -130,8 +201,8 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido){
 	int i;
 	for (i = 0; i< cantidadDePlatos; i++){
 		respuestaPedido->platos_pedido[i].nombrePlato = nombresLista[i];
-		respuestaPedido->platos_pedido[i].cantidadPlatos = cantTotalLista[i];
-		respuestaPedido->platos_pedido[i].cantLista = cantListaLista[i];
+		respuestaPedido->platos_pedido[i].cantidadPlatos = atoi(cantTotalLista[i]);
+		respuestaPedido->platos_pedido[i].cantLista = atoi(cantListaLista[i]);
 
 //		printf("Nombre %i: %s\n", i, nombresLista[i]);
 //		printf("CantidadTotal %i: %s\n", i, cantTotalLista[i]);

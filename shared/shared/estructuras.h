@@ -162,7 +162,7 @@ typedef struct{//Todo ver con los ayudantes PORQUE ESTA PICANTE
 
 typedef struct{
 	uint32_t cantidadPlatos;
-	plato listaplatos[];
+	char** nombresPlatos;
 }respuesta_consultar_platos;
 
 typedef struct{

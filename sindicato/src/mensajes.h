@@ -12,6 +12,8 @@
 
 void obtenerRestaurante(char*);
 void guardarPedido(char*, int);
+void consultarPlatos(char* nombreRestaurant);
+void confirmarPedido(char* nombreRestaurant, int IDPedido);
 //void crearReceta(char*, datosReceta);
 //void crearRestaurant(char*, datosRestaurant);
 

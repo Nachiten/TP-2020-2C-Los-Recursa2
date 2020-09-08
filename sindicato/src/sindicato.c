@@ -750,9 +750,6 @@ char* leerDatosRestaurant(char* nombreRestaurante){
 	int sizeBytes = leerValorArchivo(pathInfoRestaurant, "SIZE");
 	int bloqueInicial = leerValorArchivo(pathInfoRestaurant, "INITIAL_BLOCK");
 
-	printf("Size: %i\n", sizeBytes);
-	printf("BloqueInicial: %i\n", bloqueInicial);
-
 	free(pathInfoRestaurant);
 
 	return leerDatosBloques(sizeBytes, bloqueInicial);
@@ -844,6 +841,15 @@ char* cambiarEstadoA(char* nombreEstado, char* datosPedido){
 	return lineaPedidoCompleta;
 }
 
+void printearRespuestaConsultarPlatos(respuesta_consultar_platos* unaRta){
+	printf("Cantidad de platos: %i\n", unaRta->cantidadPlatos);
+
+	int i;
+	for (i = 0; i< unaRta->cantidadPlatos; i++){
+		printf("Plato %i: %s\n", i, unaRta->nombresPlatos[i]);
+	}
+}
+
 int main(){
 	printf("Comienzo sindicato\n");
 
@@ -888,16 +894,14 @@ int main(){
 	// Hilo para leer el input de la consola
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
 
-    //obtenerRestaurante("ElDestino");
+//    guardarPedido("ElDestino", 5);
+//
+//    confirmarPedido("ElDestino", 5);
+//    confirmarPedido("ElDestino", 5);
 
-    //guardarPedido("ElDestino", 1);
-//    guardarPedido("ElDestino", 2);
-//    guardarPedido("ElDestino", 2);
-    //guardarPedido("ElDestino", 4);
-
-    //obtenerPedido("ElDestino", 4);
-
-    confirmarPedido("ElDestino", 1);
+    consultarPlatos("ElDestino");
+    consultarPlatos("PanaderiaJorge");
+    consultarPlatos("Bataglia");
 
     // 37,38,39
 
