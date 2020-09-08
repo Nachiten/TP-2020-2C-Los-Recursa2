@@ -30,6 +30,41 @@ int32_t reservarSocket(char* miPuerto)
 	return miSocket;
 }
 
+int32_t crearSocketServidor(char* ip, char* puerto){
+
+	int socket_servidor;
+	int activo = 1;
+
+	    struct addrinfo hints, *servinfo, *p;
+
+	    memset(&hints, 0, sizeof(hints));
+	    hints.ai_family = PF_INET;
+	    hints.ai_socktype = SOCK_STREAM;
+	    hints.ai_flags = IPPROTO_TCP;
+
+	    getaddrinfo(ip, puerto, &hints, &servinfo);
+
+	    for (p=servinfo; p != NULL; p = p->ai_next)
+	    {
+	        if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
+	            continue;
+
+	        //para que pueda reusar el socket si se cae ToDo esto serviria ahora?
+	        setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &activo,sizeof(activo));
+
+	        if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
+	            close(socket_servidor);
+	            continue;
+	        }
+	        break;
+	    }
+
+		listen(socket_servidor, SOMAXCONN);
+	    freeaddrinfo(servinfo);
+
+	    return socket_servidor;
+}
+
 int32_t establecer_conexion(char* ip, char* puerto)
 {
 	struct addrinfo hints;
