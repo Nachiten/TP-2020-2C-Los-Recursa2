@@ -894,16 +894,13 @@ int main(){
 	// Hilo para leer el input de la consola
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
 
-//    guardarPedido("ElDestino", 5);
-//
-//    confirmarPedido("ElDestino", 5);
-//    confirmarPedido("ElDestino", 5);
+//  guardarPedido("ElDestino", 5);
+//  confirmarPedido("ElDestino", 5);
+//  confirmarPedido("ElDestino", 5);
 
     consultarPlatos("ElDestino");
     consultarPlatos("PanaderiaJorge");
     consultarPlatos("Bataglia");
-
-    // 37,38,39
 
     pthread_join(hiloConsola, NULL);
 

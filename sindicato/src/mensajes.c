@@ -53,7 +53,8 @@ void consultarPlatos(char* nombreRestaurant){
 
 	int cantidadPlatos = cantidadDeElementosEnArray(platosComoArray);
 
-	respuesta_consultar_platos* respuestaPlatos = malloc(sizeof(respuesta_consultar_platos) + sizeof(char*) * cantidadPlatos);
+	respuesta_consultar_platos* respuestaPlatos = malloc(sizeof(respuesta_consultar_platos));
+	respuestaPlatos->nombresPlatos = calloc(sizeof(char*), cantidadPlatos);
 
 	respuestaPlatos->cantidadPlatos = cantidadPlatos;
 
