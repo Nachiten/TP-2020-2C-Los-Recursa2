@@ -7,6 +7,7 @@
 #include<unistd.h>
 #include<netdb.h>
 #include<commons/log.h>
+#include<commons/string.h>
 #include<string.h>
 #include<pthread.h>
 #include <inttypes.h> // Para tener el uint32_t
@@ -14,6 +15,8 @@
 #include "shared/estructuras.h"
 #include"shared/cargador.h"
 #include"shared/socket.h"
+
+t_list* listaRestos;
 
 // ***SERVIDOR***
 void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t sizeAAllocar) ;
