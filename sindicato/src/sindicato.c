@@ -529,7 +529,7 @@ char* generarPathInfoRestaurant(char* nombreRestaurante){
 	return pathInfoRestaurant;
 }
 
-t_list* leerListaBloquesAsignados(sizeBytes, bloqueInicial){
+t_list* leerListaBloquesAsignados(int sizeBytes, int bloqueInicial){
 	t_list* listaBloques = list_create();
 
 	char* pathSiguienteBloque = generarPathABloque(bloqueInicial);
@@ -554,7 +554,6 @@ t_list* leerListaBloquesAsignados(sizeBytes, bloqueInicial){
 		if (i == cantidadBloquesALeer - 1){
 		// No es el ultimo bloque
 		} else {
-			//lineaActualLeida = malloc(BLOCK_SIZE - 4 + 1);
 
 			// Me muevo a la posicion donde empieza el numero que apunta al siguiente bloque
 			fseek(bloqueALeer, BLOCK_SIZE - 4 + 1, SEEK_SET);
@@ -842,20 +841,35 @@ char* cambiarEstadoA(char* nombreEstado, char* datosPedido){
 }
 
 void printearRespuestaConsultarPlatos(respuesta_consultar_platos* unaRta){
-	printf("Cantidad de platos: %i\n", unaRta->cantidadPlatos);
+	printf("Longitud total del string: %i\n", unaRta->longitudNombresPlatos);
+
+	printf("Linea platos: %s", unaRta->nombresPlatos);
+}
+
+void printearRespuestaObtenerPedido(respuesta_obtener_pedido* unaRta){
+	printf("Cantidad platos: %i\n", unaRta->cantPlatos);
 
 	int i;
-	for (i = 0; i< unaRta->cantidadPlatos; i++){
-		printf("Plato %i: %s\n", i, unaRta->nombresPlatos[i]);
+	for (i = 0; i<unaRta->cantPlatos; i++){
+		printf("Longitud nombre plato %i: %i\n", i, unaRta->platos_pedido[i].longitudNombrePlato);
+		printf("Nombre Plato %i: %s\n", i, unaRta->platos_pedido[i].nombrePlato);
+		printf("Cantidad Total %i: %i\n", i, unaRta->platos_pedido[i].cantidadPlatos);
+		printf("Cantidad Lista %i: %i\n", i, unaRta->platos_pedido[i].cantLista);
 	}
+
 }
 
 int main(){
 	printf("Comienzo sindicato\n");
 
 	// Inicializar semaforo bitmap
-	//semBitmap = malloc(sizeof(sem_t));
-	//sem_init(semBitmap, 0, 1);
+	semBitmap = malloc(sizeof(sem_t));
+	sem_init(semBitmap, 0, 1);
+
+	// Inicializacion listas de semaforos archivos
+	listaSemPedido = list_create();
+	listaSemRestaurant = list_create();
+	listaSemReceta = list_create();
 
 	char* PUNTO_MONTAJE;
 	// Leer la config
@@ -890,17 +904,36 @@ int main(){
 
 	// ---- A partir de aca el FS ya existe ----
 
+	// Testing semaforos
+//	char* restaurant1 = "ElDestino";
+//	crearSemaforoRestaurant(restaurant1);
+//	pthread_t hilo1;
+//	pthread_t hilo2;
+//	pthread_t hilo3;
+//	pthread_create(&hilo1, NULL, (void*)abrirArchivo1, NULL);
+//	pthread_create(&hilo2, NULL, (void*)abrirArchivo2, NULL);
+//	pthread_create(&hilo3, NULL, (void*)abrirArchivo3, NULL);
+//	pthread_join(hilo1, NULL);
+//	pthread_join(hilo2, NULL);
+//	pthread_join(hilo3, NULL);
+
+
 	pthread_t hiloConsola;
 	// Hilo para leer el input de la consola
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
 
-//  guardarPedido("ElDestino", 5);
-//  confirmarPedido("ElDestino", 5);
-//  confirmarPedido("ElDestino", 5);
+    guardarPedido("ElDestino", 5);
+    confirmarPedido("ElDestino", 5);
+    confirmarPedido("ElDestino", 5);
 
     consultarPlatos("ElDestino");
     consultarPlatos("PanaderiaJorge");
     consultarPlatos("Bataglia");
+
+    guardarPedido("PanaderiaJorge", 4);
+    obtenerPedido("ElDestino", 5);
+    obtenerPedido("PanaderiaJorge", 4);
+    obtenerPedido("PanaderiaJorge", 3);
 
     pthread_join(hiloConsola, NULL);
 

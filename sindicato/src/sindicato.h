@@ -30,6 +30,7 @@
 #include "iniciarFS.h"
 #include "bitarray.h"
 #include "mensajes.h"
+#include "semaforos.h"
 
 typedef struct{
 	int cantCocineros;

@@ -126,7 +126,7 @@ void obtenerInputConsola(){
 			}
 
 		} else {
-			printf("ERROR | El comando ingresado no es valido. Los comandos posibles son: CrearRestaurante, CrearReceta.\n");
+			printf("ERROR | Comando ingresado no valido. Los comandos posibles son: CrearRestaurante, CrearReceta.\n");
 		}
 
 		// Libero las palabras separadas
