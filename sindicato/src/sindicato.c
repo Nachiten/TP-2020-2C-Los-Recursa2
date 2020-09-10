@@ -896,11 +896,17 @@ int main(){
 	// Si existe el filesystem no se hace nada
 	if (existeFilesystem()){
 		printf("El filesystem ya existe. No se debe inicializar.\n");
+		// Se generan todos los semaforos de los archivos que ya existan
+		crearSemaforosArchivosExistentes();
 	// Si no existe se genera bitmap y demas verduras
 	} else {
 		printf("No existe filesystem... inicializando.\n");
 		inicializarFileSystem(PUNTO_MONTAJE);
 	}
+
+	printearSemaforosRestaurantes();
+	printearSemaforosPedidos();
+	printearSemaforosRecetas();
 
 	// ---- A partir de aca el FS ya existe ----
 

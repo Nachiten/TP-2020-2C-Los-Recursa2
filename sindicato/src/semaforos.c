@@ -70,7 +70,7 @@ void crearSemaforoRestaurant(char* nombreRestaurant){
 }
 
 void crearSemaforoPedido(char* nombreRestaurant, int numPedido){
-	semPedido* semaforoRestaurant = malloc(sizeof(semRestaurant));
+	semPedido* semaforoRestaurant = malloc(sizeof(semPedido));
 
 	sem_t* semaforoNuevo = malloc(sizeof(sem_t));
 
@@ -84,7 +84,7 @@ void crearSemaforoPedido(char* nombreRestaurant, int numPedido){
 }
 
 void crearSemaforoReceta(char* nombreReceta){
-	semReceta* semaforoReceta = malloc(sizeof(semRestaurant));
+	semReceta* semaforoReceta = malloc(sizeof(semReceta));
 
 	sem_t* semaforoNuevo = malloc(sizeof(sem_t));
 
@@ -194,4 +194,166 @@ void signalSemaforoReceta(char* nombreReceta){
 	printf("No se encontro el semaforo receta deseado\n");
 }
 
+void crearSemaforosArchivosExistentes(){
+	crearSemaforosRestaurantesExistentes();
+	crearSemaforosRecetasExistentes();
+	// TODO | Al crear el semaforo de un pedido no se guarda correctamente el nombre del restaurant
+	crearSemaforosPedidosExistentes();
+}
+
+void printearSemaforosRestaurantes(){
+	int i;
+	for (i = 0; i<list_size(listaSemRestaurant); i++){
+
+		semRestaurant* unSemaforoRestaurant = list_get(listaSemRestaurant, i);
+
+		printf("Nombre restaurant: %s\n", unSemaforoRestaurant->nombreRestaurant);
+	}
+
+}
+
+void printearSemaforosRecetas(){
+	int i;
+	for (i = 0; i<list_size(listaSemReceta); i++){
+
+		semReceta* unSemaforoRestaurant = list_get(listaSemReceta, i);
+
+		printf("Nombre receta: %s\n", unSemaforoRestaurant->nombreReceta);
+	}
+}
+
+void printearSemaforosPedidos(){
+	int i;
+	for (i = 0; i<list_size(listaSemPedido); i++){
+
+		semPedido* unPedido = list_get(listaSemPedido, i);
+
+		printf("Nombre restaurant: %s\n", unPedido->nombreRestaurant);
+		printf("Numero pedido: %i\n", unPedido->numPedido);
+	}
+}
+
+void crearSemaforosRestaurantesExistentes()
+{
+	t_list* listaNombresRestaurant = escanearCarpetasExistentes(pathRestaurantes);
+
+	int i;
+
+	int cantElementos = list_size(listaNombresRestaurant);
+
+	for(i = cantElementos - 1; i >= 0; i--)
+	{
+		char* unRestaurant = list_get(listaNombresRestaurant, i);
+
+		crearSemaforoRestaurant(unRestaurant);
+	}
+
+	//destruirListaYElementos(listaNombresRestaurant);
+}
+
+void crearSemaforosRecetasExistentes()
+{
+	t_list* listaNombresRecetas = escanearCarpetasExistentes(pathRecetas);
+
+	int i;
+
+	int cantElementos = list_size(listaNombresRecetas);
+
+	for(i = cantElementos - 1; i >= 0; i--)
+	{
+		char* unaReceta = list_get(listaNombresRecetas, i);
+
+		crearSemaforoReceta(unaReceta);
+	}
+
+	destruirListaYElementos(listaNombresRecetas);
+}
+
+void crearSemaforosPedidosExistentes(){
+	t_list* listaNombresRestaurant = escanearCarpetasExistentes(pathRestaurantes);
+
+	int i;
+	for (i = 0; i < list_size(listaNombresRestaurant); i++){
+
+		char* nombreRestaurant = list_get(listaNombresRestaurant, i);
+		crearSemaforosPedidosRestaurant(nombreRestaurant);
+	}
+
+	destruirListaYElementos(listaNombresRestaurant);
+}
+
+void crearSemaforosPedidosRestaurant(char* nombreRestaurant){
+	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
+
+	struct dirent *archivoLeido;
+
+	// Retorna un puntero al directorio | {puntoMontaje}/Files
+	DIR *dr = opendir(pathCarpetaRestaurant);
+
+	if (dr == NULL)
+	{
+		printf("No se pudo abrir el directorio actual" );
+	}
+
+	while ((archivoLeido = readdir(dr)) != NULL)
+	{
+		// Nombre del archivo leido dentro del directorio
+		char* punteroANombre = archivoLeido->d_name;
+
+		// Si el archivo es . .. o Info.AFIP es ignorado
+		if (strcmp(punteroANombre, ".") == 0 || strcmp(punteroANombre, "..") == 0 || strcmp(punteroANombre, "Info.AFIP") == 0){
+			continue;
+		}
+
+		// Nombre: PedidoNNN.AFIP
+		char** archivoSeparado = string_split(punteroANombre, ".");
+
+		char* numeroPedidoString = string_substring_from(archivoSeparado[0], 6);
+
+		int numeroPedido = atoi(numeroPedidoString);
+
+		crearSemaforoPedido(nombreRestaurant, numeroPedido);
+
+		freeDeArray(archivoSeparado);
+		free(numeroPedidoString);
+	}
+
+	closedir(dr);
+}
+
+t_list* escanearCarpetasExistentes(char* path){
+	struct dirent *archivoLeido;
+
+	t_list* listaCarpetasExistenes = list_create();
+
+	// Retorna un puntero al directorio | {puntoMontaje}/Files
+	DIR *dr = opendir(path);
+
+	if (dr == NULL)
+	{
+		printf("No se pudo abrir el directorio actual" );
+	}
+
+	while ((archivoLeido = readdir(dr)) != NULL)
+	{
+		// Nombre del archivo leido dentro del directorio
+		char* punteroANombre = archivoLeido->d_name;
+
+		// Si el archivo es . .. o Metadata.bin es ignorado
+		if (strcmp(punteroANombre, ".") == 0 || strcmp(punteroANombre, "..") == 0){
+			continue;
+		}
+
+		char* punteroANombreLista = malloc(strlen(punteroANombre) + 1);
+		strcpy(punteroANombreLista, punteroANombre);
+
+		// Si es una carpeta pokemon lo agrego a la lista
+		list_add(listaCarpetasExistenes, punteroANombreLista);
+	}
+
+	closedir(dr);
+
+	return listaCarpetasExistenes;
+
+}
 

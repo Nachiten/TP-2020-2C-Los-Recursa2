@@ -43,4 +43,12 @@ void signalSemaforoPedido(char*, int);
 void waitSemaforoReceta(char* nombreReceta);
 void signalSemaforoReceta(char* nombreReceta);
 
+void crearSemaforosArchivosExistentes();
+void crearSemaforosRestaurantesExistentes();
+void crearSemaforosRecetasExistentes();
+void crearSemaforosPedidosExistentes();
+void crearSemaforosPedidosRestaurant(char* nombreRestaurant);
+t_list* escanearCarpetasExistentes(char* path);
+
+
 #endif /* SRC_SEMAFOROS_H_ */
