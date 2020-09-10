@@ -2,6 +2,7 @@
 
 int main(){
 	listaRestos = list_create(); //inicializo la lista de restaurantes
+	listaPedidos = list_create(); //inicializo la lista de pedidos
 	return 0;
 }
 
@@ -13,7 +14,7 @@ void consultar_restaurantes(int32_t socket_cliente){
 	char* stringInicial = "[";
 	char* stringFinal = "]";
 	char* stringSeparador = ",";
-	infoResto* resto;
+	info_resto* resto;
 
 	if(listaRestos->elements_count == 0){
 		stringCompleto  = string_new();
@@ -29,26 +30,64 @@ void consultar_restaurantes(int32_t socket_cliente){
 				string_append(&stringCompleto, stringSeparador);// agregas una , si ya hay elementos agregados
 			}
 			resto = list_get(listaRestos,i);// coseguis el restaurante de la posicion i
-			stringNuevoParaAgregar = resto->nombreResto;
+			stringNuevoParaAgregar = resto->nombre_resto;
 			string_append(&stringCompleto, stringNuevoParaAgregar);
 		}
 
 		string_append(&stringCompleto, stringFinal);// agregas un ] al final
-		mandar_mensaje(stringCompleto,SELECCIONAR_RESTAURANTE,socket_cliente);
+		mandar_mensaje(stringCompleto,RESPUESTA_CONSULTAR_R,socket_cliente);
 	}
 }
 
-void seleccionarRestaurante(char* nombreResto){
+void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
+	int restoBuscado;
+	respuesta_ok_error* respuesta;
+	perfil_cliente* perfil;
 
+	restoBuscado = buscar_restaurante(nombreResto);
+
+	if(restoBuscado == 1){
+		perfil = malloc(sizeof(perfil_cliente));
+		perfil->socket_cliente = socket_cliente;
+		perfil->nombre_resto = nombreResto;
+		perfil->id_pedido = 0;
+		list_add(listaPedidos,perfil);
+	}else{
+		respuesta->respuesta = 0;
+		mandar_mensaje(respuesta,RESPUESTA_SELECCIONAR_R,socket_cliente);
+	}
+}
+
+
+int buscar_restaurante(char* nombreResto){
+	info_resto* resto;
+	for(int i = 0; i < listaRestos->elements_count; i++){
+		resto = list_get(listaRestos,i);// coseguis el restaurante de la posicion i
+		if(resto->nombre_resto == nombreResto){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int32_t buscar_socket_resto(char* nombreResto){
+	info_resto* resto;
+	for(int i = 0; i < listaRestos->elements_count; i++){
+		resto = list_get(listaRestos,i);// coseguis el restaurante de la posicion i
+		if(resto->nombre_resto == nombreResto){
+			return resto->socket;
+		}
+	}
+	return 0;
 }
 
 // agrega un restaurante que se conecto a app a la lista de restaurantes
-void agregar_restaurante(infoResto* recibidoAgregarRestaurante){
+void agregar_restaurante(info_resto* recibidoAgregarRestaurante){
 	list_add(listaRestos,recibidoAgregarRestaurante);
 }
 
 void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t sizeAAllocar)  {
-	infoResto* recibidoAgregarRestaurante;
+	info_resto* recibidoAgregarRestaurante;
 	seleccionar_restaurante* recibidoSeleccionarRestaurante;
 
 	switch (cod_op) {
@@ -58,9 +97,10 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		case SELECCIONAR_RESTAURANTE:
 			recibidoSeleccionarRestaurante = malloc(sizeof(seleccionar_restaurante));
 			recibir_mensaje(recibidoSeleccionarRestaurante,SELECCIONAR_RESTAURANTE,socket_cliente);
+			seleccionarRestaurante(recibidoSeleccionarRestaurante->restaurante,socket_cliente);
 			break;
 		case AGREGAR_RESTAURANTE:
-			recibidoAgregarRestaurante = malloc(sizeof(infoResto));
+			recibidoAgregarRestaurante = malloc(sizeof(info_resto));
 			recibir_mensaje(recibidoAgregarRestaurante,AGREGAR_RESTAURANTE,socket_cliente);
 			agregar_restaurante(recibidoAgregarRestaurante);
 			break;

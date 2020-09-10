@@ -80,8 +80,14 @@ typedef struct{
 
 typedef struct{
 	int32_t socket;
-	char* nombreResto;
-}infoResto;
+	char* nombre_resto;
+}info_resto;
+
+typedef struct{
+	int32_t socket_cliente;
+	char* nombre_resto;
+	uint32_t id_pedido;
+}perfil_cliente;
 
 //ESTRUCTURAS PARA MANDAR MENSAJES-------------------------------------------------------------------------------------------------
 
