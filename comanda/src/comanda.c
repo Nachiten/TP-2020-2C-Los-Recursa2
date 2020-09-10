@@ -90,17 +90,18 @@ int main()
 	}
 
 	//inicializamos la tabla de segmentos
-	tabla_de_segmentos = malloc(sizeof(segmentos));
-	inicializar_tabla_de_segmentos(tabla_de_segmentos);
+	lista_de_pedidos_de_todos_los_restaurantes = malloc(sizeof(tablas_segmentos_restaurantes));
+	inicializar_lista_de_tablas_de_segmentos_de_restaurantes(lista_de_pedidos_de_todos_los_restaurantes);//si, son nombres de mierda
+
+
+	//ToDo matar la lista de las tablas de segmento
 	//ToDo matar la tabla de segmentos
 	//ToDo matar las tablas de paginas
-
 
 
 	//puts("antes recepcion");
 	recepcion_mensajes();
 	//puts("despues recepcion");
-
 
 
 
@@ -203,8 +204,16 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibidoGuardarPedido = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoGuardarPedido, cod_op, socket);
 
+        	tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante;
+
+        	//buscamos la tabla de pedidos del restaurante seleccionado
+        	tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoGuardarPedido->nombreRestaurante);
+
+        	//creamos un nuevo segmento para el pedido ToDo
+        	numeroDeSegmento = crearSegmento(tablaDePedidosDelRestaurante);
+
         	//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se crea
-        	numeroDeSegmento = buscar_segmento_de_restaurante(tabla_de_segmentos, recibidoGuardarPedido->nombreRestaurante);
+        	numeroDeSegmento = buscar_segmento_de_restaurante(tablaDePedidosDelRestaurante, recibidoGuardarPedido->idPedido);
 
         	//al segmento que corresponde al restaurante, se le agrega el nuevo pedido
         	agregarPedidoARestaurante(tabla_de_segmentos, numeroDeSegmento, recibidoGuardarPedido->idPedido);
