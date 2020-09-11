@@ -931,7 +931,7 @@ int main(){
     pthread_detach(hiloConsola);
 
     // Iniciar servidor para recibir mensajes
-    iniciar_server(IP_SINDICATO, PUERTO_ESCUCHA);
+    //iniciar_server(IP_SINDICATO, PUERTO_ESCUCHA);
 
 
 //    guardarPedido("ElDestino", 5);
