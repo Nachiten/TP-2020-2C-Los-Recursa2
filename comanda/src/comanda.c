@@ -212,13 +212,16 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	//creamos un nuevo segmento para el pedido ToDo
         	numeroDeSegmento = crearSegmento(tablaDePedidosDelRestaurante);
 
+        	/*
         	//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se crea
         	numeroDeSegmento = buscar_segmento_de_restaurante(tablaDePedidosDelRestaurante, recibidoGuardarPedido->idPedido);
+        	*/
 
         	//al segmento que corresponde al restaurante, se le agrega el nuevo pedido
-        	agregarPedidoARestaurante(tabla_de_segmentos, numeroDeSegmento, recibidoGuardarPedido->idPedido);
+        	agregarPedidoARestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento, recibidoGuardarPedido->idPedido);
 
         	//ToDo por ultimo avisamos que el pedido fue agregado correctamente
+        	//mandar_mensaje();
 
         	free(recibidoGuardarPedido->nombreRestaurante); //shit, esto me va a armar quilombo ToDo revisar
 			free(recibidoGuardarPedido);

@@ -28,7 +28,7 @@ tablas_segmentos_restaurantes* crear_tabla_de_pedidos(tablas_segmentos_restauran
 uint32_t buscar_segmento_de_restaurante(segmentos* laTablaDeSegmentos, char* nombreRestaurante);
 uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante);
 
-void agregarPedidoARestaurante(segmentos* laTablaDeSegmentos, uint32_t numeroDeSegmento, uint32_t idPedido);
+void agregarPedidoARestaurante(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento, uint32_t idPedido);
 
 
 #endif /* SRC_MANEJOMEMORIA_H_ */

@@ -90,6 +90,7 @@ tablas_segmentos_restaurantes* crear_tabla_de_pedidos(tablas_segmentos_restauran
 	return nuevaTablaDePedidos;
 }
 
+//ToDo volver a revisar esto cuando tenga que agregar platos a un pedido
 uint32_t buscar_segmento_de_restaurante(segmentos* laTablaDeSegmentos, char* nombreDeRestaurante)
 {
 	int encontrado = 0;
@@ -153,8 +154,9 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 	return nuevoSegmento->numero_de_segmento;
 }
 
-void agregarPedidoARestaurante(segmentos* laTablaDeSegmentos, uint32_t numeroDeSegmento, uint32_t idPedido)
+void agregarPedidoARestaurante(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento, uint32_t idPedido)
 {
+	segmentos* laTablaDeSegmentos = tablaDePedidosDelRestaurante->miTablaDePedidos;
 	segmentos* segmentoSeleccionado = NULL;
 
 	//recorro la lista hasta que encuentre el numero del segmento seleccionado
@@ -163,7 +165,11 @@ void agregarPedidoARestaurante(segmentos* laTablaDeSegmentos, uint32_t numeroDeS
 		laTablaDeSegmentos = laTablaDeSegmentos->sig_segmento;
 	}
 
-	segmentoSeleccionado = laTablaDeSegmentos;
+	segmentoSeleccionado->id_Pedido = idPedido;
+
+
+
+	//segmentoSeleccionado = laTablaDeSegmentos;
 
 	//toDo  terminar cuando inicialice tabla de paginas
 	//segmentoSeleccionado->mi_tabla->

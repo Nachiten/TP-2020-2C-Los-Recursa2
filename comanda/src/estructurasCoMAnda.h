@@ -23,7 +23,7 @@ typedef struct tabla_segmentos
 	uint32_t numero_de_segmento;
 
 	uint32_t numero_de_victima; //me parece q aca no va
-	int32_t ID_MENSAJE_GUARDADO; //esto me suena que esta de mas
+	int32_t id_Pedido; //esto me suena que esta de mas
 
 
 	tabla_paginas* mi_tabla; //cada segmento tiene su tabla de paginas
