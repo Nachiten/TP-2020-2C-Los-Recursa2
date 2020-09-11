@@ -8,6 +8,7 @@ C_SRCS += \
 ../src/consola.c \
 ../src/iniciarFS.c \
 ../src/mensajes.c \
+../src/semaforos.c \
 ../src/sindicato.c 
 
 OBJS += \
@@ -15,6 +16,7 @@ OBJS += \
 ./src/consola.o \
 ./src/iniciarFS.o \
 ./src/mensajes.o \
+./src/semaforos.o \
 ./src/sindicato.o 
 
 C_DEPS += \
@@ -22,6 +24,7 @@ C_DEPS += \
 ./src/consola.d \
 ./src/iniciarFS.d \
 ./src/mensajes.d \
+./src/semaforos.d \
 ./src/sindicato.d 
 
 
