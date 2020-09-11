@@ -5,6 +5,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../src/bitarray.c \
+../src/conexiones.c \
 ../src/consola.c \
 ../src/iniciarFS.c \
 ../src/mensajes.c \
@@ -13,6 +14,7 @@ C_SRCS += \
 
 OBJS += \
 ./src/bitarray.o \
+./src/conexiones.o \
 ./src/consola.o \
 ./src/iniciarFS.o \
 ./src/mensajes.o \
@@ -21,6 +23,7 @@ OBJS += \
 
 C_DEPS += \
 ./src/bitarray.d \
+./src/conexiones.d \
 ./src/consola.d \
 ./src/iniciarFS.d \
 ./src/mensajes.d \

@@ -56,6 +56,7 @@ t_config* leerConfig(char** PUNTO_MONTAJE){
 
 	*PUNTO_MONTAJE = config_get_string_value(config, "PUNTO_MONTAJE");
 	PUERTO_ESCUCHA = config_get_string_value(config, "PUERTO_ESCUCHA");
+	IP_SINDICATO = config_get_string_value(config, "IP_SINDICATO");
 
 	return config;
 }
@@ -904,9 +905,9 @@ int main(){
 		inicializarFileSystem(PUNTO_MONTAJE);
 	}
 
-	printearSemaforosRestaurantes();
-	printearSemaforosPedidos();
-	printearSemaforosRecetas();
+//	printearSemaforosRestaurantes();
+//	printearSemaforosPedidos();
+//	printearSemaforosRecetas();
 
 	// ---- A partir de aca el FS ya existe ----
 
@@ -927,19 +928,24 @@ int main(){
 	pthread_t hiloConsola;
 	// Hilo para leer el input de la consola
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
+    pthread_detach(hiloConsola);
 
-    guardarPedido("ElDestino", 5);
-    confirmarPedido("ElDestino", 5);
-    confirmarPedido("ElDestino", 5);
+    // Iniciar servidor para recibir mensajes
+    iniciar_server(IP_SINDICATO, PUERTO_ESCUCHA);
 
-    consultarPlatos("ElDestino");
-    consultarPlatos("PanaderiaJorge");
-    consultarPlatos("Bataglia");
 
-    guardarPedido("PanaderiaJorge", 4);
-    obtenerPedido("ElDestino", 5);
-    obtenerPedido("PanaderiaJorge", 4);
-    obtenerPedido("PanaderiaJorge", 3);
+//    guardarPedido("ElDestino", 5);
+//    confirmarPedido("ElDestino", 5);
+//    confirmarPedido("ElDestino", 5);
+//
+//    consultarPlatos("ElDestino");
+//    consultarPlatos("PanaderiaJorge");
+//    consultarPlatos("Bataglia");
+//
+//    guardarPedido("PanaderiaJorge", 4);
+//    obtenerPedido("ElDestino", 5);
+//    obtenerPedido("PanaderiaJorge", 4);
+//    obtenerPedido("PanaderiaJorge", 3);
 
     pthread_join(hiloConsola, NULL);
 

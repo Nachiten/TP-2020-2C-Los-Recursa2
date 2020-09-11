@@ -31,6 +31,7 @@
 #include "bitarray.h"
 #include "mensajes.h"
 #include "semaforos.h"
+#include "conexiones.h"
 
 typedef struct{
 	int cantCocineros;
@@ -47,6 +48,7 @@ typedef struct{
 }datosReceta;
 
 char* PUERTO_ESCUCHA;
+char* IP_SINDICATO;
 
 char* pathMetadata;
 char* pathRestaurantes;
