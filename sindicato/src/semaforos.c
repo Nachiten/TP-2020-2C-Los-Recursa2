@@ -70,17 +70,17 @@ void crearSemaforoRestaurant(char* nombreRestaurant){
 }
 
 void crearSemaforoPedido(char* nombreRestaurant, int numPedido){
-	semPedido* semaforoRestaurant = malloc(sizeof(semPedido));
+	semPedido* semaforoPedido = malloc(sizeof(semPedido));
 
 	sem_t* semaforoNuevo = malloc(sizeof(sem_t));
 
 	sem_init(semaforoNuevo, 0, 1);
 
-	semaforoRestaurant->nombreRestaurant = nombreRestaurant;
-	semaforoRestaurant->numPedido = numPedido;
-	semaforoRestaurant->semaforo = semaforoNuevo;
+	semaforoPedido->nombreRestaurant = nombreRestaurant;
+	semaforoPedido->numPedido = numPedido;
+	semaforoPedido->semaforo = semaforoNuevo;
 
-	list_add(listaSemPedido, semaforoRestaurant);
+	list_add(listaSemPedido, semaforoPedido);
 }
 
 void crearSemaforoReceta(char* nombreReceta){
@@ -90,7 +90,10 @@ void crearSemaforoReceta(char* nombreReceta){
 
 	sem_init(semaforoNuevo, 0, 1);
 
-	semaforoReceta->nombreReceta = nombreReceta;
+	char* nombreRecetaCopia = malloc(strlen(nombreReceta) + 1);
+	strcpy(nombreRecetaCopia, nombreReceta);
+
+	semaforoReceta->nombreReceta = nombreRecetaCopia;
 	semaforoReceta->semaforo = semaforoNuevo;
 
 	list_add(listaSemReceta, semaforoReceta);
@@ -228,8 +231,8 @@ void printearSemaforosPedidos(){
 
 		semPedido* unPedido = list_get(listaSemPedido, i);
 
-		printf("Nombre restaurant: %s\n", unPedido->nombreRestaurant);
 		printf("Numero pedido: %i\n", unPedido->numPedido);
+		printf("Nombre restaurant de pedido: %s\n", unPedido->nombreRestaurant);
 	}
 }
 
@@ -278,7 +281,6 @@ void crearSemaforosPedidosExistentes(){
 		char* nombreRestaurant = list_get(listaNombresRestaurant, i);
 		crearSemaforosPedidosRestaurant(nombreRestaurant);
 	}
-
 	destruirListaYElementos(listaNombresRestaurant);
 }
 
@@ -312,7 +314,11 @@ void crearSemaforosPedidosRestaurant(char* nombreRestaurant){
 
 		int numeroPedido = atoi(numeroPedidoString);
 
-		crearSemaforoPedido(nombreRestaurant, numeroPedido);
+		char* nombreRestaurantCopia = malloc(strlen(nombreRestaurant) + 1);
+
+		strcpy(nombreRestaurantCopia, nombreRestaurant);
+
+		crearSemaforoPedido(nombreRestaurantCopia, numeroPedido);
 
 		freeDeArray(archivoSeparado);
 		free(numeroPedidoString);
