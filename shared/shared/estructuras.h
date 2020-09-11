@@ -13,7 +13,7 @@
 
 typedef enum
 {
-	CONSULTAR_RESTAURANTE = 1,
+	CONSULTAR_RESTAURANTES = 1,
 	SELECCIONAR_RESTAURANTE,
 	OBTENER_RESTAURANTE,
 	CONSULTAR_PLATOS,
@@ -41,6 +41,7 @@ typedef enum
 	RESPUESTA_OBTENER_PEDIDO,
 	RESPUESTA_FINALIZAR_PEDIDO,
 	RESPUESTA_TERMINAR_PEDIDO,
+	AGREGAR_RESTAURANTE, //cuando un restaurante se reporta en la app para ser tenido en cuenta en CONSULTAR_RESTAURANTES
 	ERROR = -1,
 	DESCONEXION = 0
 }codigo_operacion;
@@ -69,10 +70,11 @@ typedef struct{
 }receta;
 
 typedef struct{
+	uint32_t longitudNombrePlato;
 	char* nombrePlato; //comida?
 	uint32_t cantidadPlatos;
 	uint32_t cantLista; //Todo preguntar a los ayudantes
-}item_pedido;
+}plato;
 
 //ESTRUCTURAS PARA MANDAR MENSAJES-------------------------------------------------------------------------------------------------
 
@@ -143,7 +145,8 @@ typedef struct{
 
 typedef struct{
 	uint32_t cantRestaurantes;
-	char** listaRestaurantes[];
+	uint32_t longitudlistaRestaurantes;
+	char* listaRestaurantes;
 }respuesta_consultar_restaurantes;
 
 typedef struct{
@@ -161,8 +164,8 @@ typedef struct{//Todo ver con los ayudantes PORQUE ESTA PICANTE
 }respuesta_obtener_restaurante;
 
 typedef struct{
-	uint32_t cantidadPlatos;
-	char** listaplatos[];
+	uint32_t longitudNombresPlatos;
+	char* nombresPlatos;
 }respuesta_consultar_platos;
 
 typedef struct{
@@ -179,7 +182,8 @@ typedef struct{
 }respuesta_consultar_pedido;
 
 typedef struct{
-	item_pedido platos_pedido;//esto es una lista
+	uint32_t cantPlatos;
+	plato platos_pedido[];//esto es una lista
 }respuesta_obtener_pedido;
 
 

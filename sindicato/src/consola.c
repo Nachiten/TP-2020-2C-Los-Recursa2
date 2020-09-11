@@ -22,6 +22,12 @@ void obtenerInputConsola(){
 		// Recorto los espacios que puedan entrar (basura) y el \n del final
 		string_trim(&lineaEntera);
 
+		if (strcmp(lineaEntera, "") == 0){
+			printf("No se ingresó ningun comando.\n");
+			free(lineaEntera);
+			continue;
+		}
+
 		// Separo el comando ingresado en cada uno de los parametros
 		char** palabrasSeparadas = string_split( lineaEntera , " ");
 
@@ -121,7 +127,6 @@ void obtenerInputConsola(){
 
 		} else {
 			printf("ERROR | El comando ingresado no es valido. Los comandos posibles son: CrearRestaurante, CrearReceta.\n");
-			return;
 		}
 
 		// Libero las palabras separadas
