@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include "shared/estructuras.h"
 #include "shared/cargador.h"
+#include "shared/socket.h"
+#include "shared/terminarPrograma.h"
+#include "shared/utilidades.h"
 
 uint32_t PIDCliente;
 t_log* logger;
