@@ -635,6 +635,7 @@ char* leerDatosBloques(int sizeBytes, int bloqueInicial){
 	return datosCompletosLeidos;
 }
 
+// Obtener la lista de bloques asignados a un pedido
 t_list* obtenerListaBloquesPedido(char* nombreRestaurant, int IDPedido){
 
 	char* pathRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
@@ -723,9 +724,9 @@ int existePedido(char* nombreRestaurante, int IDPedido){
 char* generarStringPedidoDefault(){
 	// TODO | Esta modificado incorrecto para testear
 	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
-			"LISTA_PLATOS=[Empand,Mila,dLa]\n"
-			"CANTIDAD_PLATOS=[3,5,20]\n"
-			"CANTIDAD_LISTA=[0,2,5]\n"
+			"LISTA_PLATOS=[]\n"
+			"CANTIDAD_PLATOS=[]\n"
+			"CANTIDAD_LISTA=[]\n"
 			"PRECIO_TOTAL=500\n";
 
 	// VERSION CORRECTA
@@ -818,23 +819,29 @@ int pedidoEstaEnEstado(char* nombreEstado, char* datosPedido){
 	return retorno;
 }
 
-char* cambiarEstadoA(char* nombreEstado, char* datosPedido){
+// Cambia el estado del pedido dado el nuevo nombre y el string de datos
+char* cambiarEstadoPedidoA(char* nombreEstado, char* datosPedido){
 
-	// ESTADO_PEDIDO=Pendiente|\n
+	int unChar;
 
-	// Desde indice 23 hasta el final.
+	// Busco desde donde tengo que recortar los datosPedido (donde termina la primer linea)
+	for(unChar = 0; unChar < strlen(datosPedido); unChar++){
+		if (datosPedido[unChar] == '\n'){
+			break;
+		}
+	}
 
-	char* datosSinLineaPedido = string_substring_from(datosPedido, 23);
+	// Recorto la parte siguiente de los datos
+	char* datosSinLineaPedido = string_substring_from(datosPedido, unChar);
 
 	char* lineaPedido = "ESTADO_PEDIDO=";
 
+	// String con la lineaPedido el nuevo estado y el resto de los datos
 	char* lineaPedidoCompleta = malloc(strlen(lineaPedido) + strlen(nombreEstado) + strlen(datosSinLineaPedido) + 1);
 
 	strcpy(lineaPedidoCompleta, lineaPedido);
 	strcat(lineaPedidoCompleta, nombreEstado);
 	strcat(lineaPedidoCompleta, datosSinLineaPedido);
-
-	//void 	string_append(char ** original, char * string_to_add);
 
 	free(datosSinLineaPedido);
 

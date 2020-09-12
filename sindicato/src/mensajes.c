@@ -94,7 +94,7 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 		return;
 	}
 
-	char* nuevosDatosPedido = cambiarEstadoA("Confirmado", datosPedido);
+	char* nuevosDatosPedido = cambiarEstadoPedidoA("Confirmado", datosPedido);
 
 	printf("Nuevos datos pedido:\n%s", nuevosDatosPedido);
 

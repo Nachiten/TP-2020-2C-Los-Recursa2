@@ -71,6 +71,8 @@ char* crearCarpetaRestaurant(char*);
 char* generarSringInfoRestaurant(datosRestaurant restaurant);
 int existeRestaurant(char*);
 char* generarPathInfoRestaurant(char*);
+char* generarPathCarpetaRestaurant(char*);
+char* leerDatosRestaurant(char*);
 
 // Recetas
 char* generarStringInfoReceta(datosReceta unaReceta);
@@ -85,13 +87,20 @@ t_list* separarStringEnBloques(char*, int);
 void fijarValorArchivoA(char*, int, char*);
 int leerValorArchivo(char*, char*);
 void loguearAsignacionBloques(char*, t_list*);
-char* generarPathABloque(int numeroBloque);
+char* generarPathABloque(int);
 char* leerDatosBloques(int, int);
 
 // Pedidos
 int existePedido(char*, int);
 int pedidoEstaEnEstado(char*, char*);
-char* generarPathAPedido(char* pathRestaurant, int IDPedido);
+char* generarPathAPedido(char*, int);
+char* generarStringPedidoDefault();
+t_list* obtenerListaBloquesPedido(char*, int);
+char* cambiarEstadoPedidoA(char* nombreEstado, char* datosPedido);
+
+// Printear
+void printearRespuestaConsultarPlatos(respuesta_consultar_platos*);
+void printearRespuestaObtenerPedido(respuesta_obtener_pedido*);
 
 
 #endif /* SRC_SINDICATO_H_ */

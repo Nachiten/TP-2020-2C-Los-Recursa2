@@ -18,6 +18,8 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		case DESCONEXION:
 			pthread_exit(NULL);
 			break;
+		default:
+			break;
 	}
 
 }
