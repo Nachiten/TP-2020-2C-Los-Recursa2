@@ -9,6 +9,7 @@
 #define SRC_MENSAJES_H_
 
 #include "sindicato.h"
+#include "estructuras.h"
 
 // Mensajes de socket
 void consultarPlatos(char* nombreRestaurant);
@@ -18,7 +19,7 @@ void obtenerRestaurante(char*);
 void guardarPedido(char*, int);
 
 // Mensajes de consola
-//void crearReceta(char*, datosReceta);
-//void crearRestaurant(char*, datosRestaurant);
+void crearReceta(char*, datosReceta unaReceta);
+void crearRestaurant(char*, datosRestaurant unRestaurant);
 
 #endif /* SRC_MENSAJES_H_ */

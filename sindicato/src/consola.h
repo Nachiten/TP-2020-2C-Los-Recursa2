@@ -9,10 +9,11 @@
 #define SRC_CONSOLA_H_
 
 #include "sindicato.h"
+#include "estructuras.h"
 
 void obtenerInputConsola();
-void printearDatosRestaurant(datosRestaurant);
-void printearDatosPasos(datosReceta);
+void printearDatosRestaurant(datosRestaurant unRestaurant);
+void printearDatosPasos(datosReceta unaReceta);
 int checkearLongitudArraysStrings(char*, char*);
 int existeRestaurant(char*);
 

@@ -32,20 +32,7 @@
 #include "mensajes.h"
 #include "semaforos.h"
 #include "conexiones.h"
-
-typedef struct{
-	int cantCocineros;
-	char* posicion;
-	char* afinidad;
-	char* platos;
-	char* preciosPlatos;
-	int cantHornos;
-}datosRestaurant;
-
-typedef struct{
-	char* pasos;
-	char* tiempoPasos;
-}datosReceta;
+#include "estructuras.h"
 
 char* PUERTO_ESCUCHA;
 char* IP_SINDICATO;
@@ -89,6 +76,7 @@ int leerValorArchivo(char*, char*);
 void loguearAsignacionBloques(char*, t_list*);
 char* generarPathABloque(int);
 char* leerDatosBloques(int, int);
+int cantidadDeBloquesQueOcupa(int pesoEnBytes);
 
 // Pedidos
 int existePedido(char*, int);
@@ -96,7 +84,8 @@ int pedidoEstaEnEstado(char*, char*);
 char* generarPathAPedido(char*, int);
 char* generarStringPedidoDefault();
 t_list* obtenerListaBloquesPedido(char*, int);
-char* cambiarEstadoPedidoA(char* nombreEstado, char* datosPedido);
+char* cambiarEstadoPedidoA(char*, char*);
+char* leerDatosPedido(char*, int);
 
 // Printear
 void printearRespuestaConsultarPlatos(respuesta_consultar_platos*);
