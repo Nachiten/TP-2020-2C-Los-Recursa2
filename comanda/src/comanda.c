@@ -140,17 +140,15 @@ void esperar_conexiones(int32_t miSocket)
 	socket_conexion_establecida = accept(miSocket, (void*) &dir_cliente, &tam_direccion);
 
 	//una vez se establece una conexion, se intenta recibir un mensaje
-	//escuchar_mensajes(socket_conexion_establecida);
 	pthread_create(&hilo_recibir_mensajes,NULL,(void*)escuchar_mensajes,&socket_conexion_establecida);
 	pthread_detach(hilo_recibir_mensajes);
 }
 
-//void escuchar_mensajes(datosHiloColas* parametros)
 void escuchar_mensajes(int32_t socket_conexion_establecida)
 {
 	int32_t bytesRecibidosCodOP = 0;
 	int32_t recibidosSize = 0;
-	int32_t sizeAAllocar;
+	int32_t sizeAAllocar = 0;
 	codigo_operacion cod_op;
 
 	//recibo codigo de op
@@ -163,14 +161,19 @@ void escuchar_mensajes(int32_t socket_conexion_establecida)
 		cod_op = 0;
 	}
 
-	//recibo tamaño de lo que sigue
-	recibidosSize = recv(socket_conexion_establecida, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
-	bytesRecibidos(recibidosSize);
-
-	//si se cayo la conexion, no se hace nada con esto
-	if(recibidosSize < 1)
+	//si la conexion NO se cayo, intento recibir lo que sigue
+	else
 	{
-		sizeAAllocar = 0;
+		//recibo tamaño de lo que sigue
+		recibidosSize = recv(socket_conexion_establecida, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
+		bytesRecibidos(recibidosSize);
+
+		//si se cayo la conexion, no se hace nada con esto
+		if(recibidosSize < 1)
+		{
+			sizeAAllocar = 0;
+		}
+
 	}
 
 	printf("Tamaño del Payload: %i.\n", sizeAAllocar);
@@ -188,7 +191,9 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	plato_listo* recibidoPlatoListo;
 	finalizar_pedido* recibidoFinalizarPedido;
 
-	uint32_t numeroDeSegmento;
+	respuesta_ok_error* resultado;
+
+	//uint32_t numeroDeSegmento; por ahora no sirve
 
 	/*ToDo CODIGOS DE OPERACION QUE FALTAN CODEAR:
 	 GUARDAR_PEDIDO
@@ -204,32 +209,34 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibidoGuardarPedido = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoGuardarPedido, cod_op, socket);
 
+        	resultado = malloc(sizeof(respuesta_ok_error));
         	tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante;
 
-        	//buscamos la tabla de pedidos del restaurante seleccionado
+        	//buscamos la tabla de pedidos del restaurante seleccionado, si no existe, se crea
         	tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoGuardarPedido->nombreRestaurante);
 
-        	//creamos un nuevo segmento para el pedido ToDo
-        	numeroDeSegmento = crearSegmento(tablaDePedidosDelRestaurante);
+        	//creamos un nuevo segmento para el nuevo pedido
+        	crearSegmento(tablaDePedidosDelRestaurante, recibidoGuardarPedido->idPedido);
 
-        	/*
-        	//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se crea
-        	numeroDeSegmento = buscar_segmento_de_restaurante(tablaDePedidosDelRestaurante, recibidoGuardarPedido->idPedido);
-        	*/
-
-        	//al segmento que corresponde al restaurante, se le agrega el nuevo pedido
-        	agregarPedidoARestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento, recibidoGuardarPedido->idPedido);
-
-        	//ToDo por ultimo avisamos que el pedido fue agregado correctamente
-        	//mandar_mensaje();
+        	//por ultimo avisamos que el pedido fue agregado correctamente
+        	resultado->respuesta = 1;
+        	mandar_mensaje(resultado,RESPUESTA_GUARDAR_PEDIDO,socket);
 
         	free(recibidoGuardarPedido->nombreRestaurante); //shit, esto me va a armar quilombo ToDo revisar
 			free(recibidoGuardarPedido);
+			free(resultado);
         	break;
 
         case GUARDAR_PLATO:
         	recibidoGuardarPlato = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoGuardarPlato, cod_op, socket);
+
+
+        	//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se crea
+			//numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoGuardarPedido->idPedido);
+
+			//al segmento que corresponde al restaurante, se le agrega el nuevo pedido
+			//agregarPedidoARestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento, recibidoGuardarPedido->idPedido);
 
 
 			free(recibidoGuardarPlato);
