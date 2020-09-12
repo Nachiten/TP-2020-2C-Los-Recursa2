@@ -72,12 +72,12 @@ void esperar_cliente(int32_t socket_servidor)
 
 void iniciar_server(char* ip, char* puerto)
 {
-	int32_t socket_servidor;
-	socket_servidor = crearSocketServidor(ip, puerto);
+	//int32_t socket_servidor;
+	//socket_servidor = crearSocketServidor(ip, puerto);
 
     while(1)
     {
-    	esperar_cliente(socket_servidor);
+    	//esperar_cliente(socket_servidor);
     }
 
 }
