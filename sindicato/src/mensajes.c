@@ -40,7 +40,11 @@ void consultarPlatos(char* nombreRestaurant){
 	 * 4 - Devolver el mensaje
 	 */
 
+	waitSemaforoRestaurant(nombreRestaurant);
+
 	char* datosRestaurante = leerDatosRestaurant(nombreRestaurant);
+
+	signalSemaforoRestaurant(nombreRestaurant);
 
 	// datosSeparados[3] = PLATOS=[Milanesas,Empanadas,Ensalada]
 	char** datosSeparados = string_split(datosRestaurante, "\n");
@@ -48,22 +52,13 @@ void consultarPlatos(char* nombreRestaurant){
 	// lineaPlatos[1] = lo q esta despues del = --> [Milanesas,Empanadas,Ensalada]
 	char** lineaPlatos = string_split(datosSeparados[3], "=");
 
-	// lineaPlatos[1] es el array con los nombres
-
-	// Separo [a,b,c] en char** a, b, c
-	char** platosComoArray = string_get_string_as_array(lineaPlatos[1]);
-
-	int cantidadPlatos = cantidadDeElementosEnArray(platosComoArray);
+	int longitudLineaPlatos = strlen(lineaPlatos[1]);
 
 	respuesta_consultar_platos* respuestaPlatos = malloc(sizeof(respuesta_consultar_platos));
-	respuestaPlatos->nombresPlatos = calloc(sizeof(char*), cantidadPlatos);
+	respuestaPlatos->nombresPlatos = malloc(longitudLineaPlatos + 1);
 
-	respuestaPlatos->cantidadPlatos = cantidadPlatos;
-
-	int i;
-	for (i = 0; i<cantidadPlatos; i++){
-		respuestaPlatos->nombresPlatos[i] = platosComoArray[i];
-	}
+	respuestaPlatos->longitudNombresPlatos = longitudLineaPlatos;
+	strcpy(respuestaPlatos->nombresPlatos, lineaPlatos[1]);
 
 	printearRespuestaConsultarPlatos(respuestaPlatos);
 
@@ -71,7 +66,6 @@ void consultarPlatos(char* nombreRestaurant){
 
 	freeDeArray(datosSeparados);
 	freeDeArray(lineaPlatos);
-	freeDeArray(platosComoArray);
 	free(datosRestaurante);
 }
 
@@ -89,10 +83,13 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 		return;
 	}
 
+	waitSemaforoPedido(nombreRestaurant, IDPedido);
+
 	char* datosPedido = leerDatosPedido(nombreRestaurant, IDPedido);
 
 	if(!pedidoEstaEnEstado("Pendiente", datosPedido)){
 		printf("ERROR | No esta en estado pendiente.\n");
+		signalSemaforoPedido(nombreRestaurant, IDPedido);
 		// TODO | Retornar fail
 		return;
 	}
@@ -104,6 +101,7 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 	t_list* listaBloquesActual = obtenerListaBloquesPedido(nombreRestaurant, IDPedido);
 
 //	int i;
+	// Testing
 //	for (i = 0; i< list_size(listaBloquesActual); i++){
 //		int* punteroABloque = list_get(listaBloquesActual, i);
 //		printf("Bloque actual: %i\n", *punteroABloque);
@@ -153,6 +151,8 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 	// Fijar el size correcto
 	fijarValorArchivoA(pathAPedido, strlen(nuevosDatosPedido), "SIZE");
 
+	signalSemaforoPedido(nombreRestaurant, IDPedido);
+
 	// TODO | Retornar OK
 
 	free(datosPedido);
@@ -177,7 +177,11 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido){
 		return;
 	}
 
+	waitSemaforoPedido(nombreRestaurant, IDPedido);
+
 	char* datosPedido = leerDatosPedido(nombreRestaurant, IDPedido);
+
+	signalSemaforoPedido(nombreRestaurant, IDPedido);
 
 	char** datosSeparados = string_split(datosPedido, "\n");
 
@@ -203,6 +207,7 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido){
 
 	int i;
 	for (i = 0; i< cantidadDePlatos; i++){
+		respuestaPedido->platos_pedido[i].longitudNombrePlato = strlen(nombresLista[i]);
 		respuestaPedido->platos_pedido[i].nombrePlato = nombresLista[i];
 		respuestaPedido->platos_pedido[i].cantidadPlatos = atoi(cantTotalLista[i]);
 		respuestaPedido->platos_pedido[i].cantLista = atoi(cantListaLista[i]);
@@ -211,6 +216,8 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido){
 //		printf("CantidadTotal %i: %s\n", i, cantTotalLista[i]);
 //		printf("CantidadLista %i: %s\n", i, cantListaLista[i]);
 	}
+
+	printearRespuestaObtenerPedido(respuestaPedido);
 
 	// TODO | Enviar el mensaje con la respuesta
 
@@ -233,7 +240,11 @@ void obtenerRestaurante(char* nombreRestaurante){
 		return;
 	}
 
+	waitSemaforoRestaurant(nombreRestaurante);
+
 	char* datosRestaurant = leerDatosRestaurant(nombreRestaurante);
+
+	signalSemaforoRestaurant(nombreRestaurante);
 
 	// TODO | Cerrar archivo con semaforos
 
@@ -290,6 +301,8 @@ void guardarPedido(char* nombreRestaurante, int IDPedido){
 
 	log_info(logger, "Se creo un nuevo pedido llamado %s", nombrePedidoParaLog);
 
+	crearSemaforoPedido(nombreRestaurante, IDPedido);
+
 	// TODO | Se debe dar la respuesta afirmativa
 
 	free(pathCarpetaRestaurant);
@@ -315,6 +328,8 @@ void crearRestaurant(char* nombreRestaurant, datosRestaurant unRestaurant){
 
 	log_info(logger, "Se creo un nuevo restaurant llamado %s", nombreRestaurant);
 
+	crearSemaforoRestaurant(nombreRestaurant);
+
 	free(pathCarpetaRestaurant);
 	free(pathArchivoRestaurant);
 	free(stringRestaurant);
@@ -337,6 +352,8 @@ void crearReceta(char* nombreReceta, datosReceta unaReceta){
 	llenarBloquesConString(pathArchivoReceta, stringReceta, nombreReceta);
 
 	log_info(logger, "Se creo una nueva receta llamada %s", nombreReceta);
+
+	crearSemaforoReceta(nombreReceta);
 
 	free(nombreArchivoReceta);
 	free(pathArchivoReceta);

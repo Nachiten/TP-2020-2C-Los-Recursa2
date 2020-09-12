@@ -78,7 +78,7 @@ t_list* obtenerPrimerosLibresDeBitmap(int cantidad){
 	char* BITARRAY_ARCHIVO = malloc(BLOCKS / 8);
 
 	// Se espera el semaforo antes de leer el bitarray
-	//sem_wait(semBitmap);
+	sem_wait(semBitmap);
 
 	leerBitArrayDeArchivo(&BITARRAY_ARCHIVO);
 
@@ -119,7 +119,7 @@ t_list* obtenerPrimerosLibresDeBitmap(int cantidad){
 	guardarBitArrayEnArchivo(BITARRAY_ARCHIVO);
 
 	// Se hace el signal luego de guardar el bitarray en archivo
-	//sem_post(semBitmap);
+	sem_post(semBitmap);
 
 	free(BITARRAY_ARCHIVO);
 	bitarray_destroy(bitArray);

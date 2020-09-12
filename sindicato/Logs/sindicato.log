@@ -57,3 +57,23 @@
 [INFO] 14:30:05:232 SINDICATO/(7694:7699): Se creo un nuevo restaurant llamado PanaderiaJorge
 [INFO] 14:33:12:2 SINDICATO/(8137:8142): Se le asignan los bloques 22,23,24 a Bataglia
 [INFO] 14:33:13:7 SINDICATO/(8137:8142): Se creo un nuevo restaurant llamado Bataglia
+[INFO] 16:19:55:582 SINDICATO/(7166:7171): Se le asignan los bloques 1,2,3 a ElDestino
+[INFO] 16:19:55:601 SINDICATO/(7166:7171): Se creo un nuevo restaurant llamado ElDestino
+[INFO] 16:20:05:428 SINDICATO/(7166:7171): Se le asignan los bloques 4,5,6 a Bataglia
+[INFO] 16:20:05:429 SINDICATO/(7166:7171): Se creo un nuevo restaurant llamado Bataglia
+[INFO] 16:20:11:356 SINDICATO/(7166:7171): Se le asignan los bloques 7,8,9 a PanaderiaJorge
+[INFO] 16:20:11:357 SINDICATO/(7166:7171): Se creo un nuevo restaurant llamado PanaderiaJorge
+[INFO] 16:34:13:671 SINDICATO/(7763:7763): Se le asignan los bloques 10,11 a Pedido5.AFIP de ElDestino
+[INFO] 16:34:13:671 SINDICATO/(7763:7763): Se creo un nuevo pedido llamado Pedido5.AFIP de ElDestino
+[INFO] 16:34:13:673 SINDICATO/(7763:7763): Se le asignan los bloques 13,14 a Pedido4.AFIP de PanaderiaJorge
+[INFO] 16:34:13:673 SINDICATO/(7763:7763): Se creo un nuevo pedido llamado Pedido4.AFIP de PanaderiaJorge
+[INFO] 16:44:03:39 SINDICATO/(8303:8308): Se le asignan los bloques 1,2,3 a ElDestino
+[INFO] 16:44:03:39 SINDICATO/(8303:8308): Se creo un nuevo restaurant llamado ElDestino
+[INFO] 16:44:08:371 SINDICATO/(8303:8308): Se le asignan los bloques 4,5,6 a Bataglia
+[INFO] 16:44:08:371 SINDICATO/(8303:8308): Se creo un nuevo restaurant llamado Bataglia
+[INFO] 16:44:16:463 SINDICATO/(8303:8308): Se le asignan los bloques 7,8,9 a PanaderiaJorge
+[INFO] 16:44:16:463 SINDICATO/(8303:8308): Se creo un nuevo restaurant llamado PanaderiaJorge
+[INFO] 16:44:43:181 SINDICATO/(8321:8321): Se le asignan los bloques 10,11 a Pedido5.AFIP de ElDestino
+[INFO] 16:44:43:181 SINDICATO/(8321:8321): Se creo un nuevo pedido llamado Pedido5.AFIP de ElDestino
+[INFO] 16:44:43:182 SINDICATO/(8321:8321): Se le asignan los bloques 13,14 a Pedido4.AFIP de PanaderiaJorge
+[INFO] 16:44:43:182 SINDICATO/(8321:8321): Se creo un nuevo pedido llamado Pedido4.AFIP de PanaderiaJorge
