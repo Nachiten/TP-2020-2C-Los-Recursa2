@@ -15,10 +15,6 @@ uint32_t PIDCliente;
 t_log* logger;
 t_config* config;
 int32_t socketEscucha;
-int32_t socketApp;
-int32_t socketComanda;
-int32_t socketSindicato;
-int32_t socketRestaurante;
 pthread_t hiloConsola;
 
 

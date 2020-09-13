@@ -91,11 +91,7 @@ typedef struct{
 
 //ESTRUCTURAS PARA MANDAR MENSAJES-------------------------------------------------------------------------------------------------
 
-typedef struct{
-//ToDo esto me parece que vuela a la mierda, mejor que solo mandemos el Cod. Operacion y listo
-}consultar_restaurante;
-
-//Todo respuesta a consultar restaurante?
+//nadie te va a extrañar
 
 typedef struct{
 	uint32_t cliente; //seria el PID del cliente

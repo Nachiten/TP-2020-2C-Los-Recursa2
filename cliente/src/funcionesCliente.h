@@ -14,6 +14,9 @@ char* puerto_destino;
 typedef struct{
 	char* ip_destino;
 	char* puerto_destino;
+	t_log* mi_logger;
+	//ignorar por ahora
+	//char* mi_puerto; //para poder levantarme el socket de escucha
 }t_conexion;
 
 

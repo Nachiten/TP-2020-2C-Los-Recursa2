@@ -26,4 +26,7 @@ void bytesEnviados (int32_t cantidad);
 // Hace free de cada uno de los elementos y de la lista misma
 void destruirListaYElementos(t_list* unaLista);
 
+//esta porqueria "traduce" el numero de OK/FAIL para ahorrarnos los if si queremos mostrar por pantalla
+char* resultadoDeRespuesta(uint32_t resultado);
+
 #endif /* SHARED_UTILIDADES_H_ */

@@ -17,27 +17,6 @@ int main(){
 	//Dejo cargado un logger para loguear los eventos.
 	logger = cargarUnLog(LOG_PATH, "Cliente");
 
-	//ToDo esto esta para que corten/peguen donde sea necesario, asi no pierden tiempo viendo como funcionan estas cosas
-	//FUNCIONES DE ESTABLECER CONEXIONES, USAR COMO Y CUANDO HAGAN FALTA********************************************************************
-//	socketComanda = establecer_conexion(ip_destino, puerto_destino);
-//	resultado_de_conexion(socketComanda, logger, "CoMAnda");
-
-//	socketApp = establecer_conexion(app_IP, app_puerto);
-//	resultado_de_conexion(socketApp, logger, "App");
-//
-//	socketSindicato = establecer_conexion(sindicato_IP, sindicato_puerto);
-//	resultado_de_conexion(socketSindicato, logger, "Sindicato");
-//
-//	socketRestaurante = establecer_conexion(restaurante_IP, restaurante_puerto);
-//	resultado_de_conexion(socketRestaurante, logger, "Restaurante");
-
-//	close(socketComanda);
-//	close(socketApp);
-//	close(socketSindicato);
-//	close(socketRestaurante);
-	//*************************************************************************************************************************************
-
-	//ToDo levantar hilos para conexiones a Comanda y Sindicato???
 
 	//ToDo levantamos socket para recibir mensajes (hilo)
 
@@ -49,16 +28,13 @@ int main(){
 	t_conexion tuplaConexion;
     tuplaConexion.ip_destino = ip_destino;
     tuplaConexion.puerto_destino = puerto_destino;
+    tuplaConexion.mi_logger = logger;
 
-
-	while(1){
-
+	while(1)
+	{
 		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, &tuplaConexion);
 		pthread_join(hiloConsola, NULL);
-
 	}
-
-
 
 
 
