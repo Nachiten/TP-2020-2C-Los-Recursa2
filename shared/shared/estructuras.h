@@ -96,12 +96,12 @@ typedef struct{
 typedef struct{
 	uint32_t cliente; //seria el PID del cliente
 	uint32_t largoNombreRestaurante;
-	char* restaurante;
+	char* nombreRestaurante;
 }seleccionar_restaurante;
 
 typedef struct{
 	uint32_t largoNombreRestaurante;
-	char* restaurante;
+	char* nombreRestaurante;
 }obtener_restaurante;
 
 //ToDo crear pedido no tiene estructura? hay que poner una estructura para devolver la ID del pedido
@@ -121,7 +121,8 @@ typedef struct{
 	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
 	uint32_t idPedido;
-	char* nombrePlato; //comida?
+	uint32_t largonombrePlato;
+	char* nombrePlato; //comida
 	uint32_t cantidadPlatos;
 }guardar_plato;
 

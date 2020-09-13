@@ -7,7 +7,6 @@
 #include<commons/string.h>
 #include<commons/config.h>
 #include<commons/collections/list.h>
-//#include<commons/memory.h>//este habria que sacarlo?
 #include<readline/readline.h>
 #include<signal.h>
 #include<unistd.h>
@@ -36,12 +35,17 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 
 //estas funciones las necesita serializar_paquete para saber que empaquetar
 uint32_t serializar_paquete_seleccionar_restaurante(t_paquete* paquete, seleccionar_restaurante* estructura);
+uint32_t serializar_paquete_obtener_restaurante(t_paquete* paquete, obtener_restaurante* estructura);
+uint32_t serializar_paquete_guardar_plato(t_paquete* paquete, guardar_plato* estructura);
 uint32_t serializar_paquete_guardar_pedido(t_paquete* paquete, guardar_pedido* estructura);
 
 //FUNCIONES DESSERIALIZAR
-void desserializar_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t socket_cliente);
+//void desserializar_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t socket_cliente); //esto vuela a la mierda a menos que se decida lo contrario
 
 //estas funciones las necesita desserializar para saber como manejar la info que le llega
 void desserializar_seleccionar_restaurante(seleccionar_restaurante* estructura, int32_t socket_cliente);
+void desserializar_obtener_restaurante(obtener_restaurante* estructura, int32_t socket_cliente);
+void desserializar_guardar_plato(guardar_plato* estructura, int32_t socket_cliente);
+void desserializar_guardar_pedido(guardar_pedido* estructura, int32_t socket_cliente);
 
 #endif /* SHARED_SOCKET_H_ */
