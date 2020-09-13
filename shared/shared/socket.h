@@ -20,6 +20,7 @@
 
 
 int32_t reservarSocket(char* miPuerto); //me reserva un socket (pasarle la key que sacamos de nuestro config)
+int32_t crearSocketServidor(char* ip, char* puerto);
 int32_t establecer_conexion(char* ip, char* puerto);//se le da una IP y un PUERTO y establece la conexion
 //dice el resultado de intentar conectarse a un modulo
 void resultado_de_conexion(int32_t socket, t_log* logger, char* modulo); //enviarle el socket al que se intenta conectar, el logger y nombre del modulo al que intentamos conectar.
@@ -34,7 +35,8 @@ void eliminar_paquete(t_paquete* paquete); //libera la memoria utilizada para ma
 void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tipoMensaje, uint32_t *size_serializado);//prepara paquete y deja listo para mandar
 
 //estas funciones las necesita serializar_paquete para saber que empaquetar
-uint32_t serializar_paquete_seleccionar_restaurante(t_paquete* paquete, seleccionar_restaurante* pokemon);
+uint32_t serializar_paquete_seleccionar_restaurante(t_paquete* paquete, seleccionar_restaurante* estructura);
+uint32_t serializar_paquete_guardar_pedido(t_paquete* paquete, guardar_pedido* estructura);
 
 //FUNCIONES DESSERIALIZAR
 void desserializar_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t socket_cliente);

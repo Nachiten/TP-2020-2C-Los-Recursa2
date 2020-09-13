@@ -139,6 +139,13 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 				size_ya_armado = serializar_paquete_seleccionar_restaurante(paquete, mensaje);
 			break;
 
+		//voy a ir agregando mas a medida que necesitemos
+
+		case GUARDAR_PEDIDO:
+			    paquete->buffer->stream = malloc(sizeof(guardar_pedido));
+			    size_ya_armado = serializar_paquete_guardar_pedido(paquete, mensaje);
+			break;
+
 		default:
 			puts("\n\n\nATENCION: Switch de serializar_paquete pasó por el caso default.\n\n\n");
 			break;
@@ -205,6 +212,50 @@ uint32_t serializar_paquete_seleccionar_restaurante(t_paquete* paquete, seleccio
 		return size;
 	}
 }
+
+
+
+uint32_t serializar_paquete_guardar_pedido(t_paquete* paquete, guardar_pedido* estructura)
+{
+	uint32_t size = 0;
+	uint32_t desplazamiento = 0;
+	uint32_t pesoDeElementosAEnviar = 0;
+
+	//meto el PID del Cliente
+	memcpy(paquete->buffer->stream + desplazamiento, &(estructura->largoNombreRestaurante),  sizeof(estructura->largoNombreRestaurante));
+	desplazamiento += sizeof(estructura->largoNombreRestaurante);
+
+	//meto el largo del nombre del Restaurante
+	memcpy(paquete->buffer->stream + desplazamiento, estructura->nombreRestaurante, strlen(estructura->nombreRestaurante)+1);
+	desplazamiento += strlen(estructura->nombreRestaurante)+1;
+
+	//meto el nombre del restaurante
+	memcpy(paquete->buffer->stream + desplazamiento, &(estructura->idPedido), sizeof(estructura->idPedido));
+	desplazamiento += sizeof(estructura->idPedido);
+
+	//controlo que el desplazamiento sea = al peso de lo que mando
+	pesoDeElementosAEnviar = sizeof(estructura->largoNombreRestaurante) + sizeof(estructura->largoNombreRestaurante) + estructura->largoNombreRestaurante + 1;
+
+	if(desplazamiento != pesoDeElementosAEnviar)
+	{
+		puts("Hubo un error al serializar un mensaje, se pudre todo\n.");
+		abort();
+	}
+
+	else
+	{
+		//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
+		paquete->buffer->size = desplazamiento;
+
+		//el tamaño del mensaje entero es el codigo de operacion + la variable donde me guarde el size del buffer + lo que pesa el buffer
+		size = sizeof(codigo_operacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
+
+		//devuelvo el tamaño de lo que meti en el paquete para poder hacer el malloc
+		return size;
+	}
+}
+
+
 
 //Todo faltan meter todas las otras serializaciones*************************
 

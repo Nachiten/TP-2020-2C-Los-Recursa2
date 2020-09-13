@@ -25,8 +25,8 @@ typedef enum
 	CONFIRMAR_PEDIDO,
 	CONSULTAR_PEDIDO,
 	OBTENER_PEDIDO,
-	FINALIZAR_PEDIDO,//estos 2 hay que consultarlos (finalizar y terminar)
-	TERMINAR_PEDIDO,//estos 2 hay que consultarlos (finalizar y terminar)
+	FINALIZAR_PEDIDO,
+	TERMINAR_PEDIDO,
 	RESPUESTA_CONSULTAR_R,
 	RESPUESTA_SELECCIONAR_R,
 	RESPUESTA_OBTENER_R,
