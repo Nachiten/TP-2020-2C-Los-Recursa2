@@ -71,9 +71,11 @@ int32_t establecer_conexion(char* ip, char* puerto)
 	struct addrinfo *server_info;
 
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = PF_INET;
+	//hints.ai_family = PF_INET;
+	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = IPPROTO_TCP;
+	//hints.ai_flags = IPPROTO_TCP;
+	hints.ai_flags = AI_PASSIVE;
 
 	getaddrinfo(ip, puerto, &hints, &server_info);
 
@@ -86,6 +88,11 @@ int32_t establecer_conexion(char* ip, char* puerto)
 	}
 
 	freeaddrinfo(server_info);
+
+//	else
+//	{
+//		freeaddrinfo(server_info); //Todo esta para testear todavia
+//	}
 
 	return socket_cliente;
 }

@@ -26,8 +26,8 @@ char* puerto_local;
 uint32_t miPosicionX;
 uint32_t miPosicionY;
 
-
-
+//obtiene el comando que quiere ejecutar el usuario
+void obtenerInputConsolaCliente(char* lineaEntera);
 
 
 

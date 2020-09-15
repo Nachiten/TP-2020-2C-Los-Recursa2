@@ -20,7 +20,12 @@ typedef struct{
 }t_conexion;
 
 
-void obtenerInputConsolaCliente(t_conexion*);
+//firmas de funciones
+uint32_t valor_para_switch_case(char* input);
+int cantidadDeElementosEnArray(char** array);
+void freeDeArray(char** array);
+
+
+
 
 #endif /* SRC_FUNCIONESCLIENTE_H_ */
-

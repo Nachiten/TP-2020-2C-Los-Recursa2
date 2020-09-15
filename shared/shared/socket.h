@@ -14,6 +14,7 @@
 #include<arpa/inet.h>
 #include<netdb.h>
 #include<string.h>
+#include <errno.h>
 #include"estructuras.h"
 #include"utilidades.h"
 
