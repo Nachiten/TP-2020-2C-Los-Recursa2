@@ -24,6 +24,68 @@
  *
  */
 
+void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int cantidadPlatos){
+	if ( !existeRestaurant(nombreRestaurant) ){
+		printf("ERROR | No existe el restaurant buscado.\n");
+		// TODO | Retornar fail
+		return;
+	}
+
+	if( !existePedido(nombreRestaurant, IDPedido) ){
+		printf("ERROR | No existe el pedido solicitado.\n");
+		// TODO | Retornar fail
+		return;
+	}
+
+	waitSemaforoPedido(nombreRestaurant, IDPedido);
+
+	char* datosPedido = leerDatosPedido(nombreRestaurant, IDPedido);
+
+	if(!pedidoEstaEnEstado("Pendiente", datosPedido)){
+		printf("ERROR | No esta en estado pendiente.\n");
+		signalSemaforoPedido(nombreRestaurant, IDPedido);
+		// TODO | Retornar fail
+		return;
+	}
+
+	/*
+	 * Obtener precio de plato y saber si ya existe en restaurant | DONE
+	 * Verificar si es plato nuevo o ya existe
+	 * if (nuevo) => agregar a la linea platos agregar cantidad y sumar precio
+	 * if (ya existe) => solo sumar la cantidad a la ya existente y sumar precio
+	 */
+
+	int precioPlato = obtenerPrecioPlatoRestaurant(nombreRestaurant, nombrePlato);
+
+	// No existia el plato
+	if (precioPlato == -1){
+		printf("ERROR | El plato dado no puede cocinarse en el restaurant.\n");
+		signalSemaforoPedido(nombreRestaurant, IDPedido);
+		// TODO | Retornar fail
+		return;
+	}
+
+	printf("Precio plato: %i\n", precioPlato);
+
+	int indexPlatoEnPedido = obtenerPlatoEnPedido(datosPedido, nombrePlato);
+
+	char* nuevosDatos;
+
+	// El plato no esta en el pedido (se debe agregar)
+	if (indexPlatoEnPedido == -1){
+		nuevosDatos = agregarPlatoNuevoAPedido(nombrePlato, datosPedido, precioPlato, cantidadPlatos);
+
+		printf("Datos nuevos: %s", nuevosDatos);
+
+	// El plato si esta en el pedido (se debe sumar la cantidad)
+	} else {
+		// TODO | Se debe agregar la cantidad del plato existente y sumar el precio total
+		// nuevosDatos = sumarCantidadAPlatoExistente(algo, algo, mas algos)
+	}
+
+	signalSemaforoPedido(nombreRestaurant, IDPedido);
+
+}
 
 void consultarPlatos(char* nombreRestaurant){
 
@@ -69,6 +131,8 @@ void consultarPlatos(char* nombreRestaurant){
 	free(datosRestaurante);
 }
 
+
+
 void confirmarPedido(char* nombreRestaurant, int IDPedido){
 
 	if ( !existeRestaurant(nombreRestaurant) ){
@@ -100,19 +164,12 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 
 	t_list* listaBloquesActual = obtenerListaBloquesPedido(nombreRestaurant, IDPedido);
 
-//	int i;
-	// Testing
-//	for (i = 0; i< list_size(listaBloquesActual); i++){
-//		int* punteroABloque = list_get(listaBloquesActual, i);
-//		printf("Bloque actual: %i\n", *punteroABloque);
-//	}
-
 	/*
-		 * 1 - Calcular cantidad de bloques a utilizar
-		 * 2 - Obtener bloques actuales
-		 * 3 - Pedir bloques si es necesario
-		 * 4 - Escribir nuevos datos en bloques
-		 * 5 - Fijar size nuevo
+	 * 1 - Calcular cantidad de bloques a utilizar
+	 * 2 - Obtener bloques actuales
+	 * 3 - Pedir bloques si es necesario
+	 * 4 - Escribir nuevos datos en bloques
+	 * 5 - Fijar size nuevo
 	 */
 
 	// Calculo cantidad de bloques que necesito
@@ -121,22 +178,8 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 	// Calculo cantidad de bloques que tengo
 	int cantidadBloquesActuales = list_size(listaBloquesActual);
 
-	// Si necesito agregar bloques nuevos
-	if (cantidadBloquesNecesarios > cantidadBloquesActuales){
-		int cantidadBloquesAPedir = cantidadBloquesNecesarios - cantidadBloquesActuales;
-
-		// Pido la cantidad de bloques que necesito
-		t_list* bloquesPedidos = obtenerPrimerosLibresDeBitmap(cantidadBloquesAPedir);
-
-		// Agrego los bloques nuevos a la lista de bloques
-		list_add_all(listaBloquesActual, bloquesPedidos);
-
-		list_destroy(bloquesPedidos);
-	// No tiene sentido que esto pase
-	} else if (cantidadBloquesNecesarios < cantidadBloquesActuales){
-		printf("ERROR | No puede necesitarse menos bloques al confirmar un pedido.\n");
-		exit(5);
-	}
+	// Pido mas bloques y los agrego en listaBloques si son necesarios
+	pedirMasBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual);
 
 	// Separar los datos en una lista
 	t_list* listaDatosSeparados = separarStringEnBloques(nuevosDatosPedido, cantidadBloquesNecesarios);

@@ -52,6 +52,7 @@ t_log* logger;
 // Arrays
 int cantidadDeElementosEnArray(char**);
 void freeDeArray(char**);
+int encontrarElementoEnArray(char*, char*);
 
 // Restaurantes
 char* crearCarpetaRestaurant(char*);
@@ -60,6 +61,7 @@ int existeRestaurant(char*);
 char* generarPathInfoRestaurant(char*);
 char* generarPathCarpetaRestaurant(char*);
 char* leerDatosRestaurant(char*);
+int obtenerPrecioPlatoRestaurant(char* nombrestaurant, char*);
 
 // Recetas
 char* generarStringInfoReceta(datosReceta unaReceta);
@@ -76,7 +78,7 @@ int leerValorArchivo(char*, char*);
 void loguearAsignacionBloques(char*, t_list*);
 char* generarPathABloque(int);
 char* leerDatosBloques(int, int);
-int cantidadDeBloquesQueOcupa(int pesoEnBytes);
+int cantidadDeBloquesQueOcupa(int);
 
 // Pedidos
 int existePedido(char*, int);
@@ -91,5 +93,8 @@ char* leerDatosPedido(char*, int);
 void printearRespuestaConsultarPlatos(respuesta_consultar_platos*);
 void printearRespuestaObtenerPedido(respuesta_obtener_pedido*);
 
+// Otros
+char* sumarPrecioTotal(char* precioInicialString, int precioPlato, int cantidadPlato);
+char* agregarElementoEnStringArray(char* stringArray, char* nombreElemento);
 
 #endif /* SRC_SINDICATO_H_ */

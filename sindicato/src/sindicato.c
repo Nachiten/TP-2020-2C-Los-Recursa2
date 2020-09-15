@@ -7,6 +7,213 @@
 
 #include "sindicato.h"
 
+char* agregarPlatoNuevoAPedido(char* nombrePlato, char* datosPedido, int precioPlato, int cantidadPlato){
+
+	/*
+	 *  ESTADO_PEDIDO=Confirmado
+	 *	LISTA_PLATOS=[Milanesa,Empanadas,Ensalada]
+	 * 	CANTIDAD_PLATOS=[2,12,1]
+	 *	CANTIDAD_LISTA=[1,6,0]
+	 *	PRECIO_TOTAL=1150
+	 *
+	 *	EstadoPedido queda igual
+	 *	Agregar pedido a lista_platos = nombrePlato
+	 *	Agregar cantidad total = cantidadPlato
+	 *	Agregar cantidadLista = 0
+	 *  Sumar a precio_total la cantidad precioPlato * cantidadPlato
+	 */
+
+	char* datosNuevos = string_new();
+
+	char** datosSeparados = string_split(datosPedido, "\n");
+
+	char** lineaPlatosSeparada = string_split(datosSeparados[1], "=");
+	char** lineaCantTotalSeparada = string_split(datosSeparados[2], "=");
+	char** lineaCantListaSeparada = string_split(datosSeparados[3], "=");
+	char** lineaPrecioTotalSeparada = string_split(datosSeparados[4], "=");
+
+	char* cantTotalString;
+
+	asprintf(&cantTotalString, "%i", cantidadPlato);
+
+	char* lineaPlatosNueva = agregarElementoEnStringArray(lineaPlatosSeparada[1], nombrePlato);
+	char* lineaCantTotalNueva = agregarElementoEnStringArray(lineaCantTotalSeparada[1], cantTotalString);
+	char* lineaCantListaNueva = agregarElementoEnStringArray(lineaCantListaSeparada[1], "0");
+
+	char* precioTotalString = sumarPrecioTotal(lineaPrecioTotalSeparada[1], precioPlato, cantidadPlato);
+
+	printf("lineaPlatosNueva: %s\n", lineaPlatosNueva);
+	printf("lineaCantTotalNueva: %s\n", lineaCantTotalNueva);
+	printf("lineaCantListaNueva: %s\n", lineaCantListaNueva);
+	printf("precioTotalString: %s\n", precioTotalString);
+
+	char* LISTA_PLATOS = "LISTA_PLATOS=";
+	char* CANTIDAD_PLATOS = "CANTIDAD_PLATOS=";
+	char* CANTIDAD_LISTA = "CANTIDAD_LISTA=";
+	char* PRECIO_TOTAL = "PRECIO_TOTAL=";
+
+	string_append(&datosNuevos, datosSeparados[0]);
+	string_append(&datosNuevos, "\n");
+	string_append(&datosNuevos, LISTA_PLATOS);
+	string_append(&datosNuevos, lineaPlatosNueva);
+	string_append(&datosNuevos, "\n");
+
+	string_append(&datosNuevos, CANTIDAD_PLATOS);
+	string_append(&datosNuevos, lineaCantTotalNueva);
+	string_append(&datosNuevos, "\n");
+
+	string_append(&datosNuevos, CANTIDAD_LISTA);
+	string_append(&datosNuevos, lineaCantListaNueva);
+	string_append(&datosNuevos, "\n");
+
+	string_append(&datosNuevos, PRECIO_TOTAL);
+	string_append(&datosNuevos, precioTotalString);
+	string_append(&datosNuevos, "\n");
+
+	freeDeArray(datosSeparados);
+	freeDeArray(lineaPlatosSeparada);
+	freeDeArray(lineaCantTotalSeparada);
+	freeDeArray(lineaCantListaSeparada);
+	freeDeArray(lineaPrecioTotalSeparada);
+
+	free(cantTotalString);
+	free(lineaPlatosNueva);
+	free(lineaCantTotalNueva);
+	free(lineaCantListaNueva);
+	free(precioTotalString);
+
+	return datosNuevos;
+}
+
+char* sumarPrecioTotal(char* precioInicialString, int precioPlato, int cantidadPlato){
+
+	int precioInicial = atoi(precioInicialString);
+
+	int precioFinal = precioInicial + precioPlato * cantidadPlato;
+
+	char* precioFinalString;
+
+	asprintf(&precioFinalString, "%i", precioFinal);
+
+	return precioFinalString;
+}
+
+char* agregarElementoEnStringArray(char* stringArray, char* nombreElemento){
+
+	// stringArray = [cosa,cosa2,cosa3]
+	// elemento = cosa4
+	// Resultado: [cosa,cosa2,cosa3,cosa4]
+
+	char** arrayElementos = string_get_string_as_array(stringArray);
+
+	int cantidadElementosAnterior = cantidadDeElementosEnArray(arrayElementos);
+
+	char* stringADevolver = string_substring(stringArray, 0, strlen(stringArray) - 1);
+
+	if (cantidadElementosAnterior > 0){
+		string_append(&stringADevolver, ",");
+	}
+
+	string_append(&stringADevolver, nombreElemento);
+	string_append(&stringADevolver, "]");
+
+	return stringADevolver;
+}
+
+void pedirMasBloquesDeSerNecesario(int cantidadBloquesNecesarios, int cantidadBloquesActuales, t_list* listaBloquesActual){
+	// Si necesito agregar bloques nuevos
+	if (cantidadBloquesNecesarios > cantidadBloquesActuales){
+		int cantidadBloquesAPedir = cantidadBloquesNecesarios - cantidadBloquesActuales;
+
+		// Pido la cantidad de bloques que necesito
+		t_list* bloquesPedidos = obtenerPrimerosLibresDeBitmap(cantidadBloquesAPedir);
+
+		// Agrego los bloques nuevos a la lista de bloques
+		list_add_all(listaBloquesActual, bloquesPedidos);
+
+		list_destroy(bloquesPedidos);
+	// No tiene sentido que esto pase
+	} else if (cantidadBloquesNecesarios < cantidadBloquesActuales){
+		printf("ERROR | No puede necesitarse menos bloques al confirmar un pedido.\n");
+		exit(5);
+	}
+}
+
+int obtenerPlatoEnPedido(char* datosPedido, char* nombrePlato){
+	int retorno = -1;
+
+	char** datosSeparados = string_split(datosPedido, "\n");
+
+	char** lineaPlatosSeparada = string_split(datosSeparados[1], "=");
+
+	retorno = encontrarElementoEnArray(nombrePlato, lineaPlatosSeparada[1]);
+
+	freeDeArray(datosSeparados);
+	freeDeArray(lineaPlatosSeparada);
+
+	return retorno;
+}
+
+// Devuelve el precio de un plato en caso de encontrarlo, si no lo encuentra devuelve -1
+int obtenerPrecioPlatoRestaurant(char* nombreRestaurant, char* nombrePlato){
+
+	int retorno = -1;
+
+	char* datosRestaurant = leerDatosRestaurant(nombreRestaurant);
+
+	char** datosSeparados = string_split(datosRestaurant, "\n");
+
+	// Obtengo la lista de platos en lineaPlatos[1]
+	char** lineaPlatos = string_split(datosSeparados[3], "=");
+
+	// Encuentro el index
+	int indexPlato = encontrarElementoEnArray(nombrePlato, lineaPlatos[1]);
+
+	// Existe el plato en alguna posicion
+	if (indexPlato != -1){
+
+		// Obtengo la linea PRECIO_PLATOS=[3,4,5]
+		char** preciosListaString = string_split(datosSeparados[4], "=");
+
+		// Obtengo la lista 3,4,5
+		char** listaPrecios = string_get_string_as_array(preciosListaString[1]);
+
+		// Retorno el precio del plato
+		retorno = atoi(listaPrecios[indexPlato]);
+
+		freeDeArray(preciosListaString);
+		freeDeArray(listaPrecios);
+	}
+
+	free(datosRestaurant);
+	freeDeArray(datosSeparados);
+	freeDeArray(lineaPlatos);
+
+
+	return retorno;
+}
+
+// Devuelve el index donde aparece stringAEncontrar y -1 si no se encuentra
+int encontrarElementoEnArray(char* stringAEncontrar, char* arrayString){
+
+	int retorno = -1;
+
+	char** stringSeparado = string_get_string_as_array(arrayString);
+
+	int cantElementos = cantidadDeElementosEnArray(stringSeparado);
+
+	int i;
+	for(i = 0; i < cantElementos; i++){
+		if (strcmp(stringSeparado[i], stringAEncontrar) == 0){
+			retorno = i;
+		}
+	}
+
+	freeDeArray(stringSeparado);
+
+	return retorno;
+}
+
 // Devuelve la cantidad de bloques que necesito para un string a escribir
 int cantidadDeBloquesQueOcupa(int pesoEnBytes){
 
@@ -210,6 +417,13 @@ char* generarStringInfoReceta(datosReceta unaReceta){
 	return stringCompleto;
 }
 
+/*
+ * Llenar bloques de un nuevo archivo con datos
+ * @params:
+ * pathArchivo: Archivo donde se guardan los datos
+ * stringAEscribir: String completo que se debe escribir en el archivo
+ * nombre: Nombre para loguear asignacion de bloques
+ */
 void llenarBloquesConString(char* pathArchivo, char* stringAEscribir, char* nombre){
 
 	// Calculo la cantidad de bloques necesarios
@@ -931,6 +1145,29 @@ int main(){
 //	pthread_join(hilo2, NULL);
 //	pthread_join(hilo3, NULL);
 
+
+	// Testing
+	//guardarPedido("ElDestino", 6);
+	guardarPlato("ElDestino", 6, "Empanadas", 20);
+
+	// 500 + 20 empanadas
+	// 500 + 20 * 50 = 100
+
+//	guardarPlato("ElDestino", 6, "Jorge", 20);
+//	guardarPlato("ElDestino", 6, "Ensalada", 20);
+//	guardarPlato("ElDestino", 6, "Milanesa", 20);
+
+//	char* array = "[Milanesas,Empanadas,Ensalada]";
+//
+//	int index1 = encontrarElementoEnArray("Milanesas", array);
+//	int index2 = encontrarElementoEnArray("Empanada", array);
+//	int index3 = encontrarElementoEnArray("Empanadas", array);
+//	int index4 = encontrarElementoEnArray("Ensalada", array);
+//
+//	printf("Index1: %i\n", index1);
+//	printf("Index2: %i\n", index2);
+//	printf("Index3: %i\n", index3);
+//	printf("Index4: %i\n", index4);
 
 	pthread_t hiloConsola;
 	// Hilo para leer el input de la consola
