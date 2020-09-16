@@ -74,3 +74,16 @@ void destruirListaYElementos(t_list* unaLista){
 	list_clean_and_destroy_elements(unaLista, free);
 	list_destroy(unaLista);
 }
+
+char* resultadoDeRespuesta(uint32_t resultado)
+{
+	if(resultado == 1)
+	{
+		return "exitoso";
+	}
+
+	else
+	{
+		return "fallido";
+	}
+}

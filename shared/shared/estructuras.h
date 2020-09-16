@@ -25,8 +25,8 @@ typedef enum
 	CONFIRMAR_PEDIDO,
 	CONSULTAR_PEDIDO,
 	OBTENER_PEDIDO,
-	FINALIZAR_PEDIDO,//estos 2 hay que consultarlos (finalizar y terminar)
-	TERMINAR_PEDIDO,//estos 2 hay que consultarlos (finalizar y terminar)
+	FINALIZAR_PEDIDO,
+	TERMINAR_PEDIDO,
 	RESPUESTA_CONSULTAR_R,
 	RESPUESTA_SELECCIONAR_R,
 	RESPUESTA_OBTENER_R,
@@ -91,21 +91,17 @@ typedef struct{
 
 //ESTRUCTURAS PARA MANDAR MENSAJES-------------------------------------------------------------------------------------------------
 
-typedef struct{
-//ToDo esto me parece que vuela a la mierda, mejor que solo mandemos el Cod. Operacion y listo
-}consultar_restaurante;
-
-//Todo respuesta a consultar restaurante?
+//nadie te va a extrañar
 
 typedef struct{
 	uint32_t cliente; //seria el PID del cliente
 	uint32_t largoNombreRestaurante;
-	char* restaurante;
+	char* nombreRestaurante;
 }seleccionar_restaurante;
 
 typedef struct{
 	uint32_t largoNombreRestaurante;
-	char* restaurante;
+	char* nombreRestaurante;
 }obtener_restaurante;
 
 //ToDo crear pedido no tiene estructura? hay que poner una estructura para devolver la ID del pedido
@@ -125,7 +121,8 @@ typedef struct{
 	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
 	uint32_t idPedido;
-	char* nombrePlato; //comida?
+	uint32_t largonombrePlato;
+	char* nombrePlato; //comida
 	uint32_t cantidadPlatos;
 }guardar_plato;
 

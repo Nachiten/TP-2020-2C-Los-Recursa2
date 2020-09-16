@@ -5,60 +5,183 @@ int main(){
 	PIDCliente = getpid();
 	socketEscucha = 0;
 
+	ip_destino = malloc(sizeof(char*));
+	puerto_destino = malloc(sizeof(char*));
+
 	//Cargo las configuraciones del .config
 	config = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/cliente.config");
 	LOG_PATH = config_get_string_value(config,"LOG_FILE_PATH"); //cargo el path del archivo log
-	comanda_IP = config_get_string_value(config,"IP_COMANDA");
-	restaurante_IP = config_get_string_value(config,"IP_RESTAURANTE");
-	sindicato_IP = config_get_string_value(config,"IP_SINDICATO");
-	app_IP = config_get_string_value(config,"IP_APP");
-	app_puerto = config_get_string_value(config,"PUERTO_APP");
-	comanda_puerto = config_get_string_value(config,"PUERTO_COMANDA");
-	sindicato_puerto = config_get_string_value(config,"PUERTO_SINDICATO");
-	restaurante_puerto = config_get_string_value(config,"PUERTO_RESTAURANTE");
-	mi_puerto = config_get_string_value(config,"PUERTO_CLIENTE");
+	ip_destino = config_get_string_value(config,"IP_DESTINO");
+	puerto_destino = config_get_string_value(config,"PUERTO_DESTINO");
+	puerto_local = config_get_string_value(config,"PUERTO_LOCAL");
 	miPosicionX = config_get_int_value(config, "POSICION_X");
 	miPosicionY = config_get_int_value(config, "POSICION_Y");
 
 	//Dejo cargado un logger para loguear los eventos.
 	logger = cargarUnLog(LOG_PATH, "Cliente");
 
-	//ToDo esto esta para que corten/peguen donde sea necesario, asi no pierden tiempo viendo como funcionan estas cosas
-	//FUNCIONES DE ESTABLECER CONEXIONES, USAR COMO Y CUANDO HAGAN FALTA********************************************************************
-	socketComanda = establecer_conexion(comanda_IP, comanda_puerto);
-	resultado_de_conexion(socketComanda, logger, "CoMAnda");
-
-	socketApp = establecer_conexion(app_IP, app_puerto);
-	resultado_de_conexion(socketApp, logger, "App");
-
-	socketSindicato = establecer_conexion(sindicato_IP, sindicato_puerto);
-	resultado_de_conexion(socketSindicato, logger, "Sindicato");
-
-	socketRestaurante = establecer_conexion(restaurante_IP, restaurante_puerto);
-	resultado_de_conexion(socketRestaurante, logger, "Restaurante");
-
-	close(socketComanda);
-	close(socketApp);
-	close(socketSindicato);
-	close(socketRestaurante);
-	//*************************************************************************************************************************************
-
-	//ToDo levantar hilos para conexiones a Comanda y Sindicato???
 
 	//ToDo levantamos socket para recibir mensajes (hilo)
 
-	socketEscucha = reservarSocket(mi_puerto);
 	//ToDo hay que levantarlo como hilo, y agregar toda la parte del accept, recibir mensaje y el manejo del mensaje recibido
 
 
+	//Preparar consola que se mantendra activa hasta la terminacion del proceso (hilo)  WIP
 
-	//levantar sockets cada vez que se quiere mandar un mensaje
+	t_conexion tuplaConexion;
+    tuplaConexion.ip_destino = ip_destino;
+    tuplaConexion.puerto_destino = puerto_destino;
+    tuplaConexion.mi_logger = logger;
 
 
+    char* lineaEntera = NULL;
+	size_t longitud = 0;
+
+	while(1)
+	{
+		printf("Inserte un comando:\n");
+
+		getline(&lineaEntera, &longitud, stdin);
+
+		string_trim(&lineaEntera);
+
+
+		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, lineaEntera);
+		//pthread_join(hiloConsola, NULL);
+		pthread_detach(hiloConsola);
+
+	}
+
+	//ToDO meter los free que falten
 
 
 	//para cerrar el programa
 	matarPrograma(logger, config, socketEscucha);
 
 	return EXIT_SUCCESS;
+}
+
+
+//void obtenerInputConsolaCliente(t_conexion* tuplaConexion)
+void obtenerInputConsolaCliente(char* lineaEntera)
+{
+	//char* lineaEntera = NULL;
+	//size_t longitud = 0;
+	uint32_t switcher;
+	respuesta_ok_error* estructuraRespuesta;
+	uint32_t socketCliente;
+	int32_t iterador = 0;
+
+//	printf("Inserte un comando:\n");
+//
+//	getline(&lineaEntera, &longitud, stdin);
+//
+//	string_trim(&lineaEntera);
+
+	char** palabrasSeparadas = string_split(lineaEntera , " ");
+
+	// El nombre del comando es la primer palabra (POR EL MOMENTO CON GUIONES_BAJOS) -> EJ: CONSULTAR_RESTAURANTES
+    char* comandoIngresado = palabrasSeparadas[0];
+
+    //printf("El comando solicitado fue: %s. \n", comandoIngresado);
+
+    switcher = valor_para_switch_case(comandoIngresado);
+
+
+    //todo me parece que por cuestion de "prolijidad" y que despues sea mas facil encontrar cada CASE, lo ideal seria ir poniendolos en orden,
+    //como estan declarados en codigo_operacion: consultar restaurante, seleccionar restaurante, obtener restaurante, etc...
+    switch(switcher)
+    {
+
+	case CONSULTAR_RESTAURANTES:;
+		respuesta_consultar_restaurantes* estructuraRespuestaConsultaRestaurantes = malloc(sizeof(respuesta_consultar_restaurantes));
+
+		//socketCliente = establecer_conexion(tuplaConexion->ip_destino , tuplaConexion->puerto_destino);
+		socketCliente = establecer_conexion(ip_destino , puerto_destino);
+		resultado_de_conexion(socketCliente, logger, "destino");
+
+		if(socketCliente < 1)
+		{
+			puts("estoy en el if");
+			break;
+		}
+
+
+
+		mandar_mensaje("nadaxdxd", CONSULTAR_RESTAURANTES, socketCliente);
+
+		recibir_mensaje(estructuraRespuestaConsultaRestaurantes,RESPUESTA_CONSULTAR_R,socketCliente);
+
+
+		//ToDo hablar con Tomas sobre si esto funcionaria asi o no
+
+
+		palabrasSeparadas = string_split(estructuraRespuestaConsultaRestaurantes->listaRestaurantes, ",");//falta agregar corchetes
+
+		puts("Los restaurantes que se encuentran disponibles son:");
+
+		while(iterador < estructuraRespuestaConsultaRestaurantes->cantRestaurantes)
+		{
+			printf("%s\n",palabrasSeparadas[iterador]);
+		}
+
+
+		free(estructuraRespuestaConsultaRestaurantes);
+    	break;
+
+    case SELECCIONAR_RESTAURANTE:
+    	break;
+
+	case OBTENER_RESTAURANTE:
+		break;
+
+    //aca van mas Cases...
+
+    case GUARDAR_PEDIDO:
+    	estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
+
+    	socketCliente = establecer_conexion(ip_destino , puerto_destino);
+		resultado_de_conexion(socketCliente, logger, "destino");
+
+		/* no entiendo para que declarar estas variables de mas, y los malloc extra
+		uint32_t idPedido = atoi(palabrasSeparadas[1]);
+		char* nombreRestaurante = malloc(strlen(palabrasSeparadas[2])+1);
+		strcpy(nombreRestaurante, palabrasSeparadas[2]);
+		*/
+
+		guardar_pedido* elMensaje = malloc(sizeof(guardar_pedido));
+		elMensaje->idPedido = atoi(palabrasSeparadas[1]);
+		elMensaje->largoNombreRestaurante = strlen(palabrasSeparadas[2]);
+		elMensaje->nombreRestaurante = malloc(elMensaje->largoNombreRestaurante + 1);
+		elMensaje->nombreRestaurante = palabrasSeparadas[2];
+
+		//   ¿¿¿¿¿Crearia un hilo mas para mandar el socket junto con el id pedido, el nombre del resto y el tamanio????? entiendo que no
+		//      pthread_t hiloMensaje;
+		//      pthread_create(&hiloMensaje, NULL, mandar_mensaje ?), &socketCliente);
+		//      pthread_detach(hiloMensaje);
+
+		mandar_mensaje(elMensaje, GUARDAR_PEDIDO, socketCliente);
+
+		recibir_mensaje(estructuraRespuesta,RESPUESTA_GUARDAR_PEDIDO,socketCliente);
+
+		printf("El intento de guardar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+
+		free(elMensaje->nombreRestaurante); //porfa no olvidarse de este free, tambien es importante, no solo liberar la estructura, sino nos va a caber
+		free(elMensaje);
+		free(estructuraRespuesta);
+		close(socketCliente); //siempre cerrar socket cuando se termina de usar
+      break;
+
+
+
+
+
+
+
+
+    default:
+    	puts("Input no reconocida.");
+    	break;
+    }
+    freeDeArray(palabrasSeparadas);
 }
