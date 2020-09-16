@@ -7,6 +7,128 @@
 
 #include "sindicato.h"
 
+char* generarNombrePedidoParaLog(char* nombreRestaurante, int numeroPedido){
+
+	char* numeroPedidoString;
+
+	asprintf(&numeroPedidoString, "%i" ,numeroPedido);
+
+	char* pedido = "Pedido";
+	char* de = " de ";
+
+	char* nombrePedidoParaLog = malloc(strlen(pedido) + strlen(numeroPedidoString) + strlen(de) + strlen(nombreRestaurante) + 1);
+
+	strcpy(nombrePedidoParaLog, pedido);
+	strcat(nombrePedidoParaLog, numeroPedidoString);
+	strcat(nombrePedidoParaLog, de);
+	strcat(nombrePedidoParaLog, nombreRestaurante);
+
+	// PedidoN de NombreRestaurant
+	return nombrePedidoParaLog;
+}
+
+// Sumar la cantidad de un plato que ya existe en un pedido
+char* sumarCantidadAPlatoExistente(int indexPlatoEnPedido, char* datosPedido, int precioPlato, int cantidadPlatos){
+	/*
+	 *  ESTADO_PEDIDO=Confirmado
+	 *	LISTA_PLATOS=[Milanesa,Empanadas,Ensalada]
+	 * 	CANTIDAD_PLATOS=[2,12,1]
+	 *	CANTIDAD_LISTA=[1,6,0]
+	 *	PRECIO_TOTAL=1150
+	 *
+	 *	Se suma la cantidad a cantidad_plato[indexPlatoEnPedido]
+	 *	Se suma el precio total
+	 */
+
+	char** datosSeparados = string_split(datosPedido, "\n");
+
+	char** lineaCantidadTotal = string_split(datosSeparados[2], "=");
+
+	char* nuevoArrayCantidadTotal = sumarCantidadAStringPlatos(lineaCantidadTotal[1], cantidadPlatos, indexPlatoEnPedido);
+
+	char** lineaPrecioTotalSeparada = string_split(datosSeparados[4], "=");
+
+	char* precioTotalString = sumarPrecioTotal(lineaPrecioTotalSeparada[1], precioPlato, cantidadPlatos);
+
+	char* CANTIDAD_PLATOS = "CANTIDAD_PLATOS=";
+	char* PRECIO_TOTAL = "PERCIO_TOTAL=";
+
+	char* nuevosDatos = string_new();
+
+	// Pego el estado pedido anterior
+	string_append(&nuevosDatos, datosSeparados[0]);
+	string_append(&nuevosDatos, "\n");
+	// Pego la lista de nombres platos anterior
+	string_append(&nuevosDatos, datosSeparados[1]);
+	string_append(&nuevosDatos, "\n");
+
+	// Pego las nuevas cantidades totales
+	string_append(&nuevosDatos, CANTIDAD_PLATOS);
+	string_append(&nuevosDatos, nuevoArrayCantidadTotal);
+	string_append(&nuevosDatos, "\n");
+
+	// Pego la lista de cantidad lista anterior
+	string_append(&nuevosDatos, datosSeparados[3]);
+	string_append(&nuevosDatos, "\n");
+
+	// Pego el nuevo precio total
+	string_append(&nuevosDatos, PRECIO_TOTAL);
+	string_append(&nuevosDatos, precioTotalString);
+	string_append(&nuevosDatos, "\n");
+
+	freeDeArray(datosSeparados);
+	freeDeArray(lineaCantidadTotal);
+	freeDeArray(lineaPrecioTotalSeparada);
+
+	free(nuevoArrayCantidadTotal);
+	free(precioTotalString);
+
+	return nuevosDatos;
+}
+
+// Le suma cantidad a un plato en el array de platosTotales
+char* sumarCantidadAStringPlatos(char* stringPlatos, int cantidad, int indexArray){
+	// stringPlatos = [1,20,50]
+
+	// Sumar index 15 en index 2 => [1,20,65]
+
+	char** preciosSeparados = string_get_string_as_array(stringPlatos);
+
+	int cantidadActual = atoi(preciosSeparados[indexArray]);
+
+	int cantidadTotal = cantidadActual + cantidad;
+
+	asprintf(&preciosSeparados[indexArray], "%i", cantidadTotal);
+
+	char* stringArrayADevolver = generarStringArray(preciosSeparados);
+
+	freeDeArray(preciosSeparados);
+
+	return stringArrayADevolver;
+}
+
+// Genera un stringArray de la forma [1,2,3] a partir de los elementosArray
+char* generarStringArray(char** elementosArray){
+	char* stringArray = string_new();
+
+	string_append(&stringArray, "[");
+	string_append(&stringArray, "]");
+
+	int cantElementos = cantidadDeElementosEnArray(elementosArray);
+
+	int i;
+
+	// Itero y agrego cada elemento del elementosArray en el string generado
+	for (i = 0; i < cantElementos; i++){
+		char* stringMasElemento = agregarElementoEnStringArray(stringArray, elementosArray[i]);
+		free(stringArray);
+		stringArray = stringMasElemento;
+	}
+
+	return stringArray;
+}
+
+// Agregar un nuevo plato a un pedido que no lo tiene
 char* agregarPlatoNuevoAPedido(char* nombrePlato, char* datosPedido, int precioPlato, int cantidadPlato){
 
 	/*
@@ -18,8 +140,8 @@ char* agregarPlatoNuevoAPedido(char* nombrePlato, char* datosPedido, int precioP
 	 *
 	 *	EstadoPedido queda igual
 	 *	Agregar pedido a lista_platos = nombrePlato
-	 *	Agregar cantidad total = cantidadPlato
-	 *	Agregar cantidadLista = 0
+	 *	Agregar cantidad_platos = cantidadPlato
+	 *	Agregar cantidad_lista = 0
 	 *  Sumar a precio_total la cantidad precioPlato * cantidadPlato
 	 */
 
@@ -42,30 +164,36 @@ char* agregarPlatoNuevoAPedido(char* nombrePlato, char* datosPedido, int precioP
 
 	char* precioTotalString = sumarPrecioTotal(lineaPrecioTotalSeparada[1], precioPlato, cantidadPlato);
 
-	printf("lineaPlatosNueva: %s\n", lineaPlatosNueva);
-	printf("lineaCantTotalNueva: %s\n", lineaCantTotalNueva);
-	printf("lineaCantListaNueva: %s\n", lineaCantListaNueva);
-	printf("precioTotalString: %s\n", precioTotalString);
+//	printf("lineaPlatosNueva: %s\n", lineaPlatosNueva);
+//	printf("lineaCantTotalNueva: %s\n", lineaCantTotalNueva);
+//	printf("lineaCantListaNueva: %s\n", lineaCantListaNueva);
+//	printf("precioTotalString: %s\n", precioTotalString);
 
 	char* LISTA_PLATOS = "LISTA_PLATOS=";
 	char* CANTIDAD_PLATOS = "CANTIDAD_PLATOS=";
 	char* CANTIDAD_LISTA = "CANTIDAD_LISTA=";
 	char* PRECIO_TOTAL = "PRECIO_TOTAL=";
 
+	// Pego el estado que estaba
 	string_append(&datosNuevos, datosSeparados[0]);
 	string_append(&datosNuevos, "\n");
+
+	// Pego la lista de nombres de platos
 	string_append(&datosNuevos, LISTA_PLATOS);
 	string_append(&datosNuevos, lineaPlatosNueva);
 	string_append(&datosNuevos, "\n");
 
+	// Pego las cantidades totales
 	string_append(&datosNuevos, CANTIDAD_PLATOS);
 	string_append(&datosNuevos, lineaCantTotalNueva);
 	string_append(&datosNuevos, "\n");
 
+	// Pego las cantidades listas
 	string_append(&datosNuevos, CANTIDAD_LISTA);
 	string_append(&datosNuevos, lineaCantListaNueva);
 	string_append(&datosNuevos, "\n");
 
+	// Pego el precio total
 	string_append(&datosNuevos, PRECIO_TOTAL);
 	string_append(&datosNuevos, precioTotalString);
 	string_append(&datosNuevos, "\n");
@@ -85,6 +213,7 @@ char* agregarPlatoNuevoAPedido(char* nombrePlato, char* datosPedido, int precioP
 	return datosNuevos;
 }
 
+// Suma el valor precioPlato * cantidadPlato al valor inicial del precio de un plato
 char* sumarPrecioTotal(char* precioInicialString, int precioPlato, int cantidadPlato){
 
 	int precioInicial = atoi(precioInicialString);
@@ -98,6 +227,7 @@ char* sumarPrecioTotal(char* precioInicialString, int precioPlato, int cantidadP
 	return precioFinalString;
 }
 
+// Agrega un elemento al final de un stringArray
 char* agregarElementoEnStringArray(char* stringArray, char* nombreElemento){
 
 	// stringArray = [cosa,cosa2,cosa3]
@@ -117,16 +247,20 @@ char* agregarElementoEnStringArray(char* stringArray, char* nombreElemento){
 	string_append(&stringADevolver, nombreElemento);
 	string_append(&stringADevolver, "]");
 
+	freeDeArray(arrayElementos);
+
 	return stringADevolver;
 }
 
-void pedirMasBloquesDeSerNecesario(int cantidadBloquesNecesarios, int cantidadBloquesActuales, t_list* listaBloquesActual){
+void pedirMasBloquesDeSerNecesario(int cantidadBloquesNecesarios, int cantidadBloquesActuales, t_list* listaBloquesActual, char* nombre){
 	// Si necesito agregar bloques nuevos
 	if (cantidadBloquesNecesarios > cantidadBloquesActuales){
 		int cantidadBloquesAPedir = cantidadBloquesNecesarios - cantidadBloquesActuales;
 
 		// Pido la cantidad de bloques que necesito
 		t_list* bloquesPedidos = obtenerPrimerosLibresDeBitmap(cantidadBloquesAPedir);
+
+		loguearAsignacionBloques(nombre, bloquesPedidos);
 
 		// Agrego los bloques nuevos a la lista de bloques
 		list_add_all(listaBloquesActual, bloquesPedidos);
@@ -936,12 +1070,11 @@ int existePedido(char* nombreRestaurante, int IDPedido){
 }
 
 char* generarStringPedidoDefault(){
-	// TODO | Esta modificado incorrecto para testear
 	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
-			"LISTA_PLATOS=[]\n"
-			"CANTIDAD_PLATOS=[]\n"
-			"CANTIDAD_LISTA=[]\n"
-			"PRECIO_TOTAL=500\n";
+					"LISTA_PLATOS=[]\n"
+					"CANTIDAD_PLATOS=[]\n"
+					"CANTIDAD_LISTA=[]\n"
+					"PRECIO_TOTAL=0\n";
 
 	// VERSION CORRECTA
 //	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
@@ -1147,8 +1280,21 @@ int main(){
 
 
 	// Testing
-	//guardarPedido("ElDestino", 6);
-	guardarPlato("ElDestino", 6, "Empanadas", 20);
+	guardarPedido("ElDestino", 9);
+
+
+	guardarPlato("ElDestino", 9, "Milanesa", 20);
+	guardarPlato("ElDestino", 9, "Empanadas", 20);
+	guardarPlato("ElDestino", 9, "Ensalada", 20);
+	guardarPlato("ElDestino", 9, "Milanesa", 10);
+	guardarPlato("ElDestino", 9, "Empanadas", 10);
+	guardarPlato("ElDestino", 9, "Ensalada", 10);
+	guardarPlato("ElDestino", 9, "Milanesa", 30);
+	guardarPlato("ElDestino", 9, "Empanadas", 30);
+	guardarPlato("ElDestino", 9, "Ensalada", 30);
+
+	// 24000
+	// 60 * (200+50+150)
 
 	// 500 + 20 empanadas
 	// 500 + 20 * 50 = 100

@@ -53,6 +53,7 @@ t_log* logger;
 int cantidadDeElementosEnArray(char**);
 void freeDeArray(char**);
 int encontrarElementoEnArray(char*, char*);
+char* generarStringArray(char** elementosArray);
 
 // Restaurantes
 char* crearCarpetaRestaurant(char*);
@@ -88,6 +89,9 @@ char* generarStringPedidoDefault();
 t_list* obtenerListaBloquesPedido(char*, int);
 char* cambiarEstadoPedidoA(char*, char*);
 char* leerDatosPedido(char*, int);
+
+// Platos
+char* sumarCantidadAStringPlatos(char* stringPlatos, int cantidad, int indexArray);
 
 // Printear
 void printearRespuestaConsultarPlatos(respuesta_consultar_platos*);
