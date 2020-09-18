@@ -226,7 +226,7 @@ typedef struct{
 }respuesta_obtener_pedido;
 
 typedef struct{
-	uint32_t* sizePasos;
+	uint32_t sizePasos;
 	char* pasos;
 	uint32_t sizeTiempoPasos;
 	char* tiempoPasos;

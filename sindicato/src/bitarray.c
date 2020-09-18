@@ -126,3 +126,25 @@ t_list* obtenerPrimerosLibresDeBitmap(int cantidad){
 
 	return listaNums;
 }
+
+void liberarUnBloque(int index){
+
+	char* BITARRAY = malloc(BLOCKS / 8);
+
+	// Se espera el semaforo antes de leer el bitarray
+	sem_wait(semBitmap);
+
+	leerBitArrayDeArchivo(&BITARRAY);
+
+	t_bitarray* bitArrayBloques = crearBitArray(BITARRAY);
+
+	bitarray_clean_bit(bitArrayBloques, index);
+
+	guardarBitArrayEnArchivo(BITARRAY);
+
+	// Se hace el signal luego de guardar el bitarray en archivo
+	sem_post(semBitmap);
+
+	bitarray_destroy(bitArrayBloques);
+	free(BITARRAY);
+}

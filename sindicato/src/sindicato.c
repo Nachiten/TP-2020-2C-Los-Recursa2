@@ -330,7 +330,7 @@ char* agregarElementoEnStringArray(char* stringArray, char* nombreElemento){
 	return stringADevolver;
 }
 
-void pedirMasBloquesDeSerNecesario(int cantidadBloquesNecesarios, int cantidadBloquesActuales, t_list* listaBloquesActual, char* nombre){
+void pedirOLiberarBloquesDeSerNecesario(int cantidadBloquesNecesarios, int cantidadBloquesActuales, t_list* listaBloquesActual, char* nombre){
 	// Si necesito agregar bloques nuevos
 	if (cantidadBloquesNecesarios > cantidadBloquesActuales){
 		int cantidadBloquesAPedir = cantidadBloquesNecesarios - cantidadBloquesActuales;
@@ -344,10 +344,27 @@ void pedirMasBloquesDeSerNecesario(int cantidadBloquesNecesarios, int cantidadBl
 		list_add_all(listaBloquesActual, bloquesPedidos);
 
 		list_destroy(bloquesPedidos);
-	// No tiene sentido que esto pase
+	// Necesito quitar bloques
 	} else if (cantidadBloquesNecesarios < cantidadBloquesActuales){
-		printf("ERROR | No puede necesitarse menos bloques al confirmar un pedido.\n");
-		exit(5);
+
+		printf("Se liberan bloques..\n");
+		int cantidadBloquesALiberar = cantidadBloquesActuales - cantidadBloquesNecesarios;
+
+		int cantidadBloquesEnLista = list_size(listaBloquesActual);
+
+		while (cantidadBloquesALiberar > 0){
+			int* punteroABloque = list_remove(listaBloquesActual, cantidadBloquesEnLista - 1);
+
+			liberarUnBloque(*punteroABloque - 1);
+
+			loguearLiberacionBloque(nombre, *punteroABloque);
+
+			free(punteroABloque);
+
+			cantidadBloquesALiberar--;
+			cantidadBloquesEnLista--;
+		}
+
 	}
 }
 
@@ -692,6 +709,10 @@ void loguearAsignacionBloques(char* nombreEntidad, t_list* listaBloquesAsignados
 	log_info(logger, "Se le asignan los bloques %s a %s", stringBloques, nombreEntidad);
 
 	free(stringBloques);
+}
+
+void loguearLiberacionBloque(char* nombre, int numeroBloque){
+	log_info(logger, "Se libera el bloque %i de %s", numeroBloque, nombre);
 }
 
 void fijarValorArchivoA(char* pathArchivo, int valor, char* clave){
@@ -1165,10 +1186,17 @@ int existePedido(char* nombreRestaurante, int IDPedido){
 
 char* generarStringPedidoDefault(){
 	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
-					"LISTA_PLATOS=[]\n"
-					"CANTIDAD_PLATOS=[]\n"
-					"CANTIDAD_LISTA=[]\n"
+					"LISTA_PLATOS=[aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbb,ccccccccccccccc]\n"
+					"CANTIDAD_PLATOS=[10000,20000,30000]\n"
+					"CANTIDAD_LISTA=[10000,20000,30000]\n"
 					"PRECIO_TOTAL=0\n";
+
+	printf("TamanioEnBytes: %i", strlen(stringPedidoDefault));
+
+	// Mide 92
+	// Neccesito 88
+
+	// 30 + 30 = 60
 
 	// VERSION CORRECTA
 //	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
@@ -1336,7 +1364,7 @@ void printearRespuestaObtenerRestaurante(respuesta_obtener_restaurante* unaRta){
 }
 
 void printearRespuestaObtenerReceta(respuesta_obtener_receta* unaRta){
-	printf("SizePasos: %i\n",unaRta->sizePasos );
+	printf("SizePasos: %u\n",unaRta->sizePasos );
 	printf("Pasos: %s\n",unaRta->pasos );
 
 	printf("SizeTiempoPasos: %i\n",unaRta->sizeTiempoPasos );
@@ -1395,7 +1423,15 @@ int main(){
 
 	// ---- A partir de aca el FS ya existe ----
 
-//	guardarPedido("ElDestino", 1);
+	int numPedido = 9;
+
+	guardarPedido("ElDestino", numPedido);
+
+	confirmarPedido("ElDestino", numPedido);
+
+	terminarPedido("ElDestino", numPedido);
+
+
 //	guardarPedido("ElDestino", 2);
 //	guardarPedido("ElDestino", 3);
 
@@ -1403,9 +1439,9 @@ int main(){
 	//guardarPlato("ElDestino", 2, "Empanadas", 5);
 	//guardarPlato("ElDestino", 3, "Empanadas", 5);
 
-	platoListo("ElDestino", 1, "Empanadas");
-	platoListo("ElDestino", 1, "Empanadas");
-	platoListo("ElDestino", 1, "Empanadas");
+	//platoListo("ElDestino", 1, "Empanadas");
+	//platoListo("ElDestino", 1, "Empanadas");
+	//platoListo("ElDestino", 1, "Empanadas");
 
 	// Testing semaforos
 //	char* restaurant1 = "ElDestino";

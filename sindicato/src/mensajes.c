@@ -20,7 +20,7 @@
  * Obtener restaurante - Interno listo, falta envio mensaje
  * Plato listo - Interno listo, falta envio de mensaje
  * Obtener receta - Interno listo, falta envio de mensaje
- * Terminar pedido - X
+ * Terminar pedido - Interno listo, falta envio de mensaje
  *
  */
 
@@ -72,7 +72,7 @@ void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato){
 	char* nombreParaLog = generarNombrePedidoParaLog(nombreRestaurant, IDPedido);
 
 	// Pido mas bloques y los agrego en listaBloques si son necesarios
-	pedirMasBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
+	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
 
 	// Separar los datos en una lista
 	t_list* listaDatosSeparados = separarStringEnBloques(datosNuevos, cantidadBloquesNecesarios);
@@ -90,6 +90,14 @@ void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato){
 	signalSemaforoPedido(nombreRestaurant, IDPedido);
 
 	// TODO | Retornar OK
+
+	destruirListaYElementos(listaBloquesActual);
+	destruirListaYElementos(listaDatosSeparados);
+
+	free(nombreParaLog);
+	free(pathCarpetaRestaurant);
+	free(pathAPedido);
+
 }
 
 void obtenerReceta(char* nombreReceta){
@@ -205,7 +213,7 @@ void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int c
 	char* nombreParaLog = generarNombrePedidoParaLog(nombreRestaurant, IDPedido);
 
 	// Pido mas bloques y los agrego en listaBloques si son necesarios
-	pedirMasBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
+	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
 
 	// Separar los datos en una lista
 	t_list* listaDatosSeparados = separarStringEnBloques(nuevosDatos, cantidadBloquesNecesarios);
@@ -276,7 +284,81 @@ void consultarPlatos(char* nombreRestaurant){
 	free(datosRestaurante);
 }
 
+void terminarPedido(char* nombreRestaurant, int IDPedido){
 
+	if ( !existeRestaurant(nombreRestaurant) ){
+		printf("ERROR | No existe el restaurant buscado.\n");
+		// TODO | Retornar fail
+		return;
+	}
+
+	if( !existePedido(nombreRestaurant, IDPedido) ){
+		printf("ERROR | No existe el pedido solicitado.\n");
+		// TODO | Retornar fail
+		return;
+	}
+
+	waitSemaforoPedido(nombreRestaurant, IDPedido);
+
+	char* datosPedido = leerDatosPedido(nombreRestaurant, IDPedido);
+
+	if(!pedidoEstaEnEstado("Confirmado", datosPedido)){
+		printf("ERROR | No esta en estado pendiente.\n");
+		signalSemaforoPedido(nombreRestaurant, IDPedido);
+		// TODO | Retornar fail
+		return;
+	}
+
+	char* nuevosDatosPedido = cambiarEstadoPedidoA("Terminado", datosPedido);
+
+	printf("Nuevos datos pedido:\n%s", nuevosDatosPedido);
+
+	/*
+	 * 1 - Calcular cantidad de bloques a utilizar
+	 * 2 - Obtener bloques actuales
+	 * 3 - Pedir bloques si es necesario
+	 * 4 - Escribir nuevos datos en bloques
+	 * 5 - Fijar size nuevo
+	 */
+
+	t_list* listaBloquesActual = obtenerListaBloquesPedido(nombreRestaurant, IDPedido);
+
+	// Calculo cantidad de bloques que necesito
+	int cantidadBloquesNecesarios = cantidadDeBloquesQueOcupa(strlen(nuevosDatosPedido));
+
+	// Calculo cantidad de bloques que tengo
+	int cantidadBloquesActuales = list_size(listaBloquesActual);
+
+	char* nombreParaLog = generarNombrePedidoParaLog(nombreRestaurant, IDPedido);
+
+	// Pido mas bloques y los agrego en listaBloques si son necesarios
+	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
+
+	// Separar los datos en una lista
+	t_list* listaDatosSeparados = separarStringEnBloques(nuevosDatosPedido, cantidadBloquesNecesarios);
+
+	// Escribir los datos
+	escribirLineasEnBloques(listaBloquesActual, listaDatosSeparados);
+
+	// Generar el path al pedido
+	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
+	char* pathAPedido = generarPathAPedido(pathCarpetaRestaurant, IDPedido);
+
+	// Fijar el size correcto
+	fijarValorArchivoA(pathAPedido, strlen(nuevosDatosPedido), "SIZE");
+
+	signalSemaforoPedido(nombreRestaurant, IDPedido);
+
+	// TODO | Retornar OK
+
+	free(datosPedido);
+	free(nuevosDatosPedido);
+	destruirListaYElementos(listaBloquesActual);
+	destruirListaYElementos(listaDatosSeparados);
+	free(pathCarpetaRestaurant);
+	free(pathAPedido);
+
+}
 
 void confirmarPedido(char* nombreRestaurant, int IDPedido){
 
@@ -326,7 +408,7 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 	char* nombreParaLog = generarNombrePedidoParaLog(nombreRestaurant, IDPedido);
 
 	// Pido mas bloques y los agrego en listaBloques si son necesarios
-	pedirMasBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
+	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
 
 	// Separar los datos en una lista
 	t_list* listaDatosSeparados = separarStringEnBloques(nuevosDatosPedido, cantidadBloquesNecesarios);
