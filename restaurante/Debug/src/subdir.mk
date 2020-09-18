@@ -4,13 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/restaurante.c 
+../src/restaurante.c \
+../src/utilsRestaurante.c 
 
 OBJS += \
-./src/restaurante.o 
+./src/restaurante.o \
+./src/utilsRestaurante.o 
 
 C_DEPS += \
-./src/restaurante.d 
+./src/restaurante.d \
+./src/utilsRestaurante.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

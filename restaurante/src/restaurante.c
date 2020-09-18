@@ -8,12 +8,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "shared/shared.h"
+#include "restaurante.h"
 
 int main(){
-	printf("Funciona restaurante");
 
-	probarLasShared();
+	inicializarRestaurante();
 
 	return 0;
 }

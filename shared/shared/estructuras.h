@@ -10,6 +10,7 @@
 #include <readline/readline.h>
 #include "commons/config.h"
 #include "commons/log.h"
+#include "commons/collections/list.h"
 
 typedef enum
 {
@@ -50,31 +51,15 @@ typedef struct
 {
 	uint32_t size;
 	void* stream;
-} t_buffer;
+}t_buffer;
 
 typedef struct
 {
 	codigo_operacion codigo_op;
 	t_buffer* buffer;
-} t_paquete;
+}t_paquete;
 
-typedef struct{
-	uint32_t IDCocinero;
-	char* afinidadPlato;
-}cocinero;
 
-typedef struct{
-	uint32_t cantidadPasos;
-	char** pasos;
-	uint32_t tiempo_pasos[];
-}receta;
-
-typedef struct{
-	uint32_t longitudNombrePlato;
-	char* nombrePlato; //comida?
-	uint32_t cantidadPlatos;
-	uint32_t cantLista; //Todo preguntar a los ayudantes
-}plato;
 
 //ESTRUCTURAS DE APP-------------------------------------------------------------
 
@@ -88,6 +73,39 @@ typedef struct{
 	char* nombre_resto;
 	uint32_t id_pedido;
 }perfil_cliente;
+
+//ESTRUCTURAS DE RESTAURANTE-----------------------------------------------------
+
+
+//tentativo
+typedef struct{
+	uint32_t id_pedido;
+    t_list lista_platos;
+}t_pedido;
+
+//tentativo
+typedef struct{
+	uint32_t cantidadPasos;
+	char** pasos;
+	uint32_t tiempo_pasos[]; //preguntar
+}t_receta;
+
+
+//tentativo
+typedef struct{
+	uint32_t longitudNombrePlato;
+	char* nombrePlato;
+	uint32_t cantidadPlatos;
+	uint32_t cantLista;
+	t_receta receta;
+}t_plato;
+
+
+typedef struct{
+	uint32_t id_cocinero;
+	char* afinidadPlato;
+}t_cocinero;
+
 
 //ESTRUCTURAS PARA MANDAR MENSAJES-------------------------------------------------------------------------------------------------
 
@@ -165,11 +183,11 @@ typedef struct{
 
 typedef struct{//Todo ver con los ayudantes PORQUE ESTA PICANTE
 	uint32_t cantidadCocineros;
-	cocinero losCocineros;//esto es una lista
+	t_cocinero losCocineros;//esto es una lista
 	uint32_t posX;
 	uint32_t posY;
 	uint32_t cantidadRecetas;
-	receta las_recetas;//esto es una lista
+	t_receta las_recetas;//esto es una lista
 	uint32_t cantHornos;
 }respuesta_obtener_restaurante;
 
@@ -193,7 +211,7 @@ typedef struct{
 
 typedef struct{
 	uint32_t cantPlatos;
-	plato platos_pedido[];//esto es una lista
+	t_plato platos_pedido[];//esto es una lista
 }respuesta_obtener_pedido;
 
 

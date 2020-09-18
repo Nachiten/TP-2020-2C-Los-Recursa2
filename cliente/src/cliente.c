@@ -5,8 +5,9 @@ int main(){
 	PIDCliente = getpid();
 	socketEscucha = 0;
 
-	ip_destino = malloc(sizeof(char*));
-	puerto_destino = malloc(sizeof(char*));
+	ip_destino = malloc(15); //creo que no se puede pasar de esto
+	puerto_destino = malloc(10); //10 para ir a lo seguro
+	puerto_local = malloc(10); //10 para ir a lo seguro
 
 	//Cargo las configuraciones del .config
 	config = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/cliente.config");
@@ -20,7 +21,6 @@ int main(){
 	//Dejo cargado un logger para loguear los eventos.
 	logger = cargarUnLog(LOG_PATH, "Cliente");
 
-
 	//ToDo levantamos socket para recibir mensajes (hilo)
 
 	//ToDo hay que levantarlo como hilo, y agregar toda la parte del accept, recibir mensaje y el manejo del mensaje recibido
@@ -28,13 +28,15 @@ int main(){
 
 	//Preparar consola que se mantendra activa hasta la terminacion del proceso (hilo)  WIP
 
+	/* 	ToDo VER SI BORRAR LA ESTRUCTURA ESTA
 	t_conexion tuplaConexion;
     tuplaConexion.ip_destino = ip_destino;
     tuplaConexion.puerto_destino = puerto_destino;
     tuplaConexion.mi_logger = logger;
+    */
 
-
-    char* lineaEntera = NULL;
+    char* lineaEntera = malloc(30); //con 30 caracteres estamos piola, no?
+    lineaEntera = NULL;
 	size_t longitud = 0;
 
 	while(1)
