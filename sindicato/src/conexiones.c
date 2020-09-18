@@ -12,6 +12,13 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	switch(cod_op){
 		case CONSULTAR_PLATOS:
 			break;
+		case OBTENER_RESTAURANTE: ;
+			obtener_restaurante* estructuraMensaje = malloc(sizeof(obtener_restaurante));
+            recibir_mensaje(estructuraMensaje, OBTENER_RESTAURANTE, socket_cliente);
+
+            obtenerRestaurante(estructuraMensaje->nombreRestaurante, socket_cliente);
+
+			break;
 		case ERROR:
 			pthread_exit(NULL);
 			break;
@@ -63,21 +70,21 @@ void esperar_cliente(int32_t socket_servidor)
 	struct sockaddr_in dir_cliente;
 
 	socklen_t tam_direccion = sizeof(struct sockaddr_in);
-	pthread_t thread;
+	pthread_t hiloConexionCliente;
 	int32_t socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
 
-	pthread_create(&thread, NULL, (void*)serve_client, &socket_cliente);
-	pthread_detach(thread);
+	pthread_create(&hiloConexionCliente, NULL, (void*)serve_client, &socket_cliente);
+	pthread_detach(hiloConexionCliente);
 }
 
-void iniciar_server(char* ip, char* puerto)
+void iniciar_server(char* puerto)
 {
-	//int32_t socket_servidor;
-	//socket_servidor = crearSocketServidor(ip, puerto);
+	int32_t socket_servidor;
+	socket_servidor = reservarSocket(puerto);
 
     while(1)
     {
-    	//esperar_cliente(socket_servidor);
+    	esperar_cliente(socket_servidor);
     }
 
 }

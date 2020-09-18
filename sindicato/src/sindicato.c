@@ -1284,7 +1284,7 @@ int main(){
 
 	// ---- A partir de aca el FS ya existe ----
 
-	obtenerRestaurante("ElDestino");
+//	obtenerRestaurante("ElDestino");
 
 	// Testing semaforos
 //	char* restaurant1 = "ElDestino";
@@ -1342,7 +1342,7 @@ int main(){
     pthread_detach(hiloConsola);
 
     // Iniciar servidor para recibir mensajes
-    //iniciar_server(IP_SINDICATO, PUERTO_ESCUCHA);
+    iniciar_server(PUERTO_ESCUCHA);
 
 
 //    guardarPedido("ElDestino", 5);
@@ -1358,7 +1358,7 @@ int main(){
 //    obtenerPedido("PanaderiaJorge", 4);
 //    obtenerPedido("PanaderiaJorge", 3);
 
-    pthread_join(hiloConsola, NULL);
+//    pthread_join(hiloConsola, NULL);
 
 	// Liberaciones finales (a las que nunca se llega)
 	config_destroy(config);
