@@ -27,6 +27,84 @@ char* generarNombrePedidoParaLog(char* nombreRestaurante, int numeroPedido){
 	return nombrePedidoParaLog;
 }
 
+char* sumarPlatoListoAPedido(char* datosPedido, int indexPlatoEnPedido){
+	/*
+	 *  ESTADO_PEDIDO=Confirmado
+	 *	LISTA_PLATOS=[Milanesa,Empanadas,Ensalada]
+	 * 	CANTIDAD_PLATOS=[2,12,1]
+	 *	CANTIDAD_LISTA=[1,6,0]
+	 *	PRECIO_TOTAL=1150
+	 *
+	 *	Se suma a cantidadLista en el indexPlatoEnPedido
+	 *	Se corrobora que cantidadLista no sea > a cantidadPlatos
+	 */
+
+	char** datosSeparados = string_split(datosPedido, "\n");
+
+	char** lineaCantidadLista = string_split(datosSeparados[3], "=");
+
+	// Se le suma 1 a la cantidad lista
+	char* nuevoArrayCantidadLista = sumarCantidadAStringPlatos(lineaCantidadLista[1], 1, indexPlatoEnPedido);
+
+	char** lineaCantidadTotal = string_split(datosSeparados[2], "=");
+
+	if (!cantidadListaNoEsMayorATotal(nuevoArrayCantidadLista, lineaCantidadTotal[1], indexPlatoEnPedido)){
+		printf("ERROR | La cantidad lista no puede ser mayor a la total");
+		nuevoArrayCantidadLista = string_duplicate(lineaCantidadLista[1]);
+	}
+
+	char* nuevosDatos = string_new();
+
+	string_append(&nuevosDatos, datosSeparados[0]);
+	string_append(&nuevosDatos, "\n");
+	string_append(&nuevosDatos, datosSeparados[1]);
+	string_append(&nuevosDatos, "\n");
+	string_append(&nuevosDatos, datosSeparados[2]);
+	string_append(&nuevosDatos, "\n");
+
+	char* CANTIDAD_LISTA = "CANTIDAD_LISTA=";
+
+	string_append(&nuevosDatos, CANTIDAD_LISTA);
+	string_append(&nuevosDatos, nuevoArrayCantidadLista);
+	string_append(&nuevosDatos, "\n");
+
+	string_append(&nuevosDatos, datosSeparados[4]);
+	string_append(&nuevosDatos, "\n");
+
+	free(nuevoArrayCantidadLista);
+	freeDeArray(datosSeparados);
+	freeDeArray(lineaCantidadLista);
+	freeDeArray(lineaCantidadTotal);
+
+	printf("Nuevos datos:\n%s", nuevosDatos);
+
+	return nuevosDatos;
+}
+
+// Compara los arrays cantidadLista y cantidadTotal
+// para saber que cantidad lista sea <= a cantidadTotal en el index indicado
+// Retorna 1 si se cumple, 0 sino
+int cantidadListaNoEsMayorATotal(char* cantidadLista, char* cantidadTotal, int index){
+
+	int retorno = 0;
+
+	char** cantidadListaArray = string_get_string_as_array(cantidadLista);
+	char** cantidadTotalArray = string_get_string_as_array(cantidadTotal);
+
+	int cantidadTotalValor = atoi(cantidadTotalArray[index]);
+	int cantidadListaValor = atoi(cantidadListaArray[index]);
+
+	if (cantidadListaValor <= cantidadTotalValor){
+		retorno = 1;
+	}
+
+	freeDeArray(cantidadListaArray);
+	freeDeArray(cantidadTotalArray);
+
+	return retorno;
+}
+
+
 // Sumar la cantidad de un plato que ya existe en un pedido
 char* sumarCantidadAPlatoExistente(int indexPlatoEnPedido, char* datosPedido, int precioPlato, int cantidadPlatos){
 	/*
@@ -878,6 +956,22 @@ char* generarPathInfoRestaurant(char* nombreRestaurante){
 	return pathInfoRestaurant;
 }
 
+char* generarPathAReceta(char* nombreReceta){
+
+	char* extension = ".AFIP";
+
+	// Expected: pathReceta/nombreReceta.AFIP
+
+	char* pathAReceta = malloc(strlen(pathRecetas) + strlen(nombreReceta) + strlen(extension) + 2);
+
+	strcpy(pathAReceta, pathRecetas);
+	strcat(pathAReceta, "/");
+	strcat(pathAReceta, nombreReceta);
+	strcat(pathAReceta, extension);
+
+	return pathAReceta;
+}
+
 t_list* leerListaBloquesAsignados(int sizeBytes, int bloqueInicial){
 	t_list* listaBloques = list_create();
 
@@ -1093,12 +1187,21 @@ char* generarStringPedidoDefault(){
 char* leerDatosRestaurant(char* nombreRestaurante){
 	char* pathInfoRestaurant = generarPathInfoRestaurant(nombreRestaurante);
 
-	// TODO | Abrir archivo con semaforos
-
 	int sizeBytes = leerValorArchivo(pathInfoRestaurant, "SIZE");
 	int bloqueInicial = leerValorArchivo(pathInfoRestaurant, "INITIAL_BLOCK");
 
 	free(pathInfoRestaurant);
+
+	return leerDatosBloques(sizeBytes, bloqueInicial);
+}
+
+char* leerDatosReceta(char* nombreReceta){
+	char* pathReceta = generarPathAReceta(nombreReceta);
+
+	int sizeBytes = leerValorArchivo(pathReceta, "SIZE");
+	int bloqueInicial = leerValorArchivo(pathReceta, "INITIAL_BLOCK");
+
+	free(pathReceta);
 
 	return leerDatosBloques(sizeBytes, bloqueInicial);
 }
@@ -1232,6 +1335,14 @@ void printearRespuestaObtenerRestaurante(respuesta_obtener_restaurante* unaRta){
 
 }
 
+void printearRespuestaObtenerReceta(respuesta_obtener_receta* unaRta){
+	printf("SizePasos: %i\n",unaRta->sizePasos );
+	printf("Pasos: %s\n",unaRta->pasos );
+
+	printf("SizeTiempoPasos: %i\n",unaRta->sizeTiempoPasos );
+	printf("TiempoPasos: %s\n",unaRta->tiempoPasos );
+}
+
 int main(){
 	printf("Comienzo sindicato\n");
 
@@ -1277,15 +1388,24 @@ int main(){
 		inicializarFileSystem(PUNTO_MONTAJE);
 	}
 
-//	printearSemaforosRestaurantes();
-//	printearSemaforosPedidos();
-//	printearSemaforosRecetas();
+    // Testing | Printear semaforos
+//  printearSemaforosRestaurantes();
+//  printearSemaforosPedidos();
+//  printearSemaforosRecetas();
 
 	// ---- A partir de aca el FS ya existe ----
 
-	//obtenerRestaurante("ElDestino");
+//	guardarPedido("ElDestino", 1);
+//	guardarPedido("ElDestino", 2);
+//	guardarPedido("ElDestino", 3);
 
-	obtenerPedido( "ElDestino" , 9);
+	//guardarPlato("ElDestino", 1, "Empanadas", 5);
+	//guardarPlato("ElDestino", 2, "Empanadas", 5);
+	//guardarPlato("ElDestino", 3, "Empanadas", 5);
+
+	platoListo("ElDestino", 1, "Empanadas");
+	platoListo("ElDestino", 1, "Empanadas");
+	platoListo("ElDestino", 1, "Empanadas");
 
 	// Testing semaforos
 //	char* restaurant1 = "ElDestino";
@@ -1301,63 +1421,13 @@ int main(){
 //	pthread_join(hilo3, NULL);
 
 
-	// Testing
-//	guardarPedido("ElDestino", 9);
-//
-//
-//	guardarPlato("ElDestino", 9, "Milanesa", 20);
-//	guardarPlato("ElDestino", 9, "Empanadas", 20);
-//	guardarPlato("ElDestino", 9, "Ensalada", 20);
-//	guardarPlato("ElDestino", 9, "Milanesa", 10);
-//	guardarPlato("ElDestino", 9, "Empanadas", 10);
-//	guardarPlato("ElDestino", 9, "Ensalada", 10);
-//	guardarPlato("ElDestino", 9, "Milanesa", 30);
-//	guardarPlato("ElDestino", 9, "Empanadas", 30);
-//	guardarPlato("ElDestino", 9, "Ensalada", 30);
-
-	// 24000
-	// 60 * (200+50+150)
-
-	// 500 + 20 empanadas
-	// 500 + 20 * 50 = 100
-
-//	guardarPlato("ElDestino", 6, "Jorge", 20);
-//	guardarPlato("ElDestino", 6, "Ensalada", 20);
-//	guardarPlato("ElDestino", 6, "Milanesa", 20);
-
-//	char* array = "[Milanesas,Empanadas,Ensalada]";
-//
-//	int index1 = encontrarElementoEnArray("Milanesas", array);
-//	int index2 = encontrarElementoEnArray("Empanada", array);
-//	int index3 = encontrarElementoEnArray("Empanadas", array);
-//	int index4 = encontrarElementoEnArray("Ensalada", array);
-//
-//	printf("Index1: %i\n", index1);
-//	printf("Index2: %i\n", index2);
-//	printf("Index3: %i\n", index3);
-//	printf("Index4: %i\n", index4);
-
 	pthread_t hiloConsola;
 	// Hilo para leer el input de la consola
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
-    pthread_detach(hiloConsola);
+    //pthread_detach(hiloConsola);
 
     // Iniciar servidor para recibir mensajes
     //iniciar_server(IP_SINDICATO, PUERTO_ESCUCHA);
-
-
-//    guardarPedido("ElDestino", 5);
-//    confirmarPedido("ElDestino", 5);
-//    confirmarPedido("ElDestino", 5);
-//
-//    consultarPlatos("ElDestino");
-//    consultarPlatos("PanaderiaJorge");
-//    consultarPlatos("Bataglia");
-//
-//    guardarPedido("PanaderiaJorge", 4);
-//    obtenerPedido("ElDestino", 5);
-//    obtenerPedido("PanaderiaJorge", 4);
-//    obtenerPedido("PanaderiaJorge", 3);
 
     pthread_join(hiloConsola, NULL);
 

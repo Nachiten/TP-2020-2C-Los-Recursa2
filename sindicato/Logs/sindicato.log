@@ -1,3 +1,21 @@
 [INFO] 16:38:00:878 SINDICATO/(7302:7302): Se le asignan los bloques 23,24 a Pedido9 de ElDestino
 [INFO] 16:38:00:878 SINDICATO/(7302:7302): Se creo un nuevo pedido llamado Pedido9 de ElDestino
 [INFO] 16:38:00:879 SINDICATO/(7302:7302): Se le asignan los bloques 25 a Pedido9 de ElDestino
+[INFO] 18:19:38:638 SINDICATO/(5579:5584): Se le asignan los bloques 26,27 a Milanesa
+[INFO] 18:19:38:638 SINDICATO/(5579:5584): Se creo una nueva receta llamada Milanesa
+[INFO] 18:19:48:592 SINDICATO/(5579:5584): Se le asignan los bloques 28 a Empanada
+[INFO] 18:19:48:592 SINDICATO/(5579:5584): Se creo una nueva receta llamada Empanada
+[INFO] 18:19:53:374 SINDICATO/(5579:5584): Se le asignan los bloques 29 a Torta
+[INFO] 18:19:53:494 SINDICATO/(5579:5584): Se creo una nueva receta llamada Torta
+[INFO] 19:25:21:370 SINDICATO/(7996:8002): Se le asignan los bloques 1,2,3 a ElDestino
+[INFO] 19:25:21:370 SINDICATO/(7996:8002): Se creo un nuevo restaurant llamado ElDestino
+[INFO] 19:25:27:670 SINDICATO/(7996:8002): Se le asignan los bloques 4,5,6 a Bataglia
+[INFO] 19:25:27:671 SINDICATO/(7996:8002): Se creo un nuevo restaurant llamado Bataglia
+[INFO] 19:25:31:872 SINDICATO/(7996:8002): Se le asignan los bloques 7,8,9 a PanaderiaJorge
+[INFO] 19:25:31:873 SINDICATO/(7996:8002): Se creo un nuevo restaurant llamado PanaderiaJorge
+[INFO] 19:26:08:61 SINDICATO/(8107:8107): Se le asignan los bloques 10,11 a Pedido1 de ElDestino
+[INFO] 19:26:08:62 SINDICATO/(8107:8107): Se creo un nuevo pedido llamado Pedido1 de ElDestino
+[INFO] 19:26:08:62 SINDICATO/(8107:8107): Se le asignan los bloques 12,13 a Pedido2 de ElDestino
+[INFO] 19:26:08:64 SINDICATO/(8107:8107): Se creo un nuevo pedido llamado Pedido2 de ElDestino
+[INFO] 19:26:08:64 SINDICATO/(8107:8107): Se le asignan los bloques 14,15 a Pedido3 de ElDestino
+[INFO] 19:26:08:65 SINDICATO/(8107:8107): Se creo un nuevo pedido llamado Pedido3 de ElDestino
