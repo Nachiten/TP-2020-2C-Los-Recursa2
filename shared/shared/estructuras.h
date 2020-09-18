@@ -217,8 +217,12 @@ typedef struct{
 }respuesta_consultar_pedido;
 
 typedef struct{
-	uint32_t cantPlatos;
-	t_plato platos_pedido[];//esto es una lista
+	uint32_t sizeComidas;
+	char* comidas;
+	uint32_t sizeCantTotales;
+	char* cantTotales;
+	uint32_t sizeCantListas;
+	char* cantListas;
 }respuesta_obtener_pedido;
 
 

@@ -1202,15 +1202,14 @@ void printearRespuestaConsultarPlatos(respuesta_consultar_platos* unaRta){
 }
 
 void printearRespuestaObtenerPedido(respuesta_obtener_pedido* unaRta){
-	printf("Cantidad platos: %i\n", unaRta->cantPlatos);
+	printf("SizeComidas: %i\n",unaRta->sizeComidas );
+	printf("Comidas: %s\n",unaRta->comidas );
 
-	int i;
-	for (i = 0; i<unaRta->cantPlatos; i++){
-		printf("Longitud nombre plato %i: %i\n", i, unaRta->platos_pedido[i].longitudNombrePlato);
-		printf("Nombre Plato %i: %s\n", i, unaRta->platos_pedido[i].nombrePlato);
-		printf("Cantidad Total %i: %i\n", i, unaRta->platos_pedido[i].cantidadPlatos);
-		printf("Cantidad Lista %i: %i\n", i, unaRta->platos_pedido[i].cantLista);
-	}
+	printf("SizeCantTotales: %i\n",unaRta->sizeCantTotales );
+	printf("CantTotales: %s\n",unaRta->cantTotales );
+
+	printf("SizeCantListas: %i\n",unaRta->sizeCantListas );
+	printf("CantListas: %s\n",unaRta->cantListas );
 
 }
 
@@ -1284,7 +1283,9 @@ int main(){
 
 	// ---- A partir de aca el FS ya existe ----
 
-	obtenerRestaurante("ElDestino");
+	//obtenerRestaurante("ElDestino");
+
+	obtenerPedido( "ElDestino" , 9);
 
 	// Testing semaforos
 //	char* restaurant1 = "ElDestino";

@@ -273,56 +273,45 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido){
 	 */
 
 	// Separo la linea con = | Linea : PLATOS=[platoA,platoB,platoC]
-	char** listaNombresPlatos = string_split(datosSeparados[1], "=");
-	char** listaCantidadesTotales = string_split(datosSeparados[2], "=");
-	char** listaCantidadesListas = string_split(datosSeparados[3], "=");
+	char** lineaNombresPlatos = string_split(datosSeparados[1], "=");
+	char** lineaCantidadesTotales = string_split(datosSeparados[2], "=");
+	char** lineaCantidadesListas = string_split(datosSeparados[3], "=");
 
-	char** nombresLista = string_get_string_as_array(listaNombresPlatos[1]);
-	char** cantTotalLista = string_get_string_as_array(listaCantidadesTotales[1]);
-	char** cantListaLista = string_get_string_as_array(listaCantidadesListas[1]);
+	//char** nombresLista = string_get_string_as_array(listaNombresPlatos[1]);
+	//char** cantTotalLista = string_get_string_as_array(listaCantidadesTotales[1]);
+	//char** cantListaLista = string_get_string_as_array(listaCantidadesListas[1]);
 
-	int cantidadDePlatos = cantidadDeElementosEnArray(nombresLista);
+	char* nombresPlatos = lineaNombresPlatos[1];
+	char* cantidadesTotales = lineaCantidadesTotales[1];
+	char* cantidadesListas = lineaCantidadesListas[1];
 
-	// TODO | Ver como se responde
-	// IDEA: Struct:
-	/*
-	 * uint32_t sizeComidas;
-	 * char* comidas;
-	 * uint32_t sizeCantTotales;
-	 * char* cantTotales;
-	 * uint32_t sizeCantListas;
-	 * char* cantListas;
-	 */
+	respuesta_obtener_pedido* respuestaPedido = malloc(sizeof(respuesta_obtener_pedido)
+			+ strlen(nombresPlatos)
+			+ strlen(cantidadesTotales)
+			+ strlen(cantidadesListas) + 3);
 
-//	respuesta_obtener_pedido* respuestaPedido = malloc(sizeof(respuesta_obtener_pedido) + cantidadDePlatos * sizeof(plato));
-//
-//	respuestaPedido->cantPlatos = cantidadDePlatos;
-//
-//	int i;
-//	for (i = 0; i< cantidadDePlatos; i++){
-//		respuestaPedido->platos_pedido[i].longitudNombrePlato = strlen(nombresLista[i]);
-//		respuestaPedido->platos_pedido[i].nombrePlato = nombresLista[i];
-//		respuestaPedido->platos_pedido[i].cantidadPlatos = atoi(cantTotalLista[i]);
-//		respuestaPedido->platos_pedido[i].cantLista = atoi(cantListaLista[i]);
-//
-////		printf("Nombre %i: %s\n", i, nombresLista[i]);
-////		printf("CantidadTotal %i: %s\n", i, cantTotalLista[i]);
-////		printf("CantidadLista %i: %s\n", i, cantListaLista[i]);
-//	}
+	respuestaPedido->sizeComidas = strlen(nombresPlatos);
+	respuestaPedido->comidas = nombresPlatos;
 
-	//printearRespuestaObtenerPedido(respuestaPedido);
+	respuestaPedido->sizeCantTotales = strlen(cantidadesTotales);
+	respuestaPedido->cantTotales = cantidadesTotales;
+
+	respuestaPedido->sizeCantListas = strlen(cantidadesListas);
+	respuestaPedido->cantListas = cantidadesListas;
+
+	printearRespuestaObtenerPedido(respuestaPedido);
 
 	// TODO | Enviar el mensaje con la respuesta
 
 	free(datosPedido);
 
 	freeDeArray(datosSeparados);
-	freeDeArray(listaNombresPlatos);
-	freeDeArray(listaCantidadesTotales);
-	freeDeArray(listaCantidadesListas);
-	freeDeArray(nombresLista);
-	freeDeArray(cantTotalLista);
-	freeDeArray(cantListaLista);
+//	freeDeArray(listaNombresPlatos);
+//	freeDeArray(listaCantidadesTotales);
+//	freeDeArray(listaCantidadesListas);
+//	freeDeArray(nombresLista);
+//	freeDeArray(cantTotalLista);
+//	freeDeArray(cantListaLista);
 }
 
 // Obtiene todos los datos de un restaurant
