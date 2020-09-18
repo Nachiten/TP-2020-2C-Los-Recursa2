@@ -50,6 +50,14 @@ void obtenerMetadataRestaurante(){
 
 }
 
+//void crearColasPlanificacion(){
+//
+//	for(int i=0; i<cantCocineros; i++){
+//
+//
+//		}
+//
+//}
 
 
 void inicializarRestaurante(){
@@ -72,5 +80,10 @@ void inicializarRestaurante(){
 
     obtenerMetadataRestaurante();
 
+//    crearColasPlanificacion();
+
 
 }
+
+
+

@@ -69,6 +69,8 @@ typedef enum{
 
 void inicializarRestaurante();
 void obtenerMetadataRestaurante();
+//void crearColasPlanificacion();
+
 
 
 #endif /* SRC_UTILSRESTAURANTE_H_ */
