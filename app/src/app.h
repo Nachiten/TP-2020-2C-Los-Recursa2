@@ -16,20 +16,54 @@
 #include"shared/cargador.h"
 #include"shared/socket.h"
 
+// *** ESTRUCTURAS DE APP***
+typedef struct{
+	int32_t socket;
+	char* nombre_resto;
+}info_resto;
+
+typedef struct{
+	int32_t socket_cliente;
+	char* nombre_resto;
+	uint32_t id_pedido;
+}perfil_cliente;
+
+
+
+//***VARIABLES***
 t_list* listaRestos;
 t_list* listaPedidos;
+
+t_log* logger;
+t_config* config;
+
+//***cosas de config**
+char* LOG_PATH;
+char* mi_puerto;
+char* puerto_commanda;
+char* ip_commanda;
+
+sem_t* semId;
+int32_t id_inicial_pedidos;
+int32_t socket_commanda;
+
 
 // ***SERVIDOR***
 void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t sizeAAllocar) ;
 void serve_client(int32_t* socket);
 void esperar_cliente(int32_t socket_servidor);
-void iniciar_server(char* ip, char* puerto);
+void iniciar_server(char* puerto);
+
 
 // ***MANEJO DE MENSAJES***
+int32_t crear_id_pedidos();
 void consultar_restaurantes(int32_t socket_cliente);
 void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente);
 int buscar_restaurante(char* nombreResto);
+int32_t crear_pedido(int32_t socket);
+int buscar_cliente(int32_t socket);
 int32_t buscar_socket_resto(char* nombreResto);
 void agregar_restaurante(info_resto* recibidoAgregarRestaurante);
+void recibir_respuesta(codigo_operacion cod_op, int32_t socket_resto, int32_t  socket_cliente, char* nombreResto);
 
 #endif /* SRC_APP_H_ */

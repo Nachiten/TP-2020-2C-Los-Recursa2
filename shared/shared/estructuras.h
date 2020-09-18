@@ -76,19 +76,6 @@ typedef struct{
 	uint32_t cantLista; //Todo preguntar a los ayudantes
 }plato;
 
-//ESTRUCTURAS DE APP-------------------------------------------------------------
-
-typedef struct{
-	int32_t socket;
-	char* nombre_resto;
-}info_resto;
-
-typedef struct{
-	int32_t socket_cliente;
-	char* nombre_resto;
-	uint32_t id_pedido;
-}perfil_cliente;
-
 //ESTRUCTURAS PARA MANDAR MENSAJES-------------------------------------------------------------------------------------------------
 
 //nadie te va a extrañar

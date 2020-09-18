@@ -140,6 +140,12 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			size_ya_armado = sizeof(tipoMensaje);
 			break;
 
+		case CREAR_PEDIDO: //este se pasa el mensaje por el culo, solo manda el codigo de operacion
+			paquete->buffer->stream = malloc(0); //malloc flashero para que no rompa despues con el free, ToDo ver si funciona o rompe
+			paquete->buffer->size = 0;
+			size_ya_armado = sizeof(tipoMensaje);
+			break;
+
 		case SELECCIONAR_RESTAURANTE:
 				paquete->buffer->stream = malloc(sizeof(seleccionar_restaurante));
 				size_ya_armado = serializar_paquete_seleccionar_restaurante(paquete, mensaje);
@@ -387,6 +393,10 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 	{
 		case SELECCIONAR_RESTAURANTE:
 			desserializar_seleccionar_restaurante(estructura, socket_cliente);
+			break;
+
+		case GUARDAR_PEDIDO:
+			desserializar_guardar_pedido(estructura, socket_cliente);
 			break;
 
 		default:
