@@ -183,12 +183,19 @@ typedef struct{
 
 typedef struct{//Todo ver con los ayudantes PORQUE ESTA PICANTE
 	uint32_t cantidadCocineros;
-	t_cocinero losCocineros;//esto es una lista
 	uint32_t posX;
 	uint32_t posY;
-	uint32_t cantidadRecetas;
-	t_receta las_recetas;//esto es una lista
 	uint32_t cantHornos;
+
+	uint32_t longitudAfinidades;
+	char* afinidades;
+
+	uint32_t longitudPlatos;
+	char* platos;
+
+	uint32_t longitudPrecioPlatos;
+	char* precioPlatos;
+
 }respuesta_obtener_restaurante;
 
 typedef struct{

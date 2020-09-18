@@ -1214,6 +1214,25 @@ void printearRespuestaObtenerPedido(respuesta_obtener_pedido* unaRta){
 
 }
 
+void printearRespuestaObtenerRestaurante(respuesta_obtener_restaurante* unaRta){
+
+	printf("CantidadCocineros: %i\n", unaRta->cantidadCocineros);
+	printf("CantidadHornos: %i\n", unaRta->cantHornos);
+	printf("PosX: %i\n", unaRta->posX);
+	printf("PosY: %i\n", unaRta->posY);
+
+	printf("SizeAfinidades: %i\n", unaRta->longitudAfinidades);
+	printf("Afinidades: %s\n", unaRta->afinidades);
+
+	printf("SizePlatos: %i\n", unaRta->longitudPlatos);
+	printf("Platos: %s\n", unaRta->platos);
+
+	printf("SizePreciosPlatos: %i\n", unaRta->longitudPrecioPlatos);
+	printf("PreciosPlatos: %s\n", unaRta->precioPlatos);
+
+
+}
+
 int main(){
 	printf("Comienzo sindicato\n");
 
@@ -1265,6 +1284,8 @@ int main(){
 
 	// ---- A partir de aca el FS ya existe ----
 
+	obtenerRestaurante("ElDestino");
+
 	// Testing semaforos
 //	char* restaurant1 = "ElDestino";
 //	crearSemaforoRestaurant(restaurant1);
@@ -1280,18 +1301,18 @@ int main(){
 
 
 	// Testing
-	guardarPedido("ElDestino", 9);
-
-
-	guardarPlato("ElDestino", 9, "Milanesa", 20);
-	guardarPlato("ElDestino", 9, "Empanadas", 20);
-	guardarPlato("ElDestino", 9, "Ensalada", 20);
-	guardarPlato("ElDestino", 9, "Milanesa", 10);
-	guardarPlato("ElDestino", 9, "Empanadas", 10);
-	guardarPlato("ElDestino", 9, "Ensalada", 10);
-	guardarPlato("ElDestino", 9, "Milanesa", 30);
-	guardarPlato("ElDestino", 9, "Empanadas", 30);
-	guardarPlato("ElDestino", 9, "Ensalada", 30);
+//	guardarPedido("ElDestino", 9);
+//
+//
+//	guardarPlato("ElDestino", 9, "Milanesa", 20);
+//	guardarPlato("ElDestino", 9, "Empanadas", 20);
+//	guardarPlato("ElDestino", 9, "Ensalada", 20);
+//	guardarPlato("ElDestino", 9, "Milanesa", 10);
+//	guardarPlato("ElDestino", 9, "Empanadas", 10);
+//	guardarPlato("ElDestino", 9, "Ensalada", 10);
+//	guardarPlato("ElDestino", 9, "Milanesa", 30);
+//	guardarPlato("ElDestino", 9, "Empanadas", 30);
+//	guardarPlato("ElDestino", 9, "Ensalada", 30);
 
 	// 24000
 	// 60 * (200+50+150)

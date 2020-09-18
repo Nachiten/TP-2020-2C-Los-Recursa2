@@ -283,23 +283,34 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido){
 
 	int cantidadDePlatos = cantidadDeElementosEnArray(nombresLista);
 
-	respuesta_obtener_pedido* respuestaPedido = malloc(sizeof(respuesta_obtener_pedido) + cantidadDePlatos * sizeof(plato));
+	// TODO | Ver como se responde
+	// IDEA: Struct:
+	/*
+	 * uint32_t sizeComidas;
+	 * char* comidas;
+	 * uint32_t sizeCantTotales;
+	 * char* cantTotales;
+	 * uint32_t sizeCantListas;
+	 * char* cantListas;
+	 */
 
-	respuestaPedido->cantPlatos = cantidadDePlatos;
+//	respuesta_obtener_pedido* respuestaPedido = malloc(sizeof(respuesta_obtener_pedido) + cantidadDePlatos * sizeof(plato));
+//
+//	respuestaPedido->cantPlatos = cantidadDePlatos;
+//
+//	int i;
+//	for (i = 0; i< cantidadDePlatos; i++){
+//		respuestaPedido->platos_pedido[i].longitudNombrePlato = strlen(nombresLista[i]);
+//		respuestaPedido->platos_pedido[i].nombrePlato = nombresLista[i];
+//		respuestaPedido->platos_pedido[i].cantidadPlatos = atoi(cantTotalLista[i]);
+//		respuestaPedido->platos_pedido[i].cantLista = atoi(cantListaLista[i]);
+//
+////		printf("Nombre %i: %s\n", i, nombresLista[i]);
+////		printf("CantidadTotal %i: %s\n", i, cantTotalLista[i]);
+////		printf("CantidadLista %i: %s\n", i, cantListaLista[i]);
+//	}
 
-	int i;
-	for (i = 0; i< cantidadDePlatos; i++){
-		respuestaPedido->platos_pedido[i].longitudNombrePlato = strlen(nombresLista[i]);
-		respuestaPedido->platos_pedido[i].nombrePlato = nombresLista[i];
-		respuestaPedido->platos_pedido[i].cantidadPlatos = atoi(cantTotalLista[i]);
-		respuestaPedido->platos_pedido[i].cantLista = atoi(cantListaLista[i]);
-
-//		printf("Nombre %i: %s\n", i, nombresLista[i]);
-//		printf("CantidadTotal %i: %s\n", i, cantTotalLista[i]);
-//		printf("CantidadLista %i: %s\n", i, cantListaLista[i]);
-	}
-
-	printearRespuestaObtenerPedido(respuestaPedido);
+	//printearRespuestaObtenerPedido(respuestaPedido);
 
 	// TODO | Enviar el mensaje con la respuesta
 
@@ -328,13 +339,74 @@ void obtenerRestaurante(char* nombreRestaurante){
 
 	signalSemaforoRestaurant(nombreRestaurante);
 
-	// TODO | Cerrar archivo con semaforos
+	char** datosSeparados = string_split(datosRestaurant, "\n");
+
+	/*
+	 *
+	 * AFINIDAD_COCINEROS=[Milanesas] [2]
+	PLATOS=[Milanesas,Empanadas,Ensalada] [3]
+	PRECIO_PLATOS=[200,50,150] [4]
+	 *
+	 *
+	 */
+
+	char** lineaAfinidadesSeparada = string_split(datosSeparados[2], "=");
+	char** lineaPlatosSeparada = string_split(datosSeparados[3], "=");
+	char** lineaPrecioPlatosSeparada = string_split(datosSeparados[4], "=");
+
+	// Numero de cantidadHornos
+	char** lineaCantCocinerosSeparada = string_split(datosSeparados[0], "=");
+	// Posicion = [3,4]
+	char** lineaPosicionSeparada = string_split(datosSeparados[1], "=");
+	// Numero cantidadHornos
+	char** lineaCantHornosSeparada = string_split(datosSeparados[5], "=");
+
+	char** posicionesSeparadas = string_get_string_as_array(lineaPosicionSeparada[1]);
+
+	uint32_t posX = atoi(posicionesSeparadas[0]);
+	uint32_t posY = atoi(posicionesSeparadas[1]);
+
+	uint32_t cantCocineros = atoi(lineaCantCocinerosSeparada[1]);
+	uint32_t cantHornos = atoi(lineaCantHornosSeparada[1]);
+
+	respuesta_obtener_restaurante* respuestaMensaje = malloc(
+			sizeof(respuesta_obtener_restaurante)
+			+ strlen(lineaAfinidadesSeparada[1])
+			+ strlen(lineaPlatosSeparada[1])
+			+ strlen(lineaPrecioPlatosSeparada[1]) + 3
+			);
+
+	respuestaMensaje->cantidadCocineros = cantCocineros;
+	respuestaMensaje->cantHornos = cantHornos;
+	respuestaMensaje->posX = posX;
+	respuestaMensaje->posY = posY;
+	respuestaMensaje->longitudAfinidades = strlen(lineaAfinidadesSeparada[1]);
+	respuestaMensaje->afinidades = lineaAfinidadesSeparada[1];
+
+	respuestaMensaje->longitudPlatos = strlen(lineaPlatosSeparada[1]);
+	respuestaMensaje->platos = lineaPlatosSeparada[1];
+
+	respuestaMensaje->longitudPrecioPlatos = strlen(lineaPrecioPlatosSeparada[1]);
+	respuestaMensaje->precioPlatos = lineaPrecioPlatosSeparada[1];
+
+	printearRespuestaObtenerRestaurante(respuestaMensaje);
 
 	// TODO | Se debe procesar los datos leidos y devolver la respuesta
 
-	printf("Datos leidos:\n%s", datosRestaurant);
+
+
+	//printf("Datos leidos:\n%s", datosRestaurant);
 
 	free(datosRestaurant);
+	freeDeArray(datosSeparados);
+	freeDeArray(lineaAfinidadesSeparada);
+	freeDeArray(lineaPlatosSeparada);
+	freeDeArray(lineaPrecioPlatosSeparada);
+	freeDeArray(lineaCantCocinerosSeparada);
+	freeDeArray(lineaPosicionSeparada);
+	freeDeArray(lineaCantHornosSeparada);
+	freeDeArray(posicionesSeparadas);
+	free(respuestaMensaje);
 }
 
 // Generar un nuevo pedido vacio en el restaurante
