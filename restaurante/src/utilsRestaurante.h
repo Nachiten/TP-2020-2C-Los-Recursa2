@@ -9,6 +9,8 @@
 #define SRC_UTILSRESTAURANTE_H_
 
 #include"shared/estructuras.h"
+#include"shared/socket.h"
+#include"shared/cargador.h"
 #include<stdio.h>
 #include<stdlib.h>
 #include<signal.h>
@@ -30,17 +32,24 @@
 
 //cosas cargadas del archivo config
 t_config* configuracion;
+t_log* logger;
 char* LOG_PATH;
 char* puerto_local;
 char* ip_sindicato;
 char* puerto_sindicato;
 char* puerto_app;
 char* ip_app;
-uint32_t miPosicionX;
-uint32_t miPosicionY;
 char* algoritmoElegido;
 uint32_t quantumElegido;
 char* nombreRestaurante;
+
+uint32_t miPosicionX;
+uint32_t miPosicionY;
+uint32_t cantCocineros;
+uint32_t cantRecetas;
+uint32_t cantHornos;
+t_receta las_recetas;//esto es una lista
+t_cocinero los_cocineros;//esto tambien
 
 typedef enum{
 	NEW = 1,
@@ -59,7 +68,7 @@ typedef enum{
 
 
 void inicializarRestaurante();
-void obtenerRestaurante();
+void obtenerMetadataRestaurante();
 
 
 #endif /* SRC_UTILSRESTAURANTE_H_ */

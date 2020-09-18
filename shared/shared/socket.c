@@ -157,8 +157,13 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 		//ir agregando mas a medida que necesitemos
 
 		case GUARDAR_PEDIDO:
-			    paquete->buffer->stream = malloc(sizeof(guardar_pedido));
-			    size_ya_armado = serializar_paquete_guardar_pedido(paquete, mensaje);
+			paquete->buffer->stream = malloc(sizeof(guardar_pedido));
+			size_ya_armado = serializar_paquete_guardar_pedido(paquete, mensaje);
+			break;
+
+		case RESPUESTA_OBTENER_R:
+			//paquete->buffer->stream = malloc(sizeof(respuesta_obtener_restaurante));
+			//size_ya_armado = serializar_paquete_respuesta_obtener_restaurante(paquete, mensaje);
 			break;
 
 		default:
@@ -356,6 +361,18 @@ uint32_t serializar_paquete_guardar_pedido(t_paquete* paquete, guardar_pedido* e
 	}
 }
 
+/*
+uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, respuesta_obtener_restaurante* estructura){
+
+	uint32_t size = 0;
+	uint32_t desplazamiento = 0;
+	uint32_t pesoDeElementosAEnviar = 0;
+
+	//ver con nacho
+
+	return size;
+}*/
+
 
 
 //Todo faltan meter todas las otras serializaciones*************************
@@ -387,6 +404,14 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 	{
 		case SELECCIONAR_RESTAURANTE:
 			desserializar_seleccionar_restaurante(estructura, socket_cliente);
+			break;
+
+		case OBTENER_RESTAURANTE:
+			desserializar_obtener_restaurante(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_OBTENER_R:
+			//desserializar_respuesta_obtener_restaurante(estructura,socket_cliente);
 			break;
 
 		default:
@@ -484,8 +509,12 @@ void desserializar_guardar_pedido(guardar_pedido* estructura, int32_t socket_cli
 }
 
 
+/*
+void desserializar_respuesta_obtener_restaurante(respuesta_obtener_restaurante* estructura, int32_t socket_cliente){
 
-
+	//ver con nacho
+}
+*/
 
 
 

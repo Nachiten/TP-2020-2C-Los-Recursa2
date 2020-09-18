@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "restaurante.h"
 
 int main(){
 
