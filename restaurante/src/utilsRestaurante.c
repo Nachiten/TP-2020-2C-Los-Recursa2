@@ -12,7 +12,7 @@ void obtenerMetadataRestaurante(){
 
     obtener_restaurante* estructura = malloc(sizeof(obtener_restaurante));
     estructura->largoNombreRestaurante = strlen(nombreRestaurante);
-    estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante);
+    estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
     estructura->nombreRestaurante = nombreRestaurante;
 
     //emision del mensaje para pedir la info, OBTENER_RESTAURANTE [nombreR]

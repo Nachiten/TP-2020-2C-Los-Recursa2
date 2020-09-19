@@ -9,6 +9,7 @@
 #define SRC_CONEXIONES_H_
 
 #include "sindicato.h"
+#include "shared/socket.h"
 #include<sys/socket.h>
 //#include<unistd.h>
 #include<netdb.h>
