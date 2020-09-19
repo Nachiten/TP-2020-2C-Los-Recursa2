@@ -42,11 +42,9 @@ int main(){
 	while(1)
 	{
 		printf("Inserte un comando:\n");
-
 		getline(&lineaEntera, &longitud, stdin);
 
 		string_trim(&lineaEntera);
-
 
 		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, lineaEntera);
 		//pthread_join(hiloConsola, NULL);
@@ -55,7 +53,9 @@ int main(){
 	}
 
 	//ToDO meter los free que falten
-
+	free(ip_destino);
+	free(puerto_destino);
+	free(puerto_local);
 
 	//para cerrar el programa
 	matarPrograma(logger, config, socketEscucha);
@@ -73,6 +73,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 	respuesta_ok_error* estructuraRespuesta;
 	uint32_t socketCliente;
 	int32_t iterador = 0;
+	char* nombreRestaurante;
 
 //	printf("Inserte un comando:\n");
 //
@@ -134,7 +135,35 @@ void obtenerInputConsolaCliente(char* lineaEntera)
     case SELECCIONAR_RESTAURANTE:
     	break;
 
-	case OBTENER_RESTAURANTE:
+	case OBTENER_RESTAURANTE:;
+
+		strcat(palabrasSeparadas[1],"\0");
+
+		printf("El nombre que quiero procesar es: %s\n", palabrasSeparadas[1]);
+		printf("La longitud del nombre a procesar es: %d\n", strlen(palabrasSeparadas[1]));
+
+		//me trato de conectar con sindicato que deberia estar levantado esperando que le vaya a pedir la info
+		socketCliente = establecer_conexion(ip_destino, puerto_destino);
+		resultado_de_conexion(socketCliente, logger, "destino");
+
+		obtener_restaurante* estructura = malloc(sizeof(obtener_restaurante));
+		estructura->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
+//		estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
+		estructura->nombreRestaurante = palabrasSeparadas[1];
+
+		//emision del mensaje para pedir la info, OBTENER_RESTAURANTE [nombreR]
+		mandar_mensaje(estructura, OBTENER_RESTAURANTE, socketCliente);
+
+		free(estructura->nombreRestaurante);
+		free(estructura);
+
+
+
+		printf("pude mandar la solicitud de metadata a sindic.\n");
+
+
+		//aca hago recibir_mensaje pero no haria nada interno mas que capaz loggear lo devuelto
+
 		break;
 
     //aca van mas Cases...

@@ -2,7 +2,7 @@
  * mensajes.c
  *
  *  Created on: 4 sep. 2020
- *      Author: utnso
+ *      Author: Nachiten
  */
 
 #include "mensajes.h"
@@ -18,11 +18,131 @@
  * Confirmar pedido - Interno listo, falta envio mensaje
  * Obtener pedido - Interno listo, falta envio mensaje
  * Obtener restaurante - Interno listo, falta envio mensaje
- * Plato listo - X
- * Obtener receta - X
- * Terminar pedido - X
+ * Plato listo - Interno listo, falta envio de mensaje
+ * Obtener receta - Interno listo, falta envio de mensaje
+ * Terminar pedido - Interno listo, falta envio de mensaje
  *
  */
+
+void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_t socketCliente){
+	if ( !existeRestaurant(nombreRestaurant) ){
+		printf("ERROR | No existe el restaurant buscado.\n");
+		// TODO | Retornar fail
+		return;
+	}
+
+	if( !existePedido(nombreRestaurant, IDPedido) ){
+		printf("ERROR | No existe el pedido solicitado.\n");
+		// TODO | Retornar fail
+		return;
+	}
+
+	waitSemaforoPedido(nombreRestaurant, IDPedido);
+
+	char* datosPedido = leerDatosPedido(nombreRestaurant, IDPedido);
+
+	if(!pedidoEstaEnEstado("Pendiente", datosPedido)){
+		printf("ERROR | No esta en estado pendiente.\n");
+		signalSemaforoPedido(nombreRestaurant, IDPedido);
+		free(datosPedido);
+		// TODO | Retornar fail
+		return;
+	}
+
+	int indexPlatoEnPedido = obtenerPlatoEnPedido(datosPedido, nombrePlato);
+
+	// El plato no esta en el pedido (no debe pasar)
+	if (indexPlatoEnPedido == -1){
+		printf("ERROR | El plato solicitado no está en el pedido.\n");
+		signalSemaforoPedido(nombreRestaurant, IDPedido);
+		// TODO | Retornar fail
+		return;
+	}
+
+	char* datosNuevos = sumarPlatoListoAPedido(datosPedido, indexPlatoEnPedido);
+
+	t_list* listaBloquesActual = obtenerListaBloquesPedido(nombreRestaurant, IDPedido);
+
+	// Calculo cantidad de bloques que necesito
+	int cantidadBloquesNecesarios = cantidadDeBloquesQueOcupa(strlen(datosNuevos));
+
+	// Calculo cantidad de bloques que tengo
+	int cantidadBloquesActuales = list_size(listaBloquesActual);
+
+	char* nombreParaLog = generarNombrePedidoParaLog(nombreRestaurant, IDPedido);
+
+	// Pido mas bloques y los agrego en listaBloques si son necesarios
+	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
+
+	// Separar los datos en una lista
+	t_list* listaDatosSeparados = separarStringEnBloques(datosNuevos, cantidadBloquesNecesarios);
+
+	// Escribir los datos
+	escribirLineasEnBloques(listaBloquesActual, listaDatosSeparados);
+
+	// Generar el path al pedido
+	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
+	char* pathAPedido = generarPathAPedido(pathCarpetaRestaurant, IDPedido);
+
+	// Fijar el size correcto
+	fijarValorArchivoA(pathAPedido, strlen(datosNuevos), "SIZE");
+
+	signalSemaforoPedido(nombreRestaurant, IDPedido);
+
+	// TODO | Retornar OK
+
+	respuesta_ok_error* respuesta;
+
+	respuesta->respuesta = 1;
+
+	destruirListaYElementos(listaBloquesActual);
+	destruirListaYElementos(listaDatosSeparados);
+
+	free(nombreParaLog);
+	free(pathCarpetaRestaurant);
+	free(pathAPedido);
+
+}
+
+void obtenerReceta(char* nombreReceta){
+
+	if (!existeReceta(nombreReceta)){
+		printf("ERROR | No existe la receta solicitada\n");
+		return;
+	}
+
+	waitSemaforoReceta(nombreReceta);
+
+	char* datosReceta = leerDatosReceta(nombreReceta);
+
+	signalSemaforoReceta(nombreReceta);
+
+	char** datosSeparados = string_split(datosReceta, "\n");
+
+	char** lineaPasos = string_split(datosSeparados[0], "=");
+	char** lineaTiempoPasos = string_split(datosSeparados[1], "=");
+
+	char* pasos = lineaPasos[1];
+	char* tiemposPasos = lineaTiempoPasos[1];
+
+	respuesta_obtener_receta* miRespuesta = malloc(sizeof(respuesta_obtener_receta)
+			+ strlen(pasos)
+			+ strlen(tiemposPasos) + 2);
+
+	miRespuesta->sizePasos = strlen(pasos);
+	miRespuesta->pasos = pasos;
+	miRespuesta->sizeTiempoPasos = strlen(tiemposPasos);
+	miRespuesta->tiempoPasos = tiemposPasos;
+
+	printearRespuestaObtenerReceta(miRespuesta);
+
+	// TODO | Falta enviar respuesta
+
+	free(datosReceta);
+	freeDeArray(datosSeparados);
+	freeDeArray(lineaPasos);
+	freeDeArray(lineaTiempoPasos);
+}
 
 void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int cantidadPlatos){
 	if ( !existeRestaurant(nombreRestaurant) ){
@@ -66,7 +186,7 @@ void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int c
 		return;
 	}
 
-	printf("Precio plato: %i\n", precioPlato);
+	//printf("Precio plato: %i\n", precioPlato);
 
 	int indexPlatoEnPedido = obtenerPlatoEnPedido(datosPedido, nombrePlato);
 
@@ -74,12 +194,12 @@ void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int c
 
 	// El plato no esta en el pedido (se debe agregar)
 	if (indexPlatoEnPedido == -1){
-		printf("El plato no está en el pedido.\n");
+		//printf("El plato no está en el pedido.\n");
 		// Se debe agregar el nuevo plato al pedido
 		nuevosDatos = agregarPlatoNuevoAPedido(nombrePlato, datosPedido, precioPlato, cantidadPlatos);
 	// El plato si esta en el pedido (se debe sumar la cantidad)
 	} else {
-		printf("El plato si está en el pedido.\n");
+		//printf("El plato si está en el pedido.\n");
 		// Se debe agregar la cantidad del plato existente y sumar el precio total
 		nuevosDatos = sumarCantidadAPlatoExistente(indexPlatoEnPedido, datosPedido, precioPlato, cantidadPlatos);
 	}
@@ -97,7 +217,7 @@ void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int c
 	char* nombreParaLog = generarNombrePedidoParaLog(nombreRestaurant, IDPedido);
 
 	// Pido mas bloques y los agrego en listaBloques si son necesarios
-	pedirMasBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
+	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
 
 	// Separar los datos en una lista
 	t_list* listaDatosSeparados = separarStringEnBloques(nuevosDatos, cantidadBloquesNecesarios);
@@ -112,9 +232,9 @@ void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int c
 	// Fijar el size correcto
 	fijarValorArchivoA(pathAPedido, strlen(nuevosDatos), "SIZE");
 
-	// TODO | Ver si se necesitan bloques nuevos y escribir todos los datos
-
 	signalSemaforoPedido(nombreRestaurant, IDPedido);
+
+	// TODO | Retornar OK
 
 	destruirListaYElementos(listaBloquesActual);
 	destruirListaYElementos(listaDatosSeparados);
@@ -168,7 +288,81 @@ void consultarPlatos(char* nombreRestaurant){
 	free(datosRestaurante);
 }
 
+void terminarPedido(char* nombreRestaurant, int IDPedido){
 
+	if ( !existeRestaurant(nombreRestaurant) ){
+		printf("ERROR | No existe el restaurant buscado.\n");
+		// TODO | Retornar fail
+		return;
+	}
+
+	if( !existePedido(nombreRestaurant, IDPedido) ){
+		printf("ERROR | No existe el pedido solicitado.\n");
+		// TODO | Retornar fail
+		return;
+	}
+
+	waitSemaforoPedido(nombreRestaurant, IDPedido);
+
+	char* datosPedido = leerDatosPedido(nombreRestaurant, IDPedido);
+
+	if(!pedidoEstaEnEstado("Confirmado", datosPedido)){
+		printf("ERROR | No esta en estado pendiente.\n");
+		signalSemaforoPedido(nombreRestaurant, IDPedido);
+		// TODO | Retornar fail
+		return;
+	}
+
+	char* nuevosDatosPedido = cambiarEstadoPedidoA("Terminado", datosPedido);
+
+	printf("Nuevos datos pedido:\n%s", nuevosDatosPedido);
+
+	/*
+	 * 1 - Calcular cantidad de bloques a utilizar
+	 * 2 - Obtener bloques actuales
+	 * 3 - Pedir bloques si es necesario
+	 * 4 - Escribir nuevos datos en bloques
+	 * 5 - Fijar size nuevo
+	 */
+
+	t_list* listaBloquesActual = obtenerListaBloquesPedido(nombreRestaurant, IDPedido);
+
+	// Calculo cantidad de bloques que necesito
+	int cantidadBloquesNecesarios = cantidadDeBloquesQueOcupa(strlen(nuevosDatosPedido));
+
+	// Calculo cantidad de bloques que tengo
+	int cantidadBloquesActuales = list_size(listaBloquesActual);
+
+	char* nombreParaLog = generarNombrePedidoParaLog(nombreRestaurant, IDPedido);
+
+	// Pido mas bloques y los agrego en listaBloques si son necesarios
+	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
+
+	// Separar los datos en una lista
+	t_list* listaDatosSeparados = separarStringEnBloques(nuevosDatosPedido, cantidadBloquesNecesarios);
+
+	// Escribir los datos
+	escribirLineasEnBloques(listaBloquesActual, listaDatosSeparados);
+
+	// Generar el path al pedido
+	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
+	char* pathAPedido = generarPathAPedido(pathCarpetaRestaurant, IDPedido);
+
+	// Fijar el size correcto
+	fijarValorArchivoA(pathAPedido, strlen(nuevosDatosPedido), "SIZE");
+
+	signalSemaforoPedido(nombreRestaurant, IDPedido);
+
+	// TODO | Retornar OK
+
+	free(datosPedido);
+	free(nuevosDatosPedido);
+	destruirListaYElementos(listaBloquesActual);
+	destruirListaYElementos(listaDatosSeparados);
+	free(pathCarpetaRestaurant);
+	free(pathAPedido);
+
+}
 
 void confirmarPedido(char* nombreRestaurant, int IDPedido){
 
@@ -218,7 +412,7 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 	char* nombreParaLog = generarNombrePedidoParaLog(nombreRestaurant, IDPedido);
 
 	// Pido mas bloques y los agrego en listaBloques si son necesarios
-	pedirMasBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
+	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
 
 	// Separar los datos en una lista
 	t_list* listaDatosSeparados = separarStringEnBloques(nuevosDatosPedido, cantidadBloquesNecesarios);
@@ -273,56 +467,38 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido){
 	 */
 
 	// Separo la linea con = | Linea : PLATOS=[platoA,platoB,platoC]
-	char** listaNombresPlatos = string_split(datosSeparados[1], "=");
-	char** listaCantidadesTotales = string_split(datosSeparados[2], "=");
-	char** listaCantidadesListas = string_split(datosSeparados[3], "=");
+	char** lineaNombresPlatos = string_split(datosSeparados[1], "=");
+	char** lineaCantidadesTotales = string_split(datosSeparados[2], "=");
+	char** lineaCantidadesListas = string_split(datosSeparados[3], "=");
 
-	char** nombresLista = string_get_string_as_array(listaNombresPlatos[1]);
-	char** cantTotalLista = string_get_string_as_array(listaCantidadesTotales[1]);
-	char** cantListaLista = string_get_string_as_array(listaCantidadesListas[1]);
+	char* nombresPlatos = lineaNombresPlatos[1];
+	char* cantidadesTotales = lineaCantidadesTotales[1];
+	char* cantidadesListas = lineaCantidadesListas[1];
 
-	int cantidadDePlatos = cantidadDeElementosEnArray(nombresLista);
+	respuesta_obtener_pedido* respuestaPedido = malloc(sizeof(respuesta_obtener_pedido)
+			+ strlen(nombresPlatos)
+			+ strlen(cantidadesTotales)
+			+ strlen(cantidadesListas) + 3);
 
-	// TODO | Ver como se responde
-	// IDEA: Struct:
-	/*
-	 * uint32_t sizeComidas;
-	 * char* comidas;
-	 * uint32_t sizeCantTotales;
-	 * char* cantTotales;
-	 * uint32_t sizeCantListas;
-	 * char* cantListas;
-	 */
+	respuestaPedido->sizeComidas = strlen(nombresPlatos);
+	respuestaPedido->comidas = nombresPlatos;
 
-//	respuesta_obtener_pedido* respuestaPedido = malloc(sizeof(respuesta_obtener_pedido) + cantidadDePlatos * sizeof(plato));
-//
-//	respuestaPedido->cantPlatos = cantidadDePlatos;
-//
-//	int i;
-//	for (i = 0; i< cantidadDePlatos; i++){
-//		respuestaPedido->platos_pedido[i].longitudNombrePlato = strlen(nombresLista[i]);
-//		respuestaPedido->platos_pedido[i].nombrePlato = nombresLista[i];
-//		respuestaPedido->platos_pedido[i].cantidadPlatos = atoi(cantTotalLista[i]);
-//		respuestaPedido->platos_pedido[i].cantLista = atoi(cantListaLista[i]);
-//
-////		printf("Nombre %i: %s\n", i, nombresLista[i]);
-////		printf("CantidadTotal %i: %s\n", i, cantTotalLista[i]);
-////		printf("CantidadLista %i: %s\n", i, cantListaLista[i]);
-//	}
+	respuestaPedido->sizeCantTotales = strlen(cantidadesTotales);
+	respuestaPedido->cantTotales = cantidadesTotales;
 
-	//printearRespuestaObtenerPedido(respuestaPedido);
+	respuestaPedido->sizeCantListas = strlen(cantidadesListas);
+	respuestaPedido->cantListas = cantidadesListas;
 
-	// TODO | Enviar el mensaje con la respuesta
+	printearRespuestaObtenerPedido(respuestaPedido);
+
+	// TODO | Falta enviar el mensaje con la respuesta
 
 	free(datosPedido);
 
 	freeDeArray(datosSeparados);
-	freeDeArray(listaNombresPlatos);
-	freeDeArray(listaCantidadesTotales);
-	freeDeArray(listaCantidadesListas);
-	freeDeArray(nombresLista);
-	freeDeArray(cantTotalLista);
-	freeDeArray(cantListaLista);
+	freeDeArray(lineaNombresPlatos);
+	freeDeArray(lineaCantidadesTotales);
+	freeDeArray(lineaCantidadesListas);
 }
 
 // Obtiene todos los datos de un restaurant

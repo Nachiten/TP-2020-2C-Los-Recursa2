@@ -217,12 +217,20 @@ typedef struct{
 }respuesta_consultar_pedido;
 
 typedef struct{
-	uint32_t cantPlatos;
-	t_plato platos_pedido[];//esto es una lista
+	uint32_t sizeComidas;
+	char* comidas;
+	uint32_t sizeCantTotales;
+	char* cantTotales;
+	uint32_t sizeCantListas;
+	char* cantListas;
 }respuesta_obtener_pedido;
 
-
-
+typedef struct{
+	uint32_t sizePasos;
+	char* pasos;
+	uint32_t sizeTiempoPasos;
+	char* tiempoPasos;
+}respuesta_obtener_receta;
 
 
 #endif /* SHARED_ESTRUCTURAS_H_ */

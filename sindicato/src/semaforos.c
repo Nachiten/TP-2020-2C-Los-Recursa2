@@ -2,7 +2,7 @@
  * semaforos.c
  *
  *  Created on: 10 sep. 2020
- *      Author: utnso
+ *      Author: Nachiten
  */
 
 #include "semaforos.h"
@@ -200,7 +200,6 @@ void signalSemaforoReceta(char* nombreReceta){
 void crearSemaforosArchivosExistentes(){
 	crearSemaforosRestaurantesExistentes();
 	crearSemaforosRecetasExistentes();
-	// TODO | Al crear el semaforo de un pedido no se guarda correctamente el nombre del restaurant
 	crearSemaforosPedidosExistentes();
 }
 
@@ -350,11 +349,17 @@ t_list* escanearCarpetasExistentes(char* path){
 			continue;
 		}
 
-		char* punteroANombreLista = malloc(strlen(punteroANombre) + 1);
-		strcpy(punteroANombreLista, punteroANombre);
+		// Se separa el archivo para sacar el nombre antes de la extension
+		char** nombreSeparado = string_split(punteroANombre, ".");
+
+		// Se crea una copia del puntero para meterlo en la lista
+		char* punteroANombreLista = malloc(strlen(nombreSeparado[0]) + 1);
+		strcpy(punteroANombreLista, nombreSeparado[0]);
 
 		// Si es una carpeta pokemon lo agrego a la lista
 		list_add(listaCarpetasExistenes, punteroANombreLista);
+
+		freeDeArray(nombreSeparado);
 	}
 
 	closedir(dr);
