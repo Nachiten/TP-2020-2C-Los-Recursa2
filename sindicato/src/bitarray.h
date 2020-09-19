@@ -15,7 +15,8 @@ sem_t* semBitmap;
 t_bitarray* crearBitArray(char*);
 void vaciarBitArray(t_bitarray*);
 void guardarBitArrayEnArchivo(char*);
-void leerBitArrayDeArchivo(char** bitArray);
+void leerBitArrayDeArchivo(char**);
 t_list* obtenerPrimerosLibresDeBitmap(int);
+void liberarUnBloque(int);
 
 #endif /* SRC_BITARRAY_H_ */

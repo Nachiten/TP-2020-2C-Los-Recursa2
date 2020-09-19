@@ -2,7 +2,7 @@
  * semaforos.c
  *
  *  Created on: 10 sep. 2020
- *      Author: utnso
+ *      Author: Nachiten
  */
 
 #include "semaforos.h"

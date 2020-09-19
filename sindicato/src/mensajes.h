@@ -18,6 +18,7 @@ void obtenerPedido(char*, int);
 void obtenerRestaurante(char*);
 void guardarPedido(char*, int);
 void guardarPlato(char*, int, char*, int);
+void terminarPedido(char*, int);
 
 // Mensajes de consola
 void crearReceta(char*, datosReceta unaReceta);

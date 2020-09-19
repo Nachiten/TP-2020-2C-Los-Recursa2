@@ -65,8 +65,9 @@ char* leerDatosRestaurant(char*);
 int obtenerPrecioPlatoRestaurant(char* nombrestaurant, char*);
 
 // Recetas
-char* generarStringInfoReceta(datosReceta unaReceta);
+char* generarStringInfoReceta(datosReceta);
 int existeReceta(char*);
+char* leerDatosReceta(char*);
 
 // Bloques/Archivos
 void escribirDatoEnBloque(char*, int, int);
@@ -76,10 +77,12 @@ void llenarBloquesConString(char*, char*, char*);
 t_list* separarStringEnBloques(char*, int);
 void fijarValorArchivoA(char*, int, char*);
 int leerValorArchivo(char*, char*);
-void loguearAsignacionBloques(char*, t_list*);
 char* generarPathABloque(int);
 char* leerDatosBloques(int, int);
 int cantidadDeBloquesQueOcupa(int);
+void pedirOLiberarBloquesDeSerNecesario(int, int, t_list*, char*);
+void loguearAsignacionBloques(char*, t_list*);
+void loguearLiberacionBloque(char*, int);
 
 // Pedidos
 int existePedido(char*, int);
@@ -89,16 +92,24 @@ char* generarStringPedidoDefault();
 t_list* obtenerListaBloquesPedido(char*, int);
 char* cambiarEstadoPedidoA(char*, char*);
 char* leerDatosPedido(char*, int);
+char* generarNombrePedidoParaLog(char*, int);
 
 // Platos
-char* sumarCantidadAStringPlatos(char* stringPlatos, int cantidad, int indexArray);
+char* sumarCantidadAStringPlatos(char*, int, int);
+int obtenerPlatoEnPedido(char*, char*);
+char* sumarPlatoListoAPedido(char*, int);
+char* sumarCantidadAPlatoExistente(int, char*, int, int);
+char* agregarPlatoNuevoAPedido(char*, char*, int, int);
+int cantidadListaNoEsMayorATotal(char*, char*, int);
 
 // Printear
 void printearRespuestaConsultarPlatos(respuesta_consultar_platos*);
 void printearRespuestaObtenerPedido(respuesta_obtener_pedido*);
+void printearRespuestaObtenerReceta(respuesta_obtener_receta*);
+void printearRespuestaObtenerRestaurante(respuesta_obtener_restaurante* unaRta);
 
 // Otros
-char* sumarPrecioTotal(char* precioInicialString, int precioPlato, int cantidadPlato);
-char* agregarElementoEnStringArray(char* stringArray, char* nombreElemento);
+char* sumarPrecioTotal(char*, int, int);
+char* agregarElementoEnStringArray(char*, char*);
 
 #endif /* SRC_SINDICATO_H_ */

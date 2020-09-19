@@ -2,7 +2,7 @@
  * mensajes.c
  *
  *  Created on: 4 sep. 2020
- *      Author: utnso
+ *      Author: Nachiten
  */
 
 #include "mensajes.h"
