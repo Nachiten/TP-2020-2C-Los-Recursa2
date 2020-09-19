@@ -12,6 +12,13 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	switch(cod_op){
 		case CONSULTAR_PLATOS:
 			break;
+		case OBTENER_RESTAURANTE: ;
+			obtener_restaurante* estructuraMensaje = malloc(sizeof(obtener_restaurante));
+            recibir_mensaje(estructuraMensaje, OBTENER_RESTAURANTE, socket_cliente);
+
+            obtenerRestaurante(estructuraMensaje->nombreRestaurante, socket_cliente);
+
+			break;
 		case ERROR:
 			pthread_exit(NULL);
 			break;

@@ -1460,12 +1460,12 @@ int main(){
 	pthread_t hiloConsola;
 	// Hilo para leer el input de la consola
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
-    //pthread_detach(hiloConsola);
+    pthread_detach(hiloConsola);
 
-    //Iniciar servidor para recibir mensajes
+    // Iniciar servidor para recibir mensajes
     iniciar_server(PUERTO_ESCUCHA);
 
-    pthread_join(hiloConsola, NULL);
+//  pthread_join(hiloConsola, NULL);
 
 	// Liberaciones finales (a las que nunca se llega)
 	config_destroy(config);
