@@ -42,11 +42,9 @@ int main(){
 	while(1)
 	{
 		printf("Inserte un comando:\n");
-
 		getline(&lineaEntera, &longitud, stdin);
 
 		string_trim(&lineaEntera);
-
 
 		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, lineaEntera);
 		//pthread_join(hiloConsola, NULL);
@@ -55,7 +53,9 @@ int main(){
 	}
 
 	//ToDO meter los free que falten
-
+	free(ip_destino);
+	free(puerto_destino);
+	free(puerto_local);
 
 	//para cerrar el programa
 	matarPrograma(logger, config, socketEscucha);
