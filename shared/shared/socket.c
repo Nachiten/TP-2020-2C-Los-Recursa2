@@ -495,6 +495,14 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 			desserializar_obtener_restaurante(estructura, socket_cliente);
 			break;
 
+		case GUARDAR_PLATO:
+			desserializar_guardar_plato(estructura, socket_cliente);
+			break;
+
+		case GUARDAR_PEDIDO:
+			desserializar_guardar_pedido(estructura, socket_cliente);
+			break;
+
 		case RESPUESTA_OBTENER_R:
 			desserializar_respuesta_obtener_restaurante(estructura,socket_cliente);
 			break;

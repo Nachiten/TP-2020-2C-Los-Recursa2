@@ -37,7 +37,7 @@ pthread_t hilo_recibir_mensajes;
 
 void recepcion_mensajes();
 void esperar_conexiones(int32_t miSocket);
-void escuchar_mensajes(int32_t socket_conexion_establecida);
+void escuchar_mensajes(int32_t* socket_conexion_establecida);
 void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t socket);
 
 #endif /* SRC_COMANDA_H_ */

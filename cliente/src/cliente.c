@@ -73,7 +73,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 	respuesta_ok_error* estructuraRespuesta;
 	uint32_t socketCliente;
 	int32_t iterador = 0;
-	char* nombreRestaurante;
+	//char* nombreRestaurante; puede que este al pedo
 
 //	printf("Inserte un comando:\n");
 //
@@ -108,8 +108,6 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 			puts("estoy en el if");
 			break;
 		}
-
-
 
 		mandar_mensaje("nadaxdxd", CONSULTAR_RESTAURANTES, socketCliente);
 
@@ -169,6 +167,8 @@ void obtenerInputConsolaCliente(char* lineaEntera)
     //aca van mas Cases...
 
     case GUARDAR_PEDIDO:
+    	strcat(palabrasSeparadas[2],"\0"); //IMPORTANTISIMO
+
     	estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
 
     	socketCliente = establecer_conexion(ip_destino , puerto_destino);
@@ -183,13 +183,19 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 		guardar_pedido* elMensaje = malloc(sizeof(guardar_pedido));
 		elMensaje->idPedido = atoi(palabrasSeparadas[1]);
 		elMensaje->largoNombreRestaurante = strlen(palabrasSeparadas[2]);
-		elMensaje->nombreRestaurante = malloc(elMensaje->largoNombreRestaurante + 1);
+		//elMensaje->nombreRestaurante = malloc(elMensaje->largoNombreRestaurante + 1);
+		//strcpy(elMensaje->nombreRestaurante, palabrasSeparadas[2]);
 		elMensaje->nombreRestaurante = palabrasSeparadas[2];
+
+		printf("ID: %u \n", elMensaje->idPedido);
+		printf("nombre: %s \n", elMensaje->nombreRestaurante);
 
 		//   ¿¿¿¿¿Crearia un hilo mas para mandar el socket junto con el id pedido, el nombre del resto y el tamanio????? entiendo que no
 		//      pthread_t hiloMensaje;
 		//      pthread_create(&hiloMensaje, NULL, mandar_mensaje ?), &socketCliente);
 		//      pthread_detach(hiloMensaje);
+
+		//ToDO poner los 2 recv para cod OP y el size del payload
 
 		mandar_mensaje(elMensaje, GUARDAR_PEDIDO, socketCliente);
 
@@ -197,7 +203,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 		printf("El intento de guardar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
 
-		free(elMensaje->nombreRestaurante); //porfa no olvidarse de este free, tambien es importante, no solo liberar la estructura, sino nos va a caber
+		//free(elMensaje->nombreRestaurante); //porfa no olvidarse de este free, tambien es importante, no solo liberar la estructura, sino nos va a caber
 		free(elMensaje);
 		free(estructuraRespuesta);
 		close(socketCliente); //siempre cerrar socket cuando se termina de usar
