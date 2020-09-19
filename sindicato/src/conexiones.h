@@ -15,6 +15,6 @@
 
 void serve_client(int32_t* socket);
 void esperar_cliente(int32_t socket_servidor);
-void iniciar_server(char* ip, char* puerto);
+void iniciar_server( char* puerto);
 
 #endif /* SRC_CONEXIONES_H_ */

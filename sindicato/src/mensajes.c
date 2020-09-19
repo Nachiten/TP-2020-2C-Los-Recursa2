@@ -24,7 +24,7 @@
  *
  */
 
-void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato){
+void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_t socketCliente){
 	if ( !existeRestaurant(nombreRestaurant) ){
 		printf("ERROR | No existe el restaurant buscado.\n");
 		// TODO | Retornar fail
@@ -90,6 +90,10 @@ void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato){
 	signalSemaforoPedido(nombreRestaurant, IDPedido);
 
 	// TODO | Retornar OK
+
+	respuesta_ok_error* respuesta;
+
+	respuesta->respuesta = 1;
 
 	destruirListaYElementos(listaBloquesActual);
 	destruirListaYElementos(listaDatosSeparados);

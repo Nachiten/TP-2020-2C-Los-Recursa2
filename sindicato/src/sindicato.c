@@ -1462,8 +1462,8 @@ int main(){
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
     //pthread_detach(hiloConsola);
 
-    // Iniciar servidor para recibir mensajes
-    //iniciar_server(IP_SINDICATO, PUERTO_ESCUCHA);
+    //Iniciar servidor para recibir mensajes
+    iniciar_server(PUERTO_ESCUCHA);
 
     pthread_join(hiloConsola, NULL);
 
