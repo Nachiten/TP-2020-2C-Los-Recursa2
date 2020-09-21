@@ -30,9 +30,9 @@ void inicializar_tabla_de_paginas(tabla_paginas* laTablaDePaginas)
 	laTablaDePaginas->sig_pagina = NULL;
 }
 
-tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante)
+tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante, uint32_t negarCreacion)
 {
-	tablas_segmentos_restaurantes* tablaDePedidosSeleccionada;
+	tablas_segmentos_restaurantes* tablaDePedidosSeleccionada = NULL;
 	uint32_t tablaDefault = 0;
 
 	//chequeamos si solo tenemos la tabla de pedidos por default
@@ -56,21 +56,24 @@ tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_res
 
 	else //es un restaurante nuevo, hay que crearle una lista de pedidos
 	{
-		//si tengo la tabla DEFAULT disponible
-		if(tablaDefault == 1)
+		if(negarCreacion == 0) //se crea si Y SOLO SI el flag esta en 0 (no se pueden crear tablas de pedidos a menos que autorice la consigna)
 		{
-			//simplemente le asigno el nombre del restaurante nuevo a la lista de pedidos Default
-			lasListasDePedidosDeRestaurantes->nombreRestaurante = malloc(strlen(nombreDeRestaurante)+1);
-			memcpy(lasListasDePedidosDeRestaurantes->nombreRestaurante, nombreDeRestaurante, strlen(nombreDeRestaurante)+1);
+			//si tengo la tabla DEFAULT disponible
+			if(tablaDefault == 1)
+			{
+				//simplemente le asigno el nombre del restaurante nuevo a la lista de pedidos Default
+				lasListasDePedidosDeRestaurantes->nombreRestaurante = malloc(strlen(nombreDeRestaurante)+1);
+				memcpy(lasListasDePedidosDeRestaurantes->nombreRestaurante, nombreDeRestaurante, strlen(nombreDeRestaurante)+1);
 
-			tablaDePedidosSeleccionada = lasListasDePedidosDeRestaurantes; //la lista de pedidos por default es la seleccionada
-		}
+				tablaDePedidosSeleccionada = lasListasDePedidosDeRestaurantes; //la lista de pedidos por default es la seleccionada
+			}
 
-		//si o si tengo que crearle una tabla nueva
-		else
-		{
-			//devuelvo la lista de pedidos creada
-			tablaDePedidosSeleccionada = crear_tabla_de_pedidos(lasListasDePedidosDeRestaurantes, nombreDeRestaurante);
+			//si o si tengo que crearle una tabla nueva
+			else
+			{
+				//devuelvo la lista de pedidos creada
+				tablaDePedidosSeleccionada = crear_tabla_de_pedidos(lasListasDePedidosDeRestaurantes, nombreDeRestaurante);
+			}
 		}
 	}
 
@@ -214,7 +217,26 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 	}
 }
 
-void agregarPedidoARestaurante(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento, uint32_t idPedido)
+uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombrePlato)
+{
+	tabla_paginas* tablaDePlatos = segmentoSeleccionado->mi_tabla;
+	uint32_t existe = 0;
+
+	//avanzo en la tabla de paginas a ver si existe una de el plato solicitado
+	while(tablaDePlatos != NULL)
+	{
+		//comparo nombres de platos
+		if(strcmp(tablaDePlatos->nombreDeMorfi,nombrePlato) == 0)
+		{
+			existe = 1;
+		}
+		tablaDePlatos = tablaDePlatos->sig_pagina;
+	}
+
+	return existe;
+}
+
+void agregarPlatoARestaurante(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento, char* nombrePlato)
 {
 	segmentos* laTablaDeSegmentos = tablaDePedidosDelRestaurante->miTablaDePedidos;
 	segmentos* segmentoSeleccionado = NULL;
@@ -225,12 +247,19 @@ void agregarPedidoARestaurante(tablas_segmentos_restaurantes* tablaDePedidosDelR
 		laTablaDeSegmentos = laTablaDeSegmentos->sig_segmento;
 	}
 
-	segmentoSeleccionado->id_Pedido = idPedido;
+	segmentoSeleccionado = laTablaDeSegmentos;
 
+	//vemos si existe el plato en el pedido
+	if(verificarExistenciaDePlato(segmentoSeleccionado, nombrePlato))
+	{
 
+	}
 
-	//segmentoSeleccionado = laTablaDeSegmentos;
+	//es un plato nuevo que agregar al pedido ToDo terminar
+	else
+	{
 
+	}
 	//toDo  terminar cuando inicialice tabla de paginas
 	//segmentoSeleccionado->mi_tabla->
 

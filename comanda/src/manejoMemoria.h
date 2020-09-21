@@ -18,12 +18,12 @@ void inicializar_tabla_de_segmentos(segmentos* laTablaDeSegmentos);
 void inicializar_tabla_de_paginas(tabla_paginas* laTablaDePaginas);
 
 //devuelve la lista de pedidos del restaurante solicitado, si no existe, la crea
-tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante);
+tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante, uint32_t negarCreacion);
 //busca si ya existe la lista de pedidos de X restaurante
 uint32_t buscar_tabla_de_segmentos_de_restaurante(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante);
 //crea una nueva tabla y devuelve puntero a la tabla creada
 tablas_segmentos_restaurantes* crear_tabla_de_pedidos(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante);
-//para ver si ya existe el pedido, y devolver FAIL, o si no
+//para ver si ya existe el pedido, y devolver FAIL, o si no (Existe = 1, no existe = 0)
 uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido);
 //esto crea un nuevo pedido (segumento = pedido)
 uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido);
@@ -31,7 +31,11 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 
 
 uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegmentos, uint32_t idDelPedido);
-void agregarPedidoARestaurante(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento, uint32_t idPedido);
+
+//busco si existe el plato con el nombre provisto en la lista de platos del pedido seleccionado (Existe = 1, no existe = 0)
+uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombrePlato);
+//esto agrega un plato a un pedido (segmento) ya existente
+void agregarPlatoARestaurante(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento);
 
 
 #endif /* SRC_MANEJOMEMORIA_H_ */

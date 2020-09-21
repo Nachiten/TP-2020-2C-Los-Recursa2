@@ -194,7 +194,8 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
 	respuesta_ok_error* resultado;
 
-	//uint32_t numeroDeSegmento; por ahora no sirve
+	tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante = NULL;
+	uint32_t numeroDeSegmento;
 
 	/*ToDo CODIGOS DE OPERACION QUE FALTAN CODEAR:
 	 GUARDAR_PEDIDO
@@ -211,10 +212,9 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibir_mensaje(recibidoGuardarPedido, cod_op, socket);
 
         	resultado = malloc(sizeof(respuesta_ok_error));
-        	tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante;
 
         	//buscamos la tabla de pedidos del restaurante seleccionado, si no existe, se crea
-        	tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoGuardarPedido->nombreRestaurante);
+        	tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoGuardarPedido->nombreRestaurante, 0);
 
         	//si la ID del pedido ya existe
         	if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoGuardarPedido->idPedido))
@@ -243,12 +243,42 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibidoGuardarPlato = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoGuardarPlato, cod_op, socket);
 
+        	resultado = malloc(sizeof(respuesta_ok_error));
 
-        	//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se crea
-			//numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoGuardarPedido->idPedido);
+        	//buscamos la tabla de pedidos de dicho restaurante, si no existe, se envia FAIL
+        	tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoGuardarPlato->nombreRestaurante, 1);
 
-			//al segmento que corresponde al restaurante, se le agrega el nuevo pedido
-			//agregarPedidoARestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento, recibidoGuardarPedido->idPedido);
+        	if(tablaDePedidosDelRestaurante == NULL)
+        	{
+        		resultado->respuesta = 0;
+        	}
+
+        	//la tabla si existe, buscamos el segmento...
+        	else
+        	{
+        		//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
+        		if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoGuardarPlato->idPedido))
+        		{
+        			//tomamos el numero de segmento del pedido
+            		numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoGuardarPlato->idPedido);
+
+        			//al segmento que corresponde al pedido, se le agrega el nuevo plato si no existia
+            		agregarPlatoARestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento, recibidoGuardarPlato->nombrePlato);
+        		}
+
+        		//el pedido no existe
+        		else
+        		{
+        			resultado->respuesta = 0;
+        		}
+
+
+        	}
+
+
+
+
+
 
 
 			free(recibidoGuardarPlato);
