@@ -59,54 +59,6 @@ typedef struct
 	t_buffer* buffer;
 }t_paquete;
 
-
-
-//ESTRUCTURAS DE APP-------------------------------------------------------------
-
-typedef struct{
-	int32_t socket;
-	char* nombre_resto;
-}info_resto;
-
-typedef struct{
-	int32_t socket_cliente;
-	char* nombre_resto;
-	uint32_t id_pedido;
-}perfil_cliente;
-
-//ESTRUCTURAS DE RESTAURANTE-----------------------------------------------------
-
-
-//tentativo
-typedef struct{
-	uint32_t id_pedido;
-    t_list lista_platos;
-}t_pedido;
-
-//tentativo
-typedef struct{
-	uint32_t cantidadPasos;
-	char** pasos;
-	uint32_t tiempo_pasos[]; //preguntar
-}t_receta;
-
-
-//tentativo
-typedef struct{
-	uint32_t longitudNombrePlato;
-	char* nombrePlato;
-	uint32_t cantidadPlatos;
-	uint32_t cantLista;
-	t_receta receta;
-}t_plato;
-
-
-typedef struct{
-	uint32_t id_cocinero;
-	char* afinidadPlato;
-}t_cocinero;
-
-
 //ESTRUCTURAS PARA MANDAR MENSAJES-------------------------------------------------------------------------------------------------
 
 //nadie te va a extrañar

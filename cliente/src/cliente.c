@@ -131,6 +131,9 @@ void obtenerInputConsolaCliente(char* lineaEntera)
     	break;
 
     case SELECCIONAR_RESTAURANTE:
+
+
+
     	break;
 
 	case OBTENER_RESTAURANTE:;
@@ -165,6 +168,20 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 		break;
 
     //aca van mas Cases...
+
+	case CONSULTAR_PLATOS:
+
+
+
+		break;
+
+
+
+	case CREAR_PEDIDO:
+
+
+
+		break;
 
     case GUARDAR_PEDIDO:
     	strcat(palabrasSeparadas[2],"\0"); //IMPORTANTISIMO
