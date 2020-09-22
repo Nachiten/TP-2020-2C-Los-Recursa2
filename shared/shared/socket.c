@@ -162,8 +162,8 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			break;
 
 		case RESPUESTA_OBTENER_R:
-			//paquete->buffer->stream = malloc(sizeof(respuesta_obtener_restaurante));
-			//size_ya_armado = serializar_paquete_respuesta_obtener_restaurante(paquete, mensaje);
+			paquete->buffer->stream = malloc(sizeof(respuesta_obtener_restaurante));
+			size_ya_armado = serializar_paquete_respuesta_obtener_restaurante(paquete, mensaje);
 			break;
 
 		default:
@@ -534,6 +534,8 @@ void desserializar_obtener_restaurante(obtener_restaurante* estructura, int32_t 
 
 	//saco el nombre del restaurante en si
 	bytesRecibidos(recv(socket_cliente, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1, MSG_WAITALL));
+
+	strcat(estructura->nombreRestaurante, "\0");
 
 	printf("el largo del nombre del restaurante es: %u\n", estructura->largoNombreRestaurante);
 	printf("el nombre del restaurante es: %s.\n", estructura->nombreRestaurante);
