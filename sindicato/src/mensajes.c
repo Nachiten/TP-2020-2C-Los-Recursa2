@@ -163,6 +163,7 @@ void obtenerReceta(char* nombreReceta, uint32_t socketCliente){
 
 	printearRespuestaObtenerReceta(miRespuesta);
 
+	// Hay que crear la RESPUESTA_OBTENER_RECETA
 	// TODO | Ver: RESPUESTA_OBTENER_R entiendo es RespuestaObtenerRestaurante
 	// Donde esta respuestaObtenerReceta?
 	mandar_mensaje(miRespuesta, RESPUESTA_OBTENER_R, socketCliente);
