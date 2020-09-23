@@ -413,10 +413,6 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 	freeDeArray(lineaPosicionSeparada);
 	freeDeArray(lineaCantHornosSeparada);
 	freeDeArray(posicionesSeparadas);
-	free(respuestaMensaje->afinidades);
-	free(respuestaMensaje->platos);
-	free(respuestaMensaje->precioPlatos);
-	free(respuestaMensaje);
 }
 
 // Generar un nuevo pedido vacio en el restaurante

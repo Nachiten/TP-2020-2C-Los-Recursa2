@@ -247,7 +247,7 @@ uint32_t serializar_paquete_obtener_restaurante(t_paquete* paquete, obtener_rest
 	void* streamAuxiliar = malloc(buffer->size);
 
 	//meto el largo del nombre del Restaurante
-	memcpy(streamAuxiliar + desplazamiento, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante));
+	memcpy(streamAuxiliar, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante));
 	desplazamiento += sizeof(estructura->largoNombreRestaurante);
 
 	//meto el nombre del restaurante
@@ -397,12 +397,13 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 	buffer->size = sizeof(uint32_t)*6
 				 + strlen(estructura->afinidades)+1
-	             + strlen(estructura->platos)+1;
+	             + strlen(estructura->platos)+1
+	             + strlen(estructura->precioPlatos)+1;
 
 	void* streamAuxiliar = malloc(buffer->size);
 
 	//paso la cantidad de cocineros
-	memcpy(streamAuxiliar + desplazamiento, &(estructura->cantidadCocineros), sizeof(estructura->cantidadCocineros));
+	memcpy(streamAuxiliar, &(estructura->cantidadCocineros), sizeof(estructura->cantidadCocineros));
 	desplazamiento += sizeof(estructura->cantidadCocineros);
 
 	//paso las coordenadas del restau en el mapa
@@ -451,7 +452,7 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 						   + estructura->longitudAfinidades+1
 						   + sizeof(estructura->longitudPlatos)
 						   + estructura->longitudPlatos+1
-						   + sizeof(estructura->longitudPrecioPlatos)+
+						   + sizeof(estructura->longitudPrecioPlatos)
 						   + estructura->longitudPrecioPlatos+1;
 
 
@@ -647,8 +648,6 @@ void desserializar_respuesta_obtener_restaurante(respuesta_obtener_restaurante* 
 
 	estructura->precioPlatos = malloc(estructura->longitudPrecioPlatos+1);
 	bytesRecibidos(recv(socket_cliente, estructura->precioPlatos, estructura->longitudPrecioPlatos+1,  MSG_WAITALL));
-
-
 }
 
 
