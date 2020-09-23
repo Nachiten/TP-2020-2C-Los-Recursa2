@@ -7,10 +7,17 @@
 
 #include "conexiones.h"
 
-void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t sizeAAllocar)  {
+void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t sizeAAllocar)  {
 
 	switch(cod_op){
 		case CONSULTAR_PLATOS:
+			break;
+		case OBTENER_RESTAURANTE: ;
+			obtener_restaurante* estructuraMensaje = malloc(sizeof(obtener_restaurante));
+            recibir_mensaje(estructuraMensaje, OBTENER_RESTAURANTE, *socket_cliente);
+
+            obtenerRestaurante(estructuraMensaje->nombreRestaurante, *socket_cliente);
+
 			break;
 		case ERROR:
 			pthread_exit(NULL);
@@ -36,15 +43,11 @@ void serve_client(int32_t* socketCliente)
 
 		if(recibidos >= 1)
 		{
-			//sem_wait(semRecibirMensajes);
-
-			recibidosSize = recv(*socketCliente, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+			recibidosSize = recv(*socket, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 			bytesRecibidos(recibidosSize);
 			printf("Tamaño de lo que sigue en el buffer: %u.\n", sizeAAllocar);
 
-			process_request(cod_op, *socketCliente, sizeAAllocar);
-
-			//sem_post(semRecibirMensajes);
+			process_request(cod_op, socket, sizeAAllocar);
 		}
 
 
@@ -65,13 +68,11 @@ void esperar_cliente(int32_t socket_servidor)
 	struct sockaddr_in dir_cliente;
 
 	socklen_t tam_direccion = sizeof(struct sockaddr_in);
-	pthread_t thread;
+	pthread_t hiloConexionCliente;
 	int32_t* socket_cliente = malloc(sizeof(int32_t));
-
 	*socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
-
-	pthread_create(&thread, NULL, (void*)serve_client, socket_cliente);
-	pthread_detach(thread);
+	pthread_create(&hiloConexionCliente, NULL, (void*)serve_client, socket_cliente);
+	pthread_detach(hiloConexionCliente);
 }
 
 void iniciar_server(char* puerto)

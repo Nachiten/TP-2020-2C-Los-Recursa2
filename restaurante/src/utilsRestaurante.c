@@ -10,25 +10,66 @@ void obtenerMetadataRestaurante(){
     socket_cliente = establecer_conexion(ip_sindicato, puerto_sindicato);
     resultado_de_conexion(socket_cliente, logger, "destino");
 
+    obtener_restaurante* estructura = malloc(sizeof(obtener_restaurante));
+    estructura->largoNombreRestaurante = strlen(nombreRestaurante);
+    estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
+    estructura->nombreRestaurante = nombreRestaurante;
+
+    printf("El nombre rancio que estoy por mandar es: %s \n", estructura->nombreRestaurante);
+
+
+
+
     //emision del mensaje para pedir la info, OBTENER_RESTAURANTE [nombreR]
-    mandar_mensaje(nombreRestaurante, OBTENER_RESTAURANTE, socket_cliente);
+    mandar_mensaje(estructura, OBTENER_RESTAURANTE, socket_cliente);
+
+    free(estructura->nombreRestaurante);
+    free(estructura);
+
+
+
+    printf("pude mandar la solicitud de metadata a sindic.\n");
+
+
+
 
     respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizeof(respuesta_obtener_restaurante));
 
-    //recepcion del choclo divino
+   //recepcion del choclo divino
     recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_R, socket_cliente);
 
+    printf("pude recibir toda la de metadata de sindic.\n");
 
+
+    //trabajo interno con la metadata recibida
     miPosicionX = estructuraRespuestaObtenerRestaurante->posX;
     miPosicionY = estructuraRespuestaObtenerRestaurante->posY;
     cantHornos = estructuraRespuestaObtenerRestaurante->cantHornos;
-    cantRecetas = estructuraRespuestaObtenerRestaurante->cantidadRecetas;
     cantCocineros = estructuraRespuestaObtenerRestaurante->cantidadCocineros;
-    //ver como parsear la lista de cocineros y recetas
+
+    printf("Voy a tener %d cocineros/cpus. \n", cantCocineros);
+    printf("Los platos que ofrece el restaurante son: %s \n", estructuraRespuestaObtenerRestaurante->platos);
+    printf("Las afinidades de los cocineros son: %s \n", estructuraRespuestaObtenerRestaurante->afinidades);
+
+
+    //aca pasan cosas en el medio
+
+    free(estructuraRespuestaObtenerRestaurante->platos);
+    free(estructuraRespuestaObtenerRestaurante->afinidades);
+    free(estructuraRespuestaObtenerRestaurante);
+
 
 
 }
 
+//void crearColasPlanificacion(){
+//
+//	for(int i=0; i<cantCocineros; i++){
+//
+//
+//		}
+//
+//}
 
 
 void inicializarRestaurante(){
@@ -45,10 +86,16 @@ void inicializarRestaurante(){
     algoritmoElegido = config_get_string_value(configuracion, "ALGORITMO_PLANIFICACION");
 
     logger = cargarUnLog(LOG_PATH, "Cliente");
+    log_info(logger, "Obtuve de config el nombre: %s" , nombreRestaurante);
 
     //comunicarme con sindicato -> socket -> mensaje OBTENER_RESTAURANTE
 
     obtenerMetadataRestaurante();
 
+//    crearColasPlanificacion();
+
 
 }
+
+
+

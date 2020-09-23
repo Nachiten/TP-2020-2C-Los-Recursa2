@@ -1423,25 +1423,7 @@ int main(){
 
 	// ---- A partir de aca el FS ya existe ----
 
-	int numPedido = 9;
-
-	guardarPedido("ElDestino", numPedido);
-
-	confirmarPedido("ElDestino", numPedido);
-
-	terminarPedido("ElDestino", numPedido);
-
-
-//	guardarPedido("ElDestino", 2);
-//	guardarPedido("ElDestino", 3);
-
-	//guardarPlato("ElDestino", 1, "Empanadas", 5);
-	//guardarPlato("ElDestino", 2, "Empanadas", 5);
-	//guardarPlato("ElDestino", 3, "Empanadas", 5);
-
-	//platoListo("ElDestino", 1, "Empanadas");
-	//platoListo("ElDestino", 1, "Empanadas");
-	//platoListo("ElDestino", 1, "Empanadas");
+//	obtenerRestaurante("ElDestino");
 
 	// Testing semaforos
 //	char* restaurant1 = "ElDestino";
@@ -1460,12 +1442,26 @@ int main(){
 	pthread_t hiloConsola;
 	// Hilo para leer el input de la consola
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
-    //pthread_detach(hiloConsola);
+    pthread_detach(hiloConsola);
 
-    //Iniciar servidor para recibir mensajes
+    // Iniciar servidor para recibir mensajes
     iniciar_server(PUERTO_ESCUCHA);
 
-    pthread_join(hiloConsola, NULL);
+
+//    guardarPedido("ElDestino", 5);
+//    confirmarPedido("ElDestino", 5);
+//    confirmarPedido("ElDestino", 5);
+//
+//    consultarPlatos("ElDestino");
+//    consultarPlatos("PanaderiaJorge");
+//    consultarPlatos("Bataglia");
+//
+//    guardarPedido("PanaderiaJorge", 4);
+//    obtenerPedido("ElDestino", 5);
+//    obtenerPedido("PanaderiaJorge", 4);
+//    obtenerPedido("PanaderiaJorge", 3);
+
+//    pthread_join(hiloConsola, NULL);
 
 	// Liberaciones finales (a las que nunca se llega)
 	config_destroy(config);

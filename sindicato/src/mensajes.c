@@ -502,7 +502,7 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido){
 }
 
 // Obtiene todos los datos de un restaurant
-void obtenerRestaurante(char* nombreRestaurante){
+void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 	if ( !existeRestaurant(nombreRestaurante)){
 		printf("ERROR | No existe el restaurant buscado.\n");
 		// TODO | Retornar valor default (no se cual es)
@@ -567,7 +567,12 @@ void obtenerRestaurante(char* nombreRestaurante){
 
 	printearRespuestaObtenerRestaurante(respuestaMensaje);
 
-	// TODO | Falta devolver la respuesta
+
+	mandar_mensaje(respuestaMensaje, RESPUESTA_OBTENER_R, socket_cliente);
+
+	// TODO | Se debe procesar los datos leidos y devolver la respuesta
+
+
 
 	//printf("Datos leidos:\n%s", datosRestaurant);
 

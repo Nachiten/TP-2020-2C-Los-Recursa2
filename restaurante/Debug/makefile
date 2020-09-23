@@ -26,7 +26,7 @@ endif
 all: restaurante
 
 dependents:
-	-cd /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug && $(MAKE) clean all
+	-cd /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug && $(MAKE) all
 
 # Tool invocations
 restaurante: $(OBJS) $(USER_OBJS) /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug/libshared.so

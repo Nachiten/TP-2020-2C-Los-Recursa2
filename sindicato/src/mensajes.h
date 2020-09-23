@@ -15,7 +15,7 @@
 void consultarPlatos(char*);
 void confirmarPedido(char*, int);
 void obtenerPedido(char*, int);
-void obtenerRestaurante(char*);
+void obtenerRestaurante(char*, uint32_t);
 void guardarPedido(char*, int);
 void guardarPlato(char*, int, char*, int);
 void terminarPedido(char*, int);
