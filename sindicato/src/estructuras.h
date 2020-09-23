@@ -22,4 +22,9 @@ typedef struct{
 	char* tiempoPasos;
 }datosReceta;
 
+typedef enum {
+	FAIL,
+	OK
+}respuestaBool;
+
 #endif /* SRC_ESTRUCTURAS_H_ */
