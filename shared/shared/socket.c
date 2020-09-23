@@ -159,7 +159,6 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 //usa exactamente la misma estructura que el de arriba, y en el caso de que el mensaje salga de cliente se usan parametros vacios
 		case CONSULTAR_PLATOS:
 			paquete->buffer->stream = malloc(sizeof(obtener_restaurante));
-			//paquete->buffer->stream = malloc(sizeof(obtener_restaurante));
 			size_ya_armado = serializar_paquete_obtener_restaurante(paquete, mensaje);
 			break;
 
