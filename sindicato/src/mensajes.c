@@ -14,7 +14,7 @@
  *
  * Plato listo | [Rtas Terminadas] Terminado de codear respuestas booleanas
  * Obtener restaurante | [Rtas Terminadas] Restaurante vacio
- * Obtener receta | [Rtas Terminadas] Se envia la receta vacia o llena
+ * Obtener receta | [Rtas Terminadas] Se envia la receta vacia o llena || SE DEBE REVISAR EL ENUM DE COD_OP
  * Guardar plato | [Rtas Terminadas] Se envian rtas booleanas
  *
  *
