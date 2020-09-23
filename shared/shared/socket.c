@@ -109,8 +109,8 @@ void cerrar_conexion(int32_t socket)
 
 void mandar_mensaje(void* mensaje, codigo_operacion tipoMensaje, int32_t socket)
 {
-	t_paquete* paquete_por_armar = malloc (sizeof(t_paquete));
-	paquete_por_armar->buffer = malloc(sizeof(t_buffer));
+	t_paquete* paquete_por_armar = malloc(sizeof(t_paquete));
+//	paquete_por_armar->buffer = malloc(sizeof(t_buffer));
 	uint32_t size_serializado = 0;
 
 	printf("Voy a mandar un mensaje del tipo %i.\n", tipoMensaje);
@@ -152,13 +152,14 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			break;
 
 		case OBTENER_RESTAURANTE:
-			paquete->buffer->stream = malloc(sizeof(obtener_restaurante));
+			//paquete->buffer->stream = malloc(sizeof(obtener_restaurante));
 			size_ya_armado = serializar_paquete_obtener_restaurante(paquete, mensaje);
 			break;
 
 //usa exactamente la misma estructura que el de arriba, y en el caso de que el mensaje salga de cliente se usan parametros vacios
 		case CONSULTAR_PLATOS:
 			paquete->buffer->stream = malloc(sizeof(obtener_restaurante));
+			//paquete->buffer->stream = malloc(sizeof(obtener_restaurante));
 			size_ya_armado = serializar_paquete_obtener_restaurante(paquete, mensaje);
 			break;
 
@@ -174,7 +175,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			break;
 
 		case RESPUESTA_OBTENER_R:
-			paquete->buffer->stream = malloc(sizeof(respuesta_obtener_restaurante));
+			//paquete->buffer->stream = malloc(sizeof(respuesta_obtener_restaurante));
 			size_ya_armado = serializar_paquete_respuesta_obtener_restaurante(paquete, mensaje);
 			break;
 
@@ -263,13 +264,21 @@ uint32_t serializar_paquete_obtener_restaurante(t_paquete* paquete, obtener_rest
 	uint32_t desplazamiento = 0;
 	uint32_t pesoDeElementosAEnviar = 0;
 
+    //reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+	buffer->size = sizeof(uint32_t)
+				 + strlen(estructura->nombreRestaurante)+1;
+
+	void* streamAuxiliar = malloc(buffer->size);
+
 	//meto el largo del nombre del Restaurante
-	memcpy(paquete->buffer->stream + desplazamiento, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante));
+	memcpy(streamAuxiliar, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante));
 	desplazamiento += sizeof(estructura->largoNombreRestaurante);
 
 	//meto el nombre del restaurante
-	memcpy(paquete->buffer->stream + desplazamiento, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1);
-	desplazamiento += estructura->largoNombreRestaurante+1;
+	//memcpy(paquete->buffer->stream + desplazamiento, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1);
+	memcpy(streamAuxiliar + desplazamiento, estructura->nombreRestaurante, strlen(estructura->nombreRestaurante)+1);
+	desplazamiento += strlen(estructura->nombreRestaurante)+1;
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
 	pesoDeElementosAEnviar = sizeof(estructura->largoNombreRestaurante) + estructura->largoNombreRestaurante+1;
@@ -282,7 +291,10 @@ uint32_t serializar_paquete_obtener_restaurante(t_paquete* paquete, obtener_rest
 
 	else
 	{
+  //NEW el puntero al stream del buffer reservado con malloc va a ser streamAuxiliar con el payload procesado con memcpy sin padding
 		//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
+		buffer->stream = streamAuxiliar;
+		paquete->buffer = buffer;
 		paquete->buffer->size = desplazamiento;
 
 		//el tamaño del mensaje entero es el codigo de operacion + la variable donde me guarde el size del buffer + lo que pesa el buffer
@@ -392,7 +404,6 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 	uint32_t desplazamiento = 0;
 	uint32_t pesoDeElementosAEnviar = 0;
 
-	//ver con nacho
 
 	//strlen(estructura->afinidades) tiene que ser equivalente con sizeof(estructura->longitudAfinidades) numericamente
 	if(strlen(estructura->afinidades) != estructura->longitudAfinidades){
@@ -407,43 +418,52 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 	}
 
 
+    //reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+	buffer->size = sizeof(uint32_t)*6
+				 + strlen(estructura->afinidades)+1
+	             + strlen(estructura->platos)+1
+	             + strlen(estructura->precioPlatos)+1;
+
+	void* streamAuxiliar = malloc(buffer->size);
+
 	//paso la cantidad de cocineros
-	memcpy(paquete->buffer->stream, &(estructura->cantidadCocineros), sizeof(estructura->cantidadCocineros));
+	memcpy(streamAuxiliar, &(estructura->cantidadCocineros), sizeof(estructura->cantidadCocineros));
 	desplazamiento += sizeof(estructura->cantidadCocineros);
 
 	//paso las coordenadas del restau en el mapa
-	memcpy(paquete->buffer->stream, &(estructura->posX), sizeof(estructura->posX));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->posX), sizeof(estructura->posX));
 	desplazamiento += sizeof(estructura->posX);
 
-	memcpy(paquete->buffer->stream, &(estructura->posY), sizeof(estructura->posY));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->posY), sizeof(estructura->posY));
 	desplazamiento += sizeof(estructura->posY);
 
 	//paso la cant de hornos
-	memcpy(paquete->buffer->stream, &(estructura->cantHornos), sizeof(estructura->cantHornos));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->cantHornos), sizeof(estructura->cantHornos));
 	desplazamiento += sizeof(estructura->cantHornos);
 
 
 
 	//paso la longitud del char* afinidades (de cocineros)
-	memcpy(paquete->buffer->stream, &(estructura->longitudAfinidades), sizeof(estructura->longitudAfinidades));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->longitudAfinidades), sizeof(estructura->longitudAfinidades));
 	desplazamiento += sizeof(estructura->longitudAfinidades);
 
-	memcpy(paquete->buffer->stream, estructura->afinidades, strlen(estructura->afinidades)+1);
+	memcpy(streamAuxiliar + desplazamiento, estructura->afinidades, strlen(estructura->afinidades)+1);
 	desplazamiento += strlen(estructura->afinidades)+1;
 
 
 	//paso la longitud del char* platos
-	memcpy(paquete->buffer->stream, &(estructura->longitudPlatos), sizeof(estructura->longitudPlatos));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->longitudPlatos), sizeof(estructura->longitudPlatos));
 	desplazamiento += sizeof(estructura->longitudPlatos);
 
-	memcpy(paquete->buffer->stream, estructura->platos, strlen(estructura->platos)+1);
+	memcpy(streamAuxiliar + desplazamiento, estructura->platos, strlen(estructura->platos)+1);
 	desplazamiento += strlen(estructura->platos)+1;
 
 	//paso la longitud del char* precioPlatos
-	memcpy(paquete->buffer->stream, &(estructura->longitudPrecioPlatos), sizeof(estructura->longitudPrecioPlatos));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->longitudPrecioPlatos), sizeof(estructura->longitudPrecioPlatos));
 	desplazamiento += sizeof(estructura->longitudPrecioPlatos);
 
-	memcpy(paquete->buffer->stream, estructura->precioPlatos, strlen(estructura->precioPlatos)+1);
+	memcpy(streamAuxiliar + desplazamiento, estructura->precioPlatos, strlen(estructura->precioPlatos)+1);
 	desplazamiento += strlen(estructura->precioPlatos)+1;
 
 
@@ -457,7 +477,7 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 						   + estructura->longitudAfinidades+1
 						   + sizeof(estructura->longitudPlatos)
 						   + estructura->longitudPlatos+1
-						   + sizeof(estructura->longitudPrecioPlatos)+
+						   + sizeof(estructura->longitudPrecioPlatos)
 						   + estructura->longitudPrecioPlatos+1;
 
 
@@ -470,6 +490,8 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 
 		else
 		{
+			buffer->stream = streamAuxiliar;
+			paquete->buffer = buffer;
 			//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
 			paquete->buffer->size = desplazamiento;
 
@@ -630,6 +652,8 @@ void desserializar_obtener_restaurante(obtener_restaurante* estructura, int32_t 
 	//saco el nombre del restaurante en si
 	bytesRecibidos(recv(socket_cliente, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1, MSG_WAITALL));
 
+	strcat(estructura->nombreRestaurante, "\0");
+
 	printf("el largo del nombre del restaurante es: %u\n", estructura->largoNombreRestaurante);
 	printf("el nombre del restaurante es: %s.\n", estructura->nombreRestaurante);
 
@@ -721,8 +745,6 @@ void desserializar_respuesta_obtener_restaurante(respuesta_obtener_restaurante* 
 
 	estructura->precioPlatos = malloc(estructura->longitudPrecioPlatos+1);
 	bytesRecibidos(recv(socket_cliente, estructura->precioPlatos, estructura->longitudPrecioPlatos+1,  MSG_WAITALL));
-
-
 }
 
 

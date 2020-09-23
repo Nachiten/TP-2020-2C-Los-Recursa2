@@ -15,37 +15,53 @@ void obtenerMetadataRestaurante(){
     estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
     estructura->nombreRestaurante = nombreRestaurante;
 
+    printf("El nombre rancio que estoy por mandar es: %s \n", estructura->nombreRestaurante);
+
     //emision del mensaje para pedir la info, OBTENER_RESTAURANTE [nombreR]
     mandar_mensaje(estructura, OBTENER_RESTAURANTE, socket_cliente);
 
     free(estructura->nombreRestaurante);
     free(estructura);
 
-
-
     printf("pude mandar la solicitud de metadata a sindic.\n");
 
-//TRABAJO INTERNO CON LA RESPUESTA
+    //recibo el codigo de operacion, ya se que va a ser RESPUESTA_OBTENER_R
+    codigo_operacion* codigoRecibido = malloc(sizeof(codigo_operacion));
+    bytesRecibidos(recv(socket_cliente, codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+
+    printf("El codigo recibido del emisor es: %d", *codigoRecibido);
+
+    uint32_t* sizePayload = malloc(sizeof(uint32_t));
+    bytesRecibidos(recv(socket_cliente, sizePayload, sizeof(uint32_t), MSG_WAITALL));
+
+    printf("El size del buffer/payload para la metadata es: %d", *sizePayload);
+
+    respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(*sizePayload);
+
+   //recepcion del choclo divino
+    recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_R, socket_cliente);
+
+    printf("pude recibir toda la de metadata de sindic.\n");
 
 
-//    respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizeof(respuesta_obtener_restaurante));
-//
-//
-//
-//
-//
-//    //recepcion del choclo divino
-//    recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_R, socket_cliente);
-//
-//    printf("pude recibir la de metadata de sindic.\n");
+    //trabajo interno con la metadata recibida
+    miPosicionX = estructuraRespuestaObtenerRestaurante->posX;
+    miPosicionY = estructuraRespuestaObtenerRestaurante->posY;
+    cantHornos = estructuraRespuestaObtenerRestaurante->cantHornos;
+    cantCocineros = estructuraRespuestaObtenerRestaurante->cantidadCocineros;
+
+    printf("Voy a tener %d cocineros/cpus. \n", cantCocineros);
+    printf("Los platos que ofrece el restaurante son: %s \n", estructuraRespuestaObtenerRestaurante->platos);
+    printf("Las afinidades de los cocineros son: %s \n", estructuraRespuestaObtenerRestaurante->afinidades);
 
 
-      //trabajo interno con la metadata recibida
-//    miPosicionX = estructuraRespuestaObtenerRestaurante->posX;
-//    miPosicionY = estructuraRespuestaObtenerRestaurante->posY;
-//    cantHornos = estructuraRespuestaObtenerRestaurante->cantHornos;
-//    cantCocineros = estructuraRespuestaObtenerRestaurante->cantidadCocineros;
+    //aca pasan cosas en el medio
 
+    free(estructuraRespuestaObtenerRestaurante->platos);
+    free(estructuraRespuestaObtenerRestaurante->afinidades);
+    free(estructuraRespuestaObtenerRestaurante);
+    free(sizePayload);
+    free(codigoRecibido);
 
 
 }
