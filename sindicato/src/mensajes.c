@@ -371,22 +371,26 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 
 	respuesta_obtener_restaurante* respuestaMensaje = malloc(
 			sizeof(respuesta_obtener_restaurante)
-			+ strlen(lineaAfinidadesSeparada[1])
-			+ strlen(lineaPlatosSeparada[1])
-			+ strlen(lineaPrecioPlatosSeparada[1]) + 3
+//			+ strlen(lineaAfinidadesSeparada[1])
+//			+ strlen(lineaPlatosSeparada[1])
+//			+ strlen(lineaPrecioPlatosSeparada[1]) + 3
 			);
 
 	respuestaMensaje->cantidadCocineros = cantCocineros;
 	respuestaMensaje->cantHornos = cantHornos;
 	respuestaMensaje->posX = posX;
 	respuestaMensaje->posY = posY;
+
 	respuestaMensaje->longitudAfinidades = strlen(lineaAfinidadesSeparada[1]);
+	respuestaMensaje->afinidades = malloc(strlen(lineaAfinidadesSeparada[1])+1);
 	respuestaMensaje->afinidades = lineaAfinidadesSeparada[1];
 
 	respuestaMensaje->longitudPlatos = strlen(lineaPlatosSeparada[1]);
+	respuestaMensaje->platos = malloc(strlen(lineaPlatosSeparada[1])+1);
 	respuestaMensaje->platos = lineaPlatosSeparada[1];
 
 	respuestaMensaje->longitudPrecioPlatos = strlen(lineaPrecioPlatosSeparada[1]);
+	respuestaMensaje->precioPlatos = malloc(strlen(lineaPrecioPlatosSeparada[1])+1);
 	respuestaMensaje->precioPlatos = lineaPrecioPlatosSeparada[1];
 
 	printearRespuestaObtenerRestaurante(respuestaMensaje);
@@ -409,6 +413,9 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 	freeDeArray(lineaPosicionSeparada);
 	freeDeArray(lineaCantHornosSeparada);
 	freeDeArray(posicionesSeparadas);
+	free(respuestaMensaje->afinidades);
+	free(respuestaMensaje->platos);
+	free(respuestaMensaje->precioPlatos);
 	free(respuestaMensaje);
 }
 
