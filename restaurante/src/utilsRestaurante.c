@@ -34,7 +34,7 @@ void obtenerMetadataRestaurante(){
     uint32_t sizePayload;
     bytesRecibidos(recv(socket_cliente, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
 
-    printf("El size del buffer/payload para la metadata es: %d", *sizePayload);
+    printf("El size del buffer/payload para la metadata es: %u", sizePayload);
 
     respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizePayload);
 
