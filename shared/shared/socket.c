@@ -173,9 +173,29 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			size_ya_armado = serializar_paquete_guardar_pedido(paquete, mensaje);
 			break;
 
+		case RESPUESTA_SELECCIONAR_R:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
 		case RESPUESTA_OBTENER_R:
 			//paquete->buffer->stream = malloc(sizeof(respuesta_obtener_restaurante));
 			size_ya_armado = serializar_paquete_respuesta_obtener_restaurante(paquete, mensaje);
+			break;
+
+		case RESPUESTA_GUARDAR_PLATO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
+		case RESPUESTA_A_PLATO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
+		case RESPUESTA_PLATO_LISTO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
 			break;
 
 		case RESPUESTA_CONSULTAR_PLATOS:
@@ -188,6 +208,25 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			//size_ya_armado = serializar_paquete_respuesta_crear_pedido(paquete, mensaje);
 			break;
 
+		case RESPUESTA_GUARDAR_PEDIDO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
+		case RESPUESTA_CONFIRMAR_PEDIDO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
+		case RESPUESTA_FINALIZAR_PEDIDO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
+		case RESPUESTA_TERMINAR_PEDIDO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
 
 		default:
 			puts("\n\n\nATENCION: Switch de serializar_paquete pasó por el caso default.\n\n\n");
@@ -549,7 +588,37 @@ uint32_t serializar_paquete_respuesta_consultar_platos(t_paquete* paquete, respu
 			}
 }
 
+uint32_t serializar_paquete_ok_fail(t_paquete* paquete, respuesta_ok_error* estructura)
+{
+	uint32_t size = 0;
+	uint32_t desplazamiento = 0;
+	uint32_t pesoDeElementosAEnviar = 0;
 
+	//meto el booleano con el resultado
+	memcpy(paquete->buffer->stream + desplazamiento, &(estructura->respuesta), sizeof(estructura->respuesta));
+	desplazamiento += sizeof(estructura->respuesta);
+
+	//controlo que el desplazamiento sea = al peso de lo que mando
+	pesoDeElementosAEnviar = sizeof(estructura->respuesta);
+
+	if(desplazamiento != pesoDeElementosAEnviar)
+	{
+		puts("Hubo un error al serializar un mensaje, se pudre todo.\n");
+		abort();
+	}
+
+	else
+	{
+		//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
+		paquete->buffer->size = desplazamiento;
+
+		//el tamaño del mensaje entero es el codigo de operacion + la variable donde me guarde el size del buffer + lo que pesa el buffer
+		size = sizeof(codigo_operacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
+
+		//devuelvo el tamaño de lo que meti en el paquete para poder hacer el malloc
+		return size;
+	}
+}
 
 //Todo faltan meter todas las otras serializaciones*************************
 
@@ -603,6 +672,22 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 			desserializar_guardar_pedido(estructura, socket_cliente);
 			break;
 
+		case RESPUESTA_SELECCIONAR_R:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_GUARDAR_PLATO:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_A_PLATO:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_PLATO_LISTO:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
 		case RESPUESTA_OBTENER_R:
 			desserializar_respuesta_obtener_restaurante(estructura,socket_cliente);
 			break;
@@ -613,6 +698,22 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 
 		case RESPUESTA_CREAR_PEDIDO:
 			desserializar_respuesta_crear_pedido(estructura,socket_cliente);
+			break;
+
+		case RESPUESTA_GUARDAR_PEDIDO:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_CONFIRMAR_PEDIDO:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_FINALIZAR_PEDIDO:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_TERMINAR_PEDIDO:
+			desserializar_ok_fail(estructura, socket_cliente);
 			break;
 
 		default:
@@ -691,6 +792,14 @@ void desserializar_guardar_plato(guardar_plato* estructura, int32_t socket_clien
 	printf("el largo del nombre del plato es: %u.\n", estructura->largonombrePlato);
 	printf("el nombre del plato es: %s.\n", estructura->nombrePlato);
 	printf("la cantidad de platos es: %u.\n", estructura->cantidadPlatos);
+}
+
+void desserializar_ok_fail(respuesta_ok_error* estructura, int32_t socket_cliente)
+{
+	//saco el resultado de la consulta
+	bytesRecibidos(recv(socket_cliente, &(estructura->respuesta), sizeof(estructura->respuesta), MSG_WAITALL));
+
+	printf("El resultado de la consulta es: %u.\n", estructura->respuesta);
 }
 
 void desserializar_guardar_pedido(guardar_pedido* estructura, int32_t socket_cliente)
