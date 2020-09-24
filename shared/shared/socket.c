@@ -109,8 +109,8 @@ void cerrar_conexion(int32_t socket)
 
 void mandar_mensaje(void* mensaje, codigo_operacion tipoMensaje, int32_t socket)
 {
-	t_paquete* paquete_por_armar = malloc (sizeof(t_paquete));
-	paquete_por_armar->buffer = malloc(sizeof(t_buffer));
+	t_paquete* paquete_por_armar = malloc(sizeof(t_paquete));
+//	paquete_por_armar->buffer = malloc(sizeof(t_buffer));
 	uint32_t size_serializado = 0;
 
 	printf("Voy a mandar un mensaje del tipo %i.\n", tipoMensaje);
@@ -140,14 +140,26 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			size_ya_armado = sizeof(tipoMensaje);
 			break;
 
+		case CREAR_PEDIDO: //este se pasa el mensaje por el culo, solo manda el codigo de operacion
+			paquete->buffer->stream = malloc(0); //malloc flashero para que no rompa despues con el free, ToDo ver si funciona o rompe
+			paquete->buffer->size = 0;
+			size_ya_armado = sizeof(tipoMensaje);
+			break;
+
 		case SELECCIONAR_RESTAURANTE:
-				paquete->buffer->stream = malloc(sizeof(seleccionar_restaurante));
-				size_ya_armado = serializar_paquete_seleccionar_restaurante(paquete, mensaje);
+			paquete->buffer->stream = malloc(sizeof(seleccionar_restaurante));
+			size_ya_armado = serializar_paquete_seleccionar_restaurante(paquete, mensaje);
 			break;
 
 		case OBTENER_RESTAURANTE:
-				paquete->buffer->stream = malloc(sizeof(obtener_restaurante));
-				size_ya_armado = serializar_paquete_obtener_restaurante(paquete, mensaje);
+			//paquete->buffer->stream = malloc(sizeof(obtener_restaurante));
+			size_ya_armado = serializar_paquete_obtener_restaurante(paquete, mensaje);
+			break;
+
+//usa exactamente la misma estructura que el de arriba, y en el caso de que el mensaje salga de cliente se usan parametros vacios
+		case CONSULTAR_PLATOS:
+			paquete->buffer->stream = malloc(sizeof(obtener_restaurante));
+			size_ya_armado = serializar_paquete_obtener_restaurante(paquete, mensaje);
 			break;
 
 		case GUARDAR_PLATO:
@@ -161,9 +173,59 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			size_ya_armado = serializar_paquete_guardar_pedido(paquete, mensaje);
 			break;
 
+		case RESPUESTA_SELECCIONAR_R:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
 		case RESPUESTA_OBTENER_R:
 			//paquete->buffer->stream = malloc(sizeof(respuesta_obtener_restaurante));
-			//size_ya_armado = serializar_paquete_respuesta_obtener_restaurante(paquete, mensaje);
+			size_ya_armado = serializar_paquete_respuesta_obtener_restaurante(paquete, mensaje);
+			break;
+
+		case RESPUESTA_GUARDAR_PLATO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
+		case RESPUESTA_A_PLATO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
+		case RESPUESTA_PLATO_LISTO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
+		case RESPUESTA_CONSULTAR_PLATOS:
+			paquete->buffer->stream = malloc(sizeof(respuesta_consultar_platos));
+			size_ya_armado = serializar_paquete_respuesta_consultar_platos(paquete, mensaje);
+			break;
+
+		case RESPUESTA_CREAR_PEDIDO:
+			//paquete->buffer->stream = malloc(sizeof(respuesta_crear_pedido));
+			//size_ya_armado = serializar_paquete_respuesta_crear_pedido(paquete, mensaje);
+			break;
+
+		case RESPUESTA_GUARDAR_PEDIDO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
+		case RESPUESTA_CONFIRMAR_PEDIDO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
+		case RESPUESTA_FINALIZAR_PEDIDO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
+		case RESPUESTA_TERMINAR_PEDIDO:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
 			break;
 
 		default:
@@ -233,19 +295,28 @@ uint32_t serializar_paquete_seleccionar_restaurante(t_paquete* paquete, seleccio
 	}
 }
 
+//este juega doble, tanto para OBTENER_RESTAURANTE como para CONSULTAR_PLATOS (usan exactamente los mismos parametros)
 uint32_t serializar_paquete_obtener_restaurante(t_paquete* paquete, obtener_restaurante* estructura)
 {
 	uint32_t size = 0;
 	uint32_t desplazamiento = 0;
 	uint32_t pesoDeElementosAEnviar = 0;
 
+    //reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+	buffer->size = sizeof(uint32_t)
+				 + strlen(estructura->nombreRestaurante)+1;
+
+	void* streamAuxiliar = malloc(buffer->size);
+
 	//meto el largo del nombre del Restaurante
-	memcpy(paquete->buffer->stream + desplazamiento, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante));
+	memcpy(streamAuxiliar, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante));
 	desplazamiento += sizeof(estructura->largoNombreRestaurante);
 
 	//meto el nombre del restaurante
-	memcpy(paquete->buffer->stream + desplazamiento, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1);
-	desplazamiento += estructura->largoNombreRestaurante+1;
+	//memcpy(paquete->buffer->stream + desplazamiento, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1);
+	memcpy(streamAuxiliar + desplazamiento, estructura->nombreRestaurante, strlen(estructura->nombreRestaurante)+1);
+	desplazamiento += strlen(estructura->nombreRestaurante)+1;
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
 	pesoDeElementosAEnviar = sizeof(estructura->largoNombreRestaurante) + estructura->largoNombreRestaurante+1;
@@ -258,7 +329,10 @@ uint32_t serializar_paquete_obtener_restaurante(t_paquete* paquete, obtener_rest
 
 	else
 	{
+  //NEW el puntero al stream del buffer reservado con malloc va a ser streamAuxiliar con el payload procesado con memcpy sin padding
 		//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
+		buffer->stream = streamAuxiliar;
+		paquete->buffer = buffer;
 		paquete->buffer->size = desplazamiento;
 
 		//el tamaño del mensaje entero es el codigo de operacion + la variable donde me guarde el size del buffer + lo que pesa el buffer
@@ -368,7 +442,6 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 	uint32_t desplazamiento = 0;
 	uint32_t pesoDeElementosAEnviar = 0;
 
-	//ver con nacho
 
 	//strlen(estructura->afinidades) tiene que ser equivalente con sizeof(estructura->longitudAfinidades) numericamente
 	if(strlen(estructura->afinidades) != estructura->longitudAfinidades){
@@ -383,43 +456,52 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 	}
 
 
+    //reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+	buffer->size = sizeof(uint32_t)*6
+				 + strlen(estructura->afinidades)+1
+	             + strlen(estructura->platos)+1
+	             + strlen(estructura->precioPlatos)+1;
+
+	void* streamAuxiliar = malloc(buffer->size);
+
 	//paso la cantidad de cocineros
-	memcpy(paquete->buffer->stream, &(estructura->cantidadCocineros), sizeof(estructura->cantidadCocineros));
+	memcpy(streamAuxiliar, &(estructura->cantidadCocineros), sizeof(estructura->cantidadCocineros));
 	desplazamiento += sizeof(estructura->cantidadCocineros);
 
 	//paso las coordenadas del restau en el mapa
-	memcpy(paquete->buffer->stream, &(estructura->posX), sizeof(estructura->posX));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->posX), sizeof(estructura->posX));
 	desplazamiento += sizeof(estructura->posX);
 
-	memcpy(paquete->buffer->stream, &(estructura->posY), sizeof(estructura->posY));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->posY), sizeof(estructura->posY));
 	desplazamiento += sizeof(estructura->posY);
 
 	//paso la cant de hornos
-	memcpy(paquete->buffer->stream, &(estructura->cantHornos), sizeof(estructura->cantHornos));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->cantHornos), sizeof(estructura->cantHornos));
 	desplazamiento += sizeof(estructura->cantHornos);
 
 
 
 	//paso la longitud del char* afinidades (de cocineros)
-	memcpy(paquete->buffer->stream, &(estructura->longitudAfinidades), sizeof(estructura->longitudAfinidades));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->longitudAfinidades), sizeof(estructura->longitudAfinidades));
 	desplazamiento += sizeof(estructura->longitudAfinidades);
 
-	memcpy(paquete->buffer->stream, estructura->afinidades, strlen(estructura->afinidades)+1);
+	memcpy(streamAuxiliar + desplazamiento, estructura->afinidades, strlen(estructura->afinidades)+1);
 	desplazamiento += strlen(estructura->afinidades)+1;
 
 
 	//paso la longitud del char* platos
-	memcpy(paquete->buffer->stream, &(estructura->longitudPlatos), sizeof(estructura->longitudPlatos));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->longitudPlatos), sizeof(estructura->longitudPlatos));
 	desplazamiento += sizeof(estructura->longitudPlatos);
 
-	memcpy(paquete->buffer->stream, estructura->platos, strlen(estructura->platos)+1);
+	memcpy(streamAuxiliar + desplazamiento, estructura->platos, strlen(estructura->platos)+1);
 	desplazamiento += strlen(estructura->platos)+1;
 
 	//paso la longitud del char* precioPlatos
-	memcpy(paquete->buffer->stream, &(estructura->longitudPrecioPlatos), sizeof(estructura->longitudPrecioPlatos));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->longitudPrecioPlatos), sizeof(estructura->longitudPrecioPlatos));
 	desplazamiento += sizeof(estructura->longitudPrecioPlatos);
 
-	memcpy(paquete->buffer->stream, estructura->precioPlatos, strlen(estructura->precioPlatos)+1);
+	memcpy(streamAuxiliar + desplazamiento, estructura->precioPlatos, strlen(estructura->precioPlatos)+1);
 	desplazamiento += strlen(estructura->precioPlatos)+1;
 
 
@@ -433,7 +515,7 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 						   + estructura->longitudAfinidades+1
 						   + sizeof(estructura->longitudPlatos)
 						   + estructura->longitudPlatos+1
-						   + sizeof(estructura->longitudPrecioPlatos)+
+						   + sizeof(estructura->longitudPrecioPlatos)
 						   + estructura->longitudPrecioPlatos+1;
 
 
@@ -446,6 +528,8 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 
 		else
 		{
+			buffer->stream = streamAuxiliar;
+			paquete->buffer = buffer;
 			//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
 			paquete->buffer->size = desplazamiento;
 
@@ -459,6 +543,82 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 }
 
 
+uint32_t serializar_paquete_respuesta_consultar_platos(t_paquete* paquete, respuesta_consultar_platos* estructura)
+{
+
+	uint32_t size = 0;
+	uint32_t desplazamiento = 0;
+	uint32_t pesoDeElementosAEnviar = 0;
+
+	//strlen(estructura->nombresPlatos) tiene que ser equivalente con sizeof(estructura->longitudNombresPlatos) numericamente
+		if(strlen(estructura->nombresPlatos) != estructura->longitudNombresPlatos){
+		   printf("Error en la serializacion de longitudes, sos pollo\n");
+		   return -1;
+		}
+
+	//paso la longitud del char* platos
+	memcpy(paquete->buffer->stream, &(estructura->longitudNombresPlatos), sizeof(estructura->longitudNombresPlatos));
+	desplazamiento += sizeof(estructura->longitudNombresPlatos);
+
+	memcpy(paquete->buffer->stream, estructura->nombresPlatos, strlen(estructura->nombresPlatos)+1);
+	desplazamiento += strlen(estructura->nombresPlatos)+1;
+
+	//controlo que el desplazamiento sea = al peso de lo que mando
+		pesoDeElementosAEnviar = sizeof(estructura->longitudNombresPlatos)
+							   + estructura->longitudNombresPlatos+1;
+
+
+
+		if(desplazamiento != pesoDeElementosAEnviar)
+			{
+				puts("Hubo un error al serializar un mensaje, se pudre todo.\n");
+				abort();
+			}
+
+			else
+			{
+				//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
+				paquete->buffer->size = desplazamiento;
+
+				//el tamaño del mensaje entero es el codigo de operacion + la variable donde me guarde el size del buffer + lo que pesa el buffer
+				size = sizeof(codigo_operacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
+
+				//devuelvo el tamaño de lo que meti en el paquete para poder hacer el malloc
+				return size;
+			}
+}
+
+uint32_t serializar_paquete_ok_fail(t_paquete* paquete, respuesta_ok_error* estructura)
+{
+	uint32_t size = 0;
+	uint32_t desplazamiento = 0;
+	uint32_t pesoDeElementosAEnviar = 0;
+
+	//meto el booleano con el resultado
+	memcpy(paquete->buffer->stream + desplazamiento, &(estructura->respuesta), sizeof(estructura->respuesta));
+	desplazamiento += sizeof(estructura->respuesta);
+
+	//controlo que el desplazamiento sea = al peso de lo que mando
+	pesoDeElementosAEnviar = sizeof(estructura->respuesta);
+
+	if(desplazamiento != pesoDeElementosAEnviar)
+	{
+		puts("Hubo un error al serializar un mensaje, se pudre todo.\n");
+		abort();
+	}
+
+	else
+	{
+		//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
+		paquete->buffer->size = desplazamiento;
+
+		//el tamaño del mensaje entero es el codigo de operacion + la variable donde me guarde el size del buffer + lo que pesa el buffer
+		size = sizeof(codigo_operacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
+
+		//devuelvo el tamaño de lo que meti en el paquete para poder hacer el malloc
+		return size;
+	}
+}
 
 //Todo faltan meter todas las otras serializaciones*************************
 
@@ -495,6 +655,15 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 			desserializar_obtener_restaurante(estructura, socket_cliente);
 			break;
 
+//usa exactamente la misma estructura que el de arriba, y en el caso de que elmensaje salga de cliente se usan parametros vacios
+		case CONSULTAR_PLATOS:
+			desserializar_obtener_restaurante(estructura, socket_cliente);
+			break;
+
+		case CREAR_PEDIDO:
+			//no se hace nada, crear pedido no posee parametros.
+			break;
+
 		case GUARDAR_PLATO:
 			desserializar_guardar_plato(estructura, socket_cliente);
 			break;
@@ -503,8 +672,48 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 			desserializar_guardar_pedido(estructura, socket_cliente);
 			break;
 
+		case RESPUESTA_SELECCIONAR_R:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_GUARDAR_PLATO:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_A_PLATO:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_PLATO_LISTO:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
 		case RESPUESTA_OBTENER_R:
 			desserializar_respuesta_obtener_restaurante(estructura,socket_cliente);
+			break;
+
+		case RESPUESTA_CONSULTAR_PLATOS:
+			desserializar_respuesta_consultar_platos(estructura,socket_cliente);
+			break;
+
+		case RESPUESTA_CREAR_PEDIDO:
+			desserializar_respuesta_crear_pedido(estructura,socket_cliente);
+			break;
+
+		case RESPUESTA_GUARDAR_PEDIDO:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_CONFIRMAR_PEDIDO:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_FINALIZAR_PEDIDO:
+			desserializar_ok_fail(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_TERMINAR_PEDIDO:
+			desserializar_ok_fail(estructura, socket_cliente);
 			break;
 
 		default:
@@ -543,10 +752,13 @@ void desserializar_obtener_restaurante(obtener_restaurante* estructura, int32_t 
 	//saco el nombre del restaurante en si
 	bytesRecibidos(recv(socket_cliente, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1, MSG_WAITALL));
 
+	strcat(estructura->nombreRestaurante, "\0");
+
 	printf("el largo del nombre del restaurante es: %u\n", estructura->largoNombreRestaurante);
 	printf("el nombre del restaurante es: %s.\n", estructura->nombreRestaurante);
 
 }
+
 
 void desserializar_guardar_plato(guardar_plato* estructura, int32_t socket_cliente)
 {
@@ -580,6 +792,14 @@ void desserializar_guardar_plato(guardar_plato* estructura, int32_t socket_clien
 	printf("el largo del nombre del plato es: %u.\n", estructura->largonombrePlato);
 	printf("el nombre del plato es: %s.\n", estructura->nombrePlato);
 	printf("la cantidad de platos es: %u.\n", estructura->cantidadPlatos);
+}
+
+void desserializar_ok_fail(respuesta_ok_error* estructura, int32_t socket_cliente)
+{
+	//saco el resultado de la consulta
+	bytesRecibidos(recv(socket_cliente, &(estructura->respuesta), sizeof(estructura->respuesta), MSG_WAITALL));
+
+	printf("El resultado de la consulta es: %u.\n", estructura->respuesta);
 }
 
 void desserializar_guardar_pedido(guardar_pedido* estructura, int32_t socket_cliente)
@@ -633,10 +853,27 @@ void desserializar_respuesta_obtener_restaurante(respuesta_obtener_restaurante* 
 
 	estructura->precioPlatos = malloc(estructura->longitudPrecioPlatos+1);
 	bytesRecibidos(recv(socket_cliente, estructura->precioPlatos, estructura->longitudPrecioPlatos+1,  MSG_WAITALL));
+}
+
+
+void desserializar_respuesta_consultar_platos(respuesta_consultar_platos* estructura, int32_t socket_cliente){
+
+
+	//recibo la longitud del char* nombres de los platos del restaurante
+	bytesRecibidos(recv(socket_cliente, &(estructura->longitudNombresPlatos), sizeof(estructura->longitudNombresPlatos), MSG_WAITALL));
+
+	estructura->nombresPlatos = malloc(estructura->longitudNombresPlatos+1);
+	bytesRecibidos(recv(socket_cliente, estructura->nombresPlatos, estructura->longitudNombresPlatos+1,  MSG_WAITALL));
 
 
 }
 
+
+void desserializar_respuesta_crear_pedido(respuesta_crear_pedido* estructura, int32_t socket_cliente){
+
+	bytesRecibidos(recv(socket_cliente, &(estructura->idPedido), sizeof(estructura->idPedido),  MSG_WAITALL));
+
+}
 
 
 
