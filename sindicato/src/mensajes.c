@@ -30,9 +30,9 @@
 
 void enviarRespuestaBooleana(uint32_t socketCliente, codigo_operacion codOp, respuestaBool valorRespuesta){
 
-	respuesta_ok_error rta = malloc(sizeof(respuesta_ok_error));
+	respuesta_ok_error* rta = malloc(sizeof(respuesta_ok_error));
 
-	rta.respuesta = valorRespuesta;
+	rta->respuesta = valorRespuesta;
 
 	mandar_mensaje(rta, codOp, socketCliente);
 }
@@ -536,10 +536,13 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 
 		char* arrayVacio = "[]";
 
+		// 4 * 7 + 9 = 37
+
 		respuesta_obtener_restaurante* respuestaMensaje = malloc(
-			sizeof(respuesta_obtener_restaurante)
-			+ ( strlen(arrayVacio) + 1 ) * 3
+				sizeof(respuesta_obtener_restaurante)
 			);
+
+		// char** algo = string_get_string_as_array(arrayVa );
 
 		respuestaMensaje->cantidadCocineros = 0;
 		respuestaMensaje->cantHornos = 0;
@@ -547,15 +550,23 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 		respuestaMensaje->posY = 0;
 
 		respuestaMensaje->longitudAfinidades = strlen(arrayVacio);
+		respuestaMensaje->afinidades = malloc(strlen(arrayVacio) + 1);
 		strcpy(respuestaMensaje->afinidades, arrayVacio);
 
 		respuestaMensaje->longitudPlatos = strlen(arrayVacio);
+		respuestaMensaje->platos = malloc(strlen(arrayVacio) + 1);
 		strcpy(respuestaMensaje->platos, arrayVacio);
 
 		respuestaMensaje->longitudPrecioPlatos = strlen(arrayVacio);
+		respuestaMensaje->precioPlatos = malloc(strlen(arrayVacio) + 1);
 		strcpy(respuestaMensaje->precioPlatos, arrayVacio);
 
 		mandar_mensaje(respuestaMensaje, RESPUESTA_OBTENER_R, socket_cliente);
+
+		free(respuestaMensaje->precioPlatos);
+		free(respuestaMensaje->platos);
+		free(respuestaMensaje->afinidades);
+		free(respuestaMensaje);
 
 		return;
 	}
@@ -595,9 +606,6 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 
 	respuesta_obtener_restaurante* respuestaMensaje = malloc(
 			sizeof(respuesta_obtener_restaurante)
-//			+ strlen(lineaAfinidadesSeparada[1])
-//			+ strlen(lineaPlatosSeparada[1])
-//			+ strlen(lineaPrecioPlatosSeparada[1]) + 3
 			);
 
 	respuestaMensaje->cantidadCocineros = cantCocineros;
@@ -622,9 +630,10 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 
 	mandar_mensaje(respuestaMensaje, RESPUESTA_OBTENER_R, socket_cliente);
 
-	// TODO | Se debe procesar los datos leidos y devolver la respuesta
-
-
+	free(respuestaMensaje->precioPlatos);
+	free(respuestaMensaje->platos);
+	free(respuestaMensaje->afinidades);
+	free(respuestaMensaje);
 
 	//printf("Datos leidos:\n%s", datosRestaurant);
 

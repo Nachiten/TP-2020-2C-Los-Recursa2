@@ -459,15 +459,6 @@ int cantidadDeBloquesQueOcupa(int pesoEnBytes){
 	return cantBloques;
 }
 
-// Cuenta la cantidad de elementos en un array
-int cantidadDeElementosEnArray(char** array){
-	int i = 0;
-	while(array[i] != NULL && strcmp(array[i], "\n") != 0){
-		i++;
-	}
-	return i;
-}
-
 // Hacer free de un array con cosas
 void freeDeArray(char** array){
 	int cantidadElementosArray = cantidadDeElementosEnArray(array);

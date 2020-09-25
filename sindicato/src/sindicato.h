@@ -50,7 +50,6 @@ char* MAGIC_NUMBER;
 t_log* logger;
 
 // Arrays
-int cantidadDeElementosEnArray(char**);
 void freeDeArray(char**);
 int encontrarElementoEnArray(char*, char*);
 char* generarStringArray(char** elementosArray);

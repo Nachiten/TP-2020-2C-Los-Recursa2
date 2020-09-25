@@ -29,4 +29,7 @@ void destruirListaYElementos(t_list* unaLista);
 //esta porqueria "traduce" el numero de OK/FAIL para ahorrarnos los if si queremos mostrar por pantalla
 char* resultadoDeRespuesta(uint32_t resultado);
 
+// Cuenta la cantidad de elementos en un array
+int cantidadDeElementosEnArray(char** array);
+
 #endif /* SHARED_UTILIDADES_H_ */

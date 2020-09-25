@@ -49,11 +49,9 @@ void serve_client(int32_t* socketCliente)
 
 			process_request(cod_op, socketCliente, sizeAAllocar);
 		}
-
-
 		else
 		{
-			free(socketCliente);
+			//free(socketCliente);
 			pthread_exit(NULL);
 		}
 
