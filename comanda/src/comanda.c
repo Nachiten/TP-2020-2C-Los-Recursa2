@@ -7,6 +7,7 @@ int main()
 	printf("CoMAnda PID: %u.\n", PIDCoMAnda);
 	MEMORIA_PRINCIPAL = NULL;
 	AREA_DE_SWAP = NULL;
+	numero_de_victima = 0;
 
 	//Cargo las configuraciones del .config
 	config = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/comanda.config");
@@ -64,7 +65,6 @@ int main()
 		abort();
 	}
 
-
 	//meter en hilo de memoria??
 	MEMORIA_PRINCIPAL = malloc(TAMANIO_MEMORIA_PRINCIPAL);
 	if(MEMORIA_PRINCIPAL != NULL)
@@ -88,6 +88,9 @@ int main()
 		puts("Abortando...");
 		abort();
 	}
+
+	//arrancamos los semaforos para variables globales
+	void inicializarSemaforos();
 
 	//inicializamos la tabla de segmentos
 	lista_de_pedidos_de_todos_los_restaurantes = malloc(sizeof(tablas_segmentos_restaurantes));
@@ -207,7 +210,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	 */
     switch(cod_op)
     {
-        case GUARDAR_PEDIDO:
+        case GUARDAR_PEDIDO://ToDo meterle semaforos para manejar la lista de pedidos de los restaurantes
         	recibidoGuardarPedido = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoGuardarPedido, cod_op, socket);
 
@@ -263,7 +266,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoGuardarPlato->idPedido);
 
         			//al segmento que corresponde al pedido, se le agrega el nuevo plato si no existia
-            		agregarPlatoARestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento, recibidoGuardarPlato->nombrePlato);
+            		agregarPlatoAPedido(tablaDePedidosDelRestaurante, numeroDeSegmento, recibidoGuardarPlato->nombrePlato, recibidoGuardarPlato->cantidadPlatos);
         		}
 
         		//el pedido no existe
@@ -274,9 +277,6 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
 
         	}
-
-
-
 
 
 
@@ -326,5 +326,14 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
     }
 
     //ToDo agregar un close para el socket?
+}
+
+void inicializarSemaforos() //Todo matar semaforos?
+{
+	semaforoNumeroVictima = malloc(sizeof(sem_t));
+	semaforoLogger = malloc(sizeof(sem_t));
+
+	sem_init(semaforoNumeroVictima, 0, 1);
+	sem_init(semaforoLogger, 0, 1);
 }
 

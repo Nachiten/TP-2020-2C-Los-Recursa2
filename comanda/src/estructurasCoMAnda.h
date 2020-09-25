@@ -12,8 +12,8 @@ typedef struct tabla_paginas
 	uint32_t cantidadComidaPreparada;
 	char* nombreDeMorfi; //allocar siempre con 24 bytes
 
-	struct tabla_segmentos* anter_pagina;
-	struct tabla_segmentos* sig_pagina;
+	struct tabla_paginas* anter_pagina;
+	struct tabla_paginas* sig_pagina;
 }tabla_paginas;
 
 /*---->NO TOCAR!!!!<---- el "tabla_segmentos" al lado del "typedef struct", si se saca, aparece un error extraño donde la estructura

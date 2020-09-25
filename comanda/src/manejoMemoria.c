@@ -30,6 +30,109 @@ void inicializar_tabla_de_paginas(tabla_paginas* laTablaDePaginas)
 	laTablaDePaginas->sig_pagina = NULL;
 }
 
+tablas_segmentos_restaurantes* crear_tabla_de_pedidos(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante)
+{
+	tablas_segmentos_restaurantes* nuevaTablaDePedidos = malloc(sizeof(tablas_segmentos_restaurantes));
+
+	//tengo que agregar una nueva lista de pedidos al final de todas
+	while(lasListasDePedidosDeRestaurantes->sig_lista != NULL)
+	{
+		lasListasDePedidosDeRestaurantes = lasListasDePedidosDeRestaurantes->sig_lista;
+	}
+
+	lasListasDePedidosDeRestaurantes->sig_lista = nuevaTablaDePedidos;
+
+	//me copio el nombre del restaurante
+	nuevaTablaDePedidos->nombreRestaurante = malloc(strlen(nombreDeRestaurante)+1);
+	memcpy(nuevaTablaDePedidos->nombreRestaurante, nombreDeRestaurante, strlen(nombreDeRestaurante)+1);
+	nuevaTablaDePedidos->cantidadDeSegmentos = 0;
+	//inicializo la tabla de pedidos de este restaurante
+	nuevaTablaDePedidos->miTablaDePedidos = malloc(sizeof(segmentos));
+	inicializar_tabla_de_segmentos(nuevaTablaDePedidos->miTablaDePedidos);
+	nuevaTablaDePedidos->anter_lista = lasListasDePedidosDeRestaurantes;
+	nuevaTablaDePedidos->sig_lista = NULL;
+
+	//devuelvo la tabla creada
+	return nuevaTablaDePedidos;
+}
+
+//ToDo verificar si hace falta saber el numero de segmento creado
+uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido)
+{
+	segmentos* tablaDePedidos = tablaDePedidosDelRestaurante->miTablaDePedidos;
+	segmentos* ultimoSegmento = NULL;
+
+	//si el primer segmento es el que cree por default, hay que usar ese
+	if(tablaDePedidos->id_Pedido == 0)
+	{
+		tablaDePedidos->id_Pedido = idDelPedido;
+		return tablaDePedidos->numero_de_segmento;
+	}
+
+	//si no, se crea un nuevo segmento
+	else
+	{
+		segmentos* nuevoSegmento = malloc(sizeof(segmentos));
+
+		tablaDePedidosDelRestaurante->cantidadDeSegmentos++; //como creo un nuevo segmento, le sumo 1
+
+		//mientras no haya llegado al final de la tabla de Segmentos
+		while(tablaDePedidos->sig_segmento != NULL)
+		{
+			//avanzo...
+			tablaDePedidos = tablaDePedidos->sig_segmento;
+		}
+		//llegue al ultimo
+		ultimoSegmento = tablaDePedidos;
+
+		//"inicializo" el nuevo segmento
+		ultimoSegmento->sig_segmento = nuevoSegmento; //lo unimos al final de la tabla
+
+		nuevoSegmento->id_Pedido = idDelPedido;
+		nuevoSegmento->anter_segmento = ultimoSegmento;
+		nuevoSegmento->sig_segmento = NULL;
+		nuevoSegmento->numero_de_segmento = ultimoSegmento->numero_de_segmento + 1;
+		nuevoSegmento->mi_tabla = malloc(sizeof(tabla_paginas));
+		inicializar_tabla_de_paginas(nuevoSegmento->mi_tabla);
+
+		//devuelvo el numero del segmento creado
+		return nuevoSegmento->numero_de_segmento;
+	}
+}
+
+tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePlato, uint32_t cantidadPlatos)
+{
+	tabla_paginas* auxiliarRecorrer = tablaDePlatosDelPedido;
+	tabla_paginas* nuevoPlato = malloc(sizeof(tabla_paginas));
+
+	//me paro al final de la tabla de ̶P̶l̶a̶t̶os paginas para asignar una nueva
+	while(auxiliarRecorrer->sig_pagina != NULL)
+	{
+		auxiliarRecorrer = auxiliarRecorrer->sig_pagina;
+	}
+
+	nuevoPlato->cantidadComidaPreparada = 0;
+	nuevoPlato->cantidadPedidaComida = cantidadPlatos;
+	memcpy(nuevoPlato->nombreDeMorfi, nombrePlato, strlen(nombrePlato)+1);
+	nuevoPlato->numero_de_pagina = auxiliarRecorrer->numero_de_pagina + 1;
+	asignarNumeroDeVictima(&nuevoPlato->numero_de_victima);
+	nuevoPlato->anter_pagina = auxiliarRecorrer;
+	nuevoPlato->sig_pagina = NULL;
+
+	//"pego" el nuevo plato al final de la lista de platos
+	auxiliarRecorrer->sig_pagina = nuevoPlato;
+
+	return nuevoPlato;
+}
+
+void asignarNumeroDeVictima(uint32_t* miNumeroDeVictima)
+{
+	sem_wait(semaforoNumeroVictima);
+	*miNumeroDeVictima = numero_de_victima;
+	numero_de_victima++;
+	sem_post(semaforoNumeroVictima);
+}
+
 tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante, uint32_t negarCreacion)
 {
 	tablas_segmentos_restaurantes* tablaDePedidosSeleccionada = NULL;
@@ -100,32 +203,6 @@ uint32_t buscar_tabla_de_segmentos_de_restaurante(tablas_segmentos_restaurantes*
 	return encontrado;
 }
 
-tablas_segmentos_restaurantes* crear_tabla_de_pedidos(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante)
-{
-	tablas_segmentos_restaurantes* nuevaTablaDePedidos = malloc(sizeof(tablas_segmentos_restaurantes));
-
-	//tengo que agregar una nueva lista de pedidos al final de todas
-	while(lasListasDePedidosDeRestaurantes->sig_lista != NULL)
-	{
-		lasListasDePedidosDeRestaurantes = lasListasDePedidosDeRestaurantes->sig_lista;
-	}
-
-	lasListasDePedidosDeRestaurantes->sig_lista = nuevaTablaDePedidos;
-
-	//me copio el nombre del restaurante
-	nuevaTablaDePedidos->nombreRestaurante = malloc(strlen(nombreDeRestaurante)+1);
-	memcpy(nuevaTablaDePedidos->nombreRestaurante, nombreDeRestaurante, strlen(nombreDeRestaurante)+1);
-	nuevaTablaDePedidos->cantidadDeSegmentos = 0;
-	//inicializo la tabla de pedidos de este restaurante
-	nuevaTablaDePedidos->miTablaDePedidos = malloc(sizeof(segmentos));
-	inicializar_tabla_de_segmentos(nuevaTablaDePedidos->miTablaDePedidos);
-	nuevaTablaDePedidos->anter_lista = lasListasDePedidosDeRestaurantes;
-	nuevaTablaDePedidos->sig_lista = NULL;
-
-	//devuelvo la tabla creada
-	return nuevaTablaDePedidos;
-}
-
 //ToDo volver a revisar esto cuando tenga que agregar platos a un pedido
 uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegmentos, uint32_t idDelPedido)
 {
@@ -150,7 +227,7 @@ uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegme
 	//si no encontre el segmento, tengo que crearlo, si lo encontre, solo se devuelve
 	if(encontrado == 0)
 	{
-		numeroSegmentoBuscado = crearSegmento(tablaDePedidos, idDelPedido);
+		numeroSegmentoBuscado = crearSegmento(laTablaDeSegmentos, idDelPedido);
 	}
 
 	return numeroSegmentoBuscado;
@@ -173,50 +250,6 @@ uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedi
 	return existe;
 }
 
-//ToDo verificar si hace falta saber el numero de segmento creado
-uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido)
-{
-	segmentos* tablaDePedidos = tablaDePedidosDelRestaurante->miTablaDePedidos;
-	segmentos* ultimoSegmento = NULL;
-
-	//si el primer segmento es el que cree por default, hay que usar ese
-	if(tablaDePedidos->id_Pedido == 0)
-	{
-		tablaDePedidos->id_Pedido = idDelPedido;
-		return tablaDePedidos->numero_de_segmento;
-	}
-
-	//si no, se crea un nuevo segmento
-	else
-	{
-		segmentos* nuevoSegmento = malloc(sizeof(segmentos));
-
-		tablaDePedidosDelRestaurante->cantidadDeSegmentos++; //como creo un nuevo segmento, le sumo 1
-
-		//mientras no haya llegado al final de la tabla de Segmentos
-		while(tablaDePedidos->sig_segmento != NULL)
-		{
-			//avanzo...
-			tablaDePedidos = tablaDePedidos->sig_segmento;
-		}
-		//llegue al ultimo
-		ultimoSegmento = tablaDePedidos;
-
-		//"inicializo" el nuevo segmento
-		ultimoSegmento->sig_segmento = nuevoSegmento; //lo unimos al final de la tabla
-
-		nuevoSegmento->id_Pedido = idDelPedido;
-		nuevoSegmento->anter_segmento = ultimoSegmento;
-		nuevoSegmento->sig_segmento = NULL;
-		nuevoSegmento->numero_de_segmento = ultimoSegmento->numero_de_segmento + 1;
-		nuevoSegmento->mi_tabla = malloc(sizeof(tabla_paginas));
-		inicializar_tabla_de_paginas(nuevoSegmento->mi_tabla);
-
-		//devuelvo el numero del segmento creado
-		return nuevoSegmento->numero_de_segmento;
-	}
-}
-
 uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombrePlato)
 {
 	tabla_paginas* tablaDePlatos = segmentoSeleccionado->mi_tabla;
@@ -236,10 +269,11 @@ uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombr
 	return existe;
 }
 
-void agregarPlatoARestaurante(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento, char* nombrePlato)
+void agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento, char* nombrePlato, uint32_t cantidadPlatos)
 {
 	segmentos* laTablaDeSegmentos = tablaDePedidosDelRestaurante->miTablaDePedidos;
 	segmentos* segmentoSeleccionado = NULL;
+	tabla_paginas* tablaDePlatos = NULL;
 
 	//recorro la lista hasta que encuentre el numero del segmento seleccionado
 	while(laTablaDeSegmentos->numero_de_segmento != numeroDeSegmento)
@@ -248,22 +282,27 @@ void agregarPlatoARestaurante(tablas_segmentos_restaurantes* tablaDePedidosDelRe
 	}
 
 	segmentoSeleccionado = laTablaDeSegmentos;
+	tablaDePlatos = segmentoSeleccionado->mi_tabla;
 
 	//vemos si existe el plato en el pedido
 	if(verificarExistenciaDePlato(segmentoSeleccionado, nombrePlato))
 	{
+		//mietras que no encuentre el plato con el nombre que me llego
+		while(strcmp(tablaDePlatos->nombreDeMorfi,nombrePlato) == 1)
+		{
+			//avanzo
+			tablaDePlatos = tablaDePlatos->sig_pagina;
+		}
 
+		//sumo la cantidad de platos nueva que llego
+		tablaDePlatos->cantidadPedidaComida += cantidadPlatos;
 	}
 
-	//es un plato nuevo que agregar al pedido ToDo terminar
+	//es un plato nuevo que agregar al pedido
 	else
 	{
-
+		crearPagina(tablaDePlatos, nombrePlato, cantidadPlatos);
 	}
-	//toDo  terminar cuando inicialice tabla de paginas
-	//segmentoSeleccionado->mi_tabla->
-
-
 }
 
 
