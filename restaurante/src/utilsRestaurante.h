@@ -48,8 +48,6 @@ uint32_t miPosicionY;
 uint32_t cantCocineros;
 uint32_t cantRecetas;
 uint32_t cantHornos;
-t_receta las_recetas;//esto es una lista
-t_cocinero los_cocineros;//esto tambien
 
 typedef enum{
 	NEW = 1,

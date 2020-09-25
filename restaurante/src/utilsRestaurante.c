@@ -17,23 +17,26 @@ void obtenerMetadataRestaurante(){
 
     printf("El nombre rancio que estoy por mandar es: %s \n", estructura->nombreRestaurante);
 
-
-
-
     //emision del mensaje para pedir la info, OBTENER_RESTAURANTE [nombreR]
     mandar_mensaje(estructura, OBTENER_RESTAURANTE, socket_cliente);
 
     free(estructura->nombreRestaurante);
     free(estructura);
 
-
-
     printf("pude mandar la solicitud de metadata a sindic.\n");
 
+    //recibo el codigo de operacion, ya se que va a ser RESPUESTA_OBTENER_R
+    codigo_operacion codigoRecibido;
+    bytesRecibidos(recv(socket_cliente, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 
+    printf("El codigo recibido del emisor es: %d", codigoRecibido);
 
+    uint32_t sizePayload;
+    bytesRecibidos(recv(socket_cliente, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
 
-    respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizeof(respuesta_obtener_restaurante));
+    printf("El size del buffer/payload para la metadata es: %u", sizePayload);
+
+    respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizePayload);
 
    //recepcion del choclo divino
     recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_R, socket_cliente);
@@ -56,10 +59,8 @@ void obtenerMetadataRestaurante(){
 
     free(estructuraRespuestaObtenerRestaurante->platos);
     free(estructuraRespuestaObtenerRestaurante->afinidades);
+    free(estructuraRespuestaObtenerRestaurante->precioPlatos);
     free(estructuraRespuestaObtenerRestaurante);
-
-
-
 }
 
 //void crearColasPlanificacion(){

@@ -132,19 +132,20 @@ void recepcion_mensajes()
 
 void esperar_conexiones(int32_t miSocket)
 {
-	int32_t socket_conexion_establecida;
+	int32_t* socket_conexion_establecida = malloc(sizeof(int32_t));
 	struct sockaddr_in dir_cliente;
 	socklen_t tam_direccion = sizeof(struct sockaddr_in);
 
 	//espera una conexion
-	socket_conexion_establecida = accept(miSocket, (void*) &dir_cliente, &tam_direccion);
+	puts("Estoy esperando una conexión...");
+	*socket_conexion_establecida = accept(miSocket, (void*) &dir_cliente, &tam_direccion);
 
 	//una vez se establece una conexion, se intenta recibir un mensaje
-	pthread_create(&hilo_recibir_mensajes,NULL,(void*)escuchar_mensajes,&socket_conexion_establecida);
+	pthread_create(&hilo_recibir_mensajes,NULL,(void*)escuchar_mensajes,socket_conexion_establecida);
 	pthread_detach(hilo_recibir_mensajes);
 }
 
-void escuchar_mensajes(int32_t socket_conexion_establecida)
+void escuchar_mensajes(int32_t* socket_conexion_establecida)
 {
 	int32_t bytesRecibidosCodOP = 0;
 	int32_t recibidosSize = 0;
@@ -152,7 +153,7 @@ void escuchar_mensajes(int32_t socket_conexion_establecida)
 	codigo_operacion cod_op;
 
 	//recibo codigo de op
-	bytesRecibidosCodOP = recv(socket_conexion_establecida, &cod_op, sizeof(cod_op), MSG_WAITALL);
+	bytesRecibidosCodOP = recv(*socket_conexion_establecida, &cod_op, sizeof(cod_op), MSG_WAITALL);
 	bytesRecibidos(bytesRecibidosCodOP);
 
 	//si se cayo la conexion, basicamente no hacemos hada
@@ -165,7 +166,7 @@ void escuchar_mensajes(int32_t socket_conexion_establecida)
 	else
 	{
 		//recibo tamaño de lo que sigue
-		recibidosSize = recv(socket_conexion_establecida, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
+		recibidosSize = recv(*socket_conexion_establecida, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
 		bytesRecibidos(recibidosSize);
 
 		//si se cayo la conexion, no se hace nada con esto
@@ -179,7 +180,7 @@ void escuchar_mensajes(int32_t socket_conexion_establecida)
 	printf("Tamaño del Payload: %i.\n", sizeAAllocar);
 
 	//mando lo que me llego para que lo procesen
-	procesar_mensaje(cod_op, sizeAAllocar, socket_conexion_establecida);
+	procesar_mensaje(cod_op, sizeAAllocar, *socket_conexion_establecida);
 }
 
 void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t socket)
@@ -215,11 +216,22 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	//buscamos la tabla de pedidos del restaurante seleccionado, si no existe, se crea
         	tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoGuardarPedido->nombreRestaurante);
 
-        	//creamos un nuevo segmento para el nuevo pedido
-        	crearSegmento(tablaDePedidosDelRestaurante, recibidoGuardarPedido->idPedido);
+        	//si la ID del pedido ya existe
+        	if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoGuardarPedido->idPedido))
+        	{
+        		//devolvemos FAIL por que no se pudo crear un nuevo pedido
+        		resultado->respuesta = 0;
+        	}
 
-        	//por ultimo avisamos que el pedido fue agregado correctamente
-        	resultado->respuesta = 1;
+        	else
+        	{
+        		//creamos un nuevo segmento para el nuevo pedido
+				crearSegmento(tablaDePedidosDelRestaurante, recibidoGuardarPedido->idPedido);
+
+				//por ultimo avisamos que el pedido fue agregado correctamente
+				resultado->respuesta = 1;
+        	}
+
         	mandar_mensaje(resultado,RESPUESTA_GUARDAR_PEDIDO,socket);
 
         	free(recibidoGuardarPedido->nombreRestaurante); //shit, esto me va a armar quilombo ToDo revisar
@@ -282,5 +294,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	puts("PASE POR EL CASO DEFAULT DEL SWITCH DE PROCESAR MENSAJE!!!! BUSCAR ERROR!!!!");
         	break;
     }
+
+    //ToDo agregar un close para el socket?
 }
 

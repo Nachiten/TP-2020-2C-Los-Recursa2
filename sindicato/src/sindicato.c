@@ -1447,21 +1447,7 @@ int main(){
     // Iniciar servidor para recibir mensajes
     iniciar_server(PUERTO_ESCUCHA);
 
-
-//    guardarPedido("ElDestino", 5);
-//    confirmarPedido("ElDestino", 5);
-//    confirmarPedido("ElDestino", 5);
-//
-//    consultarPlatos("ElDestino");
-//    consultarPlatos("PanaderiaJorge");
-//    consultarPlatos("Bataglia");
-//
-//    guardarPedido("PanaderiaJorge", 4);
-//    obtenerPedido("ElDestino", 5);
-//    obtenerPedido("PanaderiaJorge", 4);
-//    obtenerPedido("PanaderiaJorge", 3);
-
-//    pthread_join(hiloConsola, NULL);
+//  pthread_join(hiloConsola, NULL);
 
 	// Liberaciones finales (a las que nunca se llega)
 	config_destroy(config);

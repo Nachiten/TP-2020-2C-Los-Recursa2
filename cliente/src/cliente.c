@@ -73,6 +73,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 	respuesta_ok_error* estructuraRespuesta;
 	uint32_t socketCliente;
 	int32_t iterador = 0;
+	//char* nombreRestaurante; puede que este al pedo
 
 //	printf("Inserte un comando:\n");
 //
@@ -108,8 +109,6 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 			break;
 		}
 
-
-
 		mandar_mensaje("nadaxdxd", CONSULTAR_RESTAURANTES, socketCliente);
 
 		recibir_mensaje(estructuraRespuestaConsultaRestaurantes,RESPUESTA_CONSULTAR_R,socketCliente);
@@ -132,14 +131,61 @@ void obtenerInputConsolaCliente(char* lineaEntera)
     	break;
 
     case SELECCIONAR_RESTAURANTE:
+
+
+
     	break;
 
-	case OBTENER_RESTAURANTE:
+	case OBTENER_RESTAURANTE:;
+
+		strcat(palabrasSeparadas[1],"\0");
+
+		printf("El nombre que quiero procesar es: %s\n", palabrasSeparadas[1]);
+		printf("La longitud del nombre a procesar es: %d\n", strlen(palabrasSeparadas[1]));
+
+		//me trato de conectar con sindicato que deberia estar levantado esperando que le vaya a pedir la info
+		socketCliente = establecer_conexion(ip_destino, puerto_destino);
+		resultado_de_conexion(socketCliente, logger, "destino");
+
+		obtener_restaurante* estructura = malloc(sizeof(obtener_restaurante));
+		estructura->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
+//		estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
+		estructura->nombreRestaurante = palabrasSeparadas[1];
+
+		//emision del mensaje para pedir la info, OBTENER_RESTAURANTE [nombreR]
+		mandar_mensaje(estructura, OBTENER_RESTAURANTE, socketCliente);
+
+		free(estructura->nombreRestaurante);
+		free(estructura);
+
+
+
+		printf("pude mandar la solicitud de metadata a sindic.\n");
+
+
+		//aca hago recibir_mensaje pero no haria nada interno mas que capaz loggear lo devuelto
+
 		break;
 
     //aca van mas Cases...
 
+	case CONSULTAR_PLATOS:
+
+
+
+		break;
+
+
+
+	case CREAR_PEDIDO:
+
+
+
+		break;
+
     case GUARDAR_PEDIDO:
+    	strcat(palabrasSeparadas[2],"\0"); //IMPORTANTISIMO
+
     	estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
 
     	socketCliente = establecer_conexion(ip_destino , puerto_destino);
@@ -154,13 +200,19 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 		guardar_pedido* elMensaje = malloc(sizeof(guardar_pedido));
 		elMensaje->idPedido = atoi(palabrasSeparadas[1]);
 		elMensaje->largoNombreRestaurante = strlen(palabrasSeparadas[2]);
-		elMensaje->nombreRestaurante = malloc(elMensaje->largoNombreRestaurante + 1);
+		//elMensaje->nombreRestaurante = malloc(elMensaje->largoNombreRestaurante + 1);
+		//strcpy(elMensaje->nombreRestaurante, palabrasSeparadas[2]);
 		elMensaje->nombreRestaurante = palabrasSeparadas[2];
+
+		printf("ID: %u \n", elMensaje->idPedido);
+		printf("nombre: %s \n", elMensaje->nombreRestaurante);
 
 		//   ¿¿¿¿¿Crearia un hilo mas para mandar el socket junto con el id pedido, el nombre del resto y el tamanio????? entiendo que no
 		//      pthread_t hiloMensaje;
 		//      pthread_create(&hiloMensaje, NULL, mandar_mensaje ?), &socketCliente);
 		//      pthread_detach(hiloMensaje);
+
+		//ToDO poner los 2 recv para cod OP y el size del payload
 
 		mandar_mensaje(elMensaje, GUARDAR_PEDIDO, socketCliente);
 
@@ -168,7 +220,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 		printf("El intento de guardar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
 
-		free(elMensaje->nombreRestaurante); //porfa no olvidarse de este free, tambien es importante, no solo liberar la estructura, sino nos va a caber
+		//free(elMensaje->nombreRestaurante); //porfa no olvidarse de este free, tambien es importante, no solo liberar la estructura, sino nos va a caber
 		free(elMensaje);
 		free(estructuraRespuesta);
 		close(socketCliente); //siempre cerrar socket cuando se termina de usar

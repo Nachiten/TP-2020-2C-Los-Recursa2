@@ -23,6 +23,8 @@ tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_res
 uint32_t buscar_tabla_de_segmentos_de_restaurante(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante);
 //crea una nueva tabla y devuelve puntero a la tabla creada
 tablas_segmentos_restaurantes* crear_tabla_de_pedidos(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante);
+//para ver si ya existe el pedido, y devolver FAIL, o si no
+uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido);
 //esto crea un nuevo pedido (segumento = pedido)
 uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido);
 

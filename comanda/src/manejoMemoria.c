@@ -153,6 +153,23 @@ uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegme
 	return numeroSegmentoBuscado;
 }
 
+uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido)
+{
+	segmentos* tablaDePedidos = tablaDePedidosDelRestaurante->miTablaDePedidos;
+	uint32_t existe = 0;
+
+	while(tablaDePedidos != NULL)
+	{
+		if(tablaDePedidos->id_Pedido == idDelPedido)
+		{
+			existe = 1;
+		}
+		tablaDePedidos = tablaDePedidos->sig_segmento;
+	}
+
+	return existe;
+}
+
 //ToDo verificar si hace falta saber el numero de segmento creado
 uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido)
 {
