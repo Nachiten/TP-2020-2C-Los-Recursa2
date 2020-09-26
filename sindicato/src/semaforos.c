@@ -250,7 +250,7 @@ void crearSemaforosRestaurantesExistentes()
 		crearSemaforoRestaurant(unRestaurant);
 	}
 
-	//destruirListaYElementos(listaNombresRestaurant);
+	destruirListaYElementos(listaNombresRestaurant);
 }
 
 void crearSemaforosRecetasExistentes()

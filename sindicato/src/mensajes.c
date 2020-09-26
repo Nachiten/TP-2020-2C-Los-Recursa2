@@ -618,12 +618,19 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 	strcpy(respuestaMensaje->afinidades, lineaAfinidadesSeparada[1]);
 
 	respuestaMensaje->longitudPlatos = strlen(lineaPlatosSeparada[1]);
-	respuestaMensaje->platos = malloc(strlen(lineaPlatosSeparada[1])+1);
+    respuestaMensaje->platos = malloc(strlen(lineaPlatosSeparada[1])+1);
 	strcpy(respuestaMensaje->platos, lineaPlatosSeparada[1]);
 
+	// CORRECTO
 	respuestaMensaje->longitudPrecioPlatos = strlen(lineaPrecioPlatosSeparada[1]);
 	respuestaMensaje->precioPlatos = malloc(strlen(lineaPrecioPlatosSeparada[1])+1);
 	strcpy(respuestaMensaje->precioPlatos, lineaPrecioPlatosSeparada[1]);
+
+	/* INCORRECTO
+	respuestaMensaje->longitudPrecioPlatos = strlen(lineaPrecioPlatosSeparada[1]);
+	respuestaMensaje->precioPlatos = malloc(strlen(lineaPrecioPlatosSeparada[1])+1);
+	respuestaMensaje->precioPlatos = lineaPrecioPlatosSeparada[1];
+	*/
 
 	printearRespuestaObtenerRestaurante(respuestaMensaje);
 
