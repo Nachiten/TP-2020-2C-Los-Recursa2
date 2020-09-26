@@ -324,6 +324,7 @@ void crearSemaforosPedidosRestaurant(char* nombreRestaurant){
 	}
 
 	closedir(dr);
+	free(pathCarpetaRestaurant);
 }
 
 t_list* escanearCarpetasExistentes(char* path){
