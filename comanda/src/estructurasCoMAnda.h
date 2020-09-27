@@ -12,6 +12,11 @@ typedef struct tabla_paginas
 	uint32_t cantidadComidaPreparada;
 	char* nombreDeMorfi; //allocar siempre con 24 bytes
 
+	uint32_t cargadoEnSWAP;
+	int32_t posicionInicialEnSWAP;
+	uint32_t cargadoEnMEMORIA;
+	int32_t numeroDePagina;
+
 	struct tabla_paginas* anter_pagina;
 	struct tabla_paginas* sig_pagina;
 }tabla_paginas;
@@ -21,8 +26,6 @@ no se reconoce a si misma cuando queremos sus campos anterior y siguiente apunte
 typedef struct tabla_segmentos
 {
 	uint32_t numero_de_segmento;
-
-	uint32_t numero_de_victima; //me parece q aca no va
 	int32_t id_Pedido;
 
 	tabla_paginas* mi_tabla; //cada segmento tiene su tabla de paginas
@@ -41,5 +44,14 @@ typedef struct tablas_segmentos_restaurantes
 	struct tablas_segmentos_restaurantes* anter_lista;
 	struct tablas_segmentos_restaurantes* sig_lista;
 }tablas_segmentos_restaurantes;
+
+typedef struct espacioEnSWAP
+{
+	uint32_t numeroDeEspacio;
+	uint32_t espacioOcupado;
+
+	struct espacioEnSWAP* anter_espacio;
+	struct espacioEnSWAP* sig_espacio;
+}espacioEnSWAP;
 
 #endif /* SRC_ESTRUCTURASCOMANDA_H_ */

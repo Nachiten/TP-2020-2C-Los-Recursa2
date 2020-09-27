@@ -95,12 +95,13 @@ int main()
 	//inicializamos la tabla de segmentos
 	lista_de_pedidos_de_todos_los_restaurantes = malloc(sizeof(tablas_segmentos_restaurantes));
 	inicializar_lista_de_tablas_de_segmentos_de_restaurantes(lista_de_pedidos_de_todos_los_restaurantes);//si, son nombres de mierda
-
+	lista_de_espacios_en_SWAP = malloc(sizeof(espacioEnSWAP));
+	inicializar_lista_de_espacios_en_SWAP(lista_de_espacios_en_SWAP, TAMANIO_AREA_DE_SWAP);
 
 	//ToDo matar la lista de las tablas de segmento
 	//ToDo matar la tabla de segmentos
 	//ToDo matar las tablas de paginas
-
+	//ToDo matar la lista de los espacios existentes en SWAP
 
 	//puts("antes recepcion");
 	recepcion_mensajes();
