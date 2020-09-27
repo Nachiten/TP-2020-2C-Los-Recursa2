@@ -267,6 +267,10 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
         			//al segmento que corresponde al pedido, se le agrega el nuevo plato si no existia
             		agregarPlatoAPedido(tablaDePedidosDelRestaurante, numeroDeSegmento, recibidoGuardarPlato->nombrePlato, recibidoGuardarPlato->cantidadPlatos);
+
+
+
+
         		}
 
         		//el pedido no existe
@@ -274,13 +278,12 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         		{
         			resultado->respuesta = 0;
         		}
-
-
         	}
 
+        	mandar_mensaje(resultado,RESPUESTA_GUARDAR_PLATO,socket);
 
-
-
+        	free(recibidoGuardarPlato->nombreRestaurante);
+        	free(recibidoGuardarPlato->nombrePlato);
 			free(recibidoGuardarPlato);
         	break;
 

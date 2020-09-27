@@ -46,5 +46,10 @@ uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombr
 //esto agrega un plato a un pedido (segmento) ya existente
 void agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento, char* nombrePlato, uint32_t cantidadPlatos);
 
+//ponemos en area de SWAP los datos de una pagina
+void agregar_pagina_a_swap(tabla_paginas* tablaDePlatosDelPedido, uint32_t posicionInicial);
+
+//copiamos la info que tenemos en el area de SWAP a MEMORIA PRINCIPAL
+void mover_pagina_a_memoriaPrincipal(tabla_paginas* tablaDePlatosDelPedido, uint32_t posicionInicialDeSWAP, uint32_t posicionInicialDeMEMORIA);
 
 #endif /* SRC_MANEJOMEMORIA_H_ */

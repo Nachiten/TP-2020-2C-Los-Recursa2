@@ -305,7 +305,26 @@ void agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaur
 	}
 }
 
+void agregar_pagina_a_swap(tabla_paginas* tablaDePlatosDelPedido, uint32_t posicionInicial)
+{
+	uint32_t desplazamiento = posicionInicial;
 
+	//pongo en memoria SWAP la cantidad de platos pedidos
+	memcpy(AREA_DE_SWAP + desplazamiento, &(tablaDePlatosDelPedido->cantidadPedidaComida), sizeof(tablaDePlatosDelPedido->cantidadPedidaComida));
+	desplazamiento += sizeof(tablaDePlatosDelPedido->cantidadPedidaComida);
 
+	//pongo en memoria SWAP la cantidad de platos preparados
+	memcpy(AREA_DE_SWAP + desplazamiento, &(tablaDePlatosDelPedido->cantidadComidaPreparada), sizeof(tablaDePlatosDelPedido->cantidadComidaPreparada));
+	desplazamiento += sizeof(tablaDePlatosDelPedido->cantidadComidaPreparada);
 
+	//pongo en memoria SWAP el nombre del plato
+	memcpy(AREA_DE_SWAP + desplazamiento, tablaDePlatosDelPedido->nombreDeMorfi, strlen(tablaDePlatosDelPedido->nombreDeMorfi)+1);
+	desplazamiento += strlen(tablaDePlatosDelPedido->nombreDeMorfi)+1;
+}
+
+void mover_pagina_a_memoriaPrincipal(tabla_paginas* tablaDePlatosDelPedido, uint32_t posicionInicialDeSWAP, uint32_t posicionInicialDeMEMORIA)
+{
+	//copia de memoria SWAP a memoria principal
+	memcpy(MEMORIA_PRINCIPAL + posicionInicialDeMEMORIA, &(AREA_DE_SWAP + posicionInicialDeSWAP), 32);
+}
 
