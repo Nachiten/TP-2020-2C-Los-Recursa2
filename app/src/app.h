@@ -22,6 +22,7 @@ typedef struct{
 	char* nombre_resto;
 	char* ip;
 	char* puerto;
+	char* posicion;
 }info_resto;
 
 typedef struct{
@@ -69,13 +70,13 @@ void inicializar_semaforos();
 void consultar_restaurantes(int32_t socket_cliente);
 void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente);
 void crear_pedido(int32_t socket);
-void aniadir_plato();
+void aniadir_plato(a_plato* recibidoAPlato);
 void agregar_restaurante(info_resto* recibidoAgregarRestaurante);
 
 // ***MANEJO DE MENSAJES***
 int32_t crear_id_pedidos();
-int buscar_restaurante(char* nombreResto);
 void crear_pedido(int32_t socket);
+int buscar_pedido(uint32_t id_pedido);
 int buscar_cliente(int32_t socket);
 int buscar_resto(char* nombreResto);
 void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_cliente* cliente);
