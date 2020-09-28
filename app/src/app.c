@@ -46,6 +46,7 @@ int main(){
 
 	//inicio el server
 	iniciar_server(mi_puerto);
+
 	return EXIT_SUCCESS;
 }
 
@@ -62,12 +63,7 @@ void inicializar_semaforos(){
 	sem_init(semLog, 0, 1);
 }
 
-int32_t crear_id_pedidos(){
-	sem_wait(semId);
-	id_inicial_pedidos += 1;
-	sem_post(semId);
-	return id_inicial_pedidos;
-}
+// *********************************FIN SETUP*********************************************
 
 //manda un array con los nombres de todos los restaurantes conectados o restoDefault si no hay ninguno
 void consultar_restaurantes(int32_t socket_cliente){
@@ -109,12 +105,15 @@ void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
 	int restoBuscado;
 	respuesta_ok_error* respuesta;
 	perfil_cliente* perfil;
+	int size;
 
-	restoBuscado = buscar_restaurante(nombreResto);
+	restoBuscado = buscar_resto(nombreResto);
 	respuesta = malloc(sizeof(respuesta_ok_error));
 
 	if(restoBuscado == 1){
-		perfil = malloc(sizeof(perfil_cliente));
+		size = sizeof(int32_t) + sizeof(strlen(nombreResto)) + sizeof(uint32_t) + sizeof(int);
+		// todo ver si esto esta bien
+		perfil = malloc(size);
 		perfil->socket_cliente = socket_cliente;
 		perfil->nombre_resto = nombreResto;
 		perfil->id_pedido = 0;
@@ -127,18 +126,7 @@ void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
 		respuesta->respuesta = 0;
 		mandar_mensaje(respuesta,RESPUESTA_SELECCIONAR_R,socket_cliente);
 	}
-}
-
-
-int buscar_restaurante(char* nombreResto){
-	info_resto* resto;
-	for(int i = 0; i < listaRestos->elements_count; i++){
-		resto = list_get(listaRestos,i);// coseguis el restaurante de la posicion i
-		if(resto->nombre_resto == nombreResto){
-			return 1;
-		}
-	}
-	return 0;
+	free(respuesta);
 }
 
 // todo terminar
@@ -153,10 +141,8 @@ void consultar_platos(int32_t socket_cliente){
 		if(cliente->perfilActivo == 1){
 			numero_resto = buscar_resto(cliente->nombre_resto);
 			if(numero_resto != 0){
-				// todo necesitaria hacer malloc especifico para los char*?
-				resto = malloc(sizeof(info_resto));
 				resto = list_get(listaRestos,numero_resto);
-				recibir_respuesta(CONSULTAR_PLATOS,resto,socket_cliente,cliente->nombre_resto);
+				recibir_respuesta(CONSULTAR_PLATOS,resto,cliente);
 				return;
 			}else{
 				//todo terminar la parte de resto default
@@ -176,76 +162,122 @@ void crear_pedido(int32_t socket_cliente){
 	guardar_pedido* estructura_guardar_pedido;
 	respuesta_ok_error* respuesta;
 
-	if(listaRestos->elements_count != 0){
-		numero_cliente = buscar_cliente(socket_cliente);
-		if(numero_cliente != -2){
+	numero_cliente = buscar_cliente(socket_cliente);
+	if(numero_cliente != -2){
+		if(listaRestos->elements_count != 0){
+			numero_cliente = buscar_cliente(socket_cliente);
 			cliente = list_get(listaPedidos,numero_cliente);// busca el perfil del cliente en la lista de pedidos
 			if(cliente->perfilActivo == 1){
 				numero_resto = buscar_resto(cliente->nombre_resto);
 				if(numero_resto != 0){
-					// todo necesitaria hacer malloc especifico para los char*?
-					resto = malloc(sizeof(info_resto));
 					resto = list_get(listaRestos,numero_resto);
-					recibir_respuesta(CREAR_PEDIDO,resto,socket_cliente,cliente->nombre_resto);
+					recibir_respuesta(CREAR_PEDIDO,resto,cliente);
 					return;
 				}
 			}
+		}else {
+			int idPedido = crear_id_pedidos();
+			estructura_guardar_pedido = malloc(sizeof(guardar_pedido));
+
+			estructura_guardar_pedido->idPedido = idPedido;
+			estructura_guardar_pedido->nombreRestaurante = "RestoDefault";
+			estructura_guardar_pedido->largoNombreRestaurante = strlen("RestoDefault");
+
+			respuesta = malloc(sizeof(respuesta_ok_error));
+
+			mandar_mensaje(estructura_guardar_pedido,GUARDAR_PEDIDO,socket_commanda);
+			recibir_mensaje(respuesta,GUARDAR_PEDIDO,socket_commanda);
+			mandar_mensaje(respuesta,CREAR_PEDIDO,socket_cliente);
+			return;
 		}
-	}else {
-		int idPedido = crear_id_pedidos();
-		estructura_guardar_pedido = malloc(sizeof(guardar_pedido));
+		sem_wait(semLog);
+		log_info(logger, "no se logro crear pedido");
+		sem_post(semLog);
 
-		estructura_guardar_pedido->idPedido = idPedido;
-		estructura_guardar_pedido->nombreRestaurante = "RestoDefault";
-		estructura_guardar_pedido->largoNombreRestaurante = strlen("RestoDefault");
-
-		respuesta = malloc(sizeof(respuesta_ok_error));
-
-		mandar_mensaje(estructura_guardar_pedido,GUARDAR_PEDIDO,socket_commanda);
-		recibir_mensaje(respuesta,GUARDAR_PEDIDO,socket_commanda);
-		mandar_mensaje(respuesta,CREAR_PEDIDO,socket_cliente);
-		return;
+	}else{
+		sem_wait(semLog);
+		log_info(logger, "hace falta seleccionar restaurante");
+		sem_post(semLog);
 	}
-	sem_wait(semLog);
-	log_info(logger, "no se logro crear pedido");
-	sem_post(semLog);
+}
+
+void aniadir_plato(){
+	/*
+	char* prueba = "[pedido1,pedido2,pedido3]";
+	char** a = string_get_string_as_array(prueba);
+	int i = cantidadDeElementosEnArray(a);
+	printf("%i", i);
+	*/
+}
+
+// agrega un restaurante que se conecto a app a la lista de restaurantes
+void agregar_restaurante(info_resto* recibidoAgregarRestaurante){
+	int numero_resto;
+	info_resto* resto;
+
+	if(listaRestos->elements_count != 0){
+		numero_resto = buscar_resto(recibidoAgregarRestaurante->nombre_resto);
+		if(numero_resto != 0){ // si encontro el restaurante en la lista actualiza el socket, sino lo agrega
+			resto = list_get(listaRestos,numero_resto);
+			resto->socket = recibidoAgregarRestaurante->socket;
+		}else{
+			list_add(listaRestos,recibidoAgregarRestaurante);
+		}
+	}else{
+		list_add(listaRestos,recibidoAgregarRestaurante);
+	}
+}
+
+// **************************************FIN MENSAJES**************************************
+
+/* esto esta en utils.c
+// Cuenta la cantidad de elementos en un array
+int cantidadDeElementosEnArray(char** array){
+	int i = 0;
+	while(array[i] != NULL && strcmp(array[i], "\n") != 0){
+		i++;
+	}
+	return i; // 0 es vacio
+}
+*/
+
+int32_t crear_id_pedidos(){
+	sem_wait(semId);
+	id_inicial_pedidos += 1;
+	sem_post(semId);
+	return id_inicial_pedidos;
 }
 
 int buscar_cliente(int32_t socket){
 	perfil_cliente* cliente;
 	for(int i = 0; i < listaPedidos->elements_count; i++){
 		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
-		if(cliente->socket_cliente == socket){
+		if(cliente->socket_cliente == socket && cliente->id_pedido != 0){
 			return i;
 		}
 	}
 	return -2;
 }
 
-// todo probar si no da problemas igualar strings
 int buscar_resto(char* nombreResto){
 	info_resto* resto;
 	for(int i = 0; i < listaRestos->elements_count; i++){
 		resto = list_get(listaRestos,i);// coseguis el restaurante de la posicion i
-		if(resto->nombre_resto == nombreResto){
+		if(strcmp(resto->nombre_resto,nombreResto) == 0){
 			return i;
 		}
 	}
 	return 0;
 }
 
-// agrega un restaurante que se conecto a app a la lista de restaurantes
-void agregar_restaurante(info_resto* recibidoAgregarRestaurante){
-	list_add(listaRestos,recibidoAgregarRestaurante);
-}
-
 //maneja todos los flujos de mensajes que requieran respuestas
-void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, int32_t  socket_cliente, char* nombreResto){
+void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_cliente* cliente){
 	int32_t socketRespuestas;
 	respuesta_ok_error* respuesta;
 	guardar_pedido* estructura_guardar_pedido;
 	confirmar_pedido* estructura_idPedido;
 	respuesta_consultar_platos* estructura_consultar_platos;
+	int size;
 
 	switch(cod_op){
 	case CREAR_PEDIDO:
@@ -254,35 +286,48 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, int32_t  sock
 		// todo ver con lucas que estructura mandar aca
 		//mandar_mensaje(estructura_idPedido,CREAR_PEDIDO,socketRespuestas);
 		recibir_mensaje(estructura_idPedido,RESPUESTA_CREAR_PEDIDO,socketRespuestas);
+
 		if(estructura_idPedido->idPedido != 0){
-			estructura_guardar_pedido = malloc(sizeof(guardar_pedido));
+			// todo ver si esto esta bien
+			size = sizeof(uint32_t) + sizeof(strlen(cliente->nombre_resto)) + sizeof(uint32_t);
+			estructura_guardar_pedido = malloc(size);
 
 			estructura_guardar_pedido->idPedido = estructura_idPedido->idPedido;
-			estructura_guardar_pedido->nombreRestaurante = nombreResto;
-			estructura_guardar_pedido->largoNombreRestaurante = strlen(nombreResto);
+			estructura_guardar_pedido->nombreRestaurante = cliente->nombre_resto;
+			estructura_guardar_pedido->largoNombreRestaurante = strlen(cliente->nombre_resto);
 
 			respuesta = malloc(sizeof(respuesta_ok_error));
 
 			mandar_mensaje(estructura_guardar_pedido,GUARDAR_PEDIDO,socket_commanda);
 			recibir_mensaje(respuesta,RESPUESTA_GUARDAR_PEDIDO,socket_commanda);
-			mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socket_cliente);
+
+			if(respuesta->respuesta == 1){
+				mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,cliente->socket_cliente);
+				cliente->id_pedido = estructura_idPedido->idPedido;
+			}else{
+				respuesta = malloc(sizeof(respuesta_ok_error));
+				respuesta->respuesta = 0;
+				mandar_mensaje(respuesta,CREAR_PEDIDO,cliente->socket_cliente);
+			}
+
 			// todo verificar si estan bien los cod_op
 
 		}else{
 			respuesta = malloc(sizeof(respuesta_ok_error));
 			respuesta->respuesta = 0;
-			mandar_mensaje(respuesta,CREAR_PEDIDO,socket_cliente);
+			mandar_mensaje(respuesta,CREAR_PEDIDO,cliente->socket_cliente);
 		}
 		close(socketRespuestas);
 		break;
 
 	case CONSULTAR_PLATOS:
+		// todo ver que hacer con este malloc
 		estructura_consultar_platos = malloc(sizeof(respuesta_consultar_platos));
 		socketRespuestas = establecer_conexion(resto->ip,resto->puerto);
 		// todo ver con lucas que estructura mandar aca
 		//mandar_mensaje(estructura_consultar_platos,CONSULTAR_PLATOS,socketRespuestas);
 		recibir_mensaje(estructura_consultar_platos,RESPUESTA_CONSULTAR_PLATOS,socketRespuestas);
-		mandar_mensaje(estructura_consultar_platos,RESPUESTA_CONSULTAR_PLATOS,socket_cliente);
+		mandar_mensaje(estructura_consultar_platos,RESPUESTA_CONSULTAR_PLATOS,cliente->socket_cliente);
 		// todo verificar si estan bien los cod_op
 		close(socketRespuestas);
 		break;
@@ -316,7 +361,11 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			crear_pedido(socket_cliente);
 			break;
 
+		case A_PLATO:
+			break;
+
 		case AGREGAR_RESTAURANTE:
+			//todo como hago este malloc si no tengo el tamaño de los char*
 			recibidoAgregarRestaurante = malloc(sizeof(info_resto));
 			recibir_mensaje(recibidoAgregarRestaurante,AGREGAR_RESTAURANTE,socket_cliente);
 			agregar_restaurante(recibidoAgregarRestaurante);
