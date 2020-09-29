@@ -62,8 +62,13 @@ void obtenerMetadataRestaurante(){
     printf("Los platos que ofrece el restaurante son: %s \n", estructuraRespuestaObtenerRestaurante->platos);
     printf("Las afinidades de los cocineros son: %s \n", estructuraRespuestaObtenerRestaurante->afinidades);
 
+    //rescato las variables char* en punteros globales aparte para luego usarlos en otro lado. (WIP)
+    platos = malloc(estructuraRespuestaObtenerRestaurante->longitudPlatos+1);
+    strcpy(platos, estructuraRespuestaObtenerRestaurante->platos);
 
-    //aca pasan cosas en el medio
+    afinidades = malloc(estructuraRespuestaObtenerRestaurante->longitudAfinidades+1);
+    strcpy(afinidades, estructuraRespuestaObtenerRestaurante->afinidades);
+
 
     free(estructuraRespuestaObtenerRestaurante->platos);
     free(estructuraRespuestaObtenerRestaurante->afinidades);
@@ -71,14 +76,18 @@ void obtenerMetadataRestaurante(){
     free(estructuraRespuestaObtenerRestaurante);
 }
 
-//void crearColasPlanificacion(){
-//
-//	for(int i=0; i<cantCocineros; i++){
-//
-//
-//		}
-//
-//}
+
+
+void crearColasPlanificacion(){
+
+	for(int i=0; i<cantCocineros; i++){
+
+
+		}
+
+}
+
+
 
 
 void inicializarRestaurante(){
