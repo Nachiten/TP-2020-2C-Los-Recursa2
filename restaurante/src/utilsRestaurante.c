@@ -13,7 +13,7 @@ void obtenerMetadataRestaurante(){
     obtener_restaurante* estructura = malloc(sizeof(obtener_restaurante));
     estructura->largoNombreRestaurante = strlen(nombreRestaurante);
     estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
-    estructura->nombreRestaurante = nombreRestaurante;
+    strcpy(estructura->nombreRestaurante, nombreRestaurante);
 
     printf("El nombre rancio que estoy por mandar es: %s \n", estructura->nombreRestaurante);
 
