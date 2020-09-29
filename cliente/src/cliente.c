@@ -2,7 +2,7 @@
 
 int main(){
 
-	PIDCliente = getpid();
+	//PIDCliente = getpid();
 	socketEscucha = 0;
 
 	ip_destino = malloc(15); //creo que no se puede pasar de esto
@@ -11,10 +11,12 @@ int main(){
 
 	//Cargo las configuraciones del .config
 	config = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/cliente.config");
+	idCliente = config_get_string_value(config, "ID_CLIENTE");
 	LOG_PATH = config_get_string_value(config,"LOG_FILE_PATH"); //cargo el path del archivo log
 	ip_destino = config_get_string_value(config,"IP_DESTINO");
 	puerto_destino = config_get_string_value(config,"PUERTO_DESTINO");
 	puerto_local = config_get_string_value(config,"PUERTO_LOCAL");
+	puerto_APP = config_get_string_value(config,"PUERTO_APP");
 	miPosicionX = config_get_int_value(config, "POSICION_X");
 	miPosicionY = config_get_int_value(config, "POSICION_Y");
 

@@ -64,7 +64,8 @@ typedef struct
 //nadie te va a extrañar
 
 typedef struct{
-	uint32_t cliente; //seria el PID del cliente
+	uint32_t largoIDCliente;
+	char* idCliente;
 	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
 }seleccionar_restaurante;
