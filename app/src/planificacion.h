@@ -12,9 +12,20 @@
 
 t_list* repartidores;
 t_queue* colaNew;
+t_list* colaReady;
 
-sem_t* alguienEnNew;
+int GRADO_MULTIPROCE;
+
+// Cantidad de procesos en new
+sem_t* contadorProcesosEnNew;
+// Cantidad de procesos en ready
+sem_t* contadorProcesosEnReady;
+// Mutex para tocar cola new
 sem_t* mutexNew;
+// Mutex para tocar cola ready
+sem_t* mutexReady;
+// Contador de repartidores disponibles
+sem_t* contadorRepartidoresDisp;
 
 typedef struct{
 	int numeroRepartidor;
@@ -30,15 +41,19 @@ typedef struct{
 	repartidor* repartidorAsignado;
 	int posObjetivoX;
 	int posObjetivoY;
-}pcb_plato;
+}pcb_pedido;
 
-void leerRepartidoresDeConfig(t_config*);
+void leerPlanificacionConfig(t_config*);
 void iniciarPlanificacion();
 void freeDeArray(char**);
-void agregarANew(pcb_plato* unPlato);
+void agregarANew(pcb_pedido* unPlato);
 void iniciarSemaforosPlanificacion();
-void asignarRepartidorAPlato(pcb_plato*);
+void asignarRepartidorAPedido(pcb_pedido*);
 int modulo(int);
 int distanciaDeRepartidorAObjetivo(int, int, int, int);
+void hiloNew_Ready();
+void hiloExec(int* numeroHilo);
+void printearValorSemaforo(sem_t*, char*);
+pcb_pedido* obtenerSiguienteDeReady();
 
 #endif /* SRC_PLANIFICACION_H_ */

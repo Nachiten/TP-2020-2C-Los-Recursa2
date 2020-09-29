@@ -4,6 +4,7 @@ int main(){
 
 	inicializar_colas();
 	inicializar_semaforos();
+	iniciarSemaforosPlanificacion();
 	id_inicial_pedidos = 0;
 
 	//Cargo las configuraciones del .config
@@ -41,7 +42,7 @@ int main(){
 	posX_resto = config_get_int_value(config,"POSICION_REST_DEFAULT_X");
 	posY_resto = config_get_int_value(config,"POSICION_REST_DEFAULT_Y");
 
-	leerRepartidoresDeConfig(config);
+	leerPlanificacionConfig(config);
 
 	//coneccion a commanda
 	socket_commanda = establecer_conexion(ip_commanda,puerto_commanda);
