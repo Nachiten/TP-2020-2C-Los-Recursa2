@@ -87,3 +87,13 @@ char* resultadoDeRespuesta(uint32_t resultado)
 		return "fallido";
 	}
 }
+
+// Cuenta la cantidad de elementos en un array
+// Si no hay elementos retorna 0
+int cantidadDeElementosEnArray(char** array){
+	int i = 0;
+	while(array[i] != NULL){
+		i++;
+	}
+	return i;
+}

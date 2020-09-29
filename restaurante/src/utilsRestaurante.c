@@ -43,6 +43,14 @@ void obtenerMetadataRestaurante(){
 
     printf("pude recibir toda la de metadata de sindic.\n");
 
+    char** listaPlatos = string_get_string_as_array(estructuraRespuestaObtenerRestaurante->platos);
+
+    // SI > 0 => True, si = 0 => false
+    if (cantidadDeElementosEnArray(listaPlatos)){
+    	printf("Hay platos\n");
+    } else {
+    	printf("No hay platos (no hay restaurant)\n");
+    }
 
     //trabajo interno con la metadata recibida
     miPosicionX = estructuraRespuestaObtenerRestaurante->posX;
