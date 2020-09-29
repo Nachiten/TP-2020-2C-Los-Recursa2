@@ -8,6 +8,7 @@
 #include<netdb.h>
 #include<commons/log.h>
 #include<commons/string.h>
+#include<commons/collections/queue.h>
 #include<string.h>
 #include<pthread.h>
 #include <inttypes.h> // Para tener el uint32_t

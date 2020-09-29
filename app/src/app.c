@@ -41,11 +41,15 @@ int main(){
 	posX_resto = config_get_int_value(config,"POSICION_REST_DEFAULT_X");
 	posY_resto = config_get_int_value(config,"POSICION_REST_DEFAULT_Y");
 
+	leerRepartidoresDeConfig(config);
+
 	//coneccion a commanda
 	socket_commanda = establecer_conexion(ip_commanda,puerto_commanda);
 
-	//inicio el server
-	iniciar_server(mi_puerto);
+	//inicio el server | TODO Se quita esto para testear planificacion
+	//iniciar_server(mi_puerto);
+
+	iniciarPlanificacion();
 
 	return EXIT_SUCCESS;
 }
