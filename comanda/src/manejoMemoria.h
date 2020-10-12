@@ -11,6 +11,8 @@ void* AREA_DE_SWAP;
 uint32_t numero_de_victima;
 
 sem_t* semaforoNumeroVictima;
+sem_t* semaforoTocarListaPedidosTodosLosRestaurantes;
+sem_t* semaforoTocarListaEspaciosEnSWAP;
 
 tablas_segmentos_restaurantes* lista_de_pedidos_de_todos_los_restaurantes; //aca empiezan las lista de segmentos que tiene CoMAnda para cada restaurante
 espacioEnSWAP* lista_de_espacios_en_SWAP; //aca comienza la lista de los espacios disponibles/ocupados en area de SWAP
@@ -45,8 +47,8 @@ uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegme
 
 //busco si existe el plato con el nombre provisto en la lista de platos del pedido seleccionado (Existe = 1, no existe = 0)
 uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombrePlato);
-//esto agrega un plato a un pedido (segmento) ya existente
-void agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento, char* nombrePlato, uint32_t cantidadPlatos);
+//esto agrega un plato (o aumenta su cantidad) a un pedido (segmento) ya existente. Devuelve puntero al plato editado/creado
+tabla_paginas* agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento, char* nombrePlato, uint32_t cantidadPlatos);
 
 //ponemos en area de SWAP los datos de una pagina
 void agregar_pagina_a_swap(tabla_paginas* tablaDePlatosDelPedido, uint32_t posicionInicial);

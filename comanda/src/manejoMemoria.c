@@ -200,26 +200,27 @@ void asignarNumeroDeVictima(uint32_t* miNumeroDeVictima)
 
 tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante, uint32_t negarCreacion)
 {
+	tablas_segmentos_restaurantes* auxiliarRecorrerListasDePedidos = lasListasDePedidosDeRestaurantes;
 	tablas_segmentos_restaurantes* tablaDePedidosSeleccionada = NULL;
 	uint32_t tablaDefault = 0;
 
 	//chequeamos si solo tenemos la tabla de pedidos por default
-	if(lasListasDePedidosDeRestaurantes->sig_lista == NULL && strcmp(lasListasDePedidosDeRestaurantes->nombreRestaurante,"") == 0)
+	if(auxiliarRecorrerListasDePedidos->sig_lista == NULL && strcmp(auxiliarRecorrerListasDePedidos->nombreRestaurante,"") == 0)
 	{
 		tablaDefault = 1;//se activa el comportamiento para la primera lista de pedidos
 	}
 
 	//antes que nada, vemos si ya existe una tabla de pedidos de ese restaurante, o si es nuevo
-	if(tablaDefault == 0 && buscar_tabla_de_segmentos_de_restaurante(lasListasDePedidosDeRestaurantes, nombreDeRestaurante))
+	if(tablaDefault == 0 && buscar_tabla_de_segmentos_de_restaurante(auxiliarRecorrerListasDePedidos, nombreDeRestaurante))
 	{
 		//la lista de pedidos de ese restaurante ya existe
-		while(lasListasDePedidosDeRestaurantes->nombreRestaurante != nombreDeRestaurante)
+		while(auxiliarRecorrerListasDePedidos->nombreRestaurante != nombreDeRestaurante)
 		{
 			//me busco la lista de ese restaurante
-			lasListasDePedidosDeRestaurantes = lasListasDePedidosDeRestaurantes->sig_lista;
+			auxiliarRecorrerListasDePedidos = auxiliarRecorrerListasDePedidos->sig_lista;
 		}
 
-		tablaDePedidosSeleccionada = lasListasDePedidosDeRestaurantes; //lista de pedidos encontrada, devuelvo esto
+		tablaDePedidosSeleccionada = auxiliarRecorrerListasDePedidos; //lista de pedidos encontrada, devuelvo esto
 	}
 
 	else //es un restaurante nuevo, hay que crearle una lista de pedidos
@@ -230,17 +231,17 @@ tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_res
 			if(tablaDefault == 1)
 			{
 				//simplemente le asigno el nombre del restaurante nuevo a la lista de pedidos Default
-				lasListasDePedidosDeRestaurantes->nombreRestaurante = malloc(strlen(nombreDeRestaurante)+1);
-				memcpy(lasListasDePedidosDeRestaurantes->nombreRestaurante, nombreDeRestaurante, strlen(nombreDeRestaurante)+1);
+				auxiliarRecorrerListasDePedidos->nombreRestaurante = malloc(strlen(nombreDeRestaurante)+1);
+				memcpy(auxiliarRecorrerListasDePedidos->nombreRestaurante, nombreDeRestaurante, strlen(nombreDeRestaurante)+1);
 
-				tablaDePedidosSeleccionada = lasListasDePedidosDeRestaurantes; //la lista de pedidos por default es la seleccionada
+				tablaDePedidosSeleccionada = auxiliarRecorrerListasDePedidos; //la lista de pedidos por default es la seleccionada
 			}
 
 			//si o si tengo que crearle una tabla nueva
 			else
 			{
 				//devuelvo la lista de pedidos creada
-				tablaDePedidosSeleccionada = crear_tabla_de_pedidos(lasListasDePedidosDeRestaurantes, nombreDeRestaurante);
+				tablaDePedidosSeleccionada = crear_tabla_de_pedidos(auxiliarRecorrerListasDePedidos, nombreDeRestaurante);
 			}
 		}
 	}
@@ -298,8 +299,10 @@ uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegme
 	return numeroSegmentoBuscado;
 }
 
+//este guacho ya tiene los semaforos dentro de la propia funcion!!!
 uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido)
 {
+	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 	segmentos* tablaDePedidos = tablaDePedidosDelRestaurante->miTablaDePedidos;
 	uint32_t existe = 0;
 
@@ -311,6 +314,7 @@ uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedi
 		}
 		tablaDePedidos = tablaDePedidos->sig_segmento;
 	}
+	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 
 	return existe;
 }
@@ -334,7 +338,7 @@ uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombr
 	return existe;
 }
 
-void agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento, char* nombrePlato, uint32_t cantidadPlatos)
+tabla_paginas* agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento, char* nombrePlato, uint32_t cantidadPlatos)
 {
 	segmentos* laTablaDeSegmentos = tablaDePedidosDelRestaurante->miTablaDePedidos;
 	segmentos* segmentoSeleccionado = NULL;
@@ -366,8 +370,11 @@ void agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaur
 	//es un plato nuevo que agregar al pedido
 	else
 	{
-		crearPagina(tablaDePlatos, nombrePlato, cantidadPlatos);
+		tablaDePlatos = crearPagina(tablaDePlatos, nombrePlato, cantidadPlatos);
 	}
+
+	//devuelvo un puntero al plato, ya sea uno nuevo, o el plato al que le sumamos cantidades
+	return tablaDePlatos;
 }
 
 void agregar_pagina_a_swap(tabla_paginas* tablaDePlatosDelPedido, uint32_t posicionInicial)
@@ -385,11 +392,20 @@ void agregar_pagina_a_swap(tabla_paginas* tablaDePlatosDelPedido, uint32_t posic
 	//pongo en memoria SWAP el nombre del plato
 	memcpy(AREA_DE_SWAP + desplazamiento, tablaDePlatosDelPedido->nombreDeMorfi, strlen(tablaDePlatosDelPedido->nombreDeMorfi)+1);
 	desplazamiento += strlen(tablaDePlatosDelPedido->nombreDeMorfi)+1;
+
+	//actualizamos la pagina
+	tablaDePlatosDelPedido->cargadoEnSWAP = 1;
+	tablaDePlatosDelPedido->posicionInicialEnSWAP = posicionInicial;
 }
 
 void mover_pagina_a_memoriaPrincipal(tabla_paginas* tablaDePlatosDelPedido, uint32_t posicionInicialDeSWAP, uint32_t posicionInicialDeMEMORIA)
 {
 	//copia de memoria SWAP a memoria principal
 	memcpy(MEMORIA_PRINCIPAL + posicionInicialDeMEMORIA, AREA_DE_SWAP + posicionInicialDeSWAP, 32);
+
+	//actualizamos datos de la pagina + le asignamos su numero de victima
+	asignarNumeroDeVictima(&tablaDePlatosDelPedido->numero_de_victima);
+	tablaDePlatosDelPedido->cargadoEnMEMORIA = 1;
+
 }
 
