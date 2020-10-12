@@ -49,11 +49,9 @@ void serve_client(int32_t* socketCliente)
 
 			process_request(cod_op, socketCliente, sizeAAllocar);
 		}
-
-
 		else
 		{
-			free(socketCliente);
+			//free(socketCliente);
 			pthread_exit(NULL);
 		}
 
@@ -73,7 +71,6 @@ void esperar_cliente(int32_t socket_servidor)
 	*socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
 	pthread_create(&hiloConexionCliente, NULL, (void*)serve_client, socket_cliente);
 	pthread_detach(hiloConexionCliente);
-
 }
 
 void iniciar_server(char* puerto)

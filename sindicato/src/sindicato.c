@@ -459,15 +459,6 @@ int cantidadDeBloquesQueOcupa(int pesoEnBytes){
 	return cantBloques;
 }
 
-// Cuenta la cantidad de elementos en un array
-int cantidadDeElementosEnArray(char** array){
-	int i = 0;
-	while(array[i] != NULL && strcmp(array[i], "\n") != 0){
-		i++;
-	}
-	return i;
-}
-
 // Hacer free de un array con cosas
 void freeDeArray(char** array){
 	int cantidadElementosArray = cantidadDeElementosEnArray(array);
@@ -1423,25 +1414,7 @@ int main(){
 
 	// ---- A partir de aca el FS ya existe ----
 
-	int numPedido = 9;
-
-	guardarPedido("ElDestino", numPedido);
-
-	confirmarPedido("ElDestino", numPedido);
-
-	terminarPedido("ElDestino", numPedido);
-
-
-//	guardarPedido("ElDestino", 2);
-//	guardarPedido("ElDestino", 3);
-
-	//guardarPlato("ElDestino", 1, "Empanadas", 5);
-	//guardarPlato("ElDestino", 2, "Empanadas", 5);
-	//guardarPlato("ElDestino", 3, "Empanadas", 5);
-
-	//platoListo("ElDestino", 1, "Empanadas");
-	//platoListo("ElDestino", 1, "Empanadas");
-	//platoListo("ElDestino", 1, "Empanadas");
+//	obtenerRestaurante("ElDestino");
 
 	// Testing semaforos
 //	char* restaurant1 = "ElDestino";

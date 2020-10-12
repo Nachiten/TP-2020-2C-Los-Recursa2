@@ -17,7 +17,7 @@ void confirmarPedido(char*, int);
 void obtenerPedido(char*, int);
 void obtenerRestaurante(char*, uint32_t);
 void guardarPedido(char*, int);
-void guardarPlato(char*, int, char*, int);
+void guardarPlato(char*, int, char*, int, uint32_t);
 void terminarPedido(char*, int);
 
 // Mensajes de consola
