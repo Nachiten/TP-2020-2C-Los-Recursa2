@@ -56,13 +56,6 @@ sem_t* semLog;
 int32_t id_inicial_pedidos;
 int32_t socket_commanda;
 
-
-// ***SERVIDOR***
-void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t sizeAAllocar) ;
-void serve_client(int32_t* socket);
-void esperar_cliente(int32_t socket_servidor);
-void iniciar_server(char* puerto);
-
 // ***SETUP***
 void inicializar_colas();
 void inicializar_semaforos();
@@ -72,6 +65,8 @@ void consultar_restaurantes(int32_t socket_cliente);
 void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente);
 void crear_pedido(int32_t socket);
 void aniadir_plato(a_plato* recibidoAPlato);
+void confirmar_platos(plato_listo* platoListo);
+void confirmar_Pedido(confirmar_pedido* pedido);
 void agregar_restaurante(info_resto* recibidoAgregarRestaurante);
 
 // ***MANEJO DE MENSAJES***
@@ -79,7 +74,14 @@ int32_t crear_id_pedidos();
 void crear_pedido(int32_t socket);
 int buscar_pedido(uint32_t id_pedido);
 int buscar_cliente(int32_t socket);
+int buscar_cliente_id(uint32_t id_pedido_buscado);
 int buscar_resto(char* nombreResto);
 void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_cliente* cliente);
+
+// ***SERVIDOR***
+void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t sizeAAllocar) ;
+void serve_client(int32_t* socket);
+void esperar_cliente(int32_t socket_servidor);
+void iniciar_server(char* puerto);
 
 #endif /* SRC_APP_H_ */

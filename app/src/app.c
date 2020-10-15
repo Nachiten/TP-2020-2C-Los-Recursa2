@@ -136,7 +136,6 @@ void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
 	free(respuesta);
 }
 
-// todo terminar
 void consultar_platos(int32_t socket_cliente){
 	int numero_cliente, numero_resto, size;
 	perfil_cliente* cliente;
@@ -156,14 +155,18 @@ void consultar_platos(int32_t socket_cliente){
 				recibir_respuesta(CONSULTAR_PLATOS,resto,cliente);
 				return;
 
-			}else{
+			}else if(strcmp(cliente->nombre_resto,"RestoDefault") == 0){
 				size = sizeof(uint32_t) + sizeof(strlen(platos_default));
 				platosDefault = malloc(size);
 				platosDefault->longitudNombresPlatos = strlen(platos_default);
 				strcpy(platosDefault->nombresPlatos, platos_default);
 
 				mandar_mensaje(platosDefault,RESPUESTA_CONSULTAR_PLATOS,socket_cliente);
+				free(platosDefault);
 			}
+			sem_wait(semLog);
+			log_info(logger, "no se encontro el restaurante");
+			sem_post(semLog);
 
 		}else{
 			sem_wait(semLog);
@@ -181,21 +184,23 @@ void crear_pedido(int32_t socket_cliente){
 	respuesta_ok_error* respuesta;
 
 	numero_cliente = buscar_cliente(socket_cliente);
+
 	if(numero_cliente != -2){
-		if(listaRestos->elements_count != 0){
-			numero_cliente = buscar_cliente(socket_cliente);
-			cliente = list_get(listaPedidos,numero_cliente);// busca el perfil del cliente en la lista de pedidos
-			if(cliente->perfilActivo == 1){
-				numero_resto = buscar_resto(cliente->nombre_resto);
-				if(numero_resto != -2){
-					resto = list_get(listaRestos,numero_resto);
-					recibir_respuesta(CREAR_PEDIDO,resto,cliente);
-					return;
-				}
+		cliente = list_get(listaPedidos,numero_cliente);// busca el perfil del cliente en la lista de pedidos
+
+		if(listaRestos->elements_count != 0 && strcmp(cliente->nombre_resto,"RestoDefault") != 0){
+			numero_resto = buscar_resto(cliente->nombre_resto);
+
+			if(numero_resto != -2){
+				resto = list_get(listaRestos,numero_resto);
+				recibir_respuesta(CREAR_PEDIDO,resto,cliente);
 			}
-		}else {
-			int idPedido = crear_id_pedidos();
-			estructura_guardar_pedido = malloc(sizeof(guardar_pedido));
+
+		}else if(strcmp(cliente->nombre_resto,"RestoDefault") == 0){
+			int idPedido = crear_id_pedidos(),size;
+
+			size = sizeof(uint32_t) + sizeof(strlen("RestoDefault")) + sizeof(uint32_t);
+			estructura_guardar_pedido = malloc(size);
 
 			estructura_guardar_pedido->idPedido = idPedido;
 			estructura_guardar_pedido->nombreRestaurante = "RestoDefault";
@@ -206,7 +211,8 @@ void crear_pedido(int32_t socket_cliente){
 			mandar_mensaje(estructura_guardar_pedido,GUARDAR_PEDIDO,socket_commanda);
 			recibir_mensaje(respuesta,GUARDAR_PEDIDO,socket_commanda);
 			mandar_mensaje(respuesta,CREAR_PEDIDO,socket_cliente);
-			return;
+			free(estructura_guardar_pedido);
+			free(respuesta);
 		}
 		sem_wait(semLog);
 		log_info(logger, "no se logro crear pedido");
@@ -226,7 +232,7 @@ void aniadir_plato(a_plato* recibidoAPlato){
 	int32_t socketRespuestas;
 	respuesta_ok_error* respuesta;
 
-	numero_cliente = buscar_cliente(recibidoAPlato->idPedido);
+	numero_cliente = buscar_cliente_id(recibidoAPlato->idPedido);
 
 	if(numero_cliente != -2){
 		cliente = list_get(listaPedidos,numero_cliente);
@@ -269,6 +275,92 @@ void aniadir_plato(a_plato* recibidoAPlato){
 	}
 }
 
+void confirmar_platos(plato_listo* platoListo){
+	uint32_t size;
+	respuesta_ok_error* respuesta = malloc(sizeof(respuesta_ok_error));
+	obtener_pedido* obtener_pedido;
+	respuesta_consultar_pedido* respuesta_consulta;
+
+	size = sizeof(uint32_t) + sizeof(strlen(platoListo->nombreRestaurante)) + sizeof(uint32_t);
+	obtener_pedido = malloc(size);
+	obtener_pedido->largoNombreRestaurante = platoListo->largoNombreRestaurante;
+	obtener_pedido->nombreRestaurante = platoListo->nombreRestaurante;
+	obtener_pedido->idPedido = platoListo->idPedido;
+
+	//todo ver el como hacer el size de char**
+	size = sizeof(uint32_t) + sizeof(strlen(platoListo->nombreRestaurante)) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t);
+	respuesta_consulta = malloc(size);
+
+	mandar_mensaje(platoListo,PLATO_LISTO,socket_commanda);
+	recibir_mensaje(respuesta,RESPUESTA_PLATO_LISTO,socket_commanda);
+
+	mandar_mensaje(obtener_pedido,OBTENER_PEDIDO,socket_commanda);
+	recibir_mensaje(respuesta_consulta,RESPUESTA_OBTENER_PEDIDO,socket_commanda);
+	//todo como manejo la lista de patos?
+
+	free(respuesta);
+}
+
+void confirmar_Pedido(confirmar_pedido* pedido){
+	//todo ver que devuelve obtenerPedido cuando esta vacio o no esta creado
+	int numero_cliente, numero_resto;
+	perfil_cliente* cliente;
+	info_resto* resto;
+	respuesta_ok_error* respuesta = malloc(sizeof(respuesta_ok_error));
+
+	numero_cliente = buscar_cliente_id(pedido->idPedido);
+
+	if(numero_cliente != -2){
+		cliente = list_get(listaPedidos,numero_cliente);
+
+		if(strcmp(cliente->nombre_resto,"RestoDefault") == 0){
+			//todo ver como generar el pcb
+			mandar_mensaje(pedido,CONFIRMAR_PEDIDO,socket_commanda);
+			recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,socket_commanda);
+
+			mandar_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,cliente->socket_cliente);
+
+		}else{
+			numero_resto = buscar_resto(cliente->nombre_resto);
+
+			if(numero_resto != -2){
+				resto = list_get(listaRestos,numero_resto);
+
+				mandar_mensaje(pedido,CONFIRMAR_PEDIDO,resto->socket);
+				recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,resto->socket);
+
+				if(respuesta->respuesta == 1){
+					//todo ver como generar el pcb
+					mandar_mensaje(pedido,CONFIRMAR_PEDIDO,socket_commanda);
+					recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,socket_commanda);
+
+					mandar_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,cliente->socket_cliente);
+
+				}else{
+					mandar_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,cliente->socket_cliente);
+				}
+
+			}else{
+				sem_wait(semLog);
+				log_info(logger, "no se pudo encontrar el restaurante");
+				sem_post(semLog);
+			}
+		}
+
+	}else{
+		sem_wait(semLog);
+		log_info(logger, "no se pudo encontrar el cliente");
+		sem_post(semLog);
+	}
+
+	free(respuesta);
+}
+
+void consultar_Pedido(obtener_pedido* pedido){
+	respuesta_obtener_pedido* datosObtenerPedido;
+}
+
+
 // agrega un restaurante que se conecto a app a la lista de restaurantes
 void agregar_restaurante(info_resto* recibidoAgregarRestaurante){
 	int numero_resto;
@@ -292,17 +384,6 @@ void agregar_restaurante(info_resto* recibidoAgregarRestaurante){
 
 // **************************************FIN MENSAJES**************************************
 
-/* esto esta en utils.c
-// Cuenta la cantidad de elementos en un array
-int cantidadDeElementosEnArray(char** array){
-	int i = 0;
-	while(array[i] != NULL && strcmp(array[i], "\n") != 0){
-		i++;
-	}
-	return i; // 0 es vacio
-}
-*/
-
 int32_t crear_id_pedidos(){
 	sem_wait(semId);
 	id_inicial_pedidos += 1;
@@ -321,11 +402,22 @@ int buscar_pedido(uint32_t id_pedido){
 	return -2;
 }
 
-int buscar_cliente(int32_t socket_cliente){
+int buscar_cliente(int32_t socket_cliente_buscado){
 	perfil_cliente* cliente;
 	for(int i = 0; i < listaPedidos->elements_count; i++){
 		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
-		if(cliente->socket_cliente == socket_cliente && cliente->id_pedido != 0){
+		if(cliente->socket_cliente == socket_cliente_buscado && cliente->id_pedido != 0){
+			return i;
+		}
+	}
+	return -2;
+}
+
+int buscar_cliente_id(uint32_t id_pedido_buscado){
+	perfil_cliente* cliente;
+	for(int i = 0; i < listaPedidos->elements_count; i++){
+		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
+		if(cliente->id_pedido == id_pedido_buscado){
 			return i;
 		}
 	}
@@ -418,6 +510,8 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	info_resto* recibidoAgregarRestaurante;
 	seleccionar_restaurante* recibidoSeleccionarRestaurante;
 	a_plato* recibidoAPlato;
+	plato_listo* recibidoPlatoListo ;
+	confirmar_pedido* recibidoConfirmarPedido;
 
 	switch (cod_op) {
 		case CONSULTAR_RESTAURANTES:
@@ -429,6 +523,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			recibidoSeleccionarRestaurante = malloc(sizeof(seleccionar_restaurante));
 			recibir_mensaje(recibidoSeleccionarRestaurante,SELECCIONAR_RESTAURANTE,socket_cliente);
 			seleccionarRestaurante(recibidoSeleccionarRestaurante->nombreRestaurante,socket_cliente);
+			free(recibidoSeleccionarRestaurante);
 			break;
 
 		case CONSULTAR_PLATOS:
@@ -443,6 +538,14 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			recibidoAPlato = malloc(sizeof(a_plato));
 			recibir_mensaje(recibidoAPlato,A_PLATO,socket_cliente);
 			aniadir_plato(recibidoAPlato);
+			free(recibidoAPlato);
+			break;
+
+		case PLATO_LISTO:
+			recibidoPlatoListo = malloc(sizeof(plato_listo));
+			recibir_mensaje(recibidoPlatoListo,PLATO_LISTO,socket_cliente);
+			confirmar_platos(recibidoPlatoListo);
+			free(recibidoPlatoListo); //todo ver si esto no rompe nada
 			break;
 
 		case AGREGAR_RESTAURANTE:
@@ -450,6 +553,13 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			recibidoAgregarRestaurante = malloc(sizeof(info_resto));
 			recibir_mensaje(recibidoAgregarRestaurante,AGREGAR_RESTAURANTE,socket_cliente);
 			agregar_restaurante(recibidoAgregarRestaurante);
+			break;
+
+		case CONFIRMAR_PEDIDO:
+			recibidoConfirmarPedido = malloc(sizeof(confirmar_pedido));
+			recibir_mensaje(recibidoConfirmarPedido,CONFIRMAR_PEDIDO,socket_cliente);
+			confirmar_Pedido(recibidoConfirmarPedido);
+			free(recibidoConfirmarPedido);
 			break;
 
 		case DESCONEXION:
