@@ -22,6 +22,7 @@ void iniciarPlanificacion(){
 
 	colaNew = queue_create();
 	colaReady = list_create();
+    colaBlock = list_create();
 
 	pthread_t hiloNewReady;
 
@@ -67,18 +68,19 @@ void iniciarPlanificacion(){
 
 		int* numeroHilo = malloc(sizeof(int));
 
-		*numeroHilo = i + 1;
+		*numeroHilo = i;
 
-		pthread_create(&hiloColaExec, NULL, (void*)hiloExec, numeroHilo);
+		pthread_create(&hiloColaExec, NULL, (void*)funcionHiloExec, numeroHilo);
 	}
 
 	pthread_join(hiloNewReady, NULL);
 }
 
-void hiloExec(int* numeroHilo){
+void funcionHiloExec(int* numeroHilo){
 	printf("ESPERANDO A QUE APAREZCA ALGUIEN EN READY\n");
 
 	sem_wait(contadorProcesosEnReady);
+    //waitSemaforoHabilitarCiclo(numeroHilo);
 
 	printf("HAY UN PROCESO EN READY.\n");
 
@@ -87,8 +89,56 @@ void hiloExec(int* numeroHilo){
 	printf("Al hilo exec numero: %i se le asigna el pedido con objetivo %i-%i\n",
 			*numeroHilo, pedidoAEjecutar->posObjetivoX, pedidoAEjecutar->posObjetivoY);
 
-	// TODO | El hilo exec debe comenzar a ejecutar el pedido
+	//calcularMovimientosCoordenadas
+
+	// TODO | El hilo exec debe comenzar a ejecutar el pedido AKA mover al repartidor de lugar hacia su destino (restau/client)
+
+	while(noEsFinDeRafaga())
+	{
+
+		moverRepartidor(pedidoAEjecutar->repartidorAsignado);
+		pedidoAEjecutar->movimientosRealizados += 1;
+	}
+/*
+	if(momentoDeDescansar())
+	{
+		enviarInstanciaABlock();
+	}else{
+		//devolverInstanciaAReady();
+	}*/
 }
+
+
+
+void moverRepartidor(repartidor* elRepartidor){
+
+   elRepartidor->
+
+
+
+}
+
+
+int noEsFinDeRafaga(){
+
+	return 1;
+}
+
+void agregarABlock(pcb_pedido* elPedido){
+	printf("Intentando insertar elemento en bloqueados..\n");
+
+	//printearValorSemaforo(mutexBlock);
+
+	sem_wait(mutexBlock);
+
+	list_add(colaBlock, elPedido);
+
+	sem_post(mutexBlock);
+
+	printf("Pude insertar elemento en bloqueados..\n");
+}
+
+
 
 pcb_pedido* obtenerSiguienteDeReady(){
 	sem_wait(mutexReady);
@@ -102,6 +152,7 @@ pcb_pedido* obtenerSiguienteDeReady(){
 
 	return pedidoADevolver;
 }
+
 
 // Hilo que maneja pasar los procesos de new a ready (asignar los repartidores a los platos)
 void hiloNew_Ready(){
@@ -117,7 +168,7 @@ void hiloNew_Ready(){
 		sem_wait(mutexNew);
 
 		// Region critica de tocar la lista new
-		pcb_pedido* unPlato = queue_pop(colaNew);
+		pcb_pedido* unPedido = queue_pop(colaNew);
 
 		sem_post(mutexNew);
 
@@ -127,7 +178,7 @@ void hiloNew_Ready(){
 		sem_wait(contadorRepartidoresDisp);
 
 		printf("Hay repartidores disponibles..\n");
-		asignarRepartidorAPedido(unPlato);
+		asignarRepartidorAPedido(unPedido);
 	}
 }
 
@@ -241,8 +292,13 @@ void iniciarSemaforosPlanificacion(){
 	mutexReady = malloc(sizeof(sem_t));
 	sem_init(mutexReady, 0, 1);
 
+	mutexBlock = malloc(sizeof(sem_t));
+	sem_init(mutexBlock, 0, 1);
+
 	contadorRepartidoresDisp = malloc(sizeof(sem_t));
 	sem_init(contadorRepartidoresDisp, 0, 0);
+
+	crearSemaforosCiclos();
 }
 
 // Cargo la lista repartidores con la lista de todos los repartidores de la config
@@ -251,6 +307,7 @@ void leerPlanificacionConfig(t_config* config){
 	repartidores = list_create();
 
 	GRADO_MULTIPROCE = config_get_int_value(config, "GRADO_DE_MULTIPROCESAMIENTO");
+	RETARDO_CICLO_CPU = config_get_int_value(config, "RETARDO_CICLO_CPU");
 
 	char** posicionesRepartidores = config_get_array_value(config, "REPARTIDORES");
 	char** frecuenciasDescansos = config_get_array_value(config, "FRECUENCIA_DE_DESCANSO");
@@ -282,6 +339,85 @@ void leerPlanificacionConfig(t_config* config){
 	freeDeArray(posicionesRepartidores);
 	freeDeArray(frecuenciasDescansos);
 	freeDeArray(tiemposDescanso);
+}
+
+void crearSemaforosCiclos(){
+	listaSemHabilitarCicloExec = list_create();
+	listaSemFinalizarCicloExec = list_create();
+	int i;
+
+	habilitarCicloReady= malloc(sizeof(sem_t));
+	finalizarCicloReady= malloc(sizeof(sem_t));
+	habilitarCicloBlock= malloc(sizeof(sem_t));
+	finalizarCicloBlock= malloc(sizeof(sem_t));
+
+	sem_init(habilitarCicloReady, 0, 0);
+	sem_init(finalizarCicloReady, 0, 0);
+	sem_init(habilitarCicloBlock, 0, 0);
+	sem_init(finalizarCicloBlock, 0, 0);
+
+	for(i=0; i<GRADO_MULTIPROCE; i++){
+		sem_t* semaforoHabilitarCiclo = malloc(sizeof(sem_t));
+		sem_init(semaforoHabilitarCiclo, 0, 0);
+		sem_t* semaforoFinalizarCiclo = malloc(sizeof(sem_t));
+		sem_init(semaforoFinalizarCiclo, 0, 0);
+		list_add(listaSemHabilitarCicloExec, semaforoHabilitarCiclo);
+		list_add(listaSemFinalizarCicloExec, semaforoFinalizarCiclo);
+	}
+}
+
+
+void hiloCiclosMaestro(){
+
+    int i;
+
+    while(1){
+
+	for(i=0; i<GRADO_MULTIPROCE; i++){
+		signalSemaforoHabilitarCicloExec(i);
+	}
+	sem_post(habilitarCicloReady);
+	sem_post(habilitarCicloBlock);
+
+    sleep(RETARDO_CICLO_CPU);
+
+    for(i=0; i<GRADO_MULTIPROCE; i++){
+    	waitSemaforoFinalizarCicloExec(i);
+    }
+    sem_wait(finalizarCicloReady);
+    sem_wait(finalizarCicloBlock);
+    }
+
+}
+
+
+
+void waitSemaforoHabilitarCicloExec(uint32_t indice){
+
+	sem_t* semaforoObjetivo = list_get(listaSemHabilitarCicloExec, indice);
+	sem_wait(semaforoObjetivo);
+
+}
+
+void signalSemaforoHabilitarCicloExec(uint32_t indice){
+
+	sem_t* semaforoObjetivo = list_get(listaSemHabilitarCicloExec, indice);
+	sem_post(semaforoObjetivo);
+
+}
+
+void waitSemaforoFinalizarCicloExec(uint32_t indice){
+
+	sem_t* semaforoObjetivo = list_get(listaSemFinalizarCicloExec, indice);
+	sem_wait(semaforoObjetivo);
+
+}
+
+void signalSemaforoFinalizarCicloExec(uint32_t indice){
+
+	sem_t* semaforoObjetivo = list_get(listaSemFinalizarCicloExec, indice);
+	sem_post(semaforoObjetivo);
+
 }
 
 // Hacer free de un array con cosas
