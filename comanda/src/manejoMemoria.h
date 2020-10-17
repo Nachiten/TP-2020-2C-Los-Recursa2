@@ -13,16 +13,18 @@ uint32_t numero_de_victima;
 sem_t* semaforoNumeroVictima;
 sem_t* semaforoTocarListaPedidosTodosLosRestaurantes;
 sem_t* semaforoTocarListaEspaciosEnSWAP;
+sem_t* semaforoTocarListaEspaciosEnMP;
 
 tablas_segmentos_restaurantes* lista_de_pedidos_de_todos_los_restaurantes; //aca empiezan las lista de segmentos que tiene CoMAnda para cada restaurante
-espacioEnSWAP* lista_de_espacios_en_SWAP; //aca comienza la lista de los espacios disponibles/ocupados en area de SWAP
+espacio* lista_de_espacios_en_SWAP; //aca comienza la lista de los espacios disponibles/ocupados en area de SWAP
+espacio* lista_de_espacios_en_MP; //aca comienza la lista de los espacios disponibles/ocupados en area de SWAP
 
 //funciones de memoria****************************************************************************************************************************
 //esta porqueria lo que hace es la inicializacion original para tener tablas de pedidos para cda restaurante
 void inicializar_lista_de_tablas_de_segmentos_de_restaurantes(tablas_segmentos_restaurantes* listas_de_pedidos);
 void inicializar_tabla_de_segmentos(segmentos* laTablaDeSegmentos);
 void inicializar_tabla_de_paginas(tabla_paginas* laTablaDePaginas);
-void inicializar_lista_de_espacios_en_SWAP(espacioEnSWAP* espacio, uint32_t TAMANIO_AREA_DE_SWAP);
+void inicializar_lista_de_espacios(espacio* listaDeEspacios, uint32_t TAMANIO_AREA); //utilizada para inicializar listas de los espacios disponibles de MP y SWAP
 
 //crea una nueva tabla y devuelve puntero a la tabla creada
 tablas_segmentos_restaurantes* crear_tabla_de_pedidos(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante);
@@ -30,8 +32,8 @@ tablas_segmentos_restaurantes* crear_tabla_de_pedidos(tablas_segmentos_restauran
 uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido);
 //crea una nueva pagina y devuelve el puntero a la pagina creada
 tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePlato, uint32_t cantidadPlatos);
-void crearNuevoEspacioEnSWAP(espacioEnSWAP* espacio); //para preparar los espacios que puede haber en SWAP
-int32_t buscarPrimerEspacioLibreEnSWAP(espacioEnSWAP* listaDeEspacios); //devuelve el numero del espacio encontrado, o -1 si no se encontro
+void crearNuevoEspacio(espacio* espacio); //para preparar los espacios que puede haber en SWAP/MP
+int32_t buscarPrimerEspacioLibre(espacio* listaDeEspacios); //devuelve el numero del espacio encontrado, o -1 si no se encontro
 
 //crea y asigna un nuevo numero de victima a la pagina
 void asignarNumeroDeVictima(uint32_t* miNumeroDeVictima);

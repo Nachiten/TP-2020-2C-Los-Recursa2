@@ -30,15 +30,15 @@ void inicializar_tabla_de_paginas(tabla_paginas* laTablaDePaginas)
 	laTablaDePaginas->cargadoEnSWAP = 0;
 	laTablaDePaginas->posicionInicialEnSWAP = -1;
 	laTablaDePaginas->cargadoEnMEMORIA = 0;
-	laTablaDePaginas->numeroDePagina = -1;
+	laTablaDePaginas->numeroDeMarco = -1;
 	laTablaDePaginas->anter_pagina = NULL;
 	laTablaDePaginas->sig_pagina = NULL;
 }
 
-void inicializar_lista_de_espacios_en_SWAP(espacioEnSWAP* listaDeEspacios, uint32_t TAMANIO_AREA_DE_SWAP)
+void inicializar_lista_de_espacios(espacio* listaDeEspacios, uint32_t TAMANIO_AREA)
 {
-	espacioEnSWAP* auxiliarMoverme = listaDeEspacios;
-	uint32_t cantidadPosibleDeEspacios = TAMANIO_AREA_DE_SWAP/32; //necesito saber cuantas paginas (y por ende espacios) voy a poder tener en SWAP
+	espacio* auxiliarMoverme = listaDeEspacios;
+	uint32_t cantidadPosibleDeEspacios = TAMANIO_AREA/32; //necesito saber cuantas paginas/marcos (y por ende espacios) voy a poder tener en SWAP/MEMORIA PPAL
 	uint32_t iterador = 0;
 
 	//inicializamos el primer espacio
@@ -49,7 +49,7 @@ void inicializar_lista_de_espacios_en_SWAP(espacioEnSWAP* listaDeEspacios, uint3
 
 	while(iterador < cantidadPosibleDeEspacios)
 	{
-		crearNuevoEspacioEnSWAP(auxiliarMoverme);
+		crearNuevoEspacio(auxiliarMoverme);
 		auxiliarMoverme = auxiliarMoverme->sig_espacio;
 		iterador++;
 	}
@@ -150,10 +150,10 @@ tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePl
 	return nuevoPlato;
 }
 
-void crearNuevoEspacioEnSWAP(espacioEnSWAP* espacio)
+void crearNuevoEspacio(espacio* unEspacio)
 {
-	espacioEnSWAP* auxiliarEspacioAnterior = espacio;
-	espacioEnSWAP* nuevoEspacio = malloc(sizeof(espacioEnSWAP));
+	espacio* auxiliarEspacioAnterior = unEspacio;
+	espacio* nuevoEspacio = malloc(sizeof(espacio));
 
 	//uno el nuevo espacio
 	auxiliarEspacioAnterior->sig_espacio = nuevoEspacio;
@@ -165,9 +165,9 @@ void crearNuevoEspacioEnSWAP(espacioEnSWAP* espacio)
 	nuevoEspacio->sig_espacio = NULL;
 }
 
-int32_t buscarPrimerEspacioLibreEnSWAP(espacioEnSWAP* listaDeEspacios)
+int32_t buscarPrimerEspacioLibre(espacio* listaDeEspacios)
 {
-	espacioEnSWAP* auxiliarMoverme = listaDeEspacios;
+	espacio* auxiliarMoverme = listaDeEspacios;
 	int32_t espacioEncontrado = -1;
 
 	//mientras que no encuentre un espacio ocupado...
@@ -394,8 +394,10 @@ void agregar_pagina_a_swap(tabla_paginas* tablaDePlatosDelPedido, uint32_t posic
 	desplazamiento += strlen(tablaDePlatosDelPedido->nombreDeMorfi)+1;
 
 	//actualizamos la pagina
+	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 	tablaDePlatosDelPedido->cargadoEnSWAP = 1;
 	tablaDePlatosDelPedido->posicionInicialEnSWAP = posicionInicial;
+	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 }
 
 void mover_pagina_a_memoriaPrincipal(tabla_paginas* tablaDePlatosDelPedido, uint32_t posicionInicialDeSWAP, uint32_t posicionInicialDeMEMORIA)
@@ -404,8 +406,10 @@ void mover_pagina_a_memoriaPrincipal(tabla_paginas* tablaDePlatosDelPedido, uint
 	memcpy(MEMORIA_PRINCIPAL + posicionInicialDeMEMORIA, AREA_DE_SWAP + posicionInicialDeSWAP, 32);
 
 	//actualizamos datos de la pagina + le asignamos su numero de victima
+	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 	asignarNumeroDeVictima(&tablaDePlatosDelPedido->numero_de_victima);
 	tablaDePlatosDelPedido->cargadoEnMEMORIA = 1;
-
+	tablaDePlatosDelPedido->numeroDeMarco = posicionInicialDeMEMORIA/32;
+	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 }
 

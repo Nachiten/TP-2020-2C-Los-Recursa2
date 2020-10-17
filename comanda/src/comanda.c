@@ -95,13 +95,17 @@ int main()
 	//inicializamos la tabla de segmentos
 	lista_de_pedidos_de_todos_los_restaurantes = malloc(sizeof(tablas_segmentos_restaurantes));
 	inicializar_lista_de_tablas_de_segmentos_de_restaurantes(lista_de_pedidos_de_todos_los_restaurantes);//si, son nombres de mierda
-	lista_de_espacios_en_SWAP = malloc(sizeof(espacioEnSWAP));
-	inicializar_lista_de_espacios_en_SWAP(lista_de_espacios_en_SWAP, TAMANIO_AREA_DE_SWAP);
+	lista_de_espacios_en_SWAP = malloc(sizeof(espacio));
+	inicializar_lista_de_espacios(lista_de_espacios_en_SWAP, TAMANIO_AREA_DE_SWAP);
+	lista_de_espacios_en_MP = malloc(sizeof(espacio));
+	inicializar_lista_de_espacios(lista_de_espacios_en_MP, TAMANIO_MEMORIA_PRINCIPAL);
+
 
 	//ToDo matar la lista de las tablas de segmento
 	//ToDo matar la tabla de segmentos
 	//ToDo matar las tablas de paginas
 	//ToDo matar la lista de los espacios existentes en SWAP
+	//ToDo matar la lista de los espacios existentes en MP
 
 	//puts("antes recepcion");
 	recepcion_mensajes();
@@ -207,6 +211,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	uint32_t numeroDeSegmento;
 	tabla_paginas* plato_creado_o_editado = NULL;
 	int32_t numeroDeEspacioEnSwap = -10;
+	int32_t numeroDeMarcoEnMP = -10;
 
 	/*ToDo CODIGOS DE OPERACION QUE FALTAN CODEAR:
 	 GUARDAR_PEDIDO
@@ -289,7 +294,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
             		//busco si hay un espacio libre en SWAP para poner la pagina nueva/editada
             		sem_wait(semaforoTocarListaEspaciosEnSWAP);
-            		numeroDeEspacioEnSwap = buscarPrimerEspacioLibreEnSWAP(lista_de_espacios_en_SWAP);
+            		numeroDeEspacioEnSwap = buscarPrimerEspacioLibre(lista_de_espacios_en_SWAP);
             		sem_post(semaforoTocarListaEspaciosEnSWAP);
 
             		if(numeroDeEspacioEnSwap == -1)
@@ -300,9 +305,18 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		//ToDO temporalmente asumido que siempre existe espacio en SWAP
             		agregar_pagina_a_swap(plato_creado_o_editado, numeroDeEspacioEnSwap*32);
 
+            		//busco si hay un marco libre en MP para poner la pagina nueva/editada
+					sem_wait(semaforoTocarListaEspaciosEnMP);
+					numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+					sem_post(semaforoTocarListaEspaciosEnMP);
 
-            		//ToDo crear una lista de espacios en MP???
-            		//mover_pagina_a_memoriaPrincipal(plato_creado_o_editado, numeroDeEspacioEnSwap*32, posicionInicialDeMEMORIA);
+					if(numeroDeMarcoEnMP == -1)
+					{
+						//ToDo si no hay un espacio libre hay que llamar al grim reaper
+					}
+
+					//ToDO temporalmente asumido que siempre existen marcos libres en MP
+					mover_pagina_a_memoriaPrincipal(plato_creado_o_editado, numeroDeEspacioEnSwap*32, numeroDeMarcoEnMP*32);
         		}
 
         		//el pedido no existe
@@ -369,10 +383,12 @@ void inicializarSemaforos() //Todo matar semaforos?
 	semaforoLogger = malloc(sizeof(sem_t));
 	semaforoTocarListaPedidosTodosLosRestaurantes = malloc(sizeof(sem_t));
 	semaforoTocarListaEspaciosEnSWAP = malloc(sizeof(sem_t));
+	semaforoTocarListaEspaciosEnMP = malloc(sizeof(sem_t));
 
 	sem_init(semaforoNumeroVictima, 0, 1);
 	sem_init(semaforoLogger, 0, 1);
 	sem_init(semaforoTocarListaPedidosTodosLosRestaurantes, 0, 1);
 	sem_init(semaforoTocarListaEspaciosEnSWAP, 0, 1);
+	sem_init(semaforoTocarListaEspaciosEnMP, 0, 1);
 }
 

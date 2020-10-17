@@ -15,7 +15,7 @@ typedef struct tabla_paginas
 	uint32_t cargadoEnSWAP;
 	int32_t posicionInicialEnSWAP;
 	uint32_t cargadoEnMEMORIA;
-	int32_t numeroDePagina;
+	int32_t numeroDeMarco;
 
 	struct tabla_paginas* anter_pagina;
 	struct tabla_paginas* sig_pagina;
@@ -45,13 +45,13 @@ typedef struct tablas_segmentos_restaurantes
 	struct tablas_segmentos_restaurantes* sig_lista;
 }tablas_segmentos_restaurantes;
 
-typedef struct espacioEnSWAP
+typedef struct espacio
 {
 	uint32_t numeroDeEspacio;
 	uint32_t espacioOcupado;
 
-	struct espacioEnSWAP* anter_espacio;
-	struct espacioEnSWAP* sig_espacio;
-}espacioEnSWAP;
+	struct espacio* anter_espacio;
+	struct espacio* sig_espacio;
+}espacio;
 
 #endif /* SRC_ESTRUCTURASCOMANDA_H_ */
