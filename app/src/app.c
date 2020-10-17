@@ -4,7 +4,6 @@ int main(){
 
 	inicializar_colas();
 	inicializar_semaforos();
-	iniciarSemaforosPlanificacion();
 	id_inicial_pedidos = 0;
 
 	//Cargo las configuraciones del .config
@@ -42,7 +41,14 @@ int main(){
 	posX_resto = config_get_int_value(config,"POSICION_REST_DEFAULT_X");
 	posY_resto = config_get_int_value(config,"POSICION_REST_DEFAULT_Y");
 
+	// NOTA: Alterar el orden de estos llamados va a romper (dependen uno del anterior)
+	// Inicializo semaforos necesarios para planif
+	iniciarSemaforosPlanificacion();
+	// Leo los datos que necesito para planificacion
 	leerPlanificacionConfig(config);
+	// Inicializo los semaforos para ciclos de CPU
+	crearSemaforosCiclos();
+
 
 	//coneccion a commanda
 	socket_commanda = establecer_conexion(ip_commanda,puerto_commanda);
