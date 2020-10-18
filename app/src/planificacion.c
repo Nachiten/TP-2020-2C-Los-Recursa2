@@ -111,54 +111,59 @@ void hiloExec(int* numHiloExecPuntero){
 			printf("Al hilo exec numero: %i se le asigna el pedido con objetivo %i-%i\n",
 					numHiloExec, pedidoAEjecutar->posObjetivoX, pedidoAEjecutar->posObjetivoY);
 
-			//calcularMovimientosCoordenadas
+			pedidoAEjecutar->instruccionesTotales = distanciaDeRepartidorAObjetivo(pedidoAEjecutar->repartidorAsignado, pedidoAEjecutar);
 
 			// TODO | El hilo exec debe comenzar a ejecutar el pedido AKA mover al repartidor de lugar hacia su destino (restau/client)
 
-			int i;
-			for (i = 0 ; i < 3; i++){
+			int desalojoCode;
+			int cantidadCiclos = 0;
 
-			waitSemaforoHabilitarCicloExec(numHiloExec);
-			printf("[Hilo%i] Ejecuto ciclo numero: %i\n", numHiloExec, i);
-			signalSemaforoFinalizarCicloExec(numHiloExec);
+			// Calculo si tiene que desalojar o no y por que razon
+			while ( (desalojoCode = codigoDesalojo(pedidoAEjecutar) ) == 0){
+				waitSemaforoHabilitarCicloExec(numHiloExec);
+				printf("[Hilo%i] Ejecuto ciclo numero: %i\n", numHiloExec, cantidadCiclos);
+
+				pedidoAEjecutar->instruccionesRealizadas++;
+
+				printf("[Hilo%i] Instrucciones restantes: %i\n", numHiloExec, pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
+
+				signalSemaforoFinalizarCicloExec(numHiloExec);
+
+				cantidadCiclos++;
 			}
 
-	//		while(sigoEjecutando())
-	//		{
-	//
-	//			moverRepartidor(pedidoAEjecutar->repartidorAsignado);
-	//			pedidoAEjecutar->movimientosRealizados += 1;
-	//		}
+			if (desalojoCode == 1){
+				printf("[Hilo%i] estoy cansado.\n", numHiloExec);
+			} else if (desalojoCode == 2){
+				printf("[Hilo%i] termine la rafaga.\n", numHiloExec);
+			}
+
+			// TODO | Codigo pertinente para mover el proceso a bloqueado
+
 		} else {
 			waitSemaforoHabilitarCicloExec(numHiloExec);
 			printf("[Hilo%i] Desperdicio un ciclo porque no hay nadie en ready.\n", numHiloExec);
 			signalSemaforoFinalizarCicloExec(numHiloExec);
 		}
-	/*
-		if(momentoDeDescansar())
-		{
-			enviarInstanciaABlock();
-		}else{
-			//devolverInstanciaAReady();
-		}*/
 
 	}
 }
 
+// 0: No se desaloja, 1: Se desaloja por estar cansado, 2: Se desaloja porque termino la rafaga
+int codigoDesalojo(pcb_pedido* unPedido){
 
+	// Si termino de reliazar toda la rafaga
+	if (unPedido->instruccionesRealizadas == unPedido->instruccionesTotales){
+		return 2;
+	}
 
-void moverRepartidor(repartidor* elRepartidor){
+	// Si se canso ya y debe ir a blocked
+	if (unPedido->instruccionesRealizadas == unPedido->repartidorAsignado->frecuenciaDescanso){
+		return 1;
+	}
 
-   //elRepartidor->
-
-
-
-}
-
-
-int sigoEjecutando(){
-
-	return 1;
+	// Ninguna (sigue ejecutando)
+	return 0;
 }
 
 void agregarABlock(pcb_pedido* elPedido){
@@ -245,7 +250,7 @@ void asignarRepartidorAPedido(pcb_pedido* unPlato){
 		repartidor* miRepartidor = list_get(repartidoresDisponibles, i);
 
 		// Calculo la distancia del repartidor hasta el objetivo
-		int distanciaActual = distanciaDeRepartidorAObjetivo(miRepartidor->posX, miRepartidor->posY, unPlato->posObjetivoX, unPlato->posObjetivoY);
+		int distanciaActual = distanciaDeRepartidorAObjetivo(miRepartidor, unPlato);
 
 		//printf("La distancia del repartidor numero %i es %i\n", miRepartidor->numeroRepartidor, distanciaActual);
 
@@ -269,7 +274,13 @@ void asignarRepartidorAPedido(pcb_pedido* unPlato){
 }
 
 // Calculo la distancia entre dos puntos
-int distanciaDeRepartidorAObjetivo(int posXRepartidor, int posYRepartidor, int posXObjetivo, int posYObjetivo){
+int distanciaDeRepartidorAObjetivo(repartidor* unRepartidor, pcb_pedido* elPedido){
+
+	int posXRepartidor = unRepartidor->posX;
+	int posYRepartidor = unRepartidor->posY;
+	int posXObjetivo = elPedido->posObjetivoX;
+	int posYObjetivo = elPedido->posObjetivoY;
+
 	int distanciaX = modulo(posXRepartidor - posXObjetivo);
 	int distanciaY = modulo(posYRepartidor - posYObjetivo);
 
@@ -278,8 +289,10 @@ int distanciaDeRepartidorAObjetivo(int posXRepartidor, int posYRepartidor, int p
 
 // Valor absoluto del num
 int modulo(int num){
-	if (num < 0) return -num;
-	else return num;
+	if (num < 0)
+		return -num;
+	else
+		return num;
 }
 
 void printearValorSemaforo(sem_t* unSemaforo, char* nombre){
@@ -406,9 +419,6 @@ void crearSemaforosCiclos(){
 		list_add(listaSemHabilitarCicloExec, semaforoHabilitarCiclo);
 		list_add(listaSemFinalizarCicloExec, semaforoFinalizarCiclo);
 	}
-
-	t_list* listaSemHabilitarCicloExec2 = listaSemHabilitarCicloExec;
-	t_list* listaSemFinalizarCicloExec2 = listaSemFinalizarCicloExec;
 }
 
 
@@ -441,36 +451,24 @@ void hiloCiclosMaestro(){
     }
 }
 
-
-
 void waitSemaforoHabilitarCicloExec(uint32_t indice){
-
 	sem_t* semaforoObjetivo = list_get(listaSemHabilitarCicloExec, indice);
 	sem_wait(semaforoObjetivo);
-
 }
 
 void signalSemaforoHabilitarCicloExec(uint32_t indice){
-
-	t_list* miLista = listaSemHabilitarCicloExec;
-
 	sem_t* semaforoObjetivo = list_get(listaSemHabilitarCicloExec, indice);
 	sem_post(semaforoObjetivo);
-
 }
 
 void waitSemaforoFinalizarCicloExec(uint32_t indice){
-
 	sem_t* semaforoObjetivo = list_get(listaSemFinalizarCicloExec, indice);
 	sem_wait(semaforoObjetivo);
-
 }
 
 void signalSemaforoFinalizarCicloExec(uint32_t indice){
-
 	sem_t* semaforoObjetivo = list_get(listaSemFinalizarCicloExec, indice);
 	sem_post(semaforoObjetivo);
-
 }
 
 // Hacer free de un array con cosas

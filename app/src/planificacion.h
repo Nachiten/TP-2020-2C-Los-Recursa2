@@ -48,9 +48,9 @@ typedef struct{
 }repartidor;
 
 typedef struct{
-	int instruccionesRestantes;
+	int instruccionesTotales;
 	repartidor* repartidorAsignado;
-	int movimientosRealizados;
+	int instruccionesRealizadas;
 	int posObjetivoX;
 	int posObjetivoY;
 }pcb_pedido;
@@ -62,11 +62,19 @@ void agregarANew(pcb_pedido* unPlato);
 void iniciarSemaforosPlanificacion();
 void asignarRepartidorAPedido(pcb_pedido*);
 int modulo(int);
-int distanciaDeRepartidorAObjetivo(int, int, int, int);
+int distanciaDeRepartidorAObjetivo(repartidor*, pcb_pedido*);
 void hiloNew_Ready();
 void hiloExec(int* numeroHilo);
 void printearValorSemaforo(sem_t*, char*);
 pcb_pedido* obtenerSiguienteDeReady();
 void hiloCiclosMaestro();
+void agregarAReady(pcb_pedido*);
+int codigoDesalojo(pcb_pedido*);
+
+// SEMAFOROS
+void waitSemaforoHabilitarCicloExec(uint32_t);
+void signalSemaforoHabilitarCicloExec(uint32_t);
+void waitSemaforoFinalizarCicloExec(uint32_t);
+void signalSemaforoFinalizarCicloExec(uint32_t);
 
 #endif /* SRC_PLANIFICACION_H_ */
