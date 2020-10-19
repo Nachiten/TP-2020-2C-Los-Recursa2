@@ -49,6 +49,7 @@ typedef struct{
 	int posObjetivoY;
 	estadoBlock estadoBlocked;
 	char* nombre_resto;
+	int tiempoEspera;
 }pcb_pedido;
 
 // *** ESTRUCTURAS DE APP***

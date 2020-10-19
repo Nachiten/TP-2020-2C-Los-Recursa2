@@ -36,39 +36,6 @@ t_list* listaSemFinalizarCicloExec;
 sem_t* habilitarCicloBlockReady;
 sem_t* finalizarCicloBlockReady;
 
-typedef struct{
-	int numeroRepartidor;
-	int posX;
-	int posY;
-	// Cada cuanto tiene que descansar
-	int frecuenciaDescanso;
-	// Cuanto tiempo tiene que descansar
-	int tiempoDescanso;
-	// Cuanto tiempo ya descanso
-	int tiempoDescansado;
-	int asignado;
-}repartidor;
-
-typedef enum{
-	// No esta en blocked
-	NO,
-	// Esta esperando un msg
-	ESPERANDO_MSG,
-	// Esta descansando
-	DESCANSANDO,
-}estadoBlock;
-
-typedef struct{
-	int pedidoID;
-	int instruccionesTotales;
-	int tiempoEspera;
-	repartidor* repartidorAsignado;
-	int instruccionesRealizadas;
-	int posObjetivoX;
-	int posObjetivoY;
-	estadoBlock estadoBlocked;
-}pcb_pedido;
-
 // HILOS
 void hiloBlock_Ready();
 void hiloCiclosMaestro();
