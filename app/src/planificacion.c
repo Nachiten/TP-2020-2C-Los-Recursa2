@@ -324,6 +324,7 @@ void asignarRepartidorAPedido(pcb_pedido* unPedido){
 	unPedido->repartidorAsignado = mejorRepartidor;
 	unPedido->instruccionesTotales = mejorDistancia;
 	unPedido->instruccionesRealizadas = 0;
+	unPedido->estadoBlocked = NO;
 
 	agregarAReady(unPedido);
 
@@ -357,6 +358,13 @@ void printearValorSemaforo(sem_t* unSemaforo, char* nombre){
 	sem_getvalue(unSemaforo, valorSemaforo);
 	printf("Valor semaforo %s es: %i\n", nombre, *valorSemaforo);
 }
+
+/*
+ * Al generar el pcb_pedido deben estar fijados estos valores:
+ * posObjetivoX, posObjetivoY = Posicion restaurant
+ * pedidoID,
+ *
+ */
 
 // Agrega el nuevo pedido a la cola NEW
 void agregarANew(pcb_pedido* unPedido)
