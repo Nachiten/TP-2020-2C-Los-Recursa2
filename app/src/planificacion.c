@@ -82,9 +82,7 @@ void hiloBlock_Ready(){
 		sem_wait(habilitarCicloBlockReady);
 
 		// TODO
-		// En caso de HRRN se debe escanear cola ready para sumar 1 de tiempo de espera
-
-		sem_wait(mutexBlock);
+		// En caso de HRRN se debe escanear cola READY	 para sumar 1 de tiempo de espera
 
 		int elementosEnBlock = list_size(colaBlock);
 
@@ -95,7 +93,9 @@ void hiloBlock_Ready(){
 		// Escaneo todos los elementos en block para sumar 1 ciclo de descanso a cada proceso
 		for (i = 0; i < elementosEnBlock; i++){
 
+			sem_wait(mutexBlock);
 			pcb_pedido* pedidoActual = list_get(colaBlock, i);
+			sem_post(mutexBlock);
 
 			repartidor* repartidorActual = pedidoActual->repartidorAsignado;
 
@@ -124,13 +124,8 @@ void hiloBlock_Ready(){
 				printf("[HiloBlock | ERROR] El pedido %i esta en blocked pero no se le asigno por que esta bloqueado.\n", pedidoActual->pedidoID);
 				exit(5);
 			}
-
-			// Si esta descansando sumo 1 al tiempo descansado
-
-			// Si esta en no descansando tiro un error
 		}
 
-		sem_post(mutexBlock);
 
 		sem_post(finalizarCicloBlockReady);
 
@@ -140,9 +135,6 @@ void hiloBlock_Ready(){
 void hiloExec(int* numHiloExecPuntero){
 
 	int numHiloExec = *numHiloExecPuntero;
-
-	// OLD
-	//sem_wait(contadorProcesosEnReady);
 
 	while(1){
 
@@ -171,6 +163,7 @@ void hiloExec(int* numHiloExecPuntero){
 				cantidadCiclos++;
 			}
 
+			// Esta cansado
 			if (desalojoCode == 1){
 				printf("[Hilo%i] Estoy cansado.\n", numHiloExec);
 
@@ -181,6 +174,7 @@ void hiloExec(int* numHiloExecPuntero){
 				pedidoAEjecutar->instruccionesRealizadas = 0;
 				pedidoAEjecutar->estadoBlocked = DESCANSANDO;
 
+			// Termino rafaga
 			} else if (desalojoCode == 2){
 				printf("[Hilo%i] Termine la rafaga. (espero mensaje)\n", numHiloExec);
 
@@ -189,7 +183,7 @@ void hiloExec(int* numHiloExecPuntero){
 				pedidoAEjecutar->repartidorAsignado->posY = pedidoAEjecutar->posObjetivoY;
 				pedidoAEjecutar->estadoBlocked = ESPERANDO_MSG;
 			} else {
-				printf("[Hilo%i | ERROR] El desalojo code tiene un valor invalido.\n");
+				printf("[Hilo%i | ERROR] El desalojo code tiene un valor invalido.\n", numHiloExec);
 				exit(6);
 			}
 
@@ -240,20 +234,29 @@ void agregarABlock(pcb_pedido* elPedido){
 
 pcb_pedido* obtenerSiguienteDeReady(){
 
+
 	// Solo para FIFO
 	// [1,2,3,4] (en ese orden) -> Sale 1
+	// SFJ
+	// HHRRN ->
 
 	pcb_pedido* pedidoADevolver = NULL;
 
 	sem_wait(mutexReady);
 
 	if (list_size(colaReady) > 0){
+
+
+		// Aca dentro un SWITCH para los distintos algoritmos q llama a una funcion para cada uno
+
 		// CASO FIFO
 		pedidoADevolver = list_remove(colaReady, 0);
 	}
 
 	sem_post(mutexReady);
 
+	// Devuelve NULL si no hay nada en ready
+	// Caso contrario devuelve el que tiene mas prioridad
 	return pedidoADevolver;
 }
 
@@ -325,6 +328,7 @@ void asignarRepartidorAPedido(pcb_pedido* unPedido){
 	unPedido->instruccionesTotales = mejorDistancia;
 	unPedido->instruccionesRealizadas = 0;
 	unPedido->estadoBlocked = NO;
+	unPedido->tiempoEspera = 0;
 
 	agregarAReady(unPedido);
 
