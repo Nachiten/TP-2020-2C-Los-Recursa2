@@ -61,6 +61,7 @@ typedef enum{
 typedef struct{
 	int pedidoID;
 	int instruccionesTotales;
+	int tiempoEspera;
 	repartidor* repartidorAsignado;
 	int instruccionesRealizadas;
 	int posObjetivoX;

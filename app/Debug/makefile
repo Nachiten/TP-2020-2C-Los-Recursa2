@@ -26,7 +26,7 @@ endif
 all: app
 
 dependents:
-	-cd /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug && $(MAKE) all
+	-cd /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug && $(MAKE) clean all
 
 # Tool invocations
 app: $(OBJS) $(USER_OBJS) /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug/libshared.so
