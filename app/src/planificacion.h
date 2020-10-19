@@ -33,42 +33,65 @@ sem_t* contadorRepartidoresDisp;
 // Lista de semaforos binarios para sincronizar la cantidad de hilos exec que se dispongan
 t_list* listaSemHabilitarCicloExec;
 t_list* listaSemFinalizarCicloExec;
-sem_t* habilitarCicloReady;
-sem_t* finalizarCicloReady;
-sem_t* habilitarCicloBlock;
-sem_t* finalizarCicloBlock;
+sem_t* habilitarCicloBlockReady;
+sem_t* finalizarCicloBlockReady;
 
 typedef struct{
 	int numeroRepartidor;
 	int posX;
 	int posY;
+	// Cada cuanto tiene que descansar
 	int frecuenciaDescanso;
+	// Cuanto tiempo tiene que descansar
 	int tiempoDescanso;
+	// Cuanto tiempo ya descanso
+	int tiempoDescansado;
 	int asignado;
 }repartidor;
 
+typedef enum{
+	// No esta en blocked
+	NO,
+	// Esta esperando un msg
+	ESPERANDO_MSG,
+	// Esta descansando
+	DESCANSANDO,
+}estadoBlock;
+
 typedef struct{
+	int pedidoID;
 	int instruccionesTotales;
 	repartidor* repartidorAsignado;
 	int instruccionesRealizadas;
 	int posObjetivoX;
 	int posObjetivoY;
+	estadoBlock estadoBlocked;
 }pcb_pedido;
 
+// HILOS
+void hiloBlock_Ready();
+void hiloCiclosMaestro();
+void hiloExec(int*);
+void hiloNew_Ready();
+
+// AGREGAR A COLAS
+void agregarABlock(pcb_pedido*);
+void agregarAReady(pcb_pedido*);
+void agregarANew(pcb_pedido*);
+
+// INICIALIZACION
+void iniciarSemaforosCiclos();
+void iniciarSemaforosPlanificacion();
 void leerPlanificacionConfig(t_config*);
+
+// OTROS
 void iniciarPlanificacion();
 void freeDeArray(char**);
-void agregarANew(pcb_pedido* unPlato);
-void iniciarSemaforosPlanificacion();
 void asignarRepartidorAPedido(pcb_pedido*);
+void printearValorSemaforo(sem_t*, char*);
 int modulo(int);
 int distanciaDeRepartidorAObjetivo(repartidor*, pcb_pedido*);
-void hiloNew_Ready();
-void hiloExec(int* numeroHilo);
-void printearValorSemaforo(sem_t*, char*);
 pcb_pedido* obtenerSiguienteDeReady();
-void hiloCiclosMaestro();
-void agregarAReady(pcb_pedido*);
 int codigoDesalojo(pcb_pedido*);
 
 // SEMAFOROS

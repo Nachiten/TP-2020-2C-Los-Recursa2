@@ -47,7 +47,7 @@ int main(){
 	// Leo los datos que necesito para planificacion
 	leerPlanificacionConfig(config);
 	// Inicializo los semaforos para ciclos de CPU
-	crearSemaforosCiclos();
+	iniciarSemaforosCiclos();
 
 
 	//coneccion a commanda
