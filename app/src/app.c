@@ -117,17 +117,15 @@ void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
 	int restoBuscado;
 	respuesta_ok_error* respuesta;
 	perfil_cliente* perfil;
-	int size;
 
 	restoBuscado = buscar_resto(nombreResto);
 	respuesta = malloc(sizeof(respuesta_ok_error));
 
 	if(restoBuscado != -2){
-		size = sizeof(int32_t) + sizeof(strlen(nombreResto)) + sizeof(uint32_t) + sizeof(int);
-		// todo ver si esto esta bien
-		perfil = malloc(size);
+		perfil = malloc(sizeof(perfil_cliente));
 		perfil->socket_cliente = socket_cliente;
-		perfil->nombre_resto = nombreResto;
+		perfil->nombre_resto = malloc(strlen(nombreResto)+1);
+		strcpy(perfil->nombre_resto,nombreResto);
 		perfil->id_pedido = 0;
 		perfil->perfilActivo = 1;
 		list_add(listaPedidos,perfil);
@@ -143,7 +141,7 @@ void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
 }
 
 void consultar_platos(int32_t socket_cliente){
-	int numero_cliente, numero_resto, size;
+	int numero_cliente, numero_resto;
 	perfil_cliente* cliente;
 	info_resto* resto;
 	respuesta_consultar_platos* platosDefault;
@@ -162,9 +160,9 @@ void consultar_platos(int32_t socket_cliente){
 				return;
 
 			}else if(strcmp(cliente->nombre_resto,"RestoDefault") == 0){
-				size = sizeof(uint32_t) + sizeof(strlen(platos_default));
-				platosDefault = malloc(size);
+				platosDefault = malloc(sizeof(respuesta_consultar_platos));
 				platosDefault->longitudNombresPlatos = strlen(platos_default);
+				platosDefault->nombresPlatos = malloc(strlen(platos_default)+1);
 				strcpy(platosDefault->nombresPlatos, platos_default);
 
 				mandar_mensaje(platosDefault,RESPUESTA_CONSULTAR_PLATOS,socket_cliente);
@@ -203,13 +201,13 @@ void crear_pedido(int32_t socket_cliente){
 			}
 
 		}else if(strcmp(cliente->nombre_resto,"RestoDefault") == 0){
-			int idPedido = crear_id_pedidos(),size;
+			int idPedido = crear_id_pedidos();
 
-			size = sizeof(uint32_t) + sizeof(strlen("RestoDefault")) + sizeof(uint32_t);
-			estructura_guardar_pedido = malloc(size);
+			estructura_guardar_pedido = malloc(sizeof(guardar_pedido));
 
 			estructura_guardar_pedido->idPedido = idPedido;
-			estructura_guardar_pedido->nombreRestaurante = "RestoDefault";
+			estructura_guardar_pedido->nombreRestaurante = malloc(strlen("RestoDefault")+1);
+			strcpy(estructura_guardar_pedido->nombreRestaurante,"RestoDefault");
 			estructura_guardar_pedido->largoNombreRestaurante = strlen("RestoDefault");
 
 			respuesta = malloc(sizeof(respuesta_ok_error));
@@ -281,21 +279,20 @@ void aniadir_plato(a_plato* recibidoAPlato){
 	}
 }
 
-void confirmar_platos(plato_listo* platoListo){
-	uint32_t size;
+void plato_Listo(plato_listo* platoListo){
 	respuesta_ok_error* respuesta = malloc(sizeof(respuesta_ok_error));
 	obtener_pedido* obtener_pedido;
 	respuesta_consultar_pedido* respuesta_consulta;
 
-	size = sizeof(uint32_t) + sizeof(strlen(platoListo->nombreRestaurante)) + sizeof(uint32_t);
-	obtener_pedido = malloc(size);
+	obtener_pedido = malloc(obtener_pedido);
 	obtener_pedido->largoNombreRestaurante = platoListo->largoNombreRestaurante;
-	obtener_pedido->nombreRestaurante = platoListo->nombreRestaurante;
+	obtener_pedido->nombreRestaurante = malloc(strlen(platoListo->nombreRestaurante)+1);
+	strcpy(obtener_pedido->nombreRestaurante,platoListo->nombreRestaurante);
 	obtener_pedido->idPedido = platoListo->idPedido;
 
 	//todo ver el como hacer el size de char**
-	size = sizeof(uint32_t) + sizeof(strlen(platoListo->nombreRestaurante)) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t);
-	respuesta_consulta = malloc(size);
+	//size = sizeof(uint32_t) + sizeof(strlen(platoListo->nombreRestaurante)) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t);
+	respuesta_consulta = malloc(sizeof(respuesta_consultar_pedido));
 
 	mandar_mensaje(platoListo,PLATO_LISTO,socket_commanda);
 	recibir_mensaje(respuesta,RESPUESTA_PLATO_LISTO,socket_commanda);
@@ -303,6 +300,8 @@ void confirmar_platos(plato_listo* platoListo){
 	mandar_mensaje(obtener_pedido,OBTENER_PEDIDO,socket_commanda);
 	recibir_mensaje(respuesta_consulta,RESPUESTA_OBTENER_PEDIDO,socket_commanda);
 	//todo como manejo la lista de patos?
+
+	//todo avisar al repartidor
 
 	free(respuesta);
 }
@@ -313,6 +312,7 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 	perfil_cliente* cliente;
 	info_resto* resto;
 	respuesta_ok_error* respuesta = malloc(sizeof(respuesta_ok_error));
+	pcb_pedido* nuevoPcb;
 
 	numero_cliente = buscar_cliente_id(pedido->idPedido);
 
@@ -320,7 +320,16 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 		cliente = list_get(listaPedidos,numero_cliente);
 
 		if(strcmp(cliente->nombre_resto,"RestoDefault") == 0){
-			//todo ver como generar el pcb
+			nuevoPcb = malloc(sizeof(pcb_pedido));
+			int id = crear_id_pedidos();
+
+			nuevoPcb->pedidoID = id;
+			nuevoPcb->posObjetivoX = posX_resto;
+			nuevoPcb->posObjetivoY = posY_resto;
+			nuevoPcb->nombre_resto = malloc(strlen("RestoDefault")+1);
+
+			agregarANew(nuevoPcb);
+
 			mandar_mensaje(pedido,CONFIRMAR_PEDIDO,socket_commanda);
 			recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,socket_commanda);
 
@@ -336,7 +345,15 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 				recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,resto->socket);
 
 				if(respuesta->respuesta == 1){
-					//todo ver como generar el pcb
+					nuevoPcb = malloc(sizeof(pcb_pedido));
+
+					nuevoPcb->pedidoID = pedido->idPedido;
+					nuevoPcb->posObjetivoX = resto->posX;
+					nuevoPcb->posObjetivoY = resto->posY;
+					nuevoPcb->nombre_resto = malloc(strlen(resto->nombre_resto)+1);
+
+					agregarANew(nuevoPcb);
+
 					mandar_mensaje(pedido,CONFIRMAR_PEDIDO,socket_commanda);
 					recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,socket_commanda);
 
@@ -448,7 +465,6 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 	guardar_pedido* estructura_guardar_pedido;
 	confirmar_pedido* estructura_idPedido;
 	respuesta_consultar_platos* estructura_consultar_platos;
-	int size;
 
 	switch(cod_op){
 	case CREAR_PEDIDO:
@@ -459,12 +475,11 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 		recibir_mensaje(estructura_idPedido,RESPUESTA_CREAR_PEDIDO,socketRespuestas);
 
 		if(estructura_idPedido->idPedido != 0){
-			// todo ver si esto esta bien
-			size = sizeof(uint32_t) + sizeof(strlen(cliente->nombre_resto)) + sizeof(uint32_t);
-			estructura_guardar_pedido = malloc(size);
+			estructura_guardar_pedido = malloc(sizeof(guardar_pedido));
 
 			estructura_guardar_pedido->idPedido = estructura_idPedido->idPedido;
-			estructura_guardar_pedido->nombreRestaurante = cliente->nombre_resto;
+			estructura_guardar_pedido->nombreRestaurante = malloc(strlen(cliente->nombre_resto)+1);
+			strcpy(estructura_guardar_pedido->nombreRestaurante, cliente->nombre_resto);
 			estructura_guardar_pedido->largoNombreRestaurante = strlen(cliente->nombre_resto);
 
 			respuesta = malloc(sizeof(respuesta_ok_error));
@@ -482,7 +497,6 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 			}
 			free(estructura_guardar_pedido);
 			free(respuesta);
-			// todo verificar si estan bien los cod_op
 
 		}else{
 			respuesta = malloc(sizeof(respuesta_ok_error));
@@ -501,7 +515,6 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 		//mandar_mensaje(estructura_consultar_platos,CONSULTAR_PLATOS,socketRespuestas);
 		recibir_mensaje(estructura_consultar_platos,RESPUESTA_CONSULTAR_PLATOS,socketRespuestas);
 		mandar_mensaje(estructura_consultar_platos,RESPUESTA_CONSULTAR_PLATOS,cliente->socket_cliente);
-		// todo verificar si estan bien los cod_op
 		free(estructura_consultar_platos);
 		close(socketRespuestas);
 		break;
@@ -550,7 +563,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		case PLATO_LISTO:
 			recibidoPlatoListo = malloc(sizeof(plato_listo));
 			recibir_mensaje(recibidoPlatoListo,PLATO_LISTO,socket_cliente);
-			confirmar_platos(recibidoPlatoListo);
+			plato_Listo(recibidoPlatoListo);
 			free(recibidoPlatoListo); //todo ver si esto no rompe nada
 			break;
 

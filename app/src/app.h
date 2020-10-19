@@ -17,13 +17,48 @@
 #include"shared/cargador.h"
 #include"shared/socket.h"
 
+// *** ESTRUCTURA DE PLANIFICACION ***
+typedef struct{
+	int numeroRepartidor;
+	int posX;
+	int posY;
+	// Cada cuanto tiene que descansar
+	int frecuenciaDescanso;
+	// Cuanto tiempo tiene que descansar
+	int tiempoDescanso;
+	// Cuanto tiempo ya descanso
+	int tiempoDescansado;
+	int asignado;
+}repartidor;
+
+typedef enum{
+	// No esta en blocked
+	NO,
+	// Esta esperando un msg
+	ESPERANDO_MSG,
+	// Esta descansando
+	DESCANSANDO,
+}estadoBlock;
+
+typedef struct{
+	int pedidoID;
+	int instruccionesTotales;
+	repartidor* repartidorAsignado;
+	int instruccionesRealizadas;
+	int posObjetivoX;
+	int posObjetivoY;
+	estadoBlock estadoBlocked;
+	char* nombre_resto;
+}pcb_pedido;
+
 // *** ESTRUCTURAS DE APP***
 typedef struct{
 	int32_t socket;
 	char* nombre_resto;
 	char* ip;
 	char* puerto;
-	char* posicion;
+	int32_t posX;
+	int32_t posY;
 }info_resto;
 
 typedef struct{
@@ -31,6 +66,8 @@ typedef struct{
 	char* nombre_resto;
 	uint32_t id_pedido;
 	int perfilActivo;
+	int32_t posX;
+	int32_t posY;
 }perfil_cliente;
 
 
@@ -65,7 +102,7 @@ void consultar_restaurantes(int32_t socket_cliente);
 void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente);
 void crear_pedido(int32_t socket);
 void aniadir_plato(a_plato* recibidoAPlato);
-void confirmar_platos(plato_listo* platoListo);
+void plato_Listo(plato_listo* platoListo);
 void confirmar_Pedido(confirmar_pedido* pedido);
 void agregar_restaurante(info_resto* recibidoAgregarRestaurante);
 
