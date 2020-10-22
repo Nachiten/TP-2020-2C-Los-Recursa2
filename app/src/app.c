@@ -31,6 +31,9 @@ int main(){
 		puts("Error al cargar archivo de LOGS, abortando...");
 		abort();
 	}
+	//cargo algoritmo de planificacion a utilizar
+	algoritmo_planif = config_get_string_value(config, "ALGORITMO_DE_PLANIFICACION");
+
 	//cargo IPs y Puertos...
 	mi_puerto = config_get_string_value(config,"PUERTO_ESCUCHA");
 	puerto_commanda = config_get_string_value(config,"PUERTO_COMANDA");

@@ -86,6 +86,7 @@ char* mi_puerto;
 char* puerto_commanda;
 char* ip_commanda;
 char* platos_default;
+char* algoritmo_planif;
 int32_t posX_resto;
 int32_t posY_resto;
 

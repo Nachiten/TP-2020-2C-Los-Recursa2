@@ -84,6 +84,18 @@ void hiloBlock_Ready(){
 		// TODO
 		// En caso de HRRN se debe escanear cola READY	 para sumar 1 de tiempo de espera
 
+		if(algoritmo_planif == "HRRN"){
+			int i;
+			int elementosEnReady = list_size(colaReady);
+		//itero por cada elemento presente en READY
+		  for (i = 0; i < elementosEnReady; i++){
+			sem_wait(mutexReady);
+			pcb_pedido* pedidoActual = list_get(colaReady, i);
+			pedidoActual->tiempoEspera += 1;
+			sem_post(mutexReady);
+		  }
+		}
+
 		int elementosEnBlock = list_size(colaBlock);
 
 		if(elementosEnBlock == 0)
@@ -236,28 +248,84 @@ pcb_pedido* obtenerSiguienteDeReady(){
 
 
 	// Solo para FIFO
-	// [1,2,3,4] (en ese orden) -> Sale 1
-	// SFJ
-	// HHRRN ->
+	// [1,2,3,4] (en ese orden) ----> Sale 1
+	// Solo para SFJ
+	// [1,2] pcb1->instruccionesTotales1 = 5, pcb2->instruccionesTotales1 = 9 ----> Sale 2
+	// Solo para HHRRN
 
 	pcb_pedido* pedidoADevolver = NULL;
 
-	sem_wait(mutexReady);
+
 
 	if (list_size(colaReady) > 0){
 
+	uint32_t chequeoAlgoritmoEmpleado;
+	chequeoAlgoritmoEmpleado = valor_para_switch_case(algoritmo_planif);
+
 
 		// Aca dentro un SWITCH para los distintos algoritmos q llama a una funcion para cada uno
+	  switch(chequeoAlgoritmoEmpleado){
 
 		// CASO FIFO
+		case 1:
+		sem_wait(mutexReady);
 		pedidoADevolver = list_remove(colaReady, 0);
+		sem_post(mutexReady);
+		break;
+
+		//CASO HRRN
+		case 2:
+		pedidoADevolver = obtenerSiguienteHRRN();
+		break;
+
+		case 3:
+		//pedidoADevolver = obtenerSiguienteSFJSD();
+		break;
+
+	  }
 	}
 
-	sem_post(mutexReady);
+
 
 	// Devuelve NULL si no hay nada en ready
 	// Caso contrario devuelve el que tiene mas prioridad
 	return pedidoADevolver;
+}
+
+
+pcb_pedido* obtenerSiguienteHRRN(){
+
+	pcb_pedido* pedidoAPlanificar;
+	pcb_pedido* pedidoAux1;
+	pcb_pedido* pedidoAux2;
+    int i;
+    int responseRatio1;
+    int responseRatio2;
+	int indexARemover;
+
+	sem_wait(mutexReady);
+
+    for(i=0;i<list_size(colaReady);i++){
+    	pedidoAux1 = list_get(colaReady,i);
+    	pedidoAux2 = list_get(colaReady,i+1);
+    	responseRatio1 = (pedidoAux1->tiempoEspera
+    				   + pedidoAux1->instruccionesTotales)
+    				   / pedidoAux1->instruccionesTotales;
+    	responseRatio2 = (pedidoAux2->tiempoEspera
+				   + pedidoAux2->instruccionesTotales)
+				   / pedidoAux2->instruccionesTotales;
+    	if(responseRatio1 > responseRatio2){
+    		indexARemover = i;
+    	} else {
+    		indexARemover = i+1;
+    	}
+
+    }
+
+    pedidoAPlanificar = list_remove(colaReady, indexARemover);
+    sem_post(mutexReady);
+
+	return pedidoAPlanificar;
 }
 
 
@@ -333,6 +401,30 @@ void asignarRepartidorAPedido(pcb_pedido* unPedido){
 	agregarAReady(unPedido);
 
 	// Debug
+}
+
+uint32_t valor_para_switch_case(char* algoritmo) {
+
+	uint32_t switcher;
+
+	//FIFO
+	if (strcmp(algoritmo,"FIFO") == 0)
+	{
+		switcher = 1;
+	}
+
+	//HRRN
+	if (strcmp(algoritmo,"HRRN") == 0)
+	{
+		switcher = 2;
+	}
+
+	//SFJ SIN DESALOJO
+	if (strcmp(algoritmo,"SJF-SD") == 0)
+	{
+		switcher = 3;
+	}
+	return switcher;
 }
 
 // Calculo la distancia entre dos puntos

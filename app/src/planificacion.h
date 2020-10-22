@@ -53,6 +53,7 @@ void iniciarSemaforosPlanificacion();
 void leerPlanificacionConfig(t_config*);
 
 // OTROS
+uint32_t valor_para_switch_case(char* algoritmo);
 void iniciarPlanificacion();
 void freeDeArray(char**);
 void asignarRepartidorAPedido(pcb_pedido*);
@@ -60,6 +61,7 @@ void printearValorSemaforo(sem_t*, char*);
 int modulo(int);
 int distanciaDeRepartidorAObjetivo(repartidor*, pcb_pedido*);
 pcb_pedido* obtenerSiguienteDeReady();
+pcb_pedido* obtenerSiguienteHRRN();
 int codigoDesalojo(pcb_pedido*);
 
 // SEMAFOROS
