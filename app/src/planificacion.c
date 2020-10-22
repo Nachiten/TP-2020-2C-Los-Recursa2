@@ -252,8 +252,9 @@ pcb_pedido* obtenerSiguienteDeReady(){
 	// Solo para SJF
 	// [1,2] pcb1->instruccionesTotales1 = 5, pcb2->instruccionesTotales1 = 9 ----> Sale 1
 	// Solo para HRRN
+	// [1,2,3] responseRatioDePCB1 > responseRatioDePCB2 PERO responseRatioDePCB3 > responseRatioDePCB1 ----> Sale 3
 
-	pcb_pedido* pedidoADevolver = NULL;
+	pcb_pedido* pedidoPlanificado = NULL;
 
 
 
@@ -269,17 +270,17 @@ pcb_pedido* obtenerSiguienteDeReady(){
 		// CASO FIFO
 		case 1:
 		sem_wait(mutexReady);
-		pedidoADevolver = list_remove(colaReady, 0);
+		pedidoPlanificado = list_remove(colaReady, 0);
 		sem_post(mutexReady);
 		break;
 
 		//CASO HRRN
 		case 2:
-		pedidoADevolver = obtenerSiguienteHRRN();
+		pedidoPlanificado = obtenerSiguienteHRRN();
 		break;
 
 		case 3:
-		pedidoADevolver = obtenerSiguienteSJFSD();
+		pedidoPlanificado = obtenerSiguienteSJFSD();
 		break;
 
 	  }
@@ -289,14 +290,14 @@ pcb_pedido* obtenerSiguienteDeReady(){
 
 	// Devuelve NULL si no hay nada en ready
 	// Caso contrario devuelve el que tiene mas prioridad
-	return pedidoADevolver;
+	return pedidoPlanificado;
 }
 
 
 pcb_pedido* obtenerSiguienteHRRN(){
 
-	pcb_pedido* pedidoAPlanificar;
-	pcb_pedido* pedidoAux;
+	pcb_pedido* pedidoPlanificado = NULL;
+	pcb_pedido* pedidoAux = NULL;
     int i;
     int elMejorResponseRatio;
     int responseRatioAux;
@@ -327,17 +328,17 @@ pcb_pedido* obtenerSiguienteHRRN(){
 
     }
 
-    pedidoAPlanificar = list_remove(colaReady, indexARemover);
+    pedidoPlanificado = list_remove(colaReady, indexARemover);
     sem_post(mutexReady);
 
-	return pedidoAPlanificar;
+	return pedidoPlanificado;
 }
 
 
 pcb_pedido* obtenerSiguienteSJFSD(){
 
-	pcb_pedido* pedidoAPlanificar;
-	pcb_pedido* pedidoAux;
+	pcb_pedido* pedidoPlanificado = NULL;
+	pcb_pedido* pedidoAux = NULL;
     int i;
 	int indexARemover;
 	int shortestJob;
@@ -357,10 +358,10 @@ pcb_pedido* obtenerSiguienteSJFSD(){
     	}
 
     }
-    pedidoAPlanificar = list_remove(colaReady, indexARemover);
+    pedidoPlanificado = list_remove(colaReady, indexARemover);
     sem_post(mutexReady);
 
-	return pedidoAPlanificar;
+	return pedidoPlanificado;
 }
 
 
