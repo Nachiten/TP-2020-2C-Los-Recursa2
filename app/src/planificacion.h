@@ -62,6 +62,7 @@ int modulo(int);
 int distanciaDeRepartidorAObjetivo(repartidor*, pcb_pedido*);
 pcb_pedido* obtenerSiguienteDeReady();
 pcb_pedido* obtenerSiguienteHRRN();
+pcb_pedido* obtenerSiguienteSJFSD();
 int codigoDesalojo(pcb_pedido*);
 
 // SEMAFOROS
