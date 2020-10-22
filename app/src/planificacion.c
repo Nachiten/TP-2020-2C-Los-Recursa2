@@ -249,9 +249,9 @@ pcb_pedido* obtenerSiguienteDeReady(){
 
 	// Solo para FIFO
 	// [1,2,3,4] (en ese orden) ----> Sale 1
-	// Solo para SFJ
-	// [1,2] pcb1->instruccionesTotales1 = 5, pcb2->instruccionesTotales1 = 9 ----> Sale 2
-	// Solo para HHRRN
+	// Solo para SJF
+	// [1,2] pcb1->instruccionesTotales1 = 5, pcb2->instruccionesTotales1 = 9 ----> Sale 1
+	// Solo para HRRN
 
 	pcb_pedido* pedidoADevolver = NULL;
 
@@ -279,7 +279,7 @@ pcb_pedido* obtenerSiguienteDeReady(){
 		break;
 
 		case 3:
-		//pedidoADevolver = obtenerSiguienteSFJSD();
+		pedidoADevolver = obtenerSiguienteSJFSD();
 		break;
 
 	  }
@@ -296,32 +296,67 @@ pcb_pedido* obtenerSiguienteDeReady(){
 pcb_pedido* obtenerSiguienteHRRN(){
 
 	pcb_pedido* pedidoAPlanificar;
-	pcb_pedido* pedidoAux1;
-	pcb_pedido* pedidoAux2;
+	pcb_pedido* pedidoAux;
     int i;
-    int responseRatio1;
-    int responseRatio2;
+    int elMejorResponseRatio;
+    int responseRatioAux;
 	int indexARemover;
 
 	sem_wait(mutexReady);
 
-    for(i=0;i<list_size(colaReady);i++){
-    	pedidoAux1 = list_get(colaReady,i);
-    	pedidoAux2 = list_get(colaReady,i+1);
-    	responseRatio1 = (pedidoAux1->tiempoEspera
-    				   + pedidoAux1->instruccionesTotales)
-    				   / pedidoAux1->instruccionesTotales;
-    	responseRatio2 = (pedidoAux2->tiempoEspera
-				   + pedidoAux2->instruccionesTotales)
-				   / pedidoAux2->instruccionesTotales;
-    	if(responseRatio1 > responseRatio2){
-    		indexARemover = i;
-    	} else {
-    		indexARemover = i+1;
+	pedidoAux = list_get(colaReady,0);
+	elMejorResponseRatio = (pedidoAux->tiempoEspera
+						 + pedidoAux->instruccionesTotales)
+			   	   	   	 / pedidoAux->instruccionesTotales;
+	indexARemover = 0;
+
+	//itero buscando al pedido con mayor response ratio, cada vez que encuentro uno que supere al mejor,
+	//piso el valor ancla (indice del pedido en la lista ready)
+	//que sera removido para ser planificado con repartidor
+    for(i=1;i<list_size(colaReady);i++){
+    	pedidoAux = list_get(colaReady,i);
+    	responseRatioAux = (pedidoAux->tiempoEspera
+    				     + pedidoAux->instruccionesTotales)
+    				     / pedidoAux->instruccionesTotales;
+    	//piso el valor ancla (indice del pedido en la lista ready)
+    	//que sera removido para ser planificado con repartidor solo si el iterado supera al mejor
+    	if(elMejorResponseRatio < responseRatioAux){
+    		elMejorResponseRatio = responseRatioAux;
+   		    indexARemover = i;
     	}
 
     }
 
+    pedidoAPlanificar = list_remove(colaReady, indexARemover);
+    sem_post(mutexReady);
+
+	return pedidoAPlanificar;
+}
+
+
+pcb_pedido* obtenerSiguienteSJFSD(){
+
+	pcb_pedido* pedidoAPlanificar;
+	pcb_pedido* pedidoAux;
+    int i;
+	int indexARemover;
+	int shortestJob;
+
+	sem_wait(mutexReady);
+	pedidoAux = list_get(colaReady,0);
+	indexARemover = 0;
+	shortestJob = pedidoAux->instruccionesTotales;
+
+	//itero por la lista de Ready
+    for(i=1;i<list_size(colaReady);i++){
+    	pedidoAux = list_get(colaReady,i);
+    	//idem HRRN pero en vez de response ratio solo comparo las rafagas a realizar
+    	if(shortestJob > pedidoAux->instruccionesTotales){
+    		shortestJob = pedidoAux->instruccionesTotales;
+    		indexARemover = i;
+    	}
+
+    }
     pedidoAPlanificar = list_remove(colaReady, indexARemover);
     sem_post(mutexReady);
 
