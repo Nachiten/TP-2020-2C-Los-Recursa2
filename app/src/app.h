@@ -48,7 +48,7 @@ typedef enum{
 typedef enum{
 	FIFO,
 	HRRN,
-	SFJSD,
+	SJFSD,
 }algoritmo_planif;
 
 typedef struct{

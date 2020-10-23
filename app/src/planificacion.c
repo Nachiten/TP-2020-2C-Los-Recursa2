@@ -288,7 +288,7 @@ pcb_pedido* obtenerSiguienteDeReady(){
 		break;
 
 		//CASO SJF sin desalojo
-		case SFJSD:
+		case SJFSD:
 		pedidoPlanificado = obtenerSiguienteSJFSD();
 		break;
 
