@@ -1058,6 +1058,8 @@ char* leerDatosBloques(int sizeBytes, int bloqueInicial){
 			// Leo solo lo que me queda por leer (sin leer puntero a ningun bloque)
 			fread(lineaActualLeida, cantidadALeer + 1, 1, bloqueALeer);
 
+			free(pathSiguienteBloque);
+
 		// No es el ultimo bloque
 		} else {
 			lineaActualLeida = malloc(BLOCK_SIZE - 4 + 1);

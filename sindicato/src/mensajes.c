@@ -12,16 +12,17 @@
 /*
  * Mensajes Hechos:
  *
- * Plato listo | [Rtas Terminadas] Terminado de codear respuestas booleanas
+ * Corregidos Problemas:
  * Obtener restaurante | [Rtas Terminadas] Restaurante vacio
- * Obtener receta | [Rtas Terminadas] Se envia la receta vacia o llena || SE DEBE REVISAR EL ENUM DE COD_OP
+ * Obtener receta | [Rtas Terminadas] Se envia la receta vacia o llena
+ * Obtener pedido | [Rtas Terminadas] pedido default terminado
+ * Plato listo | [Rtas Terminadas] Terminado de codear respuestas booleanas
  * Guardar plato | [Rtas Terminadas] Se envian rtas booleanas
  *
  *
  * Consultar platos - Interno listo, falta envio de mensaje
  * Guardar pedido - Interno listo, falta envio mensaje
  * Confirmar pedido - Interno listo, falta envio mensaje
- * Obtener pedido - Interno listo, falta envio mensaje
  * Terminar pedido - Interno listo, falta envio de mensaje
  *
  */
@@ -35,6 +36,8 @@ void enviarRespuestaBooleana(uint32_t socketCliente, codigo_operacion codOp, res
 	rta->respuesta = valorRespuesta;
 
 	mandar_mensaje(rta, codOp, socketCliente);
+
+	free(rta);
 }
 
 void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_t socketCliente){
@@ -117,6 +120,12 @@ void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_
 
 }
 
+void freeRtaObtenerReceta(respuesta_obtener_receta* rta){
+	free(rta->pasos);
+	free(rta->tiempoPasos);
+	free(rta);
+}
+
 void obtenerReceta(char* nombreReceta, uint32_t socketCliente){
 
 	if (!existeReceta(nombreReceta)){
@@ -124,16 +133,19 @@ void obtenerReceta(char* nombreReceta, uint32_t socketCliente){
 
 		char* arrayVacio = "[]";
 
-		respuesta_obtener_receta* miRespuesta = malloc(sizeof(respuesta_obtener_receta)
-			+ (strlen(arrayVacio) + 1) * 2);
+		respuesta_obtener_receta* miRespuesta = malloc(sizeof(respuesta_obtener_receta));
 
 		miRespuesta->sizePasos = strlen(arrayVacio);
+		miRespuesta->pasos = malloc(strlen(arrayVacio) + 1);
 		strcpy(miRespuesta->pasos, arrayVacio);
 
 		miRespuesta->sizeTiempoPasos = strlen(arrayVacio);
+		miRespuesta->tiempoPasos = malloc(strlen(arrayVacio) + 1);
 		strcpy(miRespuesta->tiempoPasos, arrayVacio);
 
-		mandar_mensaje(miRespuesta, RESPUESTA_OBTENER_R, socketCliente);
+		freeRtaObtenerReceta(miRespuesta);
+
+		mandar_mensaje(miRespuesta, RESPUESTA_OBTENER_RECETA, socketCliente);
 
 		return;
 	}
@@ -152,21 +164,21 @@ void obtenerReceta(char* nombreReceta, uint32_t socketCliente){
 	char* pasos = lineaPasos[1];
 	char* tiemposPasos = lineaTiempoPasos[1];
 
-	respuesta_obtener_receta* miRespuesta = malloc(sizeof(respuesta_obtener_receta)
-			+ strlen(pasos)
-			+ strlen(tiemposPasos) + 2);
+	respuesta_obtener_receta* miRespuesta = malloc(sizeof(respuesta_obtener_receta));
 
 	miRespuesta->sizePasos = strlen(pasos);
-	miRespuesta->pasos = pasos;
+	miRespuesta->pasos = malloc(strlen(pasos) + 1);
+	strcpy(miRespuesta->pasos, pasos);
+
 	miRespuesta->sizeTiempoPasos = strlen(tiemposPasos);
-	miRespuesta->tiempoPasos = tiemposPasos;
+	miRespuesta->tiempoPasos = malloc(strlen(tiemposPasos) + 1);
+	strcpy(miRespuesta->tiempoPasos, tiemposPasos);
 
 	printearRespuestaObtenerReceta(miRespuesta);
 
-	// Hay que crear la RESPUESTA_OBTENER_RECETA
-	// TODO | Ver: RESPUESTA_OBTENER_R entiendo es RespuestaObtenerRestaurante
-	// Donde esta respuestaObtenerReceta?
-	mandar_mensaje(miRespuesta, RESPUESTA_OBTENER_R, socketCliente);
+	freeRtaObtenerReceta(miRespuesta);
+
+	mandar_mensaje(miRespuesta, RESPUESTA_OBTENER_RECETA, socketCliente);
 
 	free(datosReceta);
 	freeDeArray(datosSeparados);
@@ -468,16 +480,52 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 
 }
 
-void obtenerPedido(char* nombreRestaurant, int IDPedido){
+void freeRtaObtenerPedido(respuesta_obtener_pedido* rta){
+	free(rta->comidas);
+	free(rta->cantTotales);
+	free(rta->cantListas);
+	free(rta);
+}
+
+void generarRtaObtenerPedidoDefault(){
+	respuesta_obtener_pedido* rta = malloc(sizeof(respuesta_obtener_pedido));
+
+	char* arrayVacio = "[]";
+
+	rta->sizeCantListas = 0;
+	rta->sizeCantTotales = 0;
+	rta->sizeComidas = 0;
+
+	rta->cantListas = malloc(strlen(arrayVacio) + 1);
+	strcpy(rta->cantListas, arrayVacio);
+
+	rta->cantTotales = malloc(strlen(arrayVacio) + 1);
+	strcpy(rta->cantTotales, arrayVacio);
+
+	rta->comidas = malloc(strlen(arrayVacio) + 1);
+	strcpy(rta->comidas, arrayVacio);
+
+}
+
+void obtenerPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente){
 	if ( !existeRestaurant(nombreRestaurant)){
 		printf("ERROR | No existe el restaurant buscado.\n");
-		// TODO | Retornar valor default (no se cual es)
+		respuesta_obtener_pedido* rtaDefault = generarRtaObtenerPedidoDefault();
+
+		mandar_mensaje(rtaDefault, RESPUESTA_OBTENER_PEDIDO, socketCliente);
+
+		freeRtaObtenerPedido(rtaDefault);
+
 		return;
 	}
 
 	if(!existePedido(nombreRestaurant, IDPedido)){
 		printf("ERROR | No existe el pedido solicitado");
-		// TODO | Retornar valor default
+		respuesta_obtener_pedido* rtaDefault = generarRtaObtenerPedidoDefault();
+
+		mandar_mensaje(rtaDefault, RESPUESTA_OBTENER_PEDIDO, socketCliente);
+
+		freeRtaObtenerPedido(rtaDefault);
 		return;
 	}
 
@@ -503,23 +551,25 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido){
 	char* cantidadesTotales = lineaCantidadesTotales[1];
 	char* cantidadesListas = lineaCantidadesListas[1];
 
-	respuesta_obtener_pedido* respuestaPedido = malloc(sizeof(respuesta_obtener_pedido)
-			+ strlen(nombresPlatos)
-			+ strlen(cantidadesTotales)
-			+ strlen(cantidadesListas) + 3);
+	respuesta_obtener_pedido* respuestaPedido = malloc(sizeof(respuesta_obtener_pedido));
 
 	respuestaPedido->sizeComidas = strlen(nombresPlatos);
-	respuestaPedido->comidas = nombresPlatos;
+	respuestaPedido->comidas = malloc(strlen(nombresPlatos) + 1);
+	strcpy(respuestaPedido->comidas, nombresPlatos);
 
 	respuestaPedido->sizeCantTotales = strlen(cantidadesTotales);
-	respuestaPedido->cantTotales = cantidadesTotales;
+	respuestaPedido->cantTotales = malloc(strlen(cantidadesTotales) + 1);
+	strcpy(respuestaPedido->cantTotales, cantidadesTotales);
 
 	respuestaPedido->sizeCantListas = strlen(cantidadesListas);
-	respuestaPedido->cantListas = cantidadesListas;
+	respuestaPedido->cantListas = malloc(strlen(cantidadesListas) + 1);
+	strcpy(respuestaPedido->cantListas, cantidadesListas);
 
-	printearRespuestaObtenerPedido(respuestaPedido);
+	//printearRespuestaObtenerPedido(respuestaPedido);
 
-	// TODO | Falta enviar el mensaje con la respuesta
+	mandar_mensaje(respuestaPedido, RESPUESTA_OBTENER_PEDIDO, socketCliente);
+
+	freeRtaObtenerPedido(respuestaPedido);
 
 	free(datosPedido);
 
@@ -529,6 +579,13 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido){
 	freeDeArray(lineaCantidadesListas);
 }
 
+void freeRtaObtenerRestaurante(respuesta_obtener_restaurante* rta){
+	free(rta->precioPlatos);
+	free(rta->platos);
+	free(rta->afinidades);
+	free(rta);
+}
+
 // Obtiene todos los datos de un restaurant
 void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 	if ( !existeRestaurant(nombreRestaurante)){
@@ -536,13 +593,9 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 
 		char* arrayVacio = "[]";
 
-		// 4 * 7 + 9 = 37
-
 		respuesta_obtener_restaurante* respuestaMensaje = malloc(
 				sizeof(respuesta_obtener_restaurante)
 			);
-
-		// char** algo = string_get_string_as_array(arrayVa );
 
 		respuestaMensaje->cantidadCocineros = 0;
 		respuestaMensaje->cantHornos = 0;
@@ -561,13 +614,9 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 		respuestaMensaje->precioPlatos = malloc(strlen(arrayVacio) + 1);
 		strcpy(respuestaMensaje->precioPlatos, arrayVacio);
 
-		mandar_mensaje(respuestaMensaje, RESPUESTA_OBTENER_R, socket_cliente);
+		mandar_mensaje(respuestaMensaje, RESPUESTA_OBTENER_REST, socket_cliente);
 
-		free(respuestaMensaje->precioPlatos);
-		free(respuestaMensaje->platos);
-		free(respuestaMensaje->afinidades);
-		free(respuestaMensaje);
-
+		freeRtaObtenerRestaurante(respuestaMensaje);
 		return;
 	}
 
@@ -615,25 +664,30 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 
 	respuestaMensaje->longitudAfinidades = strlen(lineaAfinidadesSeparada[1]);
 	respuestaMensaje->afinidades = malloc(strlen(lineaAfinidadesSeparada[1])+1);
-	respuestaMensaje->afinidades = lineaAfinidadesSeparada[1];
+	strcpy(respuestaMensaje->afinidades, lineaAfinidadesSeparada[1]);
 
 	respuestaMensaje->longitudPlatos = strlen(lineaPlatosSeparada[1]);
-	respuestaMensaje->platos = malloc(strlen(lineaPlatosSeparada[1])+1);
-	respuestaMensaje->platos = lineaPlatosSeparada[1];
+    respuestaMensaje->platos = malloc(strlen(lineaPlatosSeparada[1])+1);
+	strcpy(respuestaMensaje->platos, lineaPlatosSeparada[1]);
 
+	// CORRECTO
+	respuestaMensaje->longitudPrecioPlatos = strlen(lineaPrecioPlatosSeparada[1]);
+	respuestaMensaje->precioPlatos = malloc(strlen(lineaPrecioPlatosSeparada[1])+1);
+	strcpy(respuestaMensaje->precioPlatos, lineaPrecioPlatosSeparada[1]);
+
+	/* INCORRECTO
 	respuestaMensaje->longitudPrecioPlatos = strlen(lineaPrecioPlatosSeparada[1]);
 	respuestaMensaje->precioPlatos = malloc(strlen(lineaPrecioPlatosSeparada[1])+1);
 	respuestaMensaje->precioPlatos = lineaPrecioPlatosSeparada[1];
+	*/
 
 	printearRespuestaObtenerRestaurante(respuestaMensaje);
 
+	mandar_mensaje(respuestaMensaje, RESPUESTA_OBTENER_REST, socket_cliente);
 
-	mandar_mensaje(respuestaMensaje, RESPUESTA_OBTENER_R, socket_cliente);
+	freeRtaObtenerRestaurante(respuestaMensaje);
 
-	free(respuestaMensaje->precioPlatos);
-	free(respuestaMensaje->platos);
-	free(respuestaMensaje->afinidades);
-	free(respuestaMensaje);
+
 
 	//printf("Datos leidos:\n%s", datosRestaurant);
 
