@@ -39,7 +39,7 @@ void obtenerMetadataRestaurante(){
     respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizePayload);
 
    //recepcion del choclo divino
-    recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_R, socket_cliente);
+    recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_REST, socket_cliente);
 
     printf("pude recibir toda la de metadata de sindic.\n");
 

@@ -178,7 +178,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
 			break;
 
-		case RESPUESTA_OBTENER_R:
+		case RESPUESTA_OBTENER_REST:
 			//paquete->buffer->stream = malloc(sizeof(respuesta_obtener_restaurante));
 			size_ya_armado = serializar_paquete_respuesta_obtener_restaurante(paquete, mensaje);
 			break;
@@ -744,7 +744,7 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 			desserializar_ok_fail(estructura, socket_cliente);
 			break;
 
-		case RESPUESTA_OBTENER_R:
+		case RESPUESTA_OBTENER_REST:
 			desserializar_respuesta_obtener_restaurante(estructura,socket_cliente);
 			break;
 

@@ -487,7 +487,7 @@ void freeRtaObtenerPedido(respuesta_obtener_pedido* rta){
 	free(rta);
 }
 
-void generarRtaObtenerPedidoDefault(){
+respuesta_obtener_pedido* generarRtaObtenerPedidoDefault(){
 	respuesta_obtener_pedido* rta = malloc(sizeof(respuesta_obtener_pedido));
 
 	char* arrayVacio = "[]";
@@ -505,6 +505,7 @@ void generarRtaObtenerPedidoDefault(){
 	rta->comidas = malloc(strlen(arrayVacio) + 1);
 	strcpy(rta->comidas, arrayVacio);
 
+	return rta;
 }
 
 void obtenerPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente){
@@ -800,4 +801,3 @@ void crearReceta(char* nombreReceta, datosReceta unaReceta){
 	free(pathArchivoReceta);
 	free(stringReceta);
 }
-
