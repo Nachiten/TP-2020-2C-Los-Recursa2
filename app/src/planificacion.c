@@ -449,7 +449,7 @@ void asignarRepartidorAPedido(pcb_pedido* unPedido){
 	// Debug
 }
 
-uint32_t valor_para_switch_case(char* algoritmo) {
+uint32_t valor_para_switch_case_planificacion(char* algoritmo) {
 
 	uint32_t switcher;
 

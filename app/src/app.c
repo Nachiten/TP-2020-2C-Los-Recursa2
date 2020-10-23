@@ -32,7 +32,7 @@ int main(){
 		abort();
 	}
 	//cargo algoritmo de planificacion a utilizar
-	algoritmo = valor_para_switch_case(config_get_string_value(config, "ALGORITMO_DE_PLANIFICACION"));
+	//algoritmo = valor_para_switch_case_planificacion(config_get_string_value(config, "ALGORITMO_DE_PLANIFICACION"));
 
 
 	//cargo IPs y Puertos...
@@ -47,20 +47,20 @@ int main(){
 
 	// NOTA: Alterar el orden de estos llamados va a romper (dependen uno del anterior)
 	// Inicializo semaforos necesarios para planif
-	iniciarSemaforosPlanificacion();
+	//iniciarSemaforosPlanificacion();
 	// Leo los datos que necesito para planificacion
-	leerPlanificacionConfig(config);
+	//leerPlanificacionConfig(config);
 	// Inicializo los semaforos para ciclos de CPU
-	iniciarSemaforosCiclos();
+	//iniciarSemaforosCiclos();
 
 
 	//coneccion a commanda
 	socket_commanda = establecer_conexion(ip_commanda,puerto_commanda);
 
 	//inicio el server | TODO Se quita esto para testear planificacion
-	//iniciar_server(mi_puerto);
+	iniciar_server(mi_puerto);
 
-	iniciarPlanificacion();
+	//iniciarPlanificacion();
 
 	return EXIT_SUCCESS;
 }
@@ -96,7 +96,8 @@ void consultar_restaurantes(int32_t socket_cliente){
 		string_append(&stringCompleto, stringInicial);// agregas un [ al principio
 		string_append(&stringCompleto, stringNuevoParaAgregar);
 
-	}else{
+	}
+	else{
 		stringCompleto  = string_new();
 		string_append(&stringCompleto, stringInicial);
 
@@ -108,10 +109,9 @@ void consultar_restaurantes(int32_t socket_cliente){
 			stringNuevoParaAgregar = resto->nombre_resto;
 			string_append(&stringCompleto, stringNuevoParaAgregar);
 		}
-
-		string_append(&stringCompleto, stringFinal);// agregas un ] al final
-		mandar_mensaje(stringCompleto,RESPUESTA_CONSULTAR_R,socket_cliente);
 	}
+	string_append(&stringCompleto, stringFinal);// agregas un ] al final
+	mandar_mensaje(stringCompleto,RESPUESTA_CONSULTAR_R,socket_cliente);
 }
 
 /* si el restaurante seleccionado existe en la lista de restaurantes manda un 1 y selecciona ese
@@ -443,7 +443,7 @@ void confirmar_Pedido(confirmar_pedido* pedido, int32_t socket_cliente){
 			nuevoPcb->posRestauranteY = posY_resto;
 			nuevoPcb->nombre_resto = malloc(strlen("RestoDefault")+1);
 
-			agregarANew(nuevoPcb);
+			//agregarANew(nuevoPcb);
 
 			mandar_mensaje(pedido,CONFIRMAR_PEDIDO,socket_commanda);
 
@@ -803,26 +803,34 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 void serve_client(int32_t* socket)
 {
 	while(1){
-		int32_t sizeAAllocar;
+		int32_t sizeAAllocar = 0;
 		codigo_operacion cod_op;
 		int32_t recibidosSize = 0;
 
 		int32_t recibidos = recv(*socket, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 		bytesRecibidos(recibidos);
 
-		if(recibidos >= 1)
+		if(cod_op == 1)
 		{
-			recibidosSize = recv(*socket, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
-			bytesRecibidos(recibidosSize);
-			printf("Tamaño de lo que sigue en el buffer: %u.\n", sizeAAllocar);
-
 			process_request(cod_op, *socket, sizeAAllocar);
 		}
 
-
 		else
 		{
-			pthread_exit(NULL);
+			if(recibidos >= 1)
+			{
+				recibidosSize = recv(*socket, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+				bytesRecibidos(recibidosSize);
+				printf("Tamaño de lo que sigue en el buffer: %u.\n", sizeAAllocar);
+
+				process_request(cod_op, *socket, sizeAAllocar);
+			}
+
+
+			else
+			{
+				pthread_exit(NULL);
+			}
 		}
 
 		recibidosSize = 0;
