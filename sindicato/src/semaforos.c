@@ -250,7 +250,7 @@ void crearSemaforosRestaurantesExistentes()
 		crearSemaforoRestaurant(unRestaurant);
 	}
 
-	//destruirListaYElementos(listaNombresRestaurant);
+	destruirListaYElementos(listaNombresRestaurant);
 }
 
 void crearSemaforosRecetasExistentes()
@@ -324,6 +324,7 @@ void crearSemaforosPedidosRestaurant(char* nombreRestaurant){
 	}
 
 	closedir(dr);
+	free(pathCarpetaRestaurant);
 }
 
 t_list* escanearCarpetasExistentes(char* path){

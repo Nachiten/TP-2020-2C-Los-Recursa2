@@ -13,7 +13,7 @@ void obtenerMetadataRestaurante(){
     obtener_restaurante* estructura = malloc(sizeof(obtener_restaurante));
     estructura->largoNombreRestaurante = strlen(nombreRestaurante);
     estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
-    estructura->nombreRestaurante = nombreRestaurante;
+    strcpy(estructura->nombreRestaurante, nombreRestaurante);
 
     printf("El nombre rancio que estoy por mandar es: %s \n", estructura->nombreRestaurante);
 
@@ -39,7 +39,7 @@ void obtenerMetadataRestaurante(){
     respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizePayload);
 
    //recepcion del choclo divino
-    recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_R, socket_cliente);
+    recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_REST, socket_cliente);
 
     printf("pude recibir toda la de metadata de sindic.\n");
 
@@ -62,8 +62,13 @@ void obtenerMetadataRestaurante(){
     printf("Los platos que ofrece el restaurante son: %s \n", estructuraRespuestaObtenerRestaurante->platos);
     printf("Las afinidades de los cocineros son: %s \n", estructuraRespuestaObtenerRestaurante->afinidades);
 
+    //rescato las variables char* en punteros globales aparte para luego usarlos en otro lado. (WIP)
+    platos = malloc(estructuraRespuestaObtenerRestaurante->longitudPlatos+1);
+    strcpy(platos, estructuraRespuestaObtenerRestaurante->platos);
 
-    //aca pasan cosas en el medio
+    afinidades = malloc(estructuraRespuestaObtenerRestaurante->longitudAfinidades+1);
+    strcpy(afinidades, estructuraRespuestaObtenerRestaurante->afinidades);
+
 
     free(estructuraRespuestaObtenerRestaurante->platos);
     free(estructuraRespuestaObtenerRestaurante->afinidades);
@@ -71,14 +76,18 @@ void obtenerMetadataRestaurante(){
     free(estructuraRespuestaObtenerRestaurante);
 }
 
-//void crearColasPlanificacion(){
-//
-//	for(int i=0; i<cantCocineros; i++){
-//
-//
-//		}
-//
-//}
+
+
+void crearColasPlanificacion(){
+
+	for(int i=0; i<cantCocineros; i++){
+
+
+		}
+
+}
+
+
 
 
 void inicializarRestaurante(){

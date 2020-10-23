@@ -30,7 +30,8 @@ typedef enum
 	TERMINAR_PEDIDO,
 	RESPUESTA_CONSULTAR_R,
 	RESPUESTA_SELECCIONAR_R,
-	RESPUESTA_OBTENER_R,
+	RESPUESTA_OBTENER_REST,
+	RESPUESTA_OBTENER_RECETA,
 	RESPUESTA_CONSULTAR_PLATOS,
 	RESPUESTA_GUARDAR_PLATO,
 	RESPUESTA_A_PLATO, //(RESPUESTA AÑADIR PLATO)
@@ -64,7 +65,8 @@ typedef struct
 //nadie te va a extrañar
 
 typedef struct{
-	uint32_t cliente; //seria el PID del cliente
+	uint32_t largoIDCliente;
+	char* idCliente;
 	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
 }seleccionar_restaurante;

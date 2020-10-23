@@ -18,6 +18,9 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 
             obtenerRestaurante(estructuraMensaje->nombreRestaurante, *socket_cliente);
 
+            free(estructuraMensaje->nombreRestaurante);
+            free(estructuraMensaje);
+
 			break;
 		case ERROR:
 			pthread_exit(NULL);

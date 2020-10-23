@@ -178,7 +178,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
 			break;
 
-		case RESPUESTA_OBTENER_R:
+		case RESPUESTA_OBTENER_REST:
 			//paquete->buffer->stream = malloc(sizeof(respuesta_obtener_restaurante));
 			size_ya_armado = serializar_paquete_respuesta_obtener_restaurante(paquete, mensaje);
 			break;
@@ -264,13 +264,17 @@ uint32_t serializar_paquete_seleccionar_restaurante(t_paquete* paquete, seleccio
 	//reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 	buffer->size = sizeof(uint32_t)*2
+			     + strlen(estructura->idCliente)+1
 				 + strlen(estructura->nombreRestaurante)+1;
 
 	void* streamAuxiliar = malloc(buffer->size);
 
-	//meto el PID del Cliente
-	memcpy(streamAuxiliar + desplazamiento, &(estructura->cliente), sizeof(estructura->cliente));
-	desplazamiento += sizeof(estructura->cliente);
+	//meto el largo del identificador del cliente
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->largoIDCliente), sizeof(estructura->largoIDCliente));
+	desplazamiento += sizeof(estructura->largoIDCliente);
+
+	memcpy(streamAuxiliar + desplazamiento, estructura->idCliente, estructura->largoIDCliente+1);
+	desplazamiento += estructura->largoIDCliente+1;
 
 	//meto el largo del nombre del Restaurante
 	memcpy(streamAuxiliar + desplazamiento, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante));
@@ -281,7 +285,7 @@ uint32_t serializar_paquete_seleccionar_restaurante(t_paquete* paquete, seleccio
 	desplazamiento += estructura->largoNombreRestaurante+1;
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
-	pesoDeElementosAEnviar = sizeof(estructura->cliente) + sizeof(estructura->largoNombreRestaurante) + estructura->largoNombreRestaurante + 1;
+	pesoDeElementosAEnviar = sizeof(estructura->largoIDCliente) + estructura->largoIDCliente+1 + sizeof(estructura->largoNombreRestaurante) + estructura->largoNombreRestaurante+1;
 
 	if(desplazamiento != pesoDeElementosAEnviar)
 	{
@@ -740,7 +744,7 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 			desserializar_ok_fail(estructura, socket_cliente);
 			break;
 
-		case RESPUESTA_OBTENER_R:
+		case RESPUESTA_OBTENER_REST:
 			desserializar_respuesta_obtener_restaurante(estructura,socket_cliente);
 			break;
 
@@ -776,8 +780,10 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 
 void desserializar_seleccionar_restaurante(seleccionar_restaurante* estructura, int32_t socket_cliente)
 {
-	//saco el PID del cliente
-	bytesRecibidos(recv(socket_cliente, &(estructura->cliente), sizeof(estructura->cliente), MSG_WAITALL));
+	//saco el largo del ID del cliente
+	bytesRecibidos(recv(socket_cliente, &(estructura->largoIDCliente), sizeof(estructura->largoIDCliente), MSG_WAITALL));
+
+	bytesRecibidos(recv(socket_cliente, estructura->idCliente, estructura->largoIDCliente+1, MSG_WAITALL));
 
 	//saco el largo del nombre del restaurante
 	bytesRecibidos(recv(socket_cliente, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante), MSG_WAITALL));
@@ -788,7 +794,7 @@ void desserializar_seleccionar_restaurante(seleccionar_restaurante* estructura, 
 	//saco el nombre del restaurante en si
 	bytesRecibidos(recv(socket_cliente, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1, MSG_WAITALL));
 
-	printf("el PID del cliente es: %u\n", estructura->cliente);
+	printf("el identificador del cliente es: %s\n", estructura->idCliente);
 	printf("el largo del nombre del restaurante es: %u\n", estructura->largoNombreRestaurante);
 	printf("el nombre del restaurante es: %s.\n", estructura->nombreRestaurante);
 }

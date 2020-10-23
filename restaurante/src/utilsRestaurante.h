@@ -48,6 +48,8 @@ uint32_t miPosicionY;
 uint32_t cantCocineros;
 uint32_t cantRecetas;
 uint32_t cantHornos;
+char* platos;
+char* afinidades;
 
 typedef enum{
 	NEW = 1,
