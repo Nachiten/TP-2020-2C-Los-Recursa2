@@ -110,7 +110,7 @@ void cerrar_conexion(int32_t socket)
 void mandar_mensaje(void* mensaje, codigo_operacion tipoMensaje, int32_t socket)
 {
 	t_paquete* paquete_por_armar = malloc(sizeof(t_paquete));
-//	paquete_por_armar->buffer = malloc(sizeof(t_buffer));
+	paquete_por_armar->buffer = malloc(sizeof(t_buffer));
 	uint32_t size_serializado = 0;
 
 	printf("Voy a mandar un mensaje del tipo %i.\n", tipoMensaje);

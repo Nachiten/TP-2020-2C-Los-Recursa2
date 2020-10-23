@@ -119,7 +119,7 @@ void los_recv_repetitivos(int32_t socket_conexion_establecida, uint32_t *exito, 
 	else
 	{
 		//recibo tamaño de lo que sigue
-		recibidosSize = recv(socket_conexion_establecida, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
+		recibidosSize = recv(socket_conexion_establecida, sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
 		bytesRecibidos(recibidosSize);
 
 		//si se cayo la conexion, no se hace nada con esto
