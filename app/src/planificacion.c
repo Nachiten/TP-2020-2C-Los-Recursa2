@@ -27,8 +27,8 @@ void iniciarPlanificacion(){
 	//sleep(7);
 
 	pcb_pedido* unPedido = malloc(sizeof(pcb_pedido));
-	unPedido->posObjetivoX = 10;
-	unPedido->posObjetivoY = 15;
+	unPedido->posRestauranteX = 10;
+	unPedido->posRestauranteY = 15;
 	unPedido->pedidoID = 1;
 
 	agregarANew(unPedido);
@@ -59,15 +59,15 @@ void iniciarPlanificacion(){
 	sleep(3);
 
 	pcb_pedido* unPedido2 = malloc(sizeof(pcb_pedido));
-	unPedido2->posObjetivoX = 3;
-	unPedido2->posObjetivoY = 5;
+	unPedido2->posRestauranteX = 3;
+	unPedido2->posRestauranteY = 5;
 	unPedido2->pedidoID = 2;
 
 	agregarANew(unPedido2);
 
 	pcb_pedido* unPedido3 = malloc(sizeof(pcb_pedido));
-	unPedido3->posObjetivoX = 7;
-	unPedido3->posObjetivoY = 8;
+	unPedido3->posRestauranteX = 7;
+	unPedido3->posRestauranteY = 8;
 	unPedido3->pedidoID = 3;
 
 	agregarANew(unPedido3);
@@ -84,7 +84,7 @@ void hiloBlock_Ready(){
 		// TODO
 		// En caso de HRRN se debe escanear cola READY	 para sumar 1 de tiempo de espera
 
-		if(algoritmo_planif == "HRRN"){
+		if(algoritmo == HRRN){
 			int i;
 			int elementosEnReady = list_size(colaReady);
 		//itero por cada elemento presente en READY
@@ -185,21 +185,33 @@ void hiloExec(int* numHiloExecPuntero){
 				pedidoAEjecutar->instruccionesTotales -= pedidoAEjecutar->instruccionesRealizadas;
 				pedidoAEjecutar->instruccionesRealizadas = 0;
 				pedidoAEjecutar->estadoBlocked = DESCANSANDO;
-
+				agregarABlock(pedidoAEjecutar);
 			// Termino rafaga
 			} else if (desalojoCode == 2){
 				printf("[Hilo%i] Termine la rafaga. (espero mensaje)\n", numHiloExec);
 
+				if(pedidoAEjecutar->objetivo == RESTAURANTE){
+
+
 				pedidoAEjecutar->instruccionesRealizadas = 0;
-				pedidoAEjecutar->repartidorAsignado->posX = pedidoAEjecutar->posObjetivoX;
-				pedidoAEjecutar->repartidorAsignado->posY = pedidoAEjecutar->posObjetivoY;
+				pedidoAEjecutar->repartidorAsignado->posX = pedidoAEjecutar->posRestauranteX;
+				pedidoAEjecutar->repartidorAsignado->posY = pedidoAEjecutar->posRestauranteY;
 				pedidoAEjecutar->estadoBlocked = ESPERANDO_MSG;
+				pedidoAEjecutar->objetivo = CLIENTE;
+				pedidoAEjecutar->instruccionesTotales = distanciaDeRepartidorAObjetivo(pedidoAEjecutar->repartidorAsignado,pedidoAEjecutar);
+
+				agregarABlock(pedidoAEjecutar);
+				} else {
+				//ToDo se manda a exit y se liberan todos los recursos del pedido por puntero salvo el repartidor (pertenecen a una lista que no se puede tocar)
+				}
+
+
 			} else {
 				printf("[Hilo%i | ERROR] El desalojo code tiene un valor invalido.\n", numHiloExec);
 				exit(6);
 			}
 
-			agregarABlock(pedidoAEjecutar);
+
 
 		} else {
 			waitSemaforoHabilitarCicloExec(numHiloExec);
@@ -260,26 +272,23 @@ pcb_pedido* obtenerSiguienteDeReady(){
 
 	if (list_size(colaReady) > 0){
 
-	uint32_t chequeoAlgoritmoEmpleado;
-	chequeoAlgoritmoEmpleado = valor_para_switch_case(algoritmo_planif);
-
-
 		// Aca dentro un SWITCH para los distintos algoritmos q llama a una funcion para cada uno
-	  switch(chequeoAlgoritmoEmpleado){
+	  switch(algoritmo){
 
 		// CASO FIFO
-		case 1:
+		case FIFO:
 		sem_wait(mutexReady);
 		pedidoPlanificado = list_remove(colaReady, 0);
 		sem_post(mutexReady);
 		break;
 
 		//CASO HRRN
-		case 2:
+		case HRRN:
 		pedidoPlanificado = obtenerSiguienteHRRN();
 		break;
 
-		case 3:
+		//CASO SJF sin desalojo
+		case SFJSD:
 		pedidoPlanificado = obtenerSiguienteSJFSD();
 		break;
 
@@ -289,7 +298,7 @@ pcb_pedido* obtenerSiguienteDeReady(){
 
 
 	// Devuelve NULL si no hay nada en ready
-	// Caso contrario devuelve el que tiene mas prioridad
+	// Caso contrario devuelve el que tiene mas prioridad segun el algoritmo que se este empleando
 	return pedidoPlanificado;
 }
 
@@ -402,6 +411,7 @@ void asignarRepartidorAPedido(pcb_pedido* unPedido){
 
 	int mejorDistancia;
 	repartidor* mejorRepartidor;
+	unPedido->objetivo = RESTAURANTE;
 
 	int i;
 	// Recorro la lista de disponibles
@@ -466,13 +476,23 @@ uint32_t valor_para_switch_case(char* algoritmo) {
 // Calculo la distancia entre dos puntos
 int distanciaDeRepartidorAObjetivo(repartidor* unRepartidor, pcb_pedido* elPedido){
 
+	int posObjetivoX;
+	int posObjetivoY;
+
+	if(elPedido->objetivo == RESTAURANTE){
+		posObjetivoX = elPedido->posRestauranteX;
+		posObjetivoY = elPedido->posRestauranteY;
+	} else {
+		posObjetivoX = elPedido->posClienteX;
+		posObjetivoY = elPedido->posClienteY;
+	}
+
 	int posXRepartidor = unRepartidor->posX;
 	int posYRepartidor = unRepartidor->posY;
-	int posXObjetivo = elPedido->posObjetivoX;
-	int posYObjetivo = elPedido->posObjetivoY;
 
-	int distanciaX = modulo(posXRepartidor - posXObjetivo);
-	int distanciaY = modulo(posYRepartidor - posYObjetivo);
+
+	int distanciaX = modulo(posXRepartidor - posObjetivoX);
+	int distanciaY = modulo(posYRepartidor - posObjetivoY);
 
 	return distanciaX + distanciaY;
 }

@@ -32,7 +32,8 @@ int main(){
 		abort();
 	}
 	//cargo algoritmo de planificacion a utilizar
-	algoritmo_planif = config_get_string_value(config, "ALGORITMO_DE_PLANIFICACION");
+	algoritmo = valor_para_switch_case(config_get_string_value(config, "ALGORITMO_DE_PLANIFICACION"));
+
 
 	//cargo IPs y Puertos...
 	mi_puerto = config_get_string_value(config,"PUERTO_ESCUCHA");
@@ -399,8 +400,8 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 			int id = crear_id_pedidos();
 
 			nuevoPcb->pedidoID = id;
-			nuevoPcb->posObjetivoX = posX_resto;
-			nuevoPcb->posObjetivoY = posY_resto;
+			nuevoPcb->posRestauranteX = posX_resto;
+			nuevoPcb->posRestauranteY = posY_resto;
 			nuevoPcb->nombre_resto = malloc(strlen("RestoDefault")+1);
 
 			agregarANew(nuevoPcb);
@@ -447,8 +448,8 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 					nuevoPcb = malloc(sizeof(pcb_pedido));
 
 					nuevoPcb->pedidoID = pedido->idPedido;
-					nuevoPcb->posObjetivoX = resto->posX;
-					nuevoPcb->posObjetivoY = resto->posY;
+					nuevoPcb->posRestauranteX = posX_resto;
+					nuevoPcb->posRestauranteY = posY_resto;
 					nuevoPcb->nombre_resto = malloc(strlen(resto->nombre_resto)+1);
 
 					agregarANew(nuevoPcb);

@@ -40,13 +40,27 @@ typedef enum{
 	DESCANSANDO,
 }estadoBlock;
 
+typedef enum{
+	RESTAURANTE,
+	CLIENTE,
+}objetivoViaje;
+
+typedef enum{
+	FIFO,
+	HRRN,
+	SFJSD,
+}algoritmo_planif;
+
 typedef struct{
 	int pedidoID;
 	int instruccionesTotales;
 	repartidor* repartidorAsignado;
 	int instruccionesRealizadas;
-	int posObjetivoX;
-	int posObjetivoY;
+	int posRestauranteX;
+	int posRestauranteY;
+	int posClienteX;
+	int posClienteY;
+	objetivoViaje objetivo;
 	estadoBlock estadoBlocked;
 	char* nombre_resto;
 	int tiempoEspera;
@@ -86,7 +100,7 @@ char* mi_puerto;
 char* puerto_commanda;
 char* ip_commanda;
 char* platos_default;
-char* algoritmo_planif;
+algoritmo_planif algoritmo;
 int32_t posX_resto;
 int32_t posY_resto;
 
