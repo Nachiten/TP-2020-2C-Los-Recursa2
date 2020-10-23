@@ -87,3 +87,54 @@ char* resultadoDeRespuesta(uint32_t resultado)
 		return "fallido";
 	}
 }
+
+// Cuenta la cantidad de elementos en un array
+// Si no hay elementos retorna 0
+int cantidadDeElementosEnArray(char** array){
+	int i = 0;
+	while(array[i] != NULL){
+		i++;
+	}
+	return i;
+}
+
+void los_recv_repetitivos(int32_t socket_conexion_establecida, uint32_t *exito, int32_t *sizeAAllocar)
+{
+	int32_t bytesRecibidosCodOP = 0;
+	int32_t recibidosSize = 0;
+	codigo_operacion cod_op;
+
+	//recibo codigo de op
+	bytesRecibidosCodOP = recv(socket_conexion_establecida, &cod_op, sizeof(cod_op), MSG_WAITALL);
+	bytesRecibidos(bytesRecibidosCodOP);
+
+	//si se cayo la conexion, basicamente no hacemos hada
+	if(bytesRecibidosCodOP < 1)
+	{
+		cod_op = 0;
+		sizeAAllocar = 0;
+	}
+
+	//si la conexion NO se cayo, intento recibir lo que sigue
+	else
+	{
+		//recibo tamaño de lo que sigue
+		recibidosSize = recv(socket_conexion_establecida, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
+		bytesRecibidos(recibidosSize);
+
+		//si se cayo la conexion, no se hace nada con esto
+		if(recibidosSize < 1)
+		{
+			*exito = 0;
+			cod_op = 0;
+			sizeAAllocar = 0;
+		}
+
+	}
+
+	if(cod_op != 0)
+	{
+		*exito = 1;
+		printf("Tamaño del Payload: %i.\n", *sizeAAllocar);
+	}
+}
