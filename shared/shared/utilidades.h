@@ -9,6 +9,7 @@
 #include<string.h>
 #include<commons/collections/list.h>
 #include"estructuras.h"
+#include"socket.h"
 
 //las proximas 2 funciones son para transformar de STRING a INT----------------
 
@@ -31,5 +32,9 @@ char* resultadoDeRespuesta(uint32_t resultado);
 
 // Cuenta la cantidad de elementos en un array
 int cantidadDeElementosEnArray(char** array);
+
+//para evitar la repeticion constante de los recv del codigo de operacion y del tamaño a alocar, Exito = 0 o 1 (utilizar para validaciones)
+//USAR *SOLO* si ya estan dentro del case y esperan la respuesta de un mensaje enviado
+void los_recv_repetitivos(int32_t socket_conexion_establecida, uint32_t *exito, int32_t *sizeAAllocar);
 
 #endif /* SHARED_UTILIDADES_H_ */

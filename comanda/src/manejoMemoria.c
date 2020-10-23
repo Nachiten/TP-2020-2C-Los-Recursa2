@@ -47,7 +47,7 @@ void inicializar_lista_de_espacios(espacio* listaDeEspacios, uint32_t TAMANIO_AR
 	listaDeEspacios->anter_espacio = NULL;
 	listaDeEspacios->sig_espacio = NULL;
 
-	while(iterador < cantidadPosibleDeEspacios)
+	while(iterador < cantidadPosibleDeEspacios-1)
 	{
 		crearNuevoEspacio(auxiliarMoverme);
 		auxiliarMoverme = auxiliarMoverme->sig_espacio;

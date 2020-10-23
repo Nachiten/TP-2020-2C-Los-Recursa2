@@ -90,16 +90,15 @@ int main()
 	}
 
 	//arrancamos los semaforos para variables globales
-	void inicializarSemaforos();
+	inicializarSemaforos();
 
 	//inicializamos la tabla de segmentos
 	lista_de_pedidos_de_todos_los_restaurantes = malloc(sizeof(tablas_segmentos_restaurantes));
 	inicializar_lista_de_tablas_de_segmentos_de_restaurantes(lista_de_pedidos_de_todos_los_restaurantes);//si, son nombres de mierda
 	lista_de_espacios_en_SWAP = malloc(sizeof(espacio));
-	inicializar_lista_de_espacios(lista_de_espacios_en_SWAP, TAMANIO_AREA_DE_SWAP);
+	inicializar_lista_de_espacios(lista_de_espacios_en_SWAP, TAMANIO_AREA_DE_SWAP); //este separa logicamente los espacios de SWAP
 	lista_de_espacios_en_MP = malloc(sizeof(espacio));
-	inicializar_lista_de_espacios(lista_de_espacios_en_MP, TAMANIO_MEMORIA_PRINCIPAL);
-
+	inicializar_lista_de_espacios(lista_de_espacios_en_MP, TAMANIO_MEMORIA_PRINCIPAL); //este separa logicamente los espacios de MP
 
 	//ToDo matar la lista de las tablas de segmento
 	//ToDo matar la tabla de segmentos
