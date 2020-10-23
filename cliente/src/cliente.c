@@ -73,6 +73,9 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 	respuesta_ok_error* estructuraRespuesta;
 	uint32_t socketCliente;
 	int32_t iterador = 0;
+	int32_t sizeAAllocar = 0;
+	uint32_t exito = 0;
+
 	//char* nombreRestaurante; puede que este al pedo
 
 //	printf("Inserte un comando:\n");
@@ -97,8 +100,6 @@ void obtenerInputConsolaCliente(char* lineaEntera)
     {
 
 	case CONSULTAR_RESTAURANTES:;
-		respuesta_consultar_restaurantes* estructuraRespuestaConsultaRestaurantes = malloc(sizeof(respuesta_consultar_restaurantes));
-
 		//socketCliente = establecer_conexion(tuplaConexion->ip_destino , tuplaConexion->puerto_destino);
 		socketCliente = establecer_conexion(ip_destino , puerto_destino);
 		resultado_de_conexion(socketCliente, logger, "destino");
@@ -111,23 +112,35 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 		mandar_mensaje("nadaxdxd", CONSULTAR_RESTAURANTES, socketCliente);
 
-		recibir_mensaje(estructuraRespuestaConsultaRestaurantes,RESPUESTA_CONSULTAR_R,socketCliente);
+		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
 
-
-		//ToDo hablar con Tomas sobre si esto funcionaria asi o no
-
-
-		palabrasSeparadas = string_split(estructuraRespuestaConsultaRestaurantes->listaRestaurantes, ",");//falta agregar corchetes
-
-		puts("Los restaurantes que se encuentran disponibles son:");
-
-		while(iterador < estructuraRespuestaConsultaRestaurantes->cantRestaurantes)
+		if(exito == 1)
 		{
-			printf("%s\n",palabrasSeparadas[iterador]);
+			//respuesta_consultar_restaurantes* estructuraRespuestaConsultaRestaurantes = malloc(sizeof(respuesta_consultar_restaurantes));
+			respuesta_consultar_restaurantes* estructuraRespuestaConsultaRestaurantes = malloc(sizeAAllocar);
+
+			recibir_mensaje(estructuraRespuestaConsultaRestaurantes,RESPUESTA_CONSULTAR_R,socketCliente);
+
+			//ToDo hablar con Tomas sobre si esto funcionaria asi o no
+
+
+			palabrasSeparadas = string_split(estructuraRespuestaConsultaRestaurantes->listaRestaurantes, ",");//falta agregar corchetes
+
+			puts("Los restaurantes que se encuentran disponibles son:");
+
+			while(iterador < estructuraRespuestaConsultaRestaurantes->cantRestaurantes)
+			{
+				printf("%s\n",palabrasSeparadas[iterador]);
+			}
+
+			free(estructuraRespuestaConsultaRestaurantes);
 		}
 
+		else
+		{
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.");
+		}
 
-		free(estructuraRespuestaConsultaRestaurantes);
     	break;
 
     case SELECCIONAR_RESTAURANTE:
@@ -147,7 +160,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 		socketCliente = establecer_conexion(ip_destino, puerto_destino);
 		resultado_de_conexion(socketCliente, logger, "destino");
 
-		obtener_restaurante* estructura = malloc(sizeof(obtener_restaurante));
+		obtener_restaurante* estructura = malloc(sizeof(uint32_t) + strlen(palabrasSeparadas[1]));
 		estructura->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
 //		estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
 		estructura->nombreRestaurante = palabrasSeparadas[1];
@@ -158,12 +171,13 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 		free(estructura->nombreRestaurante);
 		free(estructura);
 
-
-
 		printf("pude mandar la solicitud de metadata a sindic.\n");
 
 
+		/*
 		//aca hago recibir_mensaje pero no haria nada interno mas que capaz loggear lo devuelto
+		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
+		*/
 
 		break;
 
@@ -175,7 +189,46 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 		break;
 
+	case GUARDAR_PLATO:
 
+		strcat(palabrasSeparadas[1],"\0"); //IMPORTANTISIMO
+		strcat(palabrasSeparadas[3],"\0");
+
+		estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
+
+		socketCliente = establecer_conexion(ip_destino , puerto_destino);
+		resultado_de_conexion(socketCliente, logger, "destino");
+
+		guardar_plato* elMensajeGuardarPlato = malloc(sizeof(uint32_t)*4 + strlen(palabrasSeparadas[1]) + strlen(palabrasSeparadas[3]));
+		elMensajeGuardarPlato->nombreRestaurante = palabrasSeparadas[1];
+		elMensajeGuardarPlato->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
+		elMensajeGuardarPlato->idPedido = atoi(palabrasSeparadas[2]);
+		elMensajeGuardarPlato->nombrePlato = palabrasSeparadas[3];
+		elMensajeGuardarPlato->largonombrePlato = strlen(palabrasSeparadas[3]);
+		elMensajeGuardarPlato->cantidadPlatos = atoi(palabrasSeparadas[4]);
+
+		mandar_mensaje(elMensajeGuardarPlato, GUARDAR_PLATO, socketCliente);
+
+		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
+
+		if(exito == 1)
+		{
+			recibir_mensaje(estructuraRespuesta,RESPUESTA_GUARDAR_PLATO,socketCliente);
+
+			printf("El intento de guardar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+		}
+
+		else
+		{
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.");
+		}
+
+		//free(elMensajeGuardarPlato->nombreRestaurante); //ToDo revisar
+		//free(elMensajeGuardarPlato->nombrePlato);
+		free(elMensajeGuardarPlato);
+		free(estructuraRespuesta);
+		close(socketCliente);
+		break;
 
 	case CREAR_PEDIDO:
 
@@ -197,34 +250,42 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 		strcpy(nombreRestaurante, palabrasSeparadas[2]);
 		*/
 
-		guardar_pedido* elMensaje = malloc(sizeof(guardar_pedido));
-		elMensaje->idPedido = atoi(palabrasSeparadas[1]);
-		elMensaje->largoNombreRestaurante = strlen(palabrasSeparadas[2]);
+		guardar_pedido* elMensajeGuardarPedido = malloc(sizeof(uint32_t)*2 + strlen(palabrasSeparadas[2]));
+		elMensajeGuardarPedido->idPedido = atoi(palabrasSeparadas[1]);
+		elMensajeGuardarPedido->largoNombreRestaurante = strlen(palabrasSeparadas[2]);
 		//elMensaje->nombreRestaurante = malloc(elMensaje->largoNombreRestaurante + 1);
 		//strcpy(elMensaje->nombreRestaurante, palabrasSeparadas[2]);
-		elMensaje->nombreRestaurante = palabrasSeparadas[2];
+		elMensajeGuardarPedido->nombreRestaurante = palabrasSeparadas[2];
 
-		printf("ID: %u \n", elMensaje->idPedido);
-		printf("nombre: %s \n", elMensaje->nombreRestaurante);
+		printf("ID: %u \n", elMensajeGuardarPedido->idPedido);
+		printf("nombre: %s \n", elMensajeGuardarPedido->nombreRestaurante);
 
 		//   ¿¿¿¿¿Crearia un hilo mas para mandar el socket junto con el id pedido, el nombre del resto y el tamanio????? entiendo que no
 		//      pthread_t hiloMensaje;
 		//      pthread_create(&hiloMensaje, NULL, mandar_mensaje ?), &socketCliente);
 		//      pthread_detach(hiloMensaje);
 
-		//ToDO poner los 2 recv para cod OP y el size del payload
+		mandar_mensaje(elMensajeGuardarPedido, GUARDAR_PEDIDO, socketCliente);
 
-		mandar_mensaje(elMensaje, GUARDAR_PEDIDO, socketCliente);
+		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
 
-		recibir_mensaje(estructuraRespuesta,RESPUESTA_GUARDAR_PEDIDO,socketCliente);
+		if(exito == 1)
+		{
+			recibir_mensaje(estructuraRespuesta,RESPUESTA_GUARDAR_PEDIDO,socketCliente);
 
-		printf("El intento de guardar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+			printf("El intento de guardar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+		}
 
-		//free(elMensaje->nombreRestaurante); //porfa no olvidarse de este free, tambien es importante, no solo liberar la estructura, sino nos va a caber
-		free(elMensaje);
+		else
+		{
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.");
+		}
+
+		//free(elMensajeGuardarPedido->nombreRestaurante); //porfa no olvidarse de este free, tambien es importante, no solo liberar la estructura, sino nos va a caber
+		free(elMensajeGuardarPedido);
 		free(estructuraRespuesta);
 		close(socketCliente); //siempre cerrar socket cuando se termina de usar
-      break;
+     	break;
 
 
 
