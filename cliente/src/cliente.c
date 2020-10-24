@@ -37,8 +37,8 @@ int main(){
     tuplaConexion.mi_logger = logger;
     */
 
-    //char* lineaEntera = malloc(60); //con 60 caracteres estamos piola, no?
 	char* lineaEntera;
+	char* auxLinea;
     lineaEntera = NULL;
 	size_t longitud = 0;
 
@@ -48,13 +48,26 @@ int main(){
 		//memset(lineaEntera,0,60);
 		getline(&lineaEntera, &longitud, stdin);
 
-		string_trim(&lineaEntera);
+		//string_trim(&lineaEntera); //ToDo hablar con un ayudante: esto puede que no sea necesario
 
-		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, lineaEntera);
-		//pthread_join(hiloConsola, NULL);
+		if(strcmp(lineaEntera, "") == 0)
+		{
+			printf("No se ingresó ningun comando.\n");
+			free(lineaEntera);
+			continue;
+		}
+
+		auxLinea = malloc(strlen(lineaEntera));
+		//strncpy(auxLinea,lineaEntera,strlen(lineaEntera));
+		strcpy(auxLinea,lineaEntera);
+
+		string_trim_right(&auxLinea);
+
+		//pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, lineaEntera);
+		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, auxLinea);
 		pthread_detach(hiloConsola);
-
 	}
+	free(lineaEntera);
 
 	//ToDO meter los free que falten
 	free(ip_destino);
@@ -203,7 +216,6 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 		//emision del mensaje para pedir la info, OBTENER_RESTAURANTE [nombreR]
 		mandar_mensaje(estructura, OBTENER_RESTAURANTE, socketCliente);
 
-		free(estructura->nombreRestaurante);
 		free(estructura);
 
 		printf("pude mandar la solicitud de metadata a sindic.\n");
@@ -323,15 +335,11 @@ void obtenerInputConsolaCliente(char* lineaEntera)
      	break;
 
 
-
-
-
-
-
-
     default:
     	puts("Input no reconocida.");
     	break;
     }
+
     freeDeArray(palabrasSeparadas);
+    free(lineaEntera);
 }
