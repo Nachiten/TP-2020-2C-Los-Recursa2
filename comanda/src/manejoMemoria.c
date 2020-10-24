@@ -81,7 +81,6 @@ tablas_segmentos_restaurantes* crear_tabla_de_pedidos(tablas_segmentos_restauran
 	return nuevaTablaDePedidos;
 }
 
-//ToDo verificar si hace falta saber el numero de segmento creado
 uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido)
 {
 	segmentos* tablaDePedidos = tablaDePedidosDelRestaurante->miTablaDePedidos;
@@ -125,6 +124,7 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 	}
 }
 
+//ToDo hace comportamiento de uso de la primera pagina
 tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePlato, uint32_t cantidadPlatos)
 {
 	tabla_paginas* auxiliarRecorrer = tablaDePlatosDelPedido;
@@ -138,6 +138,7 @@ tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePl
 
 	nuevoPlato->cantidadComidaPreparada = 0;
 	nuevoPlato->cantidadPedidaComida = cantidadPlatos;
+	nuevoPlato->nombreDeMorfi = malloc(strlen(nombrePlato)+1);
 	memcpy(nuevoPlato->nombreDeMorfi, nombrePlato, strlen(nombrePlato)+1);
 	nuevoPlato->numero_de_pagina = auxiliarRecorrer->numero_de_pagina + 1;
 	asignarNumeroDeVictima(&nuevoPlato->numero_de_victima);
@@ -404,6 +405,11 @@ void mover_pagina_a_memoriaPrincipal(tabla_paginas* tablaDePlatosDelPedido, uint
 {
 	//copia de memoria SWAP a memoria principal
 	memcpy(MEMORIA_PRINCIPAL + posicionInicialDeMEMORIA, AREA_DE_SWAP + posicionInicialDeSWAP, 32);
+
+	//log obligatorio
+	sem_wait(semaforoLogger);
+	log_info(logger,"Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: %p", MEMORIA_PRINCIPAL + posicionInicialDeMEMORIA);
+	sem_post(semaforoLogger);
 
 	//actualizamos datos de la pagina + le asignamos su numero de victima
 	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
