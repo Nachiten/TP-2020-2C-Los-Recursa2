@@ -86,6 +86,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 //
 //	string_trim(&lineaEntera);
 
+	//char** palabrasSeparadas = string_split(lineaEntera , " ");
 	char** palabrasSeparadas = string_split(lineaEntera , " ");
 
 	// El nombre del comando es la primer palabra (POR EL MOMENTO CON GUIONES_BAJOS) -> EJ: CONSULTAR_RESTAURANTES

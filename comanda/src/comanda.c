@@ -122,9 +122,9 @@ int main()
 	return EXIT_SUCCESS;
 }
 
-//ToDo ver si estos 2 sirven para algo (seguro que si)
-	//int32_t socketApp;
-	//int32_t socketCliente;
+//ToDo ver si estos 2 sirven para algo (en comanda.h)
+	//socketApp;
+	//socketCliente;
 
 
 void recepcion_mensajes()
@@ -213,7 +213,6 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	int32_t numeroDeMarcoEnMP = -10;
 
 	/*ToDo CODIGOS DE OPERACION QUE FALTAN CODEAR:
-	 GUARDAR_PEDIDO
 	 GUARDAR_PLATO
 	 OBTENER_PEDIDO
 	 CONFIRMAR_PEDIDO
@@ -248,6 +247,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	        	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 
 				//por ultimo avisamos que el pedido fue agregado correctamente
+	        	printf("--Se creó un nuevo pedido para %s con ID %u--\n", recibidoGuardarPedido->nombreRestaurante, recibidoGuardarPedido->idPedido);
 				resultado->respuesta = 1;
         	}
 
@@ -307,6 +307,8 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		//busco si hay un marco libre en MP para poner la pagina nueva/editada
 					sem_wait(semaforoTocarListaEspaciosEnMP);
 					numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+					//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
+					marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
 					sem_post(semaforoTocarListaEspaciosEnMP);
 
 					if(numeroDeMarcoEnMP == -1)
@@ -316,6 +318,9 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
 					//ToDO temporalmente asumido que siempre existen marcos libres en MP
 					mover_pagina_a_memoriaPrincipal(plato_creado_o_editado, numeroDeEspacioEnSwap*32, numeroDeMarcoEnMP*32);
+
+					//por ultimo, respondemos que no crasheo nada
+					resultado->respuesta = 1;
         		}
 
         		//el pedido no existe
