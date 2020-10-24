@@ -214,7 +214,7 @@ tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_res
 	if(tablaDefault == 0 && buscar_tabla_de_segmentos_de_restaurante(auxiliarRecorrerListasDePedidos, nombreDeRestaurante))
 	{
 		//la lista de pedidos de ese restaurante ya existe
-		while(auxiliarRecorrerListasDePedidos->nombreRestaurante != nombreDeRestaurante)
+		while(strcmp(auxiliarRecorrerListasDePedidos->nombreRestaurante,nombreDeRestaurante) != 0)
 		{
 			//me busco la lista de ese restaurante
 			auxiliarRecorrerListasDePedidos = auxiliarRecorrerListasDePedidos->sig_lista;
@@ -257,7 +257,7 @@ uint32_t buscar_tabla_de_segmentos_de_restaurante(tablas_segmentos_restaurantes*
 	while(lasListasDePedidosDeRestaurantes != NULL && encontrado == 0)
 	{
 		//comparo si encontré el segmento del restaurante que busco
-		if(lasListasDePedidosDeRestaurantes->nombreRestaurante == nombreDeRestaurante)
+		if(strcmp(lasListasDePedidosDeRestaurantes->nombreRestaurante,nombreDeRestaurante) == 0)
 		{
 			encontrado = 1;
 		}
