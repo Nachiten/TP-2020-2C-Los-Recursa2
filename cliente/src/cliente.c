@@ -147,8 +147,38 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
     case SELECCIONAR_RESTAURANTE:
 
+    	strcat(palabrasSeparadas[1],"\0");
 
+    	estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
 
+		socketCliente = establecer_conexion(ip_destino, puerto_destino);
+		resultado_de_conexion(socketCliente, logger, "destino");
+
+		seleccionar_restaurante* estructuraSeleccRestaur = malloc(sizeof(uint32_t)*2 + strlen(idCliente) + strlen(palabrasSeparadas[1]));
+		estructuraSeleccRestaur->idCliente = idCliente;
+		estructuraSeleccRestaur->largoIDCliente = strlen(idCliente);
+		estructuraSeleccRestaur->nombreRestaurante = palabrasSeparadas[1];
+		estructuraSeleccRestaur->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
+
+		mandar_mensaje(estructuraSeleccRestaur, SELECCIONAR_RESTAURANTE, socketCliente);
+
+		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
+
+		if(exito == 1)
+		{
+			recibir_mensaje(estructuraRespuesta,RESPUESTA_GUARDAR_PLATO,socketCliente);
+
+			printf("El intento de seleccionar un restaurante fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+		}
+
+		else
+		{
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.");
+		}
+
+		free(estructuraSeleccRestaur);//entiendo que no hace falta liberar nombre de restaurante ni id cliente porque solo fueron asignaciones
+		free(estructuraRespuesta);
+		close(socketCliente);
     	break;
 
 	case OBTENER_RESTAURANTE:;

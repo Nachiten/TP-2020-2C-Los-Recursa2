@@ -11,7 +11,7 @@
 #include "funcionesCliente.h"
 #include <pthread.h>
 
-uint32_t idCliente;
+
 t_log* logger;
 t_config* config;
 int32_t socketEscucha;
@@ -24,6 +24,7 @@ char* ip_destino;
 char* puerto_destino;
 char* puerto_local;
 char* puerto_APP;
+char* idCliente;
 uint32_t miPosicionX;
 uint32_t miPosicionY;
 
