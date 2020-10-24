@@ -124,31 +124,51 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 	}
 }
 
-//ToDo hace comportamiento de uso de la primera pagina
+//ToDo hacer comportamiento de uso de la primera pagina
 tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePlato, uint32_t cantidadPlatos)
 {
 	tabla_paginas* auxiliarRecorrer = tablaDePlatosDelPedido;
 	tabla_paginas* nuevoPlato = malloc(sizeof(tabla_paginas));
 
-	//me paro al final de la tabla de ̶P̶l̶a̶t̶os paginas para asignar una nueva
+	//me paro al final de la tabla de ̶P̶l̶a̶t̶os Paginas para asignar una nueva
 	while(auxiliarRecorrer->sig_pagina != NULL)
 	{
 		auxiliarRecorrer = auxiliarRecorrer->sig_pagina;
 	}
 
-	nuevoPlato->cantidadComidaPreparada = 0;
-	nuevoPlato->cantidadPedidaComida = cantidadPlatos;
-	nuevoPlato->nombreDeMorfi = malloc(strlen(nombrePlato)+1);
-	memcpy(nuevoPlato->nombreDeMorfi, nombrePlato, strlen(nombrePlato)+1);
-	nuevoPlato->numero_de_pagina = auxiliarRecorrer->numero_de_pagina + 1;
-	asignarNumeroDeVictima(&nuevoPlato->numero_de_victima);
-	nuevoPlato->anter_pagina = auxiliarRecorrer;
-	nuevoPlato->sig_pagina = NULL;
+	//si vamos a usar la pagina por default que tiene la tabla de paginas
+	if(auxiliarRecorrer->numero_de_pagina == 0)
+	{
+		//antes que nada mato la pagina nueva que se creó al pedo
+		free(nuevoPlato);
 
-	//"pego" el nuevo plato al final de la lista de platos
-	auxiliarRecorrer->sig_pagina = nuevoPlato;
+		auxiliarRecorrer->cantidadComidaPreparada = 0;
+		auxiliarRecorrer->cantidadPedidaComida = cantidadPlatos;
+		auxiliarRecorrer->nombreDeMorfi = malloc(strlen(nombrePlato)+1);
+		memcpy(auxiliarRecorrer->nombreDeMorfi, nombrePlato, strlen(nombrePlato)+1);
+		auxiliarRecorrer->numero_de_pagina++;
+		asignarNumeroDeVictima(&auxiliarRecorrer->numero_de_victima);
 
-	return nuevoPlato;
+		return auxiliarRecorrer;
+	}
+
+	//le armamos una pagina nueva
+	else
+	{
+		nuevoPlato->cantidadComidaPreparada = 0;
+		nuevoPlato->cantidadPedidaComida = cantidadPlatos;
+		nuevoPlato->nombreDeMorfi = malloc(strlen(nombrePlato)+1);
+		memcpy(nuevoPlato->nombreDeMorfi, nombrePlato, strlen(nombrePlato)+1);
+		nuevoPlato->numero_de_pagina = auxiliarRecorrer->numero_de_pagina + 1;
+		asignarNumeroDeVictima(&nuevoPlato->numero_de_victima);
+		nuevoPlato->anter_pagina = auxiliarRecorrer;
+		nuevoPlato->sig_pagina = NULL;
+
+		//"pego" el nuevo plato al final de la lista de platos
+		auxiliarRecorrer->sig_pagina = nuevoPlato;
+
+		return nuevoPlato;
+	}
 }
 
 void crearNuevoEspacio(espacio* unEspacio)
@@ -189,6 +209,21 @@ int32_t buscarPrimerEspacioLibre(espacio* listaDeEspacios)
 
 	//devuelvo el numero del espacio encontrado (o no)
 	return espacioEncontrado;
+}
+
+void marcarEspacioComoOcupado(espacio* listaDeEspacios, uint32_t numeroDeEspacioElegido)
+{
+	espacio* auxiliarMoverme = listaDeEspacios;
+
+	//mientras que no encuentre el espacio pedido...
+	while(auxiliarMoverme != NULL && auxiliarMoverme->numeroDeEspacio != numeroDeEspacioElegido)
+	{
+		//avanzo hasta encontrarlo
+		auxiliarMoverme = auxiliarMoverme->sig_espacio;
+	}
+
+	//ya lo encontre, marco como ocupado
+	auxiliarMoverme->espacioOcupado = 1;
 }
 
 void asignarNumeroDeVictima(uint32_t* miNumeroDeVictima)

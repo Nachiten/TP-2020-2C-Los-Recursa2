@@ -34,6 +34,7 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePlato, uint32_t cantidadPlatos);
 void crearNuevoEspacio(espacio* espacio); //para preparar los espacios que puede haber en SWAP/MP
 int32_t buscarPrimerEspacioLibre(espacio* listaDeEspacios); //devuelve el numero del espacio encontrado, o -1 si no se encontro
+void marcarEspacioComoOcupado(espacio* listaDeEspacios, uint32_t numeroDeEspacioElegido);
 
 //crea y asigna un nuevo numero de victima a la pagina
 void asignarNumeroDeVictima(uint32_t* miNumeroDeVictima);

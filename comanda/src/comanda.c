@@ -307,6 +307,8 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		//busco si hay un marco libre en MP para poner la pagina nueva/editada
 					sem_wait(semaforoTocarListaEspaciosEnMP);
 					numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+					//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
+					marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
 					sem_post(semaforoTocarListaEspaciosEnMP);
 
 					if(numeroDeMarcoEnMP == -1)
