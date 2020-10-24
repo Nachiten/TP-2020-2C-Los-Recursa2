@@ -37,13 +37,15 @@ int main(){
     tuplaConexion.mi_logger = logger;
     */
 
-    char* lineaEntera = malloc(30); //con 30 caracteres estamos piola, no?
+    //char* lineaEntera = malloc(60); //con 60 caracteres estamos piola, no?
+	char* lineaEntera;
     lineaEntera = NULL;
 	size_t longitud = 0;
 
 	while(1)
 	{
 		printf("Inserte un comando:\n");
+		//memset(lineaEntera,0,60);
 		getline(&lineaEntera, &longitud, stdin);
 
 		string_trim(&lineaEntera);
