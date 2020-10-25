@@ -8,6 +8,8 @@ int main(){
 	ip_destino = malloc(15); //creo que no se puede pasar de esto
 	puerto_destino = malloc(10); //10 para ir a lo seguro
 	puerto_local = malloc(10); //10 para ir a lo seguro
+	//puerto_app = malloc(10);
+	//ip_app = malloc(15);
 
 	//Cargo las configuraciones del .config
 	config = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/cliente.config");
@@ -230,7 +232,43 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
     //aca van mas Cases...
 
+	//ojito ojeron este case reutiliza el serializar de OBTENER_RESTAURANTE y su estructura para mandar, es a propositoooo
 	case CONSULTAR_PLATOS:
+		strcat(palabrasSeparadas[1],"\0");
+		printf("El restaurante al que le quiero consultar los platitos es: %s\n", palabrasSeparadas[1]);
+		obtener_restaurante* estructuraAEnviar = malloc(sizeof(uint32_t) + strlen(palabrasSeparadas[1]));
+		estructuraAEnviar->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
+		estructuraAEnviar->nombreRestaurante = malloc(estructuraAEnviar->largoNombreRestaurante+1);
+		strcpy(estructuraAEnviar->nombreRestaurante, palabrasSeparadas[1]);
+
+		socketCliente = establecer_conexion(ip_destino, puerto_destino);
+		resultado_de_conexion(socketCliente, logger, "destino");
+
+		//emision del mensaje para pedir la info, CONSULTAR_PLATOS [nombreR], algunos receptores usaran el [nombreR], otros no
+		mandar_mensaje(estructuraAEnviar, CONSULTAR_PLATOS, socketCliente);
+
+	    los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
+
+	    if(exito == 1)
+	    		{
+	    	respuesta_consultar_platos* estructuraRespuestaConsultarPlatos = malloc(sizeAAllocar);
+	    	recibir_mensaje(estructuraRespuestaConsultarPlatos, RESPUESTA_CONSULTAR_PLATOS, socketCliente);
+
+	    	char* platos = malloc(estructuraRespuestaConsultarPlatos->longitudNombresPlatos+1);
+	    	strcpy(platos, estructuraRespuestaConsultarPlatos->nombresPlatos);
+            printf("Los platitos del restaurante consultado son: %s\n", platos);
+            free(estructuraRespuestaConsultarPlatos->nombresPlatos);
+            free(estructuraRespuestaConsultarPlatos);
+            free(platos);
+
+	    	} else {
+
+	    	printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.");
+
+	    		}
+
+        free(estructura->nombreRestaurante);
+		free(estructura);
 
 
 
