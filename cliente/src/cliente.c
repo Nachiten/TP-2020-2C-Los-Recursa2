@@ -267,8 +267,8 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 	    		}
 
-        free(estructura->nombreRestaurante);
-		free(estructura);
+        free(estructuraAEnviar->nombreRestaurante);
+		free(estructuraAEnviar);
 
 
 
