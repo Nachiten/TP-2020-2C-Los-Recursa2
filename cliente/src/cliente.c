@@ -18,7 +18,7 @@ int main(){
 	ip_destino = config_get_string_value(config,"IP_DESTINO");
 	puerto_destino = config_get_string_value(config,"PUERTO_DESTINO");
 	puerto_local = config_get_string_value(config,"PUERTO_LOCAL");
-	puerto_APP = config_get_string_value(config,"PUERTO_APP");
+	//puerto_APP = config_get_string_value(config,"PUERTO_APP");
 	miPosicionX = config_get_int_value(config, "POSICION_X");
 	miPosicionY = config_get_int_value(config, "POSICION_Y");
 
