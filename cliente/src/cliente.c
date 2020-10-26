@@ -39,43 +39,49 @@ int main(){
     tuplaConexion.mi_logger = logger;
     */
 
-	char* lineaEntera;
-	char* auxLinea;
-    lineaEntera = NULL;
-	size_t longitud = 0;
+//	char* lineaEntera;
+//	char* auxLinea;
+//    lineaEntera = NULL;
+//	size_t longitud = 0;
+
+	comandoParaEjecutar = malloc(sizeof(sem_t));
+	sem_init(comandoParaEjecutar, 0, 1);
 
 	while(1)
 	{
-		printf("Inserte un comando:\n");
-		//memset(lineaEntera,0,60);
-		getline(&lineaEntera, &longitud, stdin);
-
-		//string_trim(&lineaEntera); //ToDo hablar con un ayudante: esto puede que no sea necesario
-
-		if(strcmp(lineaEntera, "") == 0)
-		{
-			printf("No se ingresó ningun comando.\n");
-			free(lineaEntera);
-			continue;
-		}
-
-		auxLinea = malloc(strlen(lineaEntera));
-		//strncpy(auxLinea,lineaEntera,strlen(lineaEntera));
-		strcpy(auxLinea,lineaEntera);
-
-		string_trim_right(&auxLinea);
-
-		//pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, lineaEntera);
-		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, auxLinea);
+//		printf("Inserte un comando:\n");
+//		//memset(lineaEntera,0,60);
+//		getline(&lineaEntera, &longitud, stdin);
+//
+//		string_trim(&lineaEntera); //ToDo hablar con un ayudante: esto puede que no sea necesario
+//
+//		if(strcmp(lineaEntera, "") == 0)
+//		{
+//			printf("No se ingresó ningun comando.\n");
+//			free(lineaEntera);
+//			continue;
+//		}
+//
+//		auxLinea = malloc(strlen(lineaEntera));
+//		//strncpy(auxLinea,lineaEntera,strlen(lineaEntera));
+//		strcpy(auxLinea,lineaEntera);
+//
+//		//string_trim_right(&auxLinea);
+		sem_wait(comandoParaEjecutar);
+		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, NULL);
+		//pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, auxLinea);
 		pthread_detach(hiloConsola);
+
 	}
+
+	/*
 	free(lineaEntera);
 
 	//ToDO meter los free que falten
 	free(ip_destino);
 	free(puerto_destino);
 	free(puerto_local);
-
+    */
 	//para cerrar el programa
 	matarPrograma(logger, config, socketEscucha);
 
@@ -84,8 +90,7 @@ int main(){
 
 
 //void obtenerInputConsolaCliente(t_conexion* tuplaConexion)
-void obtenerInputConsolaCliente(char* lineaEntera)
-{
+void obtenerInputConsolaCliente(){
 	//char* lineaEntera = NULL;
 	//size_t longitud = 0;
 	uint32_t switcher;
@@ -94,20 +99,36 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 	int32_t iterador = 0;
 	int32_t sizeAAllocar = 0;
 	uint32_t exito = 0;
+	char* lineaEntera;
+	lineaEntera = NULL;
+	size_t longitud = 0;
 
 	//char* nombreRestaurante; puede que este al pedo
 
-//	printf("Inserte un comando:\n");
-//
-//	getline(&lineaEntera, &longitud, stdin);
-//
-//	string_trim(&lineaEntera);
+	printf("Inserte un comando:\n");
+
+	getline(&lineaEntera, &longitud, stdin);
+
+	string_trim(&lineaEntera);
+
+	if(strcmp(lineaEntera, "") == 0)
+	  {
+		printf("No se ingresó ningun comando.\n");
+		free(lineaEntera);
+		sem_post(comandoParaEjecutar);
+		return;
+	  }
+
+
 
 	//char** palabrasSeparadas = string_split(lineaEntera , " ");
 	char** palabrasSeparadas = string_split(lineaEntera , " ");
 
 	// El nombre del comando es la primer palabra (POR EL MOMENTO CON GUIONES_BAJOS) -> EJ: CONSULTAR_RESTAURANTES
-    char* comandoIngresado = palabrasSeparadas[0];
+    char* comandoIngresado = malloc(strlen(palabrasSeparadas[0])+1);
+    strcpy(comandoIngresado,palabrasSeparadas[0]);
+
+    sem_post(comandoParaEjecutar);
 
     //printf("El comando solicitado fue: %s. \n", comandoIngresado);
 
@@ -126,7 +147,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 		if(socketCliente < 1)
 		{
-			puts("estoy en el if");
+			puts("estoy en el if \n");
 			break;
 		}
 
@@ -146,7 +167,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 			palabrasSeparadas = string_split(estructuraRespuestaConsultaRestaurantes->listaRestaurantes, ",");//falta agregar corchetes
 
-			puts("Los restaurantes que se encuentran disponibles son:");
+			puts("Los restaurantes que se encuentran disponibles son: \n");
 
 			while(iterador < estructuraRespuestaConsultaRestaurantes->cantRestaurantes)
 			{
@@ -158,7 +179,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 		else
 		{
-			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.");
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
 		}
 
     	break;
@@ -166,6 +187,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
     case SELECCIONAR_RESTAURANTE:
 
     	strcat(palabrasSeparadas[1],"\0");
+
 
     	estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
 
@@ -201,7 +223,13 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 	case OBTENER_RESTAURANTE:;
 
+	    if(palabrasSeparadas[1] == NULL){
+	    	printf("Es necesario ingresar un nombre para el restaurante, por favor intente nuevamente.\n");
+	    	break;
+	    }
+
 		strcat(palabrasSeparadas[1],"\0");
+
 
 		printf("El nombre que quiero procesar es: %s\n", palabrasSeparadas[1]);
 		printf("La longitud del nombre a procesar es: %d\n", strlen(palabrasSeparadas[1]));
@@ -234,7 +262,14 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 	//ojito ojeron este case reutiliza el serializar de OBTENER_RESTAURANTE y su estructura para mandar, es a propositoooo
 	case CONSULTAR_PLATOS:
+
+		if(palabrasSeparadas[1] == NULL){
+			printf("Es necesario ingresar un nombre para el restaurante, por favor intente nuevamente.");
+		break;
+			    }
+
 		strcat(palabrasSeparadas[1],"\0");
+
 		printf("El restaurante al que le quiero consultar los platitos es: %s\n", palabrasSeparadas[1]);
 		obtener_restaurante* estructuraAEnviar = malloc(sizeof(uint32_t) + strlen(palabrasSeparadas[1]));
 		estructuraAEnviar->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
@@ -254,24 +289,20 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 	    	respuesta_consultar_platos* estructuraRespuestaConsultarPlatos = malloc(sizeAAllocar);
 	    	recibir_mensaje(estructuraRespuestaConsultarPlatos, RESPUESTA_CONSULTAR_PLATOS, socketCliente);
 
-	    	char* platos = malloc(estructuraRespuestaConsultarPlatos->longitudNombresPlatos+1);
-	    	strcpy(platos, estructuraRespuestaConsultarPlatos->nombresPlatos);
-            printf("Los platitos del restaurante consultado son: %s\n", platos);
+            printf("Los platitos del restaurante consultado son: %s\n", estructuraRespuestaConsultarPlatos->nombresPlatos);
+
             free(estructuraRespuestaConsultarPlatos->nombresPlatos);
             free(estructuraRespuestaConsultarPlatos);
-            free(platos);
 
 	    	} else {
 
 	    	printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.");
 
-	    		}
+	        }
 
         free(estructuraAEnviar->nombreRestaurante);
 		free(estructuraAEnviar);
-
-
-
+		close(socketCliente);
 		break;
 
 	case GUARDAR_PLATO:
@@ -305,7 +336,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 		else
 		{
-			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.");
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
 		}
 
 		//free(elMensajeGuardarPlato->nombreRestaurante); //ToDo revisar
@@ -363,7 +394,7 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 		else
 		{
-			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.");
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
 		}
 
 		//free(elMensajeGuardarPedido->nombreRestaurante); //porfa no olvidarse de este free, tambien es importante, no solo liberar la estructura, sino nos va a caber
@@ -374,10 +405,11 @@ void obtenerInputConsolaCliente(char* lineaEntera)
 
 
     default:
-    	puts("Input no reconocida.");
+    	puts("Input no reconocida.\n");
     	break;
     }
 
     freeDeArray(palabrasSeparadas);
     free(lineaEntera);
+    return;
 }

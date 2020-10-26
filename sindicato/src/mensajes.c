@@ -284,12 +284,27 @@ void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int c
 	free(nuevosDatos);
 }
 
-void consultarPlatos(char* nombreRestaurant){
+void consultarPlatos(char* nombreRestaurant, uint32_t socket_cliente){
 
 	if ( !existeRestaurant(nombreRestaurant) ){
 		printf("ERROR | No existe el restaurant buscado.\n");
-		// TODO | Retornar valor default (no se cual es)
-		return;
+
+				char* arrayVacio = "[]";
+
+				respuesta_consultar_platos* respuestaMensaje = malloc(
+						sizeof(respuesta_consultar_platos)
+					);
+
+				respuestaMensaje->longitudNombresPlatos = strlen(arrayVacio);
+				respuestaMensaje->nombresPlatos = malloc(strlen(arrayVacio) + 1);
+				strcpy(respuestaMensaje->nombresPlatos, arrayVacio);
+
+				mandar_mensaje(respuestaMensaje, RESPUESTA_CONSULTAR_PLATOS, socket_cliente);
+
+				free(respuestaMensaje->nombresPlatos);
+				free(respuestaMensaje);
+				return;
+
 	}
 
 	/*
@@ -322,10 +337,13 @@ void consultarPlatos(char* nombreRestaurant){
 	printearRespuestaConsultarPlatos(respuestaPlatos);
 
 	// TODO | Enviar respuesta
+	mandar_mensaje(respuestaPlatos, RESPUESTA_CONSULTAR_PLATOS, socket_cliente);
 
 	freeDeArray(datosSeparados);
 	freeDeArray(lineaPlatos);
 	free(datosRestaurante);
+	free(respuestaPlatos->nombresPlatos);
+	free(respuestaPlatos);
 }
 
 void terminarPedido(char* nombreRestaurant, int IDPedido){
