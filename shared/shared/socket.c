@@ -135,13 +135,13 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 
 	switch(tipoMensaje){
 		case CONSULTAR_RESTAURANTES: //este se pasa el mensaje por el culo, solo manda el codigo de operacion
-			paquete->buffer->stream = malloc(0); //malloc flashero para que no rompa despues con el free, ToDo ver si funciona o rompe
+			paquete->buffer->stream = malloc(1); //malloc flashero para que no rompa despues con el free, ToDo ver si funciona o rompe
 			paquete->buffer->size = 0;
 			size_ya_armado = sizeof(tipoMensaje);
 			break;
 
 		case CREAR_PEDIDO: //este se pasa el mensaje por el culo, solo manda el codigo de operacion
-			paquete->buffer->stream = malloc(0); //malloc flashero para que no rompa despues con el free, ToDo ver si funciona o rompe
+			paquete->buffer->stream = malloc(1); //malloc flashero para que no rompa despues con el free, ToDo ver si funciona o rompe
 			paquete->buffer->size = 0;
 			size_ya_armado = sizeof(tipoMensaje);
 			break;
@@ -643,6 +643,49 @@ uint32_t serializar_paquete_respuesta_consultar_platos(t_paquete* paquete, respu
 				return size;
 			}
 }
+
+
+
+uint32_t serializar_paquete_respuesta_crear_pedido(t_paquete* paquete, respuesta_crear_pedido* estructura){
+
+	uint32_t size = 0;
+	uint32_t desplazamiento = 0;
+	uint32_t pesoDeElementosAEnviar = 0;
+
+	//reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+	buffer->size = sizeof(uint32_t);
+
+	void* streamAuxiliar = malloc(buffer->size);
+
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->idPedido), sizeof(estructura->idPedido));
+	desplazamiento += sizeof(estructura->idPedido);
+
+	//controlo que el desplazamiento sea = al peso de lo que mando
+	pesoDeElementosAEnviar = sizeof(estructura->idPedido);
+
+
+			if(desplazamiento != pesoDeElementosAEnviar)
+			{
+					puts("Hubo un error al serializar un mensaje, se pudre todo.\n");
+					abort();
+			}
+
+			else
+			{
+			buffer->stream = streamAuxiliar;
+			paquete->buffer = buffer;
+			//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
+			paquete->buffer->size = desplazamiento;
+
+			//el tamaño del mensaje entero es el codigo de operacion + la variable donde me guarde el size del buffer + lo que pesa el buffer
+			size = sizeof(codigo_operacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
+
+			//devuelvo el tamaño de lo que meti en el paquete para poder hacer el malloc
+		return size;
+	}
+}
+
 
 uint32_t serializar_paquete_ok_fail(t_paquete* paquete, respuesta_ok_error* estructura)
 {
