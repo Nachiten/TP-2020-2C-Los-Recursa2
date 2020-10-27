@@ -34,13 +34,16 @@ void eliminar_paquete(t_paquete* paquete); //libera la memoria utilizada para ma
 //se le da el paquete, el "algo" que vamos a mandar, tipo de mensaje y un size para que "anote" cuanto pesa el paquete despues de serializarlo.
 void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tipoMensaje, uint32_t *size_serializado);//prepara paquete y deja listo para mandar
 
-//estas funciones las necesita serializar_paquete para saber que empaquetar
+//estas funciones las necesita serializar_paquete para saber que empaqueta
 uint32_t serializar_paquete_seleccionar_restaurante(t_paquete* paquete, seleccionar_restaurante* estructura);
 uint32_t serializar_paquete_obtener_restaurante(t_paquete* paquete, obtener_restaurante* estructura);
+uint32_t serializar_paquete_aniadir_plato(t_paquete* paquete, a_plato* estructura);
 uint32_t serializar_paquete_guardar_plato(t_paquete* paquete, guardar_plato* estructura);
 uint32_t serializar_paquete_guardar_pedido(t_paquete* paquete, guardar_pedido* estructura);
+uint32_t serializar_paquete_respuesta_consultar_restaurantes(t_paquete* paquete, respuesta_consultar_restaurantes* estructura);
 uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, respuesta_obtener_restaurante* estructura);
 uint32_t serializar_paquete_respuesta_consultar_platos(t_paquete* paquete, respuesta_consultar_platos* estructura);
+uint32_t serializar_paquete_respuesta_crear_pedido(t_paquete* paquete, respuesta_crear_pedido* estructura);
 uint32_t serializar_paquete_ok_fail(t_paquete* paquete, respuesta_ok_error* estructura);
 
 //FUNCIONES DESSERIALIZAR
@@ -51,6 +54,8 @@ void desserializar_seleccionar_restaurante(seleccionar_restaurante* estructura, 
 void desserializar_obtener_restaurante(obtener_restaurante* estructura, int32_t socket_cliente);
 void desserializar_guardar_plato(guardar_plato* estructura, int32_t socket_cliente);
 void desserializar_guardar_pedido(guardar_pedido* estructura, int32_t socket_cliente);
+void desserializar_aniadir_plato(a_plato* estructura, int32_t socket_cliente);
+void desserializar_respuesta_consultar_restaurantes(respuesta_consultar_restaurantes* estructura, int32_t socket_cliente);
 void desserializar_respuesta_obtener_restaurante(respuesta_obtener_restaurante* estructura, int32_t socket_cliente);
 void desserializar_respuesta_consultar_platos(respuesta_consultar_platos* estructura, int32_t socket_cliente);
 void desserializar_respuesta_crear_pedido(respuesta_crear_pedido* estructura, int32_t socket_cliente);

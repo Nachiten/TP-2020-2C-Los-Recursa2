@@ -32,7 +32,6 @@ typedef enum
 	RESPUESTA_CONSULTAR_R,
 	RESPUESTA_SELECCIONAR_R,
 	RESPUESTA_OBTENER_REST,
-	RESPUESTA_OBTENER_RECETA,
 	RESPUESTA_CONSULTAR_PLATOS,
 	RESPUESTA_GUARDAR_PLATO,
 	RESPUESTA_A_PLATO, //(RESPUESTA AÑADIR PLATO)
@@ -44,6 +43,7 @@ typedef enum
 	RESPUESTA_OBTENER_PEDIDO,
 	RESPUESTA_FINALIZAR_PEDIDO,
 	RESPUESTA_TERMINAR_PEDIDO,
+	RESPUESTA_OBTENER_RECETA,
 	AGREGAR_RESTAURANTE, //cuando un restaurante se reporta en la app para ser tenido en cuenta en CONSULTAR_RESTAURANTES
 	ERROR = -1,
 	DESCONEXION = 0
@@ -77,8 +77,6 @@ typedef struct{
 	char* nombreRestaurante;
 }obtener_restaurante;
 
-//ToDo crear pedido no tiene estructura? hay que poner una estructura para devolver la ID del pedido
-
 typedef struct{
 	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
@@ -86,6 +84,7 @@ typedef struct{
 }guardar_pedido;
 
 typedef struct{
+	uint32_t largoNombrePlato;
 	char* nombrePlato;
 	uint32_t idPedido;
 }a_plato;//añadir plato
@@ -99,7 +98,10 @@ typedef struct{
 	uint32_t cantidadPlatos;
 }guardar_plato;
 
+
 typedef struct{
+	uint32_t largoNombreRestaurante;
+	char* nombreRestaurante;
 	uint32_t idPedido;
 }confirmar_pedido;
 
@@ -107,19 +109,22 @@ typedef struct{
 	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
 	uint32_t idPedido;
-	char* nombrePlato; //comida?
+	char* nombrePlato;
 }plato_listo;
 
+//Solo con el ID del pedido funcaba bien esto? Sospechoso ahora que lo analizo releyendo el enunciado
 typedef struct{
 	uint32_t idPedido;
 }consultar_pedido;
 
+//ATENCION!!!! Reutilizamos serializacion de GUARDAR_PEDIDO
 typedef struct{
 	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
 	uint32_t idPedido;
 }obtener_pedido;
 
+//ATENCION!!!! Reutilizamos serializacion de GUARDAR_PEDIDO
 typedef struct{
 	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
@@ -127,8 +132,13 @@ typedef struct{
 }finalizar_pedido; //seria exactamente lo mismo para terminar_pedido. hace falta separarlos?
 
 typedef struct{
+	uint32_t largoNombreReceta;
+    char* nombreReceta;
+}obtener_receta;
+
+typedef struct{
 	uint32_t cantRestaurantes;
-	uint32_t longitudlistaRestaurantes;
+	uint32_t longitudListaRestaurantes;
 	char* listaRestaurantes;
 }respuesta_consultar_restaurantes;
 
@@ -136,7 +146,7 @@ typedef struct{
 	uint32_t respuesta;
 }respuesta_ok_error;
 
-typedef struct{//Todo ver con los ayudantes PORQUE ESTA PICANTE
+typedef struct{
 	uint32_t cantidadCocineros;
 	uint32_t posX;
 	uint32_t posY;
@@ -150,7 +160,6 @@ typedef struct{//Todo ver con los ayudantes PORQUE ESTA PICANTE
 
 	uint32_t longitudPrecioPlatos;
 	char* precioPlatos;
-
 }respuesta_obtener_restaurante;
 
 typedef struct{

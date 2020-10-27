@@ -138,24 +138,25 @@ void obtenerInputConsolaCliente(){
     //todo me parece que por cuestion de "prolijidad" y que despues sea mas facil encontrar cada CASE, lo ideal seria ir poniendolos en orden,
     //como estan declarados en codigo_operacion: consultar restaurante, seleccionar restaurante, obtener restaurante, etc...
 
+    //estoy de acuerdo pez
 
     /*
     CASES LABURADOS:
 
     Consultar Restaurantes -> Check
     Seleccionar Restaurante -> Check
-    Obtener Restaurante -> Check
-    Consultar Platos -> Check
-    Guardar Plato -> Check
-    Aniadir Plato ->
+    Obtener Restaurante -> Check and tested (!)
+    Consultar Platos -> Check and tested
+    Guardar Plato -> Check and tested (!)
+    Aniadir Plato -> Check
     Plato listo ->
     Crear Pedido -> Check
-    Guardar Pedido -> Check
+    Guardar Pedido -> Check and tested (!)
     Confirmar Pedido ->
     Consultar Pedido ->
     Obtener Pedido ->
-    Finalizar Pedido ->
-    Terminar Pedido ->
+    Finalizar Pedido -> Check
+    Terminar Pedido -> Check
     Obtener Receta ->
     */
 
@@ -289,7 +290,7 @@ void obtenerInputConsolaCliente(){
 
 		if(palabrasSeparadas[1] == NULL){
 			printf("Es necesario ingresar un nombre para el restaurante, por favor intente nuevamente.");
-		break;
+		    break;
 			    }
 
 		strcat(palabrasSeparadas[1],"\0");
@@ -373,6 +374,36 @@ void obtenerInputConsolaCliente(){
 
 	case A_PLATO:
 
+		if(palabrasSeparadas[1] == NULL || palabrasSeparadas[2] == NULL){
+			printf("Se requiere ingresar el nombre de un plato y el ID de un pedido para operar.\n");
+			break;
+		}
+
+		strcat(palabrasSeparadas[1],"\0");
+
+		estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
+		socketCliente = establecer_conexion(ip_destino , puerto_destino);
+		resultado_de_conexion(socketCliente, logger, "destino");
+
+		a_plato* mensajeAniadirPlato = malloc(sizeof(a_plato));
+		mensajeAniadirPlato->largoNombrePlato = strlen(palabrasSeparadas[1])+1;
+		mensajeAniadirPlato->nombrePlato = malloc(mensajeAniadirPlato->largoNombrePlato);
+		strcpy(mensajeAniadirPlato->nombrePlato, palabrasSeparadas[1]);
+		mensajeAniadirPlato->idPedido = atoi(palabrasSeparadas[2]);
+
+		mandar_mensaje(mensajeAniadirPlato, A_PLATO, socketCliente);
+		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
+
+		if(exito == 1)
+		{
+			recibir_mensaje(estructuraRespuesta,RESPUESTA_A_PLATO,socketCliente);
+			printf("El intento de agregar un plato a un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+		}
+
+		free(mensajeAniadirPlato->nombrePlato);
+		free(mensajeAniadirPlato);
+		free(estructuraRespuesta);
+		close(socketCliente);
 
 		break;
 
@@ -482,14 +513,72 @@ void obtenerInputConsolaCliente(){
     	break;
 
     case FINALIZAR_PEDIDO:
+    	if(palabrasSeparadas[1] == NULL || palabrasSeparadas[2] == NULL){
+			printf("Se requiere ingresar el nombre de un restaurante y el ID de un pedido para operar.\n");
+			break;
+		}
 
+		strcat(palabrasSeparadas[1],"\0");
 
-    	break;
+		estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
+		socketCliente = establecer_conexion(ip_destino , puerto_destino);
+		resultado_de_conexion(socketCliente, logger, "destino");
+
+		finalizar_pedido* mensajeFinalizarPedido = malloc(sizeof(finalizar_pedido));
+		mensajeFinalizarPedido->largoNombreRestaurante = strlen(palabrasSeparadas[1])+1;
+		mensajeFinalizarPedido->nombreRestaurante = malloc(mensajeFinalizarPedido->largoNombreRestaurante);
+		strcpy(mensajeFinalizarPedido->nombreRestaurante, palabrasSeparadas[1]);
+		mensajeFinalizarPedido->idPedido = atoi(palabrasSeparadas[2]);
+
+		mandar_mensaje(mensajeFinalizarPedido, FINALIZAR_PEDIDO, socketCliente);
+		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
+
+		if(exito == 1)
+		{
+			recibir_mensaje(estructuraRespuesta, RESPUESTA_FINALIZAR_PEDIDO ,socketCliente);
+			printf("El intento de agregar un plato a un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+		}
+
+		free(mensajeFinalizarPedido->nombreRestaurante);
+		free(mensajeFinalizarPedido);
+		free(estructuraRespuesta);
+		close(socketCliente);
+
+		break;
 
     case TERMINAR_PEDIDO:
+    	if(palabrasSeparadas[1] == NULL || palabrasSeparadas[2] == NULL){
+			printf("Se requiere ingresar el nombre de un restaurante y el ID de un pedido para operar.\n");
+			break;
+		}
 
+		strcat(palabrasSeparadas[1],"\0");
 
-    	break;
+		estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
+		socketCliente = establecer_conexion(ip_destino , puerto_destino);
+		resultado_de_conexion(socketCliente, logger, "destino");
+
+		finalizar_pedido* mensajeTerminarPedido = malloc(sizeof(finalizar_pedido));
+		mensajeTerminarPedido->largoNombreRestaurante = strlen(palabrasSeparadas[1])+1;
+		mensajeTerminarPedido->nombreRestaurante = malloc(mensajeTerminarPedido->largoNombreRestaurante);
+		strcpy(mensajeTerminarPedido->nombreRestaurante, palabrasSeparadas[1]);
+		mensajeTerminarPedido->idPedido = atoi(palabrasSeparadas[2]);
+
+		mandar_mensaje(mensajeTerminarPedido, TERMINAR_PEDIDO, socketCliente);
+		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
+
+		if(exito == 1)
+		{
+			recibir_mensaje(estructuraRespuesta, RESPUESTA_TERMINAR_PEDIDO ,socketCliente);
+			printf("El intento de agregar un plato a un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+		}
+
+		free(mensajeTerminarPedido->nombreRestaurante);
+		free(mensajeTerminarPedido);
+		free(estructuraRespuesta);
+		close(socketCliente);
+
+		break;
 
     case OBTENER_RECETA:
 
