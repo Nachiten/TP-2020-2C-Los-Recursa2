@@ -787,7 +787,7 @@ uint32_t serializar_paquete_respuesta_crear_pedido(t_paquete* paquete, respuesta
 	}
 }
 
-uint32_t serializar_paquete_a_plato(t_paquete* paquete, a_plato* estructura){
+uint32_t serializar_paquete_aniadir_plato(t_paquete* paquete, a_plato* estructura){
 
 	uint32_t size = 0;
 	uint32_t desplazamiento = 0;
