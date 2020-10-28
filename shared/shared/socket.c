@@ -479,6 +479,53 @@ uint32_t serializar_paquete_guardar_plato(t_paquete* paquete, guardar_plato* est
 	}
 }
 
+uint32_t serializar_paquete_aniadir_plato(t_paquete* paquete, a_plato* estructura){
+
+	uint32_t size = 0;
+	uint32_t desplazamiento = 0;
+	uint32_t pesoDeElementosAEnviar = 0;
+
+	//reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+	buffer->size = sizeof(uint32_t)*2
+			     + strlen(estructura->nombrePlato)+1;
+
+	void* streamAuxiliar = malloc(buffer->size);
+
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->largoNombrePlato), sizeof(estructura->largoNombrePlato));
+	desplazamiento += sizeof(estructura->largoNombrePlato);
+
+	memcpy(streamAuxiliar + desplazamiento, estructura->nombrePlato, strlen(estructura->nombrePlato)+1);
+	desplazamiento += strlen(estructura->nombrePlato)+1;
+
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->idPedido), sizeof(estructura->idPedido));
+	desplazamiento += sizeof(estructura->idPedido);
+
+	//controlo que el desplazamiento sea = al peso de lo que mando
+	pesoDeElementosAEnviar = sizeof(estructura->largoNombrePlato) + strlen(estructura->nombrePlato)+1 + sizeof(estructura->idPedido);
+
+
+		if(desplazamiento != pesoDeElementosAEnviar)
+		{
+			puts("Hubo un error al serializar un mensaje, se pudre todo.\n");
+			abort();
+		}
+		else
+		{
+		buffer->stream = streamAuxiliar;
+		paquete->buffer = buffer;
+		//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
+		paquete->buffer->size = desplazamiento;
+
+		//el tamaño del mensaje entero es el codigo de operacion + la variable donde me guarde el size del buffer + lo que pesa el buffer
+		size = sizeof(codigo_operacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
+
+			//devuelvo el tamaño de lo que meti en el paquete para poder hacer el malloc
+		return size;
+	}
+}
+
+
 uint32_t serializar_paquete_guardar_pedido(t_paquete* paquete, guardar_pedido* estructura)
 {
 	uint32_t size = 0;
@@ -518,6 +565,55 @@ uint32_t serializar_paquete_guardar_pedido(t_paquete* paquete, guardar_pedido* e
 		abort();
 	}
 
+	else
+	{
+		buffer->stream = streamAuxiliar;
+		paquete->buffer = buffer;
+		//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
+		paquete->buffer->size = desplazamiento;
+
+		//el tamaño del mensaje entero es el codigo de operacion + la variable donde me guarde el size del buffer + lo que pesa el buffer
+		size = sizeof(codigo_operacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
+
+		//devuelvo el tamaño de lo que meti en el paquete para poder hacer el malloc
+		return size;
+	}
+}
+
+uint32_t serializar_paquete_obtener_receta(t_paquete* paquete, obtener_receta* estructura){
+
+	uint32_t size = 0;
+	uint32_t desplazamiento = 0;
+	uint32_t pesoDeElementosAEnviar = 0;
+
+	if(strlen(estructura->nombreReceta)+1 != estructura->largoNombreReceta){
+		   printf("Error en la serializacion de longitudes, sos pollo\n");
+		   return -1;
+		}
+
+	 //reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+	buffer->size = sizeof(uint32_t)
+				 + strlen(estructura->nombreReceta)+1;
+
+	void* streamAuxiliar = malloc(buffer->size);
+
+	//meto el largo del nombre de la receta
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->largoNombreReceta),  sizeof(estructura->largoNombreReceta));
+	desplazamiento += sizeof(estructura->largoNombreReceta);
+
+	//meto el nombre de la receta
+	memcpy(streamAuxiliar + desplazamiento, estructura->nombreReceta, strlen(estructura->nombreReceta)+1);
+	desplazamiento += strlen(estructura->nombreReceta)+1;
+
+	//controlo que el desplazamiento sea = al peso de lo que mando
+	pesoDeElementosAEnviar = sizeof(estructura->largoNombreReceta) + estructura->largoNombreReceta;
+
+	if(desplazamiento != pesoDeElementosAEnviar)
+	{
+		puts("Hubo un error al serializar un mensaje, se pudre todo.\n");
+		abort();
+	}
 	else
 	{
 		buffer->stream = streamAuxiliar;
@@ -787,7 +883,8 @@ uint32_t serializar_paquete_respuesta_crear_pedido(t_paquete* paquete, respuesta
 	}
 }
 
-uint32_t serializar_paquete_aniadir_plato(t_paquete* paquete, a_plato* estructura){
+
+uint32_t serializar_paquete_respuesta_obtener_receta(t_paquete* paquete, respuesta_obtener_receta* estructura){
 
 	uint32_t size = 0;
 	uint32_t desplazamiento = 0;
@@ -796,37 +893,47 @@ uint32_t serializar_paquete_aniadir_plato(t_paquete* paquete, a_plato* estructur
 	//reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 	buffer->size = sizeof(uint32_t)*2
-			     + strlen(estructura->nombrePlato)+1;
+			     + estructura->sizePasos
+	             + estructura->sizeTiempoPasos;
 
 	void* streamAuxiliar = malloc(buffer->size);
 
-	memcpy(streamAuxiliar + desplazamiento, &(estructura->largoNombrePlato), sizeof(estructura->largoNombrePlato));
-	desplazamiento += sizeof(estructura->largoNombrePlato);
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->sizePasos), sizeof(estructura->sizePasos));
+	desplazamiento += sizeof(estructura->sizePasos);
 
-	memcpy(streamAuxiliar + desplazamiento, estructura->nombrePlato, strlen(estructura->nombrePlato)+1);
-	desplazamiento += strlen(estructura->nombrePlato)+1;
+	memcpy(streamAuxiliar + desplazamiento, estructura->pasos, estructura->sizePasos);
+	desplazamiento += estructura->sizePasos;
 
-	memcpy(streamAuxiliar + desplazamiento, &(estructura->idPedido), sizeof(estructura->idPedido));
-	desplazamiento += sizeof(estructura->idPedido);
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->sizeTiempoPasos), sizeof(estructura->sizeTiempoPasos));
+	desplazamiento += sizeof(estructura->sizePasos);
+
+	memcpy(streamAuxiliar + desplazamiento, estructura->tiempoPasos, estructura->sizeTiempoPasos);
+	desplazamiento += estructura->sizeTiempoPasos;
+
+
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
-	pesoDeElementosAEnviar = sizeof(estructura->largoNombrePlato) + strlen(estructura->nombrePlato)+1 + sizeof(estructura->idPedido);
+	pesoDeElementosAEnviar = sizeof(estructura->sizePasos)
+			               + sizeof(estructura->sizeTiempoPasos)
+						   + estructura->sizePasos
+						   + estructura->sizeTiempoPasos;
 
 
-		if(desplazamiento != pesoDeElementosAEnviar)
-		{
-			puts("Hubo un error al serializar un mensaje, se pudre todo.\n");
-			abort();
-		}
-		else
-		{
-		buffer->stream = streamAuxiliar;
-		paquete->buffer = buffer;
-		//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
-		paquete->buffer->size = desplazamiento;
+			if(desplazamiento != pesoDeElementosAEnviar)
+			{
+					puts("Hubo un error al serializar un mensaje, se pudre todo.\n");
+					abort();
+			}
 
-		//el tamaño del mensaje entero es el codigo de operacion + la variable donde me guarde el size del buffer + lo que pesa el buffer
-		size = sizeof(codigo_operacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
+			else
+			{
+			buffer->stream = streamAuxiliar;
+			paquete->buffer = buffer;
+			//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
+			paquete->buffer->size = desplazamiento;
+
+			//el tamaño del mensaje entero es el codigo de operacion + la variable donde me guarde el size del buffer + lo que pesa el buffer
+			size = sizeof(codigo_operacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
 
 			//devuelvo el tamaño de lo que meti en el paquete para poder hacer el malloc
 		return size;

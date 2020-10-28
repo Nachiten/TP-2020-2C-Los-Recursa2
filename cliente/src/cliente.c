@@ -157,7 +157,7 @@ void obtenerInputConsolaCliente(){
     Obtener Pedido ->
     Finalizar Pedido -> Check
     Terminar Pedido -> Check
-    Obtener Receta ->
+    Obtener Receta -> Check
     */
 
 
@@ -537,6 +537,9 @@ void obtenerInputConsolaCliente(){
 		{
 			recibir_mensaje(estructuraRespuesta, RESPUESTA_FINALIZAR_PEDIDO ,socketCliente);
 			printf("El intento de agregar un plato a un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+		} else
+		{
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
 		}
 
 		free(mensajeFinalizarPedido->nombreRestaurante);
@@ -571,6 +574,8 @@ void obtenerInputConsolaCliente(){
 		{
 			recibir_mensaje(estructuraRespuesta, RESPUESTA_TERMINAR_PEDIDO ,socketCliente);
 			printf("El intento de agregar un plato a un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+		} else {
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
 		}
 
 		free(mensajeTerminarPedido->nombreRestaurante);
@@ -581,6 +586,35 @@ void obtenerInputConsolaCliente(){
 		break;
 
     case OBTENER_RECETA:
+    	if(palabrasSeparadas[1] == NULL){
+			printf("Se requiere ingresar el nombre de una receta para poder operar.\n");
+			break;
+		}
+    	strcat(palabrasSeparadas[1],"\0");
+        obtener_receta* mensajeObtenerReceta = malloc(sizeof(obtener_receta));
+        mensajeObtenerReceta->largoNombreReceta = strlen(palabrasSeparadas[1])+1;
+        mensajeObtenerReceta->nombreReceta = malloc(mensajeObtenerReceta->largoNombreReceta);
+        strcpy(mensajeObtenerReceta->nombreReceta, palabrasSeparadas[1]);
+
+        mandar_mensaje(mensajeObtenerReceta, OBTENER_RECETA, socketCliente);
+        los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
+
+        if(exito == 1)
+		{
+        	respuesta_obtener_receta* estructuraRespuestaObtenerReceta = malloc(sizeof(respuesta_obtener_receta));
+			recibir_mensaje(estructuraRespuestaObtenerReceta, RESPUESTA_OBTENER_RECETA ,socketCliente);
+			printf("Los pasos para cocinar ese plato son: %s.\n", estructuraRespuestaObtenerReceta->pasos);
+			printf("Y sus tiempos:%s \n", estructuraRespuestaObtenerReceta->tiempoPasos);
+			free(estructuraRespuestaObtenerReceta->pasos);
+			free(estructuraRespuestaObtenerReceta->tiempoPasos);
+			free(estructuraRespuestaObtenerReceta);
+		} else {
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
+		}
+        free(mensajeObtenerReceta->nombreReceta);
+        free(mensajeObtenerReceta);
+        free(estructuraRespuesta);
+        close(socketCliente);
 
 
     	break;
