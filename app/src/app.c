@@ -4,7 +4,7 @@ int main(){
 
 	inicializar_colas();
 	inicializar_semaforos();
-	id_inicial_pedidos = 0;
+	int32_t id_global = 0;
 
 	//Cargo las configuraciones del .config
 	config = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/app.config");
@@ -130,7 +130,8 @@ void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
 		perfil->socket_cliente = socket_cliente;
 		perfil->nombre_resto = malloc(strlen(nombreResto)+1);
 		strcpy(perfil->nombre_resto,nombreResto);
-		perfil->id_pedido = 0;
+		perfil->id_pedido_resto = 0;
+		perfil->id_global = crear_id_pedidos(id_global);
 		perfil->perfilActivo = 1;
 		list_add(listaPedidos,perfil);
 
@@ -207,11 +208,9 @@ void crear_pedido(int32_t socket_cliente){
 			}
 
 		}else if(strcmp(cliente->nombre_resto,"RestoDefault") == 0){
-			int idPedido = crear_id_pedidos();
-
 			estructura_guardar_pedido = malloc(sizeof(guardar_pedido));
 
-			estructura_guardar_pedido->idPedido = idPedido;
+			estructura_guardar_pedido->idPedido = cliente->id_global;
 			estructura_guardar_pedido->nombreRestaurante = malloc(strlen("RestoDefault")+1);
 			strcpy(estructura_guardar_pedido->nombreRestaurante,"RestoDefault");
 			estructura_guardar_pedido->largoNombreRestaurante = strlen("RestoDefault");
@@ -245,7 +244,7 @@ void crear_pedido(int32_t socket_cliente){
 	}
 }
 
-void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
+void aniadir_plato(a_plato* recibidoAPlato){
 	int numero_cliente, numero_resto;
 	perfil_cliente* cliente;
 	info_resto* resto;
@@ -254,7 +253,7 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 	int32_t recibidos, recibidosSize = 0, sizeAAllocar;
 	codigo_operacion cod_op;
 
-	numero_cliente = buscar_cliente(socket_cliente);
+	numero_cliente = buscar_pedido_por_id(recibidoAPlato->idPedido);
 
 	if(numero_cliente != -2){
 		cliente = list_get(listaPedidos,numero_cliente);
@@ -418,7 +417,7 @@ void plato_Listo(plato_listo* platoListo){
 	free(respuesta);
 }
 
-void confirmar_Pedido(confirmar_pedido* pedido, int32_t socket_cliente){
+void confirmar_Pedido(confirmar_pedido* pedido){
 	//todo ver si hay que hacer el obtener pedido
 	int numero_cliente, numero_resto;
 	perfil_cliente* cliente;
@@ -427,23 +426,23 @@ void confirmar_Pedido(confirmar_pedido* pedido, int32_t socket_cliente){
 	pcb_pedido* nuevoPcb;
 	int32_t recibidos, recibidosSize = 0, sizeAAllocar;
 	codigo_operacion cod_op;
+	confirmar_pedido* aux;
 	respuesta->respuesta = 0;
 
-	numero_cliente = buscar_cliente_id(pedido->idPedido,socket_cliente);
+	numero_cliente = buscar_pedido_por_id(pedido->idPedido);
 
 	if(numero_cliente != -2){
 		cliente = list_get(listaPedidos,numero_cliente);
 
 		if(strcmp(cliente->nombre_resto,"RestoDefault") == 0){
 			nuevoPcb = malloc(sizeof(pcb_pedido));
-			int id = crear_id_pedidos();
 
-			nuevoPcb->pedidoID = id;
+			nuevoPcb->pedidoID = pedido->idPedido;
 			nuevoPcb->posRestauranteX = posX_resto;
 			nuevoPcb->posRestauranteY = posY_resto;
 			nuevoPcb->nombre_resto = malloc(strlen("RestoDefault")+1);
 
-			//agregarANew(nuevoPcb);
+			//agregarANew(nuevoPcb); todo poner como se debe
 
 			mandar_mensaje(pedido,CONFIRMAR_PEDIDO,socket_commanda);
 
@@ -468,7 +467,10 @@ void confirmar_Pedido(confirmar_pedido* pedido, int32_t socket_cliente){
 			if(numero_resto != -2){
 				resto = list_get(listaRestos,numero_resto);
 
-				mandar_mensaje(pedido,CONFIRMAR_PEDIDO,resto->socket);
+				aux = malloc(sizeof(confirmar_pedido));
+				aux->idPedido = cliente->id_pedido_resto;
+
+				mandar_mensaje(aux,CONFIRMAR_PEDIDO,resto->socket);
 
 				recibidos = recv(resto->socket, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 
@@ -491,7 +493,7 @@ void confirmar_Pedido(confirmar_pedido* pedido, int32_t socket_cliente){
 					nuevoPcb->posRestauranteY = posY_resto;
 					nuevoPcb->nombre_resto = malloc(strlen(resto->nombre_resto)+1);
 
-					agregarANew(nuevoPcb);
+					//agregarANew(nuevoPcb); todo poner bien
 
 					mandar_mensaje(pedido,CONFIRMAR_PEDIDO,socket_commanda);
 
@@ -576,17 +578,17 @@ void agregar_restaurante(info_resto* recibidoAgregarRestaurante){
 
 int32_t crear_id_pedidos(){
 	sem_wait(semId);
-	id_inicial_pedidos += 1;
+	id_global += 1;
 	sem_post(semId);
-	return id_inicial_pedidos;
+	return id_global;
 }
 
-int buscar_pedido(uint32_t id_pedido){
+int buscar_pedido_por_id(uint32_t id_pedido){
 	perfil_cliente* cliente;
 	for(int i = 0; i < listaPedidos->elements_count; i++){
 		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
 
-		if(cliente->id_pedido == id_pedido){
+		if(cliente->id_global == id_global){
 			return i;
 		}
 	}
@@ -598,19 +600,7 @@ int buscar_cliente(int32_t socket_cliente_buscado){
 	for(int i = 0; i < listaPedidos->elements_count; i++){
 		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
 
-		if(cliente->socket_cliente == socket_cliente_buscado && cliente->id_pedido != 0){
-			return i;
-		}
-	}
-	return -2;
-}
-
-int buscar_cliente_id(uint32_t id_pedido_buscado, int32_t socket_cliente){
-	perfil_cliente* cliente;
-	for(int i = 0; i < listaPedidos->elements_count; i++){
-		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
-
-		if(cliente->id_pedido == id_pedido_buscado && cliente->socket_cliente){
+		if(cliente->socket_cliente == socket_cliente_buscado && cliente->id_pedido_resto == 0){
 			return i;
 		}
 	}
@@ -645,7 +635,7 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 	switch(cod_op){
 	case CREAR_PEDIDO:
 		estructura_idPedido = malloc(sizeof(confirmar_pedido));
-		estructura_idPedido = 0;
+		estructura_idPedido->idPedido = 0;
 
 		socketRespuestas = establecer_conexion(resto->ip,resto->puerto);
 		mandar_mensaje(estructura_idPedido,CREAR_PEDIDO,socketRespuestas);//todo cambiar si rompe
@@ -662,7 +652,7 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 		if(estructura_idPedido->idPedido != 0){
 			estructura_guardar_pedido = malloc(sizeof(guardar_pedido));
 
-			estructura_guardar_pedido->idPedido = estructura_idPedido->idPedido;
+			estructura_guardar_pedido->idPedido = cliente->id_global;
 			estructura_guardar_pedido->nombreRestaurante = malloc(strlen(cliente->nombre_resto)+1);
 			strcpy(estructura_guardar_pedido->nombreRestaurante, cliente->nombre_resto);
 			estructura_guardar_pedido->largoNombreRestaurante = strlen(cliente->nombre_resto);
@@ -683,7 +673,7 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 
 			if(respuesta->respuesta == 1){
 				mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,cliente->socket_cliente);
-				cliente->id_pedido = estructura_idPedido->idPedido;
+				cliente->id_pedido_resto = estructura_idPedido->idPedido;
 
 			}else{
 				respuesta->respuesta = 0;
@@ -765,7 +755,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		case A_PLATO:
 			recibidoAPlato = malloc(sizeAAllocar);
 			recibir_mensaje(recibidoAPlato,A_PLATO,socket_cliente);
-			aniadir_plato(recibidoAPlato,socket_cliente);
+			aniadir_plato(recibidoAPlato);
 			free(recibidoAPlato);
 			break;
 
@@ -785,7 +775,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		case CONFIRMAR_PEDIDO:
 			recibidoConfirmarPedido = malloc(sizeAAllocar);
 			recibir_mensaje(recibidoConfirmarPedido,CONFIRMAR_PEDIDO,socket_cliente);
-			confirmar_Pedido(recibidoConfirmarPedido,socket_cliente);
+			confirmar_Pedido(recibidoConfirmarPedido);
 			free(recibidoConfirmarPedido);
 			break;
 
