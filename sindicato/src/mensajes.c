@@ -295,8 +295,8 @@ void consultarPlatos(char* nombreRestaurant, uint32_t socket_cliente){
 						sizeof(respuesta_consultar_platos)
 					);
 
-				respuestaMensaje->longitudNombresPlatos = strlen(arrayVacio);
-				respuestaMensaje->nombresPlatos = malloc(strlen(arrayVacio) + 1);
+				respuestaMensaje->longitudNombresPlatos = strlen(arrayVacio)+1;
+				respuestaMensaje->nombresPlatos = malloc(strlen(arrayVacio)+1);
 				strcpy(respuestaMensaje->nombresPlatos, arrayVacio);
 
 				mandar_mensaje(respuestaMensaje, RESPUESTA_CONSULTAR_PLATOS, socket_cliente);
@@ -621,16 +621,16 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 		respuestaMensaje->posX = 0;
 		respuestaMensaje->posY = 0;
 
-		respuestaMensaje->longitudAfinidades = strlen(arrayVacio);
-		respuestaMensaje->afinidades = malloc(strlen(arrayVacio) + 1);
+		respuestaMensaje->longitudAfinidades = strlen(arrayVacio)+1;
+		respuestaMensaje->afinidades = malloc(strlen(arrayVacio)+1);
 		strcpy(respuestaMensaje->afinidades, arrayVacio);
 
-		respuestaMensaje->longitudPlatos = strlen(arrayVacio);
-		respuestaMensaje->platos = malloc(strlen(arrayVacio) + 1);
+		respuestaMensaje->longitudPlatos = strlen(arrayVacio)+1;
+		respuestaMensaje->platos = malloc(strlen(arrayVacio)+1);
 		strcpy(respuestaMensaje->platos, arrayVacio);
 
 		respuestaMensaje->longitudPrecioPlatos = strlen(arrayVacio);
-		respuestaMensaje->precioPlatos = malloc(strlen(arrayVacio) + 1);
+		respuestaMensaje->precioPlatos = malloc(strlen(arrayVacio)+1);
 		strcpy(respuestaMensaje->precioPlatos, arrayVacio);
 
 		mandar_mensaje(respuestaMensaje, RESPUESTA_OBTENER_REST, socket_cliente);

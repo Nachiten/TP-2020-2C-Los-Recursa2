@@ -45,6 +45,7 @@ typedef enum
 	RESPUESTA_TERMINAR_PEDIDO,
 	RESPUESTA_OBTENER_RECETA,
 	AGREGAR_RESTAURANTE, //cuando un restaurante se reporta en la app para ser tenido en cuenta en CONSULTAR_RESTAURANTES
+	HANDSHAKE,
 	ERROR = -1,
 	DESCONEXION = 0
 }codigo_operacion;
@@ -135,6 +136,13 @@ typedef struct{
 	uint32_t largoNombreReceta;
     char* nombreReceta;
 }obtener_receta;
+
+typedef struct{
+	uint32_t longitudIDCliente;
+	char* id;
+	uint32_t posX;
+	uint32_t posY;
+}handshake;
 
 typedef struct{
 	uint32_t cantRestaurantes;

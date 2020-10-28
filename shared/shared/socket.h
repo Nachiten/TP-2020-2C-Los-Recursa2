@@ -40,10 +40,13 @@ uint32_t serializar_paquete_obtener_restaurante(t_paquete* paquete, obtener_rest
 uint32_t serializar_paquete_guardar_plato(t_paquete* paquete, guardar_plato* estructura);
 uint32_t serializar_paquete_aniadir_plato(t_paquete* paquete, a_plato* estructura);
 uint32_t serializar_paquete_guardar_pedido(t_paquete* paquete, guardar_pedido* estructura);
+uint32_t serializar_paquete_obtener_receta(t_paquete* paquete, obtener_receta* estructura);
+uint32_t serializar_paquete_handshake(t_paquete* paquete, handshake* estructura);
 uint32_t serializar_paquete_respuesta_consultar_restaurantes(t_paquete* paquete, respuesta_consultar_restaurantes* estructura);
 uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, respuesta_obtener_restaurante* estructura);
 uint32_t serializar_paquete_respuesta_consultar_platos(t_paquete* paquete, respuesta_consultar_platos* estructura);
 uint32_t serializar_paquete_respuesta_crear_pedido(t_paquete* paquete, respuesta_crear_pedido* estructura);
+uint32_t serializar_paquete_respuesta_obtener_receta(t_paquete* paquete, respuesta_obtener_receta* estructura);
 uint32_t serializar_paquete_ok_fail(t_paquete* paquete, respuesta_ok_error* estructura);
 
 //FUNCIONES DESSERIALIZAR
@@ -55,9 +58,12 @@ void desserializar_obtener_restaurante(obtener_restaurante* estructura, int32_t 
 void desserializar_guardar_plato(guardar_plato* estructura, int32_t socket_cliente);
 void desserializar_aniadir_plato(a_plato* estructura, int32_t socket_cliente);
 void desserializar_guardar_pedido(guardar_pedido* estructura, int32_t socket_cliente);
+void desserializar_obtener_receta(obtener_receta* estructura, int32_t socket_cliente);
+void desserializar_handshake(handshake* estructura, int32_t socket_cliente);
 void desserializar_respuesta_consultar_restaurantes(respuesta_consultar_restaurantes* estructura, int32_t socket_cliente);
 void desserializar_respuesta_obtener_restaurante(respuesta_obtener_restaurante* estructura, int32_t socket_cliente);
 void desserializar_respuesta_consultar_platos(respuesta_consultar_platos* estructura, int32_t socket_cliente);
 void desserializar_respuesta_crear_pedido(respuesta_crear_pedido* estructura, int32_t socket_cliente);
+void desserializar_respuesta_obtener_receta(respuesta_obtener_receta* estructura, int32_t socket_cliente);
 void desserializar_ok_fail(respuesta_ok_error* estructura, int32_t socket_cliente);
 #endif /* SHARED_SOCKET_H_ */
