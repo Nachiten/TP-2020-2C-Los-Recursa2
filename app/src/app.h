@@ -137,4 +137,10 @@ void serve_client(int32_t* socket);
 void esperar_cliente(int32_t socket_servidor);
 void iniciar_server(char* puerto);
 
+// INICIALIZACION PLANIF
+void iniciarSemaforosCiclos();
+void iniciarSemaforosPlanificacion();
+void leerPlanificacionConfig(t_config*);
+void iniciarPlanificacion();
+
 #endif /* SRC_APP_H_ */

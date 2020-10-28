@@ -96,12 +96,16 @@ void iniciarPlanificacion(){
 	unPedido4->posClienteY = 3;
 	unPedido4->pedidoID = 4;
 
+	agregarANew(unPedido4);
+
 	pcb_pedido* unPedido5 = malloc(sizeof(pcb_pedido));
 	unPedido5->posRestauranteX = 12;
 	unPedido5->posRestauranteY = 9;
 	unPedido5->posClienteX = 1;
 	unPedido5->posClienteY = 2;
 	unPedido5->pedidoID = 5;
+
+	agregarANew(unPedido5);
 
 	guardarPedidoListo(4);
 	guardarPedidoListo(5);
@@ -514,9 +518,12 @@ int estaDesocupado(repartidor* unRepartidor){
 	return !unRepartidor->asignado;
 }
 
+// TODO | Se debe checkear correctamente cuando hay 0 repartidores disponibles
 void asignarRepartidorAPedido(pcb_pedido* unPedido){
 	// Filtro la lista y solo dejo los repartidores que no estan ocupados
 	t_list* repartidoresDisponibles = list_filter(repartidores, (void*)estaDesocupado);
+
+	printf("Hay %i repartidores disponibles\n", list_size(repartidoresDisponibles));
 
 	int mejorDistancia;
 	repartidor* mejorRepartidor;
@@ -637,7 +644,6 @@ void agregarANew(pcb_pedido* unPedido)
 	queue_push(colaNew, unPedido);
 
 	log_info(logger, "[NEW] Entra el nuevo pedido %i.", unPedido->pedidoID);
-	//printf("[NEW] Entra el nuevo pedido %i.\n", unPedido->pedidoID);
 
 	sem_post(mutexNew);
 
@@ -651,8 +657,6 @@ void agregarAReady(pcb_pedido* unPedido){
 	list_add(colaReady, unPedido);
 
 	sem_post(mutexReady);
-
-	//printf("[READY] Ingresa pedido %i.\n", unPedido->pedidoID);
 }
 
 void agregarAExit(pcb_pedido* unPedido){
@@ -661,6 +665,8 @@ void agregarAExit(pcb_pedido* unPedido){
 	eliminarPedidoListo(unPedido->pedidoID);
 	unPedido->repartidorAsignado->asignado = 0;
 	free(unPedido);
+
+	sem_post(contadorRepartidoresDisp);
 }
 
 // Inicializacion de semaforos necesarios

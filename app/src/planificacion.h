@@ -55,14 +55,10 @@ void agregarAReady(pcb_pedido*);
 void agregarANew(pcb_pedido*);
 void agregarAExit(pcb_pedido*);
 
-// INICIALIZACION
-void iniciarSemaforosCiclos();
-void iniciarSemaforosPlanificacion();
-void leerPlanificacionConfig(t_config*);
+
 
 // OTROS
 uint32_t valor_para_switch_case(char* algoritmo);
-void iniciarPlanificacion();
 void freeDeArray(char**);
 void asignarRepartidorAPedido(pcb_pedido*);
 void printearValorSemaforo(sem_t*, char*);
