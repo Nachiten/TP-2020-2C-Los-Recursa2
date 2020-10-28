@@ -89,19 +89,22 @@ void iniciarPlanificacion(){
 
 	guardarPedidoListo(3);
 
-	pcb_pedido* unPedido3 = malloc(sizeof(pcb_pedido));
-	unPedido3->posRestauranteX = 7;
-	unPedido3->posRestauranteY = 8;
-	unPedido3->posClienteX = 3;
-	unPedido3->posClienteY = 5;
-	unPedido3->pedidoID = 4;
+	pcb_pedido* unPedido4 = malloc(sizeof(pcb_pedido));
+	unPedido4->posRestauranteX = 10;
+	unPedido4->posRestauranteY = 11;
+	unPedido4->posClienteX = 2;
+	unPedido4->posClienteY = 3;
+	unPedido4->pedidoID = 4;
 
-	pcb_pedido* unPedido3 = malloc(sizeof(pcb_pedido));
-	unPedido3->posRestauranteX = 7;
-	unPedido3->posRestauranteY = 8;
-	unPedido3->posClienteX = 3;
-	unPedido3->posClienteY = 5;
-	unPedido3->pedidoID = 5;
+	pcb_pedido* unPedido5 = malloc(sizeof(pcb_pedido));
+	unPedido5->posRestauranteX = 12;
+	unPedido5->posRestauranteY = 9;
+	unPedido5->posClienteX = 1;
+	unPedido5->posClienteY = 2;
+	unPedido5->pedidoID = 5;
+
+	guardarPedidoListo(4);
+	guardarPedidoListo(5);
 
 	pthread_join(hiloNewReady, NULL);
 }
@@ -301,6 +304,9 @@ void hiloExec(int* numHiloExecPuntero){
 				} else if (pedidoAEjecutar->objetivo == CLIENTE){
 					log_info(logger, "[EXEC-%i] Pedido %i llega al cliente en posicion %i-%i.", numHiloExec, pedidoAEjecutar->pedidoID, pedidoAEjecutar->posClienteX, pedidoAEjecutar->posClienteY);
 					log_info(logger, "[EXEC-%i] Repartidor %i entrega pedido %i.", numHiloExec, pedidoAEjecutar->repartidorAsignado->numeroRepartidor, pedidoAEjecutar->pedidoID);
+
+					// TODO | Se deben mandar todos los mensajes aclarados en consigna
+
 					agregarAExit(pedidoAEjecutar);
 					//ToDo se manda a exit y se liberan todos los recursos del pedido por puntero salvo el repartidor (pertenecen a una lista que no se puede tocar)
 				} else {
