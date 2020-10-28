@@ -14,6 +14,7 @@ t_list* repartidores;
 t_queue* colaNew;
 t_list* colaReady;
 t_list* colaBlock;
+t_list* pedidosListos;
 
 int GRADO_MULTIPROCE;
 int RETARDO_CICLO_CPU;
@@ -28,6 +29,7 @@ sem_t* mutexNew;
 sem_t* mutexReady;
 // Mutex para tocar cola block
 sem_t* mutexBlock;
+sem_t* mutexPedidosListos;
 // Contador de repartidores disponibles
 sem_t* contadorRepartidoresDisp;
 // Lista de semaforos binarios para sincronizar la cantidad de hilos exec que se dispongan
@@ -35,6 +37,11 @@ t_list* listaSemHabilitarCicloExec;
 t_list* listaSemFinalizarCicloExec;
 sem_t* habilitarCicloBlockReady;
 sem_t* finalizarCicloBlockReady;
+
+// PEDIDO LISTO
+void guardarPedidoListo(int);
+void eliminarPedidoListo(int);
+int checkearPedidoListo(int);
 
 // HILOS
 void hiloBlock_Ready();
@@ -46,15 +53,12 @@ void hiloNew_Ready();
 void agregarABlock(pcb_pedido*);
 void agregarAReady(pcb_pedido*);
 void agregarANew(pcb_pedido*);
+void agregarAExit(pcb_pedido*);
 
-// INICIALIZACION
-void iniciarSemaforosCiclos();
-void iniciarSemaforosPlanificacion();
-void leerPlanificacionConfig(t_config*);
+
 
 // OTROS
 uint32_t valor_para_switch_case(char* algoritmo);
-void iniciarPlanificacion();
 void freeDeArray(char**);
 void asignarRepartidorAPedido(pcb_pedido*);
 void printearValorSemaforo(sem_t*, char*);
