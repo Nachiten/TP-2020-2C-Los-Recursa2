@@ -387,7 +387,7 @@ uint32_t serializar_paquete_obtener_restaurante(t_paquete* paquete, obtener_rest
 	desplazamiento += strlen(estructura->nombreRestaurante)+1;
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
-	pesoDeElementosAEnviar = sizeof(estructura->largoNombreRestaurante) + estructura->largoNombreRestaurante;
+	pesoDeElementosAEnviar = sizeof(estructura->largoNombreRestaurante) + estructura->largoNombreRestaurante+1;
 
 	if(desplazamiento != pesoDeElementosAEnviar)
 	{
@@ -590,7 +590,7 @@ uint32_t serializar_paquete_obtener_receta(t_paquete* paquete, obtener_receta* e
 	uint32_t desplazamiento = 0;
 	uint32_t pesoDeElementosAEnviar = 0;
 
-	if(strlen(estructura->nombreReceta)+1 != estructura->largoNombreReceta){
+	if(strlen(estructura->nombreReceta) != estructura->largoNombreReceta){
 		   printf("Error en la serializacion de longitudes, sos pollo\n");
 		   return -1;
 		}
@@ -611,7 +611,7 @@ uint32_t serializar_paquete_obtener_receta(t_paquete* paquete, obtener_receta* e
 	desplazamiento += strlen(estructura->nombreReceta)+1;
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
-	pesoDeElementosAEnviar = sizeof(estructura->largoNombreReceta) + estructura->largoNombreReceta;
+	pesoDeElementosAEnviar = sizeof(estructura->largoNombreReceta) + estructura->largoNombreReceta +1;
 
 	if(desplazamiento != pesoDeElementosAEnviar)
 	{
@@ -640,7 +640,7 @@ uint32_t serializar_paquete_handshake(t_paquete* paquete, handshake* estructura)
 	uint32_t desplazamiento = 0;
 	uint32_t pesoDeElementosAEnviar = 0;
 
-	if(strlen(estructura->id)+1 != estructura->longitudIDCliente){
+	if(strlen(estructura->id) != estructura->longitudIDCliente){
 		   printf("Error en la serializacion de longitudes, sos pollo\n");
 		   return -1;
 		}
