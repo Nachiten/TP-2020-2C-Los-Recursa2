@@ -23,12 +23,15 @@ void iniciarPlanificacion(){
 	colaNew = queue_create();
 	colaReady = list_create();
     colaBlock = list_create();
+    pedidosListos = list_create();
 
 	//sleep(7);
 
 	pcb_pedido* unPedido = malloc(sizeof(pcb_pedido));
-	unPedido->posRestauranteX = 10;
-	unPedido->posRestauranteY = 15;
+	unPedido->posRestauranteX = 7;
+	unPedido->posRestauranteY = 4;
+	unPedido->posClienteX = 3;
+	unPedido->posClienteY = 5;
 	unPedido->pedidoID = 1;
 
 	agregarANew(unPedido);
@@ -56,11 +59,15 @@ void iniciarPlanificacion(){
 		pthread_create(&hiloColaExec, NULL, (void*)hiloExec, numeroHilo);
 	}
 
-	sleep(3);
+	sleep(25);
+
+	guardarPedidoListo(1);
 
 	pcb_pedido* unPedido2 = malloc(sizeof(pcb_pedido));
 	unPedido2->posRestauranteX = 3;
 	unPedido2->posRestauranteY = 5;
+	unPedido2->posClienteX = 3;
+	unPedido2->posClienteY = 5;
 	unPedido2->pedidoID = 2;
 
 	agregarANew(unPedido2);
@@ -68,11 +75,85 @@ void iniciarPlanificacion(){
 	pcb_pedido* unPedido3 = malloc(sizeof(pcb_pedido));
 	unPedido3->posRestauranteX = 7;
 	unPedido3->posRestauranteY = 8;
+	unPedido3->posClienteX = 3;
+	unPedido3->posClienteY = 5;
 	unPedido3->pedidoID = 3;
 
 	agregarANew(unPedido3);
 
+	sleep(20);
+
+	guardarPedidoListo(2);
+
+	sleep(20);
+
+	guardarPedidoListo(3);
+
+	pcb_pedido* unPedido3 = malloc(sizeof(pcb_pedido));
+	unPedido3->posRestauranteX = 7;
+	unPedido3->posRestauranteY = 8;
+	unPedido3->posClienteX = 3;
+	unPedido3->posClienteY = 5;
+	unPedido3->pedidoID = 4;
+
+	pcb_pedido* unPedido3 = malloc(sizeof(pcb_pedido));
+	unPedido3->posRestauranteX = 7;
+	unPedido3->posRestauranteY = 8;
+	unPedido3->posClienteX = 3;
+	unPedido3->posClienteY = 5;
+	unPedido3->pedidoID = 5;
+
 	pthread_join(hiloNewReady, NULL);
+}
+
+void guardarPedidoListo(int idPedido){
+	int* pedidoAGuardar = malloc(sizeof(int));
+
+	*pedidoAGuardar = idPedido;
+
+	sem_wait(mutexPedidosListos);
+	// Agrego un nuevo pedido listo a la lista
+	list_add(pedidosListos, pedidoAGuardar);
+	sem_post(mutexPedidosListos);
+
+	printf("[GuardarPedido] Se guarda como listo el pedido %i\n", idPedido);
+}
+
+void eliminarPedidoListo(int idPedido){
+	sem_wait(mutexPedidosListos);
+	int i;
+	// Recorro la lista de pedidos listos a ver si encuentro el que necesito
+	for (i = 0; i< list_size(pedidosListos); i++){
+		int* pedidoCandidato = list_get(pedidosListos, i);
+
+		if (*pedidoCandidato == idPedido){
+			int* pedidoAEliminar = list_remove(pedidosListos, i);
+			free(pedidoAEliminar);
+			printf("[Pedidos] Eliminado pedido %i de pedidos listos.\n", idPedido);
+		}
+	}
+	sem_post(mutexPedidosListos);
+}
+
+
+int checkearPedidoListo(int idPedido){
+
+	int retorno = 0;
+
+	sem_wait(mutexPedidosListos);
+	int i;
+	// Recorro la lista de pedidos listos a ver si encuentro el que necesito
+	for (i = 0; i< list_size(pedidosListos); i++){
+		int* pedidoCandidato = list_get(pedidosListos, i);
+
+		if (*pedidoCandidato == idPedido){
+			retorno = 1;
+			break;
+		}
+	}
+	sem_post(mutexPedidosListos);
+
+	return retorno;
 }
 
 void hiloBlock_Ready(){
@@ -87,13 +168,15 @@ void hiloBlock_Ready(){
 		if(algoritmo == HRRN){
 			int i;
 			int elementosEnReady = list_size(colaReady);
-		//itero por cada elemento presente en READY
-		  for (i = 0; i < elementosEnReady; i++){
 			sem_wait(mutexReady);
+			//itero por cada elemento presente en READY
+			for (i = 0; i < elementosEnReady; i++){
+
 			pcb_pedido* pedidoActual = list_get(colaReady, i);
 			pedidoActual->tiempoEspera += 1;
+
+			}
 			sem_post(mutexReady);
-		  }
 		}
 
 		int elementosEnBlock = list_size(colaBlock);
@@ -126,12 +209,27 @@ void hiloBlock_Ready(){
 					pedidoAReady->repartidorAsignado->tiempoDescansado = 0;
 
 					// Se va a ready porque termino de descansar
+					printf("[READY] Ingresa pedido %i por terminar de descansar.\n", pedidoAReady->pedidoID);
 					agregarAReady(pedidoAReady);
 				}
 
 			} else if (pedidoActual->estadoBlocked == ESPERANDO_MSG){
 				// Se debe corroborar si el mensaje ya llego, caso afirmativo mover a ready
-				printf("[HiloBlock] El pedido %i esta esperando msg.\n", pedidoActual->pedidoID);
+
+				// Ya esta listo el pedido
+				if (checkearPedidoListo(pedidoActual->pedidoID)){
+					printf("[HiloBlock] El pedido %i ya esta listo.\n", pedidoActual->pedidoID);
+					pcb_pedido* pedidoAReady = list_remove(colaBlock, i);
+					pedidoAReady->estadoBlocked = NO;
+
+					log_info(logger, "[READY] Ingresa pedido %i por ya estar listo.", pedidoAReady->pedidoID);
+					agregarAReady(pedidoActual);
+				} else {
+					printf("[HiloBlock] El pedido %i todavia no esta listo.\n", pedidoActual->pedidoID);
+				}
+
+
+
 			} else if (pedidoActual->estadoBlocked == NO){
 				printf("[HiloBlock | ERROR] El pedido %i esta en blocked pero no se le asigno por que esta bloqueado.\n", pedidoActual->pedidoID);
 				exit(5);
@@ -155,20 +253,20 @@ void hiloExec(int* numHiloExecPuntero){
 
 		if (pedidoAEjecutar != NULL){
 
-			printf("Al hilo exec numero: %i se le asigna el pedido %i\n",
-					numHiloExec, pedidoAEjecutar->pedidoID);
+			log_info(logger, "[EXEC-%i] Ingresa pedido %i. Instruciones restantes: %i",
+					numHiloExec, pedidoAEjecutar->pedidoID, pedidoAEjecutar->instruccionesTotales);
 
 			int desalojoCode;
-			int cantidadCiclos = 0;
+			int cantidadCiclos = 1;
 
 			// Calculo si tiene que desalojar o no y por que razon
 			while ( (desalojoCode = codigoDesalojo(pedidoAEjecutar) ) == 0){
 				waitSemaforoHabilitarCicloExec(numHiloExec);
-				printf("[Hilo%i] Ejecuto ciclo numero: %i\n", numHiloExec, cantidadCiclos);
+				printf("[EXEC-%i] Ejecuto ciclo numero: %i\n", numHiloExec, cantidadCiclos);
 
 				pedidoAEjecutar->instruccionesRealizadas++;
 
-				printf("[Hilo%i] Instrucciones restantes: %i\n", numHiloExec, pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
+				printf("[EXEC-%i] Instrucciones restantes: %i\n", numHiloExec, pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
 
 				signalSemaforoFinalizarCicloExec(numHiloExec);
 
@@ -177,37 +275,42 @@ void hiloExec(int* numHiloExecPuntero){
 
 			// Esta cansado
 			if (desalojoCode == 1){
-				printf("[Hilo%i] Estoy cansado.\n", numHiloExec);
+				printf("[EXEC-%i] Estoy cansado.\n", numHiloExec);
 
-				// Instrucciones totales: 10 -> 4
-				// Instrucciones realizadas: 6 -> 0
 				// Ahora las instrucciones totales reflejan las que faltan
 				pedidoAEjecutar->instruccionesTotales -= pedidoAEjecutar->instruccionesRealizadas;
 				pedidoAEjecutar->instruccionesRealizadas = 0;
 				pedidoAEjecutar->estadoBlocked = DESCANSANDO;
+
+				log_info(logger, "[BLOCK] Ingresa pedido %i por estar cansado.", pedidoAEjecutar->pedidoID);
 				agregarABlock(pedidoAEjecutar);
 			// Termino rafaga
 			} else if (desalojoCode == 2){
-				printf("[Hilo%i] Termine la rafaga. (espero mensaje)\n", numHiloExec);
-
 				if(pedidoAEjecutar->objetivo == RESTAURANTE){
+					log_info(logger, "[EXEC-%i] Pedido %i llega al restaurant en posicion %i-%i.", numHiloExec, pedidoAEjecutar->pedidoID, pedidoAEjecutar->posRestauranteX, pedidoAEjecutar->posRestauranteY);
 
+					pedidoAEjecutar->instruccionesRealizadas = 0;
+					pedidoAEjecutar->repartidorAsignado->posX = pedidoAEjecutar->posRestauranteX;
+					pedidoAEjecutar->repartidorAsignado->posY = pedidoAEjecutar->posRestauranteY;
+					pedidoAEjecutar->estadoBlocked = ESPERANDO_MSG;
+					pedidoAEjecutar->objetivo = CLIENTE;
+					pedidoAEjecutar->instruccionesTotales = distanciaDeRepartidorAObjetivo(pedidoAEjecutar->repartidorAsignado,pedidoAEjecutar);
 
-				pedidoAEjecutar->instruccionesRealizadas = 0;
-				pedidoAEjecutar->repartidorAsignado->posX = pedidoAEjecutar->posRestauranteX;
-				pedidoAEjecutar->repartidorAsignado->posY = pedidoAEjecutar->posRestauranteY;
-				pedidoAEjecutar->estadoBlocked = ESPERANDO_MSG;
-				pedidoAEjecutar->objetivo = CLIENTE;
-				pedidoAEjecutar->instruccionesTotales = distanciaDeRepartidorAObjetivo(pedidoAEjecutar->repartidorAsignado,pedidoAEjecutar);
-
-				agregarABlock(pedidoAEjecutar);
+					log_info(logger, "[BLOCK] Ingresa pedido %i para esperar mensaje.", pedidoAEjecutar->pedidoID);
+					agregarABlock(pedidoAEjecutar);
+				} else if (pedidoAEjecutar->objetivo == CLIENTE){
+					log_info(logger, "[EXEC-%i] Pedido %i llega al cliente en posicion %i-%i.", numHiloExec, pedidoAEjecutar->pedidoID, pedidoAEjecutar->posClienteX, pedidoAEjecutar->posClienteY);
+					log_info(logger, "[EXEC-%i] Repartidor %i entrega pedido %i.", numHiloExec, pedidoAEjecutar->repartidorAsignado->numeroRepartidor, pedidoAEjecutar->pedidoID);
+					agregarAExit(pedidoAEjecutar);
+					//ToDo se manda a exit y se liberan todos los recursos del pedido por puntero salvo el repartidor (pertenecen a una lista que no se puede tocar)
 				} else {
-				//ToDo se manda a exit y se liberan todos los recursos del pedido por puntero salvo el repartidor (pertenecen a una lista que no se puede tocar)
+					printf("[EXEC-%i] | [ERROR] El objetivo del pedido es invalido\n", numHiloExec);
+					exit(6);
 				}
 
 
 			} else {
-				printf("[Hilo%i | ERROR] El desalojo code tiene un valor invalido.\n", numHiloExec);
+				printf("[EXEC-%i | ERROR] El desalojo code tiene un valor invalido.\n", numHiloExec);
 				exit(6);
 			}
 
@@ -215,7 +318,7 @@ void hiloExec(int* numHiloExecPuntero){
 
 		} else {
 			waitSemaforoHabilitarCicloExec(numHiloExec);
-			printf("[Hilo%i] Desperdicio un ciclo porque no hay nadie en ready.\n", numHiloExec);
+			printf("[EXEC-%i] Desperdicio un ciclo porque no hay nadie en ready.\n", numHiloExec);
 			signalSemaforoFinalizarCicloExec(numHiloExec);
 		}
 
@@ -247,7 +350,7 @@ void agregarABlock(pcb_pedido* elPedido){
 	sem_wait(mutexBlock);
 
 	list_add(colaBlock, elPedido);
-	printf("[BLOCK] Ingresa el pedido %i.\n", elPedido->pedidoID);
+	//printf("[BLOCK] Ingresa el pedido %i.\n", elPedido->pedidoID);
 
 	sem_post(mutexBlock);
 
@@ -434,7 +537,8 @@ void asignarRepartidorAPedido(pcb_pedido* unPedido){
 
 	}
 
-	printf("[NEW] Se asigna el repartidor numero: %i al pedido numero: %i.\n", mejorRepartidor->numeroRepartidor, unPedido->pedidoID);
+	log_info(logger, "[NEW] Se asigna el repartidor: %i al pedido: %i. Posicion repartidor: %i-%i. Posicion Restaurant: %i-%i.",
+			mejorRepartidor->numeroRepartidor, unPedido->pedidoID, mejorRepartidor->posX, mejorRepartidor->posY, unPedido->posRestauranteX, unPedido->posRestauranteY);
 
 	// Asigno el repartidor al pedido, ahora está ocupado
 	mejorRepartidor->asignado = 1;
@@ -444,6 +548,7 @@ void asignarRepartidorAPedido(pcb_pedido* unPedido){
 	unPedido->estadoBlocked = NO;
 	unPedido->tiempoEspera = 0;
 
+	log_info(logger,"[READY] Ingresa pedido %i desde new.", unPedido->pedidoID);
 	agregarAReady(unPedido);
 
 	// Debug
@@ -525,7 +630,8 @@ void agregarANew(pcb_pedido* unPedido)
 
 	queue_push(colaNew, unPedido);
 
-	printf("[NEW] Entra el nuevo pedido %i.\n", unPedido->pedidoID);
+	log_info(logger, "[NEW] Entra el nuevo pedido %i.", unPedido->pedidoID);
+	//printf("[NEW] Entra el nuevo pedido %i.\n", unPedido->pedidoID);
 
 	sem_post(mutexNew);
 
@@ -534,19 +640,21 @@ void agregarANew(pcb_pedido* unPedido)
 }
 
 void agregarAReady(pcb_pedido* unPedido){
-
-	//printf("Intentando insertar elemento en ready.\n");
-
 	sem_wait(mutexReady);
 
 	list_add(colaReady, unPedido);
 
 	sem_post(mutexReady);
 
-	printf("[READY] Ingresa pedido %i.\n", unPedido->pedidoID);
+	//printf("[READY] Ingresa pedido %i.\n", unPedido->pedidoID);
+}
 
-	// OLD
-	//sem_post(contadorProcesosEnReady);
+void agregarAExit(pcb_pedido* unPedido){
+	log_info(logger, "[EXIT] Pedido %i esta en exit por haber terminado.", unPedido->pedidoID);
+
+	eliminarPedidoListo(unPedido->pedidoID);
+	unPedido->repartidorAsignado->asignado = 0;
+	free(unPedido);
 }
 
 // Inicializacion de semaforos necesarios
@@ -566,6 +674,9 @@ void iniciarSemaforosPlanificacion(){
 
 	mutexBlock = malloc(sizeof(sem_t));
 	sem_init(mutexBlock, 0, 1);
+
+	mutexPedidosListos = malloc(sizeof(sem_t));
+	sem_init(mutexPedidosListos, 0, 1);
 
 	contadorRepartidoresDisp = malloc(sizeof(sem_t));
 	sem_init(contadorRepartidoresDisp, 0, 0);
@@ -637,7 +748,7 @@ void iniciarSemaforosCiclos(){
 void hiloCiclosMaestro(){
 
     int i;
-    int numCiclo = 0;
+    int numCiclo = 1;
 
     while(1){
 

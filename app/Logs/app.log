@@ -1,0 +1,35 @@
+[INFO] 16:36:39:342 App/(7179:7179): [NEW] Entra el nuevo pedido 1.
+[INFO] 16:36:42:343 App/(7179:7188): [NEW] Se asigna el repartidor: 2 al pedido: 1. Posicion repartidor: 5-2. Posicion Restaurant: 7-4.
+[INFO] 16:36:42:343 App/(7179:7188): [READY] Ingresa pedido 1 desde new.
+[INFO] 16:36:46:343 App/(7179:7190): [EXEC-0] Ingresa pedido 1. Instruciones restantes: 4
+[INFO] 16:37:02:350 App/(7179:7190): [EXEC-0] Pedido 1 llega al restaurant en posicion 7-4.
+[INFO] 16:37:02:350 App/(7179:7190): [BLOCK] Ingresa pedido 1 para esperar mensaje.
+[INFO] 16:37:07:343 App/(7179:7179): [NEW] Entra el nuevo pedido 2.
+[INFO] 16:37:07:343 App/(7179:7179): [NEW] Entra el nuevo pedido 3.
+[INFO] 16:37:07:343 App/(7179:7188): [NEW] Se asigna el repartidor: 3 al pedido: 2. Posicion repartidor: 1-4. Posicion Restaurant: 3-5.
+[INFO] 16:37:07:343 App/(7179:7188): [READY] Ingresa pedido 2 desde new.
+[INFO] 16:37:07:343 App/(7179:7188): [NEW] Se asigna el repartidor: 1 al pedido: 3. Posicion repartidor: 1-1. Posicion Restaurant: 7-8.
+[INFO] 16:37:07:343 App/(7179:7188): [READY] Ingresa pedido 3 desde new.
+[INFO] 16:37:10:351 App/(7179:7190): [EXEC-0] Ingresa pedido 2. Instruciones restantes: 3
+[INFO] 16:37:10:351 App/(7179:7187): [READY] Ingresa pedido 1 por ya estar listo.
+[INFO] 16:37:10:351 App/(7179:7191): [EXEC-1] Ingresa pedido 3. Instruciones restantes: 13
+[INFO] 16:37:10:351 App/(7179:7192): [EXEC-2] Ingresa pedido 1. Instruciones restantes: 5
+[INFO] 16:37:22:352 App/(7179:7190): [EXEC-0] Pedido 2 llega al restaurant en posicion 3-5.
+[INFO] 16:37:22:352 App/(7179:7190): [BLOCK] Ingresa pedido 2 para esperar mensaje.
+[INFO] 16:37:30:353 App/(7179:7187): [READY] Ingresa pedido 2 por ya estar listo.
+[INFO] 16:37:30:353 App/(7179:7192): [EXEC-2] Pedido 1 llega al cliente en posicion 3-5.
+[INFO] 16:37:30:353 App/(7179:7192): [EXEC-2] Repartidor 2 entrega pedido 1.
+[INFO] 16:37:30:353 App/(7179:7192): [EXIT] Pedido 1 esta en exit por haber terminado.
+[INFO] 16:37:30:353 App/(7179:7192): [EXEC-2] Ingresa pedido 2. Instruciones restantes: 0
+[INFO] 16:37:30:353 App/(7179:7192): [EXEC-2] Pedido 2 llega al cliente en posicion 3-5.
+[INFO] 16:37:30:353 App/(7179:7192): [EXEC-2] Repartidor 3 entrega pedido 2.
+[INFO] 16:37:30:353 App/(7179:7192): [EXIT] Pedido 2 esta en exit por haber terminado.
+[INFO] 16:37:42:354 App/(7179:7191): [BLOCK] Ingresa pedido 3 por estar cansado.
+[INFO] 16:37:54:355 App/(7179:7190): [EXEC-0] Ingresa pedido 3. Instruciones restantes: 5
+[INFO] 16:38:14:358 App/(7179:7190): [EXEC-0] Pedido 3 llega al restaurant en posicion 7-8.
+[INFO] 16:38:14:358 App/(7179:7190): [BLOCK] Ingresa pedido 3 para esperar mensaje.
+[INFO] 16:38:18:359 App/(7179:7187): [READY] Ingresa pedido 3 por ya estar listo.
+[INFO] 16:38:22:360 App/(7179:7190): [EXEC-0] Ingresa pedido 3. Instruciones restantes: 7
+[INFO] 16:38:50:364 App/(7179:7190): [EXEC-0] Pedido 3 llega al cliente en posicion 3-5.
+[INFO] 16:38:50:364 App/(7179:7190): [EXEC-0] Repartidor 1 entrega pedido 3.
+[INFO] 16:38:50:364 App/(7179:7190): [EXIT] Pedido 3 esta en exit por haber terminado.

@@ -47,20 +47,20 @@ int main(){
 
 	// NOTA: Alterar el orden de estos llamados va a romper (dependen uno del anterior)
 	// Inicializo semaforos necesarios para planif
-	//iniciarSemaforosPlanificacion();
+	iniciarSemaforosPlanificacion();
 	// Leo los datos que necesito para planificacion
-	//leerPlanificacionConfig(config);
+	leerPlanificacionConfig(config);
 	// Inicializo los semaforos para ciclos de CPU
-	//iniciarSemaforosCiclos();
+	iniciarSemaforosCiclos();
 
 
 	//coneccion a commanda
 	socket_commanda = establecer_conexion(ip_commanda,puerto_commanda);
 
 	//inicio el server | TODO Se quita esto para testear planificacion
-	iniciar_server(mi_puerto);
+	//iniciar_server(mi_puerto);
 
-	//iniciarPlanificacion();
+	iniciarPlanificacion();
 
 	return EXIT_SUCCESS;
 }
