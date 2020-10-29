@@ -56,7 +56,9 @@ int main(){
 /*
     handshake* elHandshake = malloc(sizeof(handshake));
     elHandshake->longitudIDCliente = strlen(idCliente);
-    elHandshake->id = malloc(elHandshake->longitudIDCliente);
+    elHandshake->posX = miPosicionX;
+    elHandshake->posY = miPosicionY;
+    elHandshake->id = malloc(elHandshake->longitudIDCliente+1);
     strcpy(elHandshake->id, idCliente);
 
     mandar_mensaje(elHandshake, HANDSHAKE, socketCliente);
@@ -220,6 +222,10 @@ void obtenerInputConsolaCliente(){
     	break;
 
     case SELECCIONAR_RESTAURANTE:
+
+    	if(palabrasSeparadas[1] == NULL){
+    		printf("Se requiere el nombre de un restaurante para operar.\n");
+    	}
 
     	strcat(palabrasSeparadas[1],"\0");
 
