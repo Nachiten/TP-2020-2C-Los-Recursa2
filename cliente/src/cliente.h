@@ -31,7 +31,7 @@ uint32_t miPosicionX;
 uint32_t miPosicionY;
 
 //obtiene el comando que quiere ejecutar el usuario
-void obtenerInputConsolaCliente(int32_t* socket);
+void obtenerInputConsolaCliente();
 
 
 

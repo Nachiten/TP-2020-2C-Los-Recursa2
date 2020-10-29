@@ -94,7 +94,7 @@ typedef struct{
 	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
 	uint32_t idPedido;
-	uint32_t largonombrePlato;
+	uint32_t largoNombrePlato;
 	char* nombrePlato; //comida
 	uint32_t cantidadPlatos;
 }guardar_plato;

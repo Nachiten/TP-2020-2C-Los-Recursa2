@@ -105,7 +105,7 @@ int main(){
 }
 
 
-void obtenerInputConsolaCliente(int32_t* socketClienteInicial){
+void obtenerInputConsolaCliente(){
 	//char* lineaEntera = NULL;
 	//size_t longitud = 0;
 	uint32_t switcher;
@@ -168,8 +168,8 @@ void obtenerInputConsolaCliente(int32_t* socketClienteInicial){
     Crear Pedido -> Check
     Guardar Pedido -> Check and tested (!)
     Confirmar Pedido ->
-    Consultar Pedido -> Check
-    Obtener Pedido ->
+    Consultar Pedido ->
+    Obtener Pedido -> Check
     Finalizar Pedido -> Check
     Terminar Pedido -> Check
     Obtener Receta -> Check
@@ -356,11 +356,13 @@ void obtenerInputConsolaCliente(int32_t* socketClienteInicial){
 		resultado_de_conexion(socketCliente, logger, "destino");
 
 		guardar_plato* elMensajeGuardarPlato = malloc(sizeof(uint32_t)*4 + strlen(palabrasSeparadas[1]) + strlen(palabrasSeparadas[3]));
-		elMensajeGuardarPlato->nombreRestaurante = palabrasSeparadas[1];
 		elMensajeGuardarPlato->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
+		elMensajeGuardarPlato->nombreRestaurante = malloc(elMensajeGuardarPlato->largoNombreRestaurante+1);
+		strcpy(elMensajeGuardarPlato->nombreRestaurante, palabrasSeparadas[1]);
 		elMensajeGuardarPlato->idPedido = atoi(palabrasSeparadas[2]);
-		elMensajeGuardarPlato->nombrePlato = palabrasSeparadas[3];
-		elMensajeGuardarPlato->largonombrePlato = strlen(palabrasSeparadas[3]);
+		elMensajeGuardarPlato->largoNombrePlato = strlen(palabrasSeparadas[3]);
+		elMensajeGuardarPlato->nombrePlato = malloc(elMensajeGuardarPlato->largoNombrePlato+1);
+		strcpy(elMensajeGuardarPlato->nombrePlato, palabrasSeparadas[3]);
 		elMensajeGuardarPlato->cantidadPlatos = atoi(palabrasSeparadas[4]);
 
 		mandar_mensaje(elMensajeGuardarPlato, GUARDAR_PLATO, socketCliente);
@@ -379,8 +381,8 @@ void obtenerInputConsolaCliente(int32_t* socketClienteInicial){
 			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
 		}
 
-		//free(elMensajeGuardarPlato->nombreRestaurante); //ToDo revisar
-		//free(elMensajeGuardarPlato->nombrePlato);
+		free(elMensajeGuardarPlato->nombreRestaurante);
+		free(elMensajeGuardarPlato->nombrePlato);
 		free(elMensajeGuardarPlato);
 		free(estructuraRespuesta);
 		close(socketCliente);
@@ -529,21 +531,64 @@ void obtenerInputConsolaCliente(int32_t* socketClienteInicial){
     	socketCliente = establecer_conexion(ip_destino , puerto_destino);
     	resultado_de_conexion(socketCliente, logger, "destino");
 
-    	consultar_pedido* estructuraConsultarPedido = malloc(sizeof(uint32_t));
+    	respuesta_crear_pedido* estructuraConsultarPedido = malloc(sizeof(uint32_t));
     	estructuraConsultarPedido->idPedido = atoi(palabrasSeparadas[1]);
 
     	mandar_mensaje(estructuraConsultarPedido, CONSULTAR_PEDIDO, socketCliente);
     	los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
     	if(exito == 1)
     	{
-    		recibir_mensaje(estructuraRespuesta, RESPUESTA_FINALIZAR_PEDIDO ,socketCliente);
-    		log_info(logger, "El intento de agregar un plato a un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+    		/*
+    		respuesta_consultar_pedido* estructuraRespuestaConsultarPedido = malloc(sizeAAllocar);
+    		recibir_mensaje(estructuraRespuesta, RESPUESTA_CONSULTAR_PEDIDO, socketCliente);
+    		*/
     	} else
     	{
     		printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
     	}
 
     	break;
+
+    case OBTENER_PEDIDO:
+    	if(palabrasSeparadas[1] == NULL){
+			printf("Se requiere ingresar el numero de un pedido para operar.\n");
+			break;
+		}
+    	socketCliente = establecer_conexion(ip_destino , puerto_destino);
+    	resultado_de_conexion(socketCliente, logger, "destino");
+
+    	guardar_pedido* mensajeObtenerPedido = malloc(sizeof(guardar_pedido));
+    	mensajeObtenerPedido->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
+    	mensajeObtenerPedido->nombreRestaurante = malloc(mensajeObtenerPedido->largoNombreRestaurante);
+		strcpy(mensajeObtenerPedido->nombreRestaurante, palabrasSeparadas[1]);
+		mensajeObtenerPedido->idPedido = atoi(palabrasSeparadas[2]);
+
+		mandar_mensaje(mensajeObtenerPedido, OBTENER_PEDIDO , socketCliente);
+		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
+
+		if(exito == 1)
+		{
+			respuesta_obtener_pedido* respuestaObtenerPedido = malloc(sizeAAllocar);
+			recibir_mensaje(respuestaObtenerPedido, RESPUESTA_OBTENER_PEDIDO ,socketCliente);
+			log_info(logger, "Obtuve del pedido %d las siguientes comidas: %s. Sus cantidades: %s."
+			,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales);
+
+			//procesarlo mejor
+
+			free(respuestaObtenerPedido->comidas);
+			free(respuestaObtenerPedido->cantTotales);
+			free(respuestaObtenerPedido);
+		} else
+		{
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
+		}
+
+		free(mensajeObtenerPedido->nombreRestaurante);
+		free(mensajeObtenerPedido);
+		close(socketCliente);
+
+    	break;
+
 
     case FINALIZAR_PEDIDO:
     	if(palabrasSeparadas[1] == NULL || palabrasSeparadas[2] == NULL){
@@ -556,7 +601,7 @@ void obtenerInputConsolaCliente(int32_t* socketClienteInicial){
 		socketCliente = establecer_conexion(ip_destino , puerto_destino);
 		resultado_de_conexion(socketCliente, logger, "destino");
 
-		finalizar_pedido* mensajeFinalizarPedido = malloc(sizeof(finalizar_pedido));
+		guardar_pedido* mensajeFinalizarPedido = malloc(sizeof(guardar_pedido));
 		mensajeFinalizarPedido->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
 		mensajeFinalizarPedido->nombreRestaurante = malloc(mensajeFinalizarPedido->largoNombreRestaurante);
 		strcpy(mensajeFinalizarPedido->nombreRestaurante, palabrasSeparadas[1]);
@@ -595,7 +640,7 @@ void obtenerInputConsolaCliente(int32_t* socketClienteInicial){
 		socketCliente = establecer_conexion(ip_destino , puerto_destino);
 		resultado_de_conexion(socketCliente, logger, "destino");
 
-		finalizar_pedido* mensajeTerminarPedido = malloc(sizeof(finalizar_pedido));
+		guardar_pedido* mensajeTerminarPedido = malloc(sizeof(guardar_pedido));
 		mensajeTerminarPedido->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
 		mensajeTerminarPedido->nombreRestaurante = malloc(mensajeTerminarPedido->largoNombreRestaurante);
 		strcpy(mensajeTerminarPedido->nombreRestaurante, palabrasSeparadas[1]);
