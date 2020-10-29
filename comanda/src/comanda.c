@@ -214,6 +214,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	finalizar_pedido* recibidoFinalizarPedido;
 
 	respuesta_ok_error* resultado;
+	respuesta_obtener_pedido* resultadoObtenerPedido;
 
 	tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante = NULL;
 	uint32_t numeroDeSegmento;
@@ -349,6 +350,66 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         case OBTENER_PEDIDO:
         	recibidoObtenerPedido = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoObtenerPedido, cod_op, socket);
+
+        	resultadoObtenerPedido = malloc(sizeof(respuesta_obtener_pedido)); //ToDo hacer los free dentro de CADA CASO POSIBLE, si es por fuera revienta
+
+        	printf("Buscando datos del pedido %u del restaurante %s...\n", recibidoObtenerPedido->idPedido, recibidoObtenerPedido->nombreRestaurante);
+
+        	//buscamos la tabla de pedidos de dicho restaurante, si no existe, se envia FAIL
+        	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+        	tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoObtenerPedido->nombreRestaurante, 1);
+        	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+        	//no existe este restaurante, se responde el default
+        	if(tablaDePedidosDelRestaurante == NULL)
+        	{
+        		resultadoObtenerPedido->comidas = malloc(2);
+        		strcpy(resultadoObtenerPedido->comidas, "[]");
+        		//resultadoObtenerPedido->comidas = "[]";
+        		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
+        		//resultadoObtenerPedido->cantTotales = "[]";
+        		resultadoObtenerPedido->cantTotales = malloc(2);
+        		strcpy(resultadoObtenerPedido->cantTotales, "[]");
+        		resultadoObtenerPedido->sizeCantTotales = strlen(resultadoObtenerPedido->cantTotales);
+        		//resultadoObtenerPedido->cantListas = "[]";
+        		resultadoObtenerPedido->cantListas = malloc(2);
+        		strcpy(resultadoObtenerPedido->cantListas, "[]");
+        		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
+
+            	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
+
+            	free(resultadoObtenerPedido);
+        	}
+
+        	//la tabla si existe, buscamos el segmento...
+        	else
+        	{
+        		//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
+        		if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoObtenerPedido->idPedido))
+        		{
+        			//tomamos el numero de segmento del pedido
+        			sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+            		numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoObtenerPedido->idPedido);
+            		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+
+        		}
+
+        		//el pedido no existe
+        		else
+        		{
+            		resultadoObtenerPedido->comidas = "[]";
+            		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
+            		resultadoObtenerPedido->cantTotales = "[]";
+            		resultadoObtenerPedido->sizeCantTotales = strlen(resultadoObtenerPedido->cantTotales);
+            		resultadoObtenerPedido->cantListas = "[]";
+            		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
+
+                	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
+
+                	free(resultadoObtenerPedido);
+        		}
+        	}
 
 			free(recibidoObtenerPedido);
         	break;
