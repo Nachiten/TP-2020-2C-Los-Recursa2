@@ -197,6 +197,11 @@ void escuchar_mensajes(int32_t* socket_conexion_establecida)
 		//mando lo que me llego para que lo procesen
 		procesar_mensaje(cod_op, sizeAAllocar, *socket_conexion_establecida);
 	}
+
+	else
+	{
+		puts("El mensaje mala leche fue recibido y felizmente ignorado.");
+	}
 }
 
 void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t socket)
@@ -377,8 +382,13 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	//no hago un carajo porque se cerro la conexion
         	break;
 
+        case HANDSHAKE:
+        	puts("Se recibió un HANDSHAKE, que fue exitosamente ignorado.");
+        	break;
+
         default://no deberia pasar nunca por aca, solo esta para que desaparezca el warning
         	puts("PASE POR EL CASO DEFAULT DEL SWITCH DE PROCESAR MENSAJE!!!! BUSCAR ERROR!!!!");
+        	//puts("El mensaje mala leche fue recibido y felizmente ignorado.");
         	break;
     }
 
