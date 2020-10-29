@@ -12,7 +12,7 @@
 #include "estructuras.h"
 
 // Mensajes de socket
-void consultarPlatos(char*);
+void consultarPlatos(char*, uint32_t);
 void confirmarPedido(char*, int);
 void obtenerPedido(char*, int, uint32_t);
 void obtenerRestaurante(char*, uint32_t);
