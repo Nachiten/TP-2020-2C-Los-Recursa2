@@ -163,36 +163,40 @@ void escuchar_mensajes(int32_t* socket_conexion_establecida)
 	bytesRecibidosCodOP = recv(*socket_conexion_establecida, &cod_op, sizeof(cod_op), MSG_WAITALL);
 	bytesRecibidos(bytesRecibidosCodOP);
 
-	//si se cayo la conexion, basicamente no hacemos hada
-	if(bytesRecibidosCodOP < 1)
+	//seguro en contra de que me llegue un CONSULTAR_RESTAURANTES mala leche
+	if(cod_op != CONSULTAR_RESTAURANTES)
 	{
-		cod_op = 0;
-		sizeAAllocar = 0;
-	}
-
-	//si la conexion NO se cayo, intento recibir lo que sigue
-	else
-	{
-		//recibo tamaño de lo que sigue
-		recibidosSize = recv(*socket_conexion_establecida, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
-		bytesRecibidos(recibidosSize);
-
-		//si se cayo la conexion, no se hace nada con esto
-		if(recibidosSize < 1)
+		//si se cayo la conexion, basicamente no hacemos hada
+		if(bytesRecibidosCodOP < 1)
 		{
 			cod_op = 0;
 			sizeAAllocar = 0;
 		}
 
-	}
+		//si la conexion NO se cayo, intento recibir lo que sigue
+		else
+		{
+			//recibo tamaño de lo que sigue
+			recibidosSize = recv(*socket_conexion_establecida, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
+			bytesRecibidos(recibidosSize);
 
-	if(cod_op != 0)
-	{
-		printf("Tamaño del Payload: %i.\n", sizeAAllocar);
-	}
+			//si se cayo la conexion, no se hace nada con esto
+			if(recibidosSize < 1)
+			{
+				cod_op = 0;
+				sizeAAllocar = 0;
+			}
 
-	//mando lo que me llego para que lo procesen
-	procesar_mensaje(cod_op, sizeAAllocar, *socket_conexion_establecida);
+		}
+
+		if(cod_op != 0)
+		{
+			printf("Tamaño del Payload: %i.\n", sizeAAllocar);
+		}
+
+		//mando lo que me llego para que lo procesen
+		procesar_mensaje(cod_op, sizeAAllocar, *socket_conexion_establecida);
+	}
 }
 
 void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t socket)
