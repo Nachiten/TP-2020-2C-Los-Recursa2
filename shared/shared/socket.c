@@ -1244,7 +1244,7 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 			break;
 
 		case RESPUESTA_OBTENER_PEDIDO:
-            //desserializar_respuesta_obtener_pedido(estructura, socket_cliente);
+            desserializar_respuesta_obtener_pedido(estructura, socket_cliente);
 			break;
 
 		case RESPUESTA_FINALIZAR_PEDIDO:
@@ -1256,7 +1256,7 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 			break;
 
 		case RESPUESTA_OBTENER_RECETA:
-            //desserializar_respuesta_obtener_receta(estructura, socket_cliente);
+            desserializar_respuesta_obtener_receta(estructura, socket_cliente);
 			break;
 
 		default:
@@ -1292,10 +1292,10 @@ void desserializar_obtener_restaurante(obtener_restaurante* estructura, int32_t 
 	bytesRecibidos(recv(socket_cliente, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante), MSG_WAITALL));
 
 	//preparo un espacio de memoria del tamaño del nombre para poder guardarlo
-	estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante);
+	estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
 
 	//saco el nombre del restaurante en si
-	bytesRecibidos(recv(socket_cliente, estructura->nombreRestaurante, estructura->largoNombreRestaurante, MSG_WAITALL));
+	bytesRecibidos(recv(socket_cliente, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1, MSG_WAITALL));
 
 }
 

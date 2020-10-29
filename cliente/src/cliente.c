@@ -160,13 +160,13 @@ void obtenerInputConsolaCliente(){
 
     Consultar Restaurantes -> Check
     Seleccionar Restaurante -> Check
-    Obtener Restaurante -> Check and tested (!)
+    Obtener Restaurante -> Check and tested
     Consultar Platos -> Check and tested
-    Guardar Plato -> Check and tested (!)
+    Guardar Plato -> Check and tested
     Aniadir Plato -> Check
     Plato listo ->
     Crear Pedido -> Check
-    Guardar Pedido -> Check and tested (!)
+    Guardar Pedido -> Check and tested
     Confirmar Pedido ->
     Consultar Pedido ->
     Obtener Pedido -> Check
