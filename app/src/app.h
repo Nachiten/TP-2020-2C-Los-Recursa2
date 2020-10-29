@@ -56,7 +56,7 @@ void consultar_restaurantes(int32_t);
 void seleccionarRestaurante(char*, int32_t);
 void crear_pedido(int32_t);
 void aniadir_plato(a_plato*);
-void plato_Listo(plato_listo*);
+void plato_Listo(plato_listo*, int32_t);
 void confirmar_Pedido(confirmar_pedido*);
 void agregar_restaurante(info_resto*);
 
@@ -64,8 +64,10 @@ void agregar_restaurante(info_resto*);
 int32_t crear_id_pedidos();
 void crear_pedido(int32_t);
 int buscar_pedido_por_id(uint32_t);
+int buscar_pedido_por_id_y_resto(uint32_t, info_resto*);
 int buscar_cliente(int32_t);
 int buscar_resto(char*);
+int buscar_resto_por_socket(int32_t);
 void recibir_respuesta(codigo_operacion, info_resto*, perfil_cliente*);
 
 // ***SERVIDOR***
