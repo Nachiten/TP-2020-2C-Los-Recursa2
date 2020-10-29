@@ -169,14 +169,12 @@ void hiloBlock_Ready(){
 
 		sem_wait(habilitarCicloBlockReady);
 
-		// TODO
-		// En caso de HRRN se debe escanear cola READY	 para sumar 1 de tiempo de espera
-
 		if(algoritmo == HRRN){
 			int i;
 			int elementosEnReady = list_size(colaReady);
 			sem_wait(mutexReady);
-			//itero por cada elemento presente en READY
+
+			// Escaneo los elementos de ready para sumarles tiempo de espera
 			for (i = 0; i < elementosEnReady; i++){
 
 			pcb_pedido* pedidoActual = list_get(colaReady, i);
@@ -189,7 +187,7 @@ void hiloBlock_Ready(){
 		int elementosEnBlock = list_size(colaBlock);
 
 		if(elementosEnBlock == 0)
-			printf("[HiloBlock] No hay pedidos en block.\n");
+			log_trace(logger, "[HiloBlock] No hay pedidos en block.\n");
 
 		int i;
 		// Escaneo todos los elementos en block para sumar 1 ciclo de descanso a cada proceso
@@ -201,45 +199,56 @@ void hiloBlock_Ready(){
 
 			repartidor* repartidorActual = pedidoActual->repartidorAsignado;
 
-			if (pedidoActual->estadoBlocked == DESCANSANDO){
-				repartidorActual->tiempoDescansado++;
+			switch(pedidoActual->estadoBlocked){
+				case DESCANSANDO:
 
-				printf("[HiloBlock] El pedido %i ya descanso %i ciclos.\n", pedidoActual->pedidoID, repartidorActual->tiempoDescansado);
+					repartidorActual->tiempoDescansado++;
 
-				// Ya descanso lo que tenia que descansar
-				if (repartidorActual->tiempoDescansado == repartidorActual->tiempoDescanso){
-					pcb_pedido* pedidoAReady = list_remove(colaBlock, i);
+					log_trace(logger, "[HiloBlock] El pedido %i ya descanso %i ciclos.", pedidoActual->pedidoID, repartidorActual->tiempoDescansado);
 
-					printf("[HiloBlock] El pedido %i ya descanso todos los %i ciclos que necesitaba.\n", pedidoActual->pedidoID, repartidorActual->tiempoDescansado);
+					// Ya descanso lo que tenia que descansar
+					if (repartidorActual->tiempoDescansado == repartidorActual->tiempoDescanso){
 
-					pedidoAReady->estadoBlocked = NO;
-					pedidoAReady->repartidorAsignado->tiempoDescansado = 0;
+						sem_wait(mutexBlock);
+						pcb_pedido* pedidoAReady = list_remove(colaBlock, i);
+						sem_post(mutexBlock);
 
-					// Se va a ready porque termino de descansar
-					printf("[READY] Ingresa pedido %i por terminar de descansar.\n", pedidoAReady->pedidoID);
-					agregarAReady(pedidoAReady);
-				}
+						log_trace(logger, "[HiloBlock] El pedido %i ya descanso todos los %i ciclos que necesitaba.", pedidoActual->pedidoID, repartidorActual->tiempoDescansado);
 
-			} else if (pedidoActual->estadoBlocked == ESPERANDO_MSG){
-				// Se debe corroborar si el mensaje ya llego, caso afirmativo mover a ready
+						pedidoAReady->estadoBlocked = NO;
+						pedidoAReady->repartidorAsignado->tiempoDescansado = 0;
 
-				// Ya esta listo el pedido
-				if (checkearPedidoListo(pedidoActual->pedidoID)){
-					printf("[HiloBlock] El pedido %i ya esta listo.\n", pedidoActual->pedidoID);
-					pcb_pedido* pedidoAReady = list_remove(colaBlock, i);
-					pedidoAReady->estadoBlocked = NO;
+						// Se va a ready porque termino de descansar
+						log_info(logger, "[READY] Ingresa pedido %i por terminar de descansar.", pedidoAReady->pedidoID);
+						agregarAReady(pedidoAReady);
+					}
 
-					log_info(logger, "[READY] Ingresa pedido %i por ya estar listo.", pedidoAReady->pedidoID);
-					agregarAReady(pedidoActual);
-				} else {
-					printf("[HiloBlock] El pedido %i todavia no esta listo.\n", pedidoActual->pedidoID);
-				}
+					break;
+				case ESPERANDO_MSG:
 
+					// Ya esta listo el pedido
+					if (checkearPedidoListo(pedidoActual->pedidoID)){
+						log_trace(logger, "[HiloBlock] El pedido %i ya esta listo.\n", pedidoActual->pedidoID);
 
+						sem_wait(mutexBlock);
+						pcb_pedido* pedidoAReady = list_remove(colaBlock, i);
+						sem_post(mutexBlock);
 
-			} else if (pedidoActual->estadoBlocked == NO){
-				printf("[HiloBlock | ERROR] El pedido %i esta en blocked pero no se le asigno por que esta bloqueado.\n", pedidoActual->pedidoID);
-				exit(5);
+						pedidoAReady->estadoBlocked = NO;
+
+						log_info(logger, "[READY] Ingresa pedido %i por ya estar listo.", pedidoAReady->pedidoID);
+						agregarAReady(pedidoActual);
+					// No esta listo
+					} else {
+						log_trace(logger, "[HiloBlock] El pedido %i todavia no esta listo.\n", pedidoActual->pedidoID);
+					}
+
+					break;
+				default:
+					printf("[HiloBlock | ERROR] El pedido %i esta en blocked pero no se le asigno por que esta bloqueado.\n", pedidoActual->pedidoID);
+					exit(5);
+
+					break;
 			}
 		}
 
@@ -282,7 +291,7 @@ void hiloExec(int* numHiloExecPuntero){
 
 			// Esta cansado
 			if (desalojoCode == 1){
-				printf("[EXEC-%i] Estoy cansado.\n", numHiloExec);
+				//printf("[EXEC-%i] Estoy cansado.\n", numHiloExec);
 
 				// Ahora las instrucciones totales reflejan las que faltan
 				pedidoAEjecutar->instruccionesTotales -= pedidoAEjecutar->instruccionesRealizadas;
@@ -311,8 +320,6 @@ void hiloExec(int* numHiloExecPuntero){
 
 					// TODO | Se deben mandar todos los mensajes aclarados en consigna
 
-
-
 					agregarAExit(pedidoAEjecutar);
 					//ToDo se manda a exit y se liberan todos los recursos del pedido por puntero salvo el repartidor (pertenecen a una lista que no se puede tocar)
 				} else {
@@ -330,7 +337,7 @@ void hiloExec(int* numHiloExecPuntero){
 
 		} else {
 			waitSemaforoHabilitarCicloExec(numHiloExec);
-			printf("[EXEC-%i] Desperdicio un ciclo porque no hay nadie en ready.\n", numHiloExec);
+			log_trace(logger, "[EXEC-%i] Desperdicio un ciclo porque no hay nadie en ready.\n", numHiloExec);
 			signalSemaforoFinalizarCicloExec(numHiloExec);
 		}
 
@@ -764,7 +771,7 @@ void hiloCiclosMaestro(){
 
     while(1){
 
-		printf("[HCM] Habilitando ciclo: %i\n", numCiclo);
+		log_trace(logger, "[HCM] Habilitando ciclo: %i", numCiclo);
 
 		for(i = 0; i < GRADO_MULTIPROCE; i++){
 			signalSemaforoHabilitarCicloExec(i);
@@ -773,7 +780,7 @@ void hiloCiclosMaestro(){
 
 		sleep(RETARDO_CICLO_CPU);
 
-		printf("[HCM] Finalizando ciclo: %i\n", numCiclo);
+		log_trace(logger, "[HCM] Finalizando ciclo: %i", numCiclo);
 
 		for(i = 0; i < GRADO_MULTIPROCE; i++){
 			waitSemaforoFinalizarCicloExec(i);
