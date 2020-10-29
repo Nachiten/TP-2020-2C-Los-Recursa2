@@ -386,7 +386,10 @@ void plato_Listo(plato_listo* platoListo){
 						sem_wait(semLog);
 						log_info(logger, "pedido completo, avisando al repartidor");
 						sem_post(semLog);
-						//todo avisar al repartidor
+
+
+						guardarPedidoListo(3);
+						// TODO | Se debe avisar a planif con guardarPedidoListo(id)
 
 					}else{
 						sem_wait(semLog);
@@ -440,7 +443,6 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 			nuevoPcb->pedidoID = pedido->idPedido;
 			nuevoPcb->posRestauranteX = posX_resto;
 			nuevoPcb->posRestauranteY = posY_resto;
-			nuevoPcb->nombre_resto = malloc(strlen("RestoDefault")+1);
 
 			//agregarANew(nuevoPcb); todo poner como se debe
 
@@ -491,7 +493,6 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 					nuevoPcb->pedidoID = pedido->idPedido;
 					nuevoPcb->posRestauranteX = posX_resto;
 					nuevoPcb->posRestauranteY = posY_resto;
-					nuevoPcb->nombre_resto = malloc(strlen(resto->nombre_resto)+1);
 
 					//agregarANew(nuevoPcb); todo poner bien
 

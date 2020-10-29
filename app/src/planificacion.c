@@ -63,52 +63,52 @@ void iniciarPlanificacion(){
 
 	guardarPedidoListo(1);
 
-	pcb_pedido* unPedido2 = malloc(sizeof(pcb_pedido));
-	unPedido2->posRestauranteX = 3;
-	unPedido2->posRestauranteY = 5;
-	unPedido2->posClienteX = 3;
-	unPedido2->posClienteY = 5;
-	unPedido2->pedidoID = 2;
-
-	agregarANew(unPedido2);
-
-	pcb_pedido* unPedido3 = malloc(sizeof(pcb_pedido));
-	unPedido3->posRestauranteX = 7;
-	unPedido3->posRestauranteY = 8;
-	unPedido3->posClienteX = 3;
-	unPedido3->posClienteY = 5;
-	unPedido3->pedidoID = 3;
-
-	agregarANew(unPedido3);
-
-	sleep(20);
-
-	guardarPedidoListo(2);
-
-	sleep(20);
-
-	guardarPedidoListo(3);
-
-	pcb_pedido* unPedido4 = malloc(sizeof(pcb_pedido));
-	unPedido4->posRestauranteX = 10;
-	unPedido4->posRestauranteY = 11;
-	unPedido4->posClienteX = 2;
-	unPedido4->posClienteY = 3;
-	unPedido4->pedidoID = 4;
-
-	agregarANew(unPedido4);
-
-	pcb_pedido* unPedido5 = malloc(sizeof(pcb_pedido));
-	unPedido5->posRestauranteX = 12;
-	unPedido5->posRestauranteY = 9;
-	unPedido5->posClienteX = 1;
-	unPedido5->posClienteY = 2;
-	unPedido5->pedidoID = 5;
-
-	agregarANew(unPedido5);
-
-	guardarPedidoListo(4);
-	guardarPedidoListo(5);
+//	pcb_pedido* unPedido2 = malloc(sizeof(pcb_pedido));
+//	unPedido2->posRestauranteX = 3;
+//	unPedido2->posRestauranteY = 5;
+//	unPedido2->posClienteX = 3;
+//	unPedido2->posClienteY = 5;
+//	unPedido2->pedidoID = 2;
+//
+//	agregarANew(unPedido2);
+//
+//	pcb_pedido* unPedido3 = malloc(sizeof(pcb_pedido));
+//	unPedido3->posRestauranteX = 7;
+//	unPedido3->posRestauranteY = 8;
+//	unPedido3->posClienteX = 3;
+//	unPedido3->posClienteY = 5;
+//	unPedido3->pedidoID = 3;
+//
+//	agregarANew(unPedido3);
+//
+//	sleep(20);
+//
+//	guardarPedidoListo(2);
+//
+//	sleep(20);
+//
+//	guardarPedidoListo(3);
+//
+//	pcb_pedido* unPedido4 = malloc(sizeof(pcb_pedido));
+//	unPedido4->posRestauranteX = 10;
+//	unPedido4->posRestauranteY = 11;
+//	unPedido4->posClienteX = 2;
+//	unPedido4->posClienteY = 3;
+//	unPedido4->pedidoID = 4;
+//
+//	agregarANew(unPedido4);
+//
+//	pcb_pedido* unPedido5 = malloc(sizeof(pcb_pedido));
+//	unPedido5->posRestauranteX = 12;
+//	unPedido5->posRestauranteY = 9;
+//	unPedido5->posClienteX = 1;
+//	unPedido5->posClienteY = 2;
+//	unPedido5->pedidoID = 5;
+//
+//	agregarANew(unPedido5);
+//
+//	guardarPedidoListo(4);
+//	guardarPedidoListo(5);
 
 	pthread_join(hiloNewReady, NULL);
 }
@@ -311,6 +311,8 @@ void hiloExec(int* numHiloExecPuntero){
 
 					// TODO | Se deben mandar todos los mensajes aclarados en consigna
 
+
+
 					agregarAExit(pedidoAEjecutar);
 					//ToDo se manda a exit y se liberan todos los recursos del pedido por puntero salvo el repartidor (pertenecen a una lista que no se puede tocar)
 				} else {
@@ -380,8 +382,6 @@ pcb_pedido* obtenerSiguienteDeReady(){
 	// [1,2,3] responseRatioDePCB1 > responseRatioDePCB2 PERO responseRatioDePCB3 > responseRatioDePCB1 ----> Sale 3
 
 	pcb_pedido* pedidoPlanificado = NULL;
-
-
 
 	if (list_size(colaReady) > 0){
 

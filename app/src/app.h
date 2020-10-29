@@ -1,74 +1,7 @@
 #ifndef SRC_APP_H_
 #define SRC_APP_H_
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<sys/socket.h>
-#include<unistd.h>
-#include<netdb.h>
-#include<commons/log.h>
-#include<commons/string.h>
-#include<commons/collections/queue.h>
-#include<string.h>
-#include<pthread.h>
-#include <inttypes.h> // Para tener el uint32_t
-#include <semaphore.h> // para los semaforos
-#include "shared/estructuras.h"
-#include"shared/cargador.h"
-#include"shared/socket.h"
-
-// *** ESTRUCTURA DE PLANIFICACION ***
-typedef struct{
-	int numeroRepartidor;
-	int posX;
-	int posY;
-	// Cada cuanto tiene que descansar
-	int frecuenciaDescanso;
-	// Cuanto tiempo tiene que descansar
-	int tiempoDescanso;
-	// Cuanto tiempo ya descanso
-	int tiempoDescansado;
-	int asignado;
-}repartidor;
-
-typedef enum{
-	// No esta en blocked
-	NO,
-	// Esta esperando un msg
-	ESPERANDO_MSG,
-	// Esta descansando
-	DESCANSANDO,
-}estadoBlock;
-
-typedef enum{
-	RESTAURANTE,
-	CLIENTE,
-}objetivoViaje;
-
-typedef enum{
-	FIFO,
-	HRRN,
-	SJFSD,
-}algoritmo_planif;
-
-typedef struct{
-	int pedidoID;
-	int instruccionesTotales;
-	repartidor* repartidorAsignado;
-	int instruccionesRealizadas;
-	int posRestauranteX;
-	int posRestauranteY;
-	int posClienteX;
-	int posClienteY;
-	objetivoViaje objetivo;
-	estadoBlock estadoBlocked;
-	char* nombre_resto;
-	int tiempoEspera;
-}pcb_pedido;
-
-
-
-
+#include"planificacion.h"
 
 
 // *** ESTRUCTURAS DE APP***
@@ -92,12 +25,11 @@ typedef struct{
 }perfil_cliente;
 
 
-
 //***VARIABLES***
 t_list* listaRestos;
 t_list* listaPedidos;
 
-t_log* logger;
+
 t_config* config;
 
 //***cosas de config**
@@ -106,7 +38,7 @@ char* mi_puerto;
 char* puerto_commanda;
 char* ip_commanda;
 char* platos_default;
-algoritmo_planif algoritmo;
+
 int32_t posX_resto;
 int32_t posY_resto;
 

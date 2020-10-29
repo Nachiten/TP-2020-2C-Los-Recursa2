@@ -8,35 +8,100 @@
 #ifndef SRC_PLANIFICACION_H_
 #define SRC_PLANIFICACION_H_
 
-#include "app.h"
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/socket.h>
+#include<unistd.h>
+#include<netdb.h>
+#include<commons/log.h>
+#include<commons/string.h>
+#include<commons/collections/queue.h>
+#include<string.h>
+#include<pthread.h>
+#include<inttypes.h> // Para tener el uint32_t
+#include<semaphore.h> // para los semaforos
+#include"shared/estructuras.h"
+#include"shared/cargador.h"
+#include"shared/socket.h"
 
+//#include "app.h"
+
+// LISTAS/COLAS
 t_list* repartidores;
 t_queue* colaNew;
 t_list* colaReady;
 t_list* colaBlock;
 t_list* pedidosListos;
 
+// OTROS
+t_log* logger;
+
+// VARIABLES DE CONFIG
 int GRADO_MULTIPROCE;
 int RETARDO_CICLO_CPU;
 
-// Cantidad de procesos en new
+// SEMAFOROS
 sem_t* contadorProcesosEnNew;
-// Cantidad de procesos en ready
-//sem_t* contadorProcesosEnReady;
-// Mutex para tocar cola new
 sem_t* mutexNew;
-// Mutex para tocar cola ready
 sem_t* mutexReady;
-// Mutex para tocar cola block
 sem_t* mutexBlock;
 sem_t* mutexPedidosListos;
-// Contador de repartidores disponibles
 sem_t* contadorRepartidoresDisp;
-// Lista de semaforos binarios para sincronizar la cantidad de hilos exec que se dispongan
+// Semaforos para sincronizar hilos con HCM
 t_list* listaSemHabilitarCicloExec;
 t_list* listaSemFinalizarCicloExec;
 sem_t* habilitarCicloBlockReady;
 sem_t* finalizarCicloBlockReady;
+
+// *** ESTRUCTURA DE PLANIFICACION ***
+typedef struct{
+	int numeroRepartidor;
+	int posX;
+	int posY;
+	// Cada cuanto tiene que descansar
+	int frecuenciaDescanso;
+	// Cuanto tiempo tiene que descansar
+	int tiempoDescanso;
+	// Cuanto tiempo ya descanso
+	int tiempoDescansado;
+	int asignado;
+}repartidor;
+
+typedef enum{
+	// No esta en blocked
+	NO,
+	// Esta esperando un msg
+	ESPERANDO_MSG,
+	// Esta descansando
+	DESCANSANDO,
+}estadoBlock;
+
+typedef enum{
+	RESTAURANTE,
+	CLIENTE,
+}objetivoViaje;
+
+typedef enum{
+	FIFO,
+	HRRN,
+	SJFSD,
+}algoritmo_planif;
+
+algoritmo_planif algoritmo;
+
+typedef struct{
+	int pedidoID;
+	int instruccionesTotales;
+	int instruccionesRealizadas;
+	repartidor* repartidorAsignado;
+	int posRestauranteX;
+	int posRestauranteY;
+	int posClienteX;
+	int posClienteY;
+	objetivoViaje objetivo;
+	estadoBlock estadoBlocked;
+	int tiempoEspera;
+}pcb_pedido;
 
 // PEDIDO LISTO
 void guardarPedidoListo(int);
@@ -54,8 +119,6 @@ void agregarABlock(pcb_pedido*);
 void agregarAReady(pcb_pedido*);
 void agregarANew(pcb_pedido*);
 void agregarAExit(pcb_pedido*);
-
-
 
 // OTROS
 uint32_t valor_para_switch_case(char* algoritmo);
