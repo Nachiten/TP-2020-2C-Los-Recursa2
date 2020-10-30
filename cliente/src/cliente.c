@@ -177,9 +177,6 @@ void obtenerInputConsolaCliente(){
     Obtener Receta -> Check
     */
 
-
-
-
     switch(switcher)
     {
 
@@ -556,42 +553,56 @@ void obtenerInputConsolaCliente(){
     	break;
 
     case OBTENER_PEDIDO:
-    	if(palabrasSeparadas[1] == NULL){
-			printf("Se requiere ingresar el numero de un pedido para operar.\n");
+    	if(palabrasSeparadas[1] == NULL || palabrasSeparadas[2] == NULL)
+    	{
+			puts("El formato correcto para este comando es: OBTENER_PEDIDO [nombre de Restaurante] [ID de Pedido]");
 			break;
 		}
-    	socketCliente = establecer_conexion(ip_destino , puerto_destino);
-    	resultado_de_conexion(socketCliente, logger, "destino");
 
-    	guardar_pedido* mensajeObtenerPedido = malloc(sizeof(guardar_pedido));
-    	mensajeObtenerPedido->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
-    	mensajeObtenerPedido->nombreRestaurante = malloc(mensajeObtenerPedido->largoNombreRestaurante);
-		strcpy(mensajeObtenerPedido->nombreRestaurante, palabrasSeparadas[1]);
-		mensajeObtenerPedido->idPedido = atoi(palabrasSeparadas[2]);
+    	else
+    	{
+    		socketCliente = establecer_conexion(ip_destino , puerto_destino);
+			resultado_de_conexion(socketCliente, logger, "destino");
 
-		mandar_mensaje(mensajeObtenerPedido, OBTENER_PEDIDO , socketCliente);
-		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
+			obtener_pedido* mensajeObtenerPedido = malloc(sizeof(obtener_pedido));
+			mensajeObtenerPedido->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
+			mensajeObtenerPedido->nombreRestaurante = malloc(mensajeObtenerPedido->largoNombreRestaurante + 1);
+			strcpy(mensajeObtenerPedido->nombreRestaurante, palabrasSeparadas[1]);
+			mensajeObtenerPedido->idPedido = atoi(palabrasSeparadas[2]);
 
-		if(exito == 1)
-		{
-			respuesta_obtener_pedido* respuestaObtenerPedido = malloc(sizeAAllocar);
-			recibir_mensaje(respuestaObtenerPedido, RESPUESTA_OBTENER_PEDIDO ,socketCliente);
-			log_info(logger, "Obtuve del pedido %d las siguientes comidas: %s. Sus cantidades: %s."
-			,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales);
+			mandar_mensaje(mensajeObtenerPedido, OBTENER_PEDIDO , socketCliente);
+			los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
 
-			//procesarlo mejor
+			if(exito == 1)
+			{
+				respuesta_obtener_pedido* respuestaObtenerPedido = malloc(sizeAAllocar);
+				recibir_mensaje(respuestaObtenerPedido, RESPUESTA_OBTENER_PEDIDO ,socketCliente);
 
-			free(respuestaObtenerPedido->comidas);
-			free(respuestaObtenerPedido->cantTotales);
-			free(respuestaObtenerPedido);
-		} else
-		{
-			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
-		}
+				if(strcmp(respuestaObtenerPedido->comidas,"[]") != 0)
+				{
+					log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es: %s. Cantidad ya cocinada: %s"
+					,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas);
+				}
 
-		free(mensajeObtenerPedido->nombreRestaurante);
-		free(mensajeObtenerPedido);
-		close(socketCliente);
+				else
+				{
+					printf("No existe el pedido %u del restaurante %s.\n",mensajeObtenerPedido->idPedido, mensajeObtenerPedido->nombreRestaurante);
+				}
+
+				free(respuestaObtenerPedido->comidas);
+				free(respuestaObtenerPedido->cantTotales);
+				free(respuestaObtenerPedido->cantListas);
+				free(respuestaObtenerPedido);
+			} else
+			{
+				printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
+			}
+
+			free(mensajeObtenerPedido->nombreRestaurante);
+			free(mensajeObtenerPedido);
+			close(socketCliente);
+    	}
+
 
     	break;
 

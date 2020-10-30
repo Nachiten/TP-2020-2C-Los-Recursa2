@@ -127,3 +127,20 @@
 [INFO] 17:32:54:4 Cliente/(25090:25092): Conexión establecida con socket de destino.
 [INFO] 17:37:03:322 Cliente/(25569:25569): Conexión establecida con socket de destino.
 [INFO] 17:37:17:794 Cliente/(25569:25571): Conexión establecida con socket de destino.
+[INFO] 21:13:21:712 Cliente/(7298:7298): Conexión establecida con socket de destino.
+[INFO] 21:14:06:119 Cliente/(7298:7329): Conexión establecida con socket de destino.
+[INFO] 21:16:41:278 Cliente/(7469:7469): Conexión establecida con socket de destino.
+[INFO] 21:16:47:33 Cliente/(7469:7479): Conexión establecida con socket de destino.
+[INFO] 21:17:55:49 Cliente/(7617:7617): Conexión establecida con socket de destino.
+[INFO] 21:18:07:698 Cliente/(7617:7619): Conexión establecida con socket de destino.
+[INFO] 21:44:24:860 Cliente/(8179:8179): Conexión establecida con socket de destino.
+[INFO] 21:44:34:109 Cliente/(8179:8181): Conexión establecida con socket de destino.
+[INFO] 21:46:59:905 Cliente/(8368:8368): Conexión establecida con socket de destino.
+[INFO] 21:47:17:939 Cliente/(8368:8378): Conexión establecida con socket de destino.
+[INFO] 21:50:54:118 Cliente/(8537:8537): Conexión establecida con socket de destino.
+[INFO] 21:51:06:532 Cliente/(8537:8553): Conexión establecida con socket de destino.
+[INFO] 21:51:15:371 Cliente/(8537:8553): Obtuve del pedido 1 la/s siguientes comida/s: []. Su/s cantidad/es: []. Cantidad ya cocinada: []
+[WARNING] 21:54:51:196 Cliente/(8824:8824): Conexión fallida con socket de destino.
+[INFO] 21:54:51:196 Cliente/(8824:8824): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 21:55:04:831 Cliente/(8854:8854): Conexión establecida con socket de destino.
+[INFO] 21:55:11:451 Cliente/(8854:8860): Conexión establecida con socket de destino.
