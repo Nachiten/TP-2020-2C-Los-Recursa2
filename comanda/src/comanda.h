@@ -18,8 +18,6 @@ uint32_t PIDCoMAnda;
 t_log* logger;
 t_config* config;
 int32_t socketEscucha;
-int32_t socketApp;
-int32_t socketCliente;
 
 sem_t* semaforoLogger;
 

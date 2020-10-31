@@ -122,11 +122,6 @@ int main()
 	return EXIT_SUCCESS;
 }
 
-//ToDo ver si estos 2 sirven para algo (en comanda.h)
-	//socketApp;
-	//socketCliente;
-
-
 void recepcion_mensajes()
 {
 	socketEscucha = reservarSocket(mi_puerto);
@@ -263,7 +258,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
         	mandar_mensaje(resultado,RESPUESTA_GUARDAR_PEDIDO,socket);
 
-        	free(recibidoGuardarPedido->nombreRestaurante); //shit, esto me va a armar quilombo ToDo revisar
+        	free(recibidoGuardarPedido->nombreRestaurante);
 			free(recibidoGuardarPedido);
 			free(resultado);
         	break;
@@ -366,22 +361,17 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         		puts("El restaurante solicitado no existe.");
         		resultadoObtenerPedido->comidas = malloc(2);
         		strcpy(resultadoObtenerPedido->comidas, "[]");
-        		//resultadoObtenerPedido->comidas = "[]";
         		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
-        		//resultadoObtenerPedido->cantTotales = "[]";
         		resultadoObtenerPedido->cantTotales = malloc(2);
         		strcpy(resultadoObtenerPedido->cantTotales, "[]");
         		resultadoObtenerPedido->sizeCantTotales = strlen(resultadoObtenerPedido->cantTotales);
-        		//resultadoObtenerPedido->cantListas = "[]";
         		resultadoObtenerPedido->cantListas = malloc(2);
         		strcpy(resultadoObtenerPedido->cantListas, "[]");
         		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
 
             	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
-
-            	free(resultadoObtenerPedido);
         	}
-
+    		//resultadoObtenerPedido->cantListas = "[]";
         	//la tabla si existe, buscamos el segmento...
         	else
         	{
@@ -393,26 +383,37 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoObtenerPedido->idPedido);
             		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 
+            		//hay que cargar cada una de las paginas del pedido en MP
+            		cargarPaginasEnMP(tablaDePedidosDelRestaurante, numeroDeSegmento);
 
+            		//toDO una vez cargadas en MP, copio los datos de MP sobre las listas
+            		//ToDo una vez tengo las listas, me armo los datos de resultadoObtenerPedido
+            		//ToDO reseteo los datos de las listas <---
+            		//ToDo mando el mensaje con los datos pedidos
         		}
 
         		//el pedido no existe
         		else
         		{
         			puts("El pedido solicitado no existe.");
-            		resultadoObtenerPedido->comidas = "[]";
+            		resultadoObtenerPedido->comidas = malloc(2);
+            		strcpy(resultadoObtenerPedido->comidas, "[]");
             		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
-            		resultadoObtenerPedido->cantTotales = "[]";
+            		resultadoObtenerPedido->cantTotales = malloc(2);
+            		strcpy(resultadoObtenerPedido->cantTotales, "[]");
             		resultadoObtenerPedido->sizeCantTotales = strlen(resultadoObtenerPedido->cantTotales);
-            		resultadoObtenerPedido->cantListas = "[]";
+            		resultadoObtenerPedido->cantListas = malloc(2);
+            		strcpy(resultadoObtenerPedido->cantListas, "[]");
             		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
 
                 	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
-
-                	free(resultadoObtenerPedido);
         		}
         	}
 
+        	free(resultadoObtenerPedido->comidas);
+        	free(resultadoObtenerPedido->cantTotales);
+        	free(resultadoObtenerPedido->cantListas);
+        	free(resultadoObtenerPedido);
 			free(recibidoObtenerPedido);
         	break;
 

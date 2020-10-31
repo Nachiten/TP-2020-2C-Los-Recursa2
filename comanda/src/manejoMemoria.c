@@ -335,6 +335,50 @@ uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegme
 	return numeroSegmentoBuscado;
 }
 
+void cargarPaginasEnMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento)
+{
+	segmentos* laTablaDeSegmentos = tablaDePedidosDelRestaurante->miTablaDePedidos;
+	segmentos* segmentoSeleccionado = NULL;
+	tabla_paginas* tablaDePlatos = NULL;
+	int32_t numeroDeMarcoEnMP = -10;
+
+	//recorro la lista hasta que encuentre el numero del segmento seleccionado
+	while(laTablaDeSegmentos->numero_de_segmento != numeroDeSegmento)
+	{
+		laTablaDeSegmentos = laTablaDeSegmentos->sig_segmento;
+	}
+
+	segmentoSeleccionado = laTablaDeSegmentos;
+	tablaDePlatos = segmentoSeleccionado->mi_tabla;
+
+	//ahora que tengo el pedido seleccionado, tengo que cargar 1 por 1, todas las paginas en MP si no lo estan
+
+	//avanzo en la lista de platos hasta que llegue al final
+	while(tablaDePlatos != NULL)
+	{
+		//si ya esta cargada en MP, la ignoro, solo me importan las que no esten cargadas
+		if(tablaDePlatos->cargadoEnMEMORIA == 0)
+		{
+			//busco si hay un marco libre en MP para poner la pagina
+			sem_wait(semaforoTocarListaEspaciosEnMP);
+			numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+			//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
+			marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
+			sem_post(semaforoTocarListaEspaciosEnMP);
+
+			if(numeroDeMarcoEnMP == -1)
+			{
+				//ToDo si no hay un espacio libre hay que llamar al grim reaper
+			}
+
+			//ToDO temporalmente asumido que siempre existen marcos libres en MP
+			mover_pagina_a_memoriaPrincipal(tablaDePlatos, tablaDePlatos->posicionInicialEnSWAP, numeroDeMarcoEnMP*32);
+		}
+		//avanzo...
+		tablaDePlatos = tablaDePlatos->sig_pagina;
+	}
+}
+
 //este guacho ya tiene los semaforos dentro de la propia funcion!!!
 uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido)
 {

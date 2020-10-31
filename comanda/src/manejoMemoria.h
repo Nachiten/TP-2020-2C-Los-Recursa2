@@ -45,8 +45,10 @@ tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_res
 uint32_t buscar_tabla_de_segmentos_de_restaurante(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante);
 //para ver si ya existe el pedido, y devolver FAIL, o si no (Existe = 1, no existe = 0)
 uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido);
-
+//devuelve el numero de segmento si lo encontro, o 0 si no existe
 uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegmentos, uint32_t idDelPedido);
+
+void cargarPaginasEnMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento);
 
 //busco si existe el plato con el nombre provisto en la lista de platos del pedido seleccionado (Existe = 1, no existe = 0)
 uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombrePlato);

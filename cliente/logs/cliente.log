@@ -144,3 +144,8 @@
 [INFO] 21:54:51:196 Cliente/(8824:8824): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
 [INFO] 21:55:04:831 Cliente/(8854:8854): Conexión establecida con socket de destino.
 [INFO] 21:55:11:451 Cliente/(8854:8860): Conexión establecida con socket de destino.
+[WARNING] 22:00:20:548 Cliente/(9043:9043): Conexión fallida con socket de destino.
+[INFO] 22:00:20:548 Cliente/(9043:9043): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 22:00:36:818 Cliente/(9120:9120): Conexión establecida con socket de destino.
+[INFO] 22:00:48:436 Cliente/(9120:9122): Conexión establecida con socket de destino.
+[INFO] 22:01:36:509 Cliente/(9120:9133): Conexión establecida con socket de destino.
