@@ -63,7 +63,7 @@ int main(){
 
     mandar_mensaje(elHandshake, HANDSHAKE, socketCliente);
 */
-    close(socketCliente);
+ //close(socketCliente);
 
 	while(1)
 	{
@@ -107,7 +107,7 @@ int main(){
 }
 
 
-void obtenerInputConsolaCliente(){
+void obtenerInputConsolaCliente(int32_t* elSocketInicial){
 	//char* lineaEntera = NULL;
 	//size_t longitud = 0;
 	uint32_t switcher;
@@ -276,7 +276,7 @@ void obtenerInputConsolaCliente(){
 
 		obtener_restaurante* estructuraObtenerRestaurante = malloc(sizeof(uint32_t) + strlen(palabrasSeparadas[1]));
 		estructuraObtenerRestaurante->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
-		estructuraObtenerRestaurante->nombreRestaurante = malloc(estructuraObtenerRestaurante->largoNombreRestaurante);
+		estructuraObtenerRestaurante->nombreRestaurante = malloc(estructuraObtenerRestaurante->largoNombreRestaurante+1);
 		strcpy(estructuraObtenerRestaurante->nombreRestaurante, palabrasSeparadas[1]);
 
 		//emision del mensaje para pedir la info, OBTENER_RESTAURANTE [nombreR]
@@ -526,7 +526,28 @@ void obtenerInputConsolaCliente(){
 
     case CONFIRMAR_PEDIDO:
 
+//mando msj y recibo respuesta ok/fail
+//y luego
 
+
+
+   /*
+    	los_recv_repetitivos(*elSocketInicial, &exito, &sizeAAllocar);
+
+
+    	if(exito == 1)
+    			{
+    				recibir_mensaje(estructuraRespuesta,FINALIZAR_PEDIDO,*elSocketInicial);
+    				//mutex
+
+    				printf("El pedido tal %d ha arribado: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+    			}
+
+    			else
+    			{
+    				printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
+    			}
+*/
     	break;
 
     case CONSULTAR_PEDIDO:
