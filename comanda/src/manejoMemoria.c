@@ -392,7 +392,7 @@ void actualizarTodosLosPlatosConDatosDeMP(tablas_segmentos_restaurantes* tablaDe
 	while(tablaDePlatos != NULL)
 	{
 		//ToDo terminar cuando esté la funcion que saca datos de MP
-
+		tomar_datos_de_MP(tablaDePlatos);
 
 
 
@@ -554,4 +554,18 @@ void borrar_datos_del_plato(tabla_paginas* platoDelPedido)
 	platoDelPedido->cantidadPedidaComida = 0;
 	platoDelPedido->cantidadComidaPreparada = 0;
 	strcpy(platoDelPedido->nombreDeMorfi, "<Censored>");
+}
+
+void borrar_datos_de_todos_los_platos_del_pedido(segmentos* tablaDePedidos)
+{
+	tabla_paginas* selector_de_plato = tablaDePedidos->mi_tabla;
+
+	//avanzo en las paginas 1 por 1 hasta llegar al final
+	while(selector_de_plato != NULL)
+	{
+		//borro los datos del plato seleccionado
+		borrar_datos_del_plato(selector_de_plato);
+		//avanzo...
+		selector_de_plato = selector_de_plato->sig_pagina;
+	}
 }
