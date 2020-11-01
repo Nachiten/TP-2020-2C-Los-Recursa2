@@ -149,3 +149,7 @@
 [INFO] 22:00:36:818 Cliente/(9120:9120): Conexión establecida con socket de destino.
 [INFO] 22:00:48:436 Cliente/(9120:9122): Conexión establecida con socket de destino.
 [INFO] 22:01:36:509 Cliente/(9120:9133): Conexión establecida con socket de destino.
+[INFO] 16:54:46:997 Cliente/(4203:4203): Conexión establecida con socket de destino.
+[INFO] 16:55:19:706 Cliente/(4203:4206): Conexión establecida con socket de destino.
+[INFO] 16:57:52:987 Cliente/(4203:4206): El intento de guardar un pedido fue: exitoso.
+

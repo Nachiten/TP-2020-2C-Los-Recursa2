@@ -111,7 +111,6 @@ int main()
 	//puts("despues recepcion");
 
 
-
 	//liberamos las memorias reservadas
 	free(MEMORIA_PRINCIPAL);
 	puts("Memoria Principal Liberada Correctamente.");
@@ -387,6 +386,12 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		cargarPaginasEnMP(tablaDePedidosDelRestaurante, numeroDeSegmento);
 
             		//toDO una vez cargadas en MP, copio los datos de MP sobre las listas
+
+
+
+
+
+
             		//ToDo una vez tengo las listas, me armo los datos de resultadoObtenerPedido
             		//ToDO reseteo los datos de las listas <---
             		//ToDo mando el mensaje con los datos pedidos
@@ -448,6 +453,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
         case HANDSHAKE:
         	puts("Se recibió un HANDSHAKE, que fue exitosamente ignorado.");
+        	close(socket);
         	break;
 
         default://no deberia pasar nunca por aca, solo esta para que desaparezca el warning
@@ -456,7 +462,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	break;
     }
 
-    //ToDo agregar un close para el socket?
+    //ToDo agregar un close para el socket? -> o no? mejor que las conexiones las cierren del otro lado
 }
 
 void inicializarSemaforos() //Todo matar semaforos?

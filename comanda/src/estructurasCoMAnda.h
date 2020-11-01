@@ -12,6 +12,8 @@ typedef struct tabla_paginas
 	uint32_t cantidadComidaPreparada;
 	char* nombreDeMorfi; //allocar siempre con 24 bytes
 
+	uint32_t largoPostaDeMorfi;
+
 	uint32_t cargadoEnSWAP;
 	int32_t posicionInicialEnSWAP;
 	uint32_t cargadoEnMEMORIA;

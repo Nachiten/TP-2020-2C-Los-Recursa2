@@ -27,6 +27,7 @@ void inicializar_tabla_de_paginas(tabla_paginas* laTablaDePaginas)
 	laTablaDePaginas->cantidadPedidaComida = 0;
 	laTablaDePaginas->cantidadComidaPreparada = 0;
 	laTablaDePaginas->nombreDeMorfi = malloc(24);
+	laTablaDePaginas->largoPostaDeMorfi = 24;
 	laTablaDePaginas->cargadoEnSWAP = 0;
 	laTablaDePaginas->posicionInicialEnSWAP = -1;
 	laTablaDePaginas->cargadoEnMEMORIA = 0;
@@ -124,7 +125,6 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 	}
 }
 
-//ToDo hacer comportamiento de uso de la primera pagina
 tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePlato, uint32_t cantidadPlatos)
 {
 	tabla_paginas* auxiliarRecorrer = tablaDePlatosDelPedido;
@@ -144,10 +144,10 @@ tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePl
 
 		auxiliarRecorrer->cantidadComidaPreparada = 0;
 		auxiliarRecorrer->cantidadPedidaComida = cantidadPlatos;
-		auxiliarRecorrer->nombreDeMorfi = malloc(strlen(nombrePlato)+1);
+		auxiliarRecorrer->largoPostaDeMorfi = strlen(nombrePlato);
+		auxiliarRecorrer->nombreDeMorfi = malloc(24); //harcodeado 24 por enunciado
 		memcpy(auxiliarRecorrer->nombreDeMorfi, nombrePlato, strlen(nombrePlato)+1);
 		auxiliarRecorrer->numero_de_pagina++;
-		asignarNumeroDeVictima(&auxiliarRecorrer->numero_de_victima);
 
 		return auxiliarRecorrer;
 	}
@@ -160,7 +160,6 @@ tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePl
 		nuevoPlato->nombreDeMorfi = malloc(strlen(nombrePlato)+1);
 		memcpy(nuevoPlato->nombreDeMorfi, nombrePlato, strlen(nombrePlato)+1);
 		nuevoPlato->numero_de_pagina = auxiliarRecorrer->numero_de_pagina + 1;
-		asignarNumeroDeVictima(&nuevoPlato->numero_de_victima);
 		nuevoPlato->anter_pagina = auxiliarRecorrer;
 		nuevoPlato->sig_pagina = NULL;
 
@@ -285,6 +284,22 @@ tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_res
 	return tablaDePedidosSeleccionada;
 }
 
+segmentos* selectordePedidoDeRestaurante(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento)
+{
+	segmentos* laTablaDeSegmentos = tablaDePedidosDelRestaurante->miTablaDePedidos;
+	segmentos* segmentoSeleccionado = NULL;
+
+	//recorro la lista hasta que encuentre el numero del segmento seleccionado
+	while(laTablaDeSegmentos->numero_de_segmento != numeroDeSegmento)
+	{
+		laTablaDeSegmentos = laTablaDeSegmentos->sig_segmento;
+	}
+
+	segmentoSeleccionado = laTablaDeSegmentos;
+
+	return segmentoSeleccionado;
+}
+
 uint32_t buscar_tabla_de_segmentos_de_restaurante(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante)
 {
 	int encontrado = 0;
@@ -305,7 +320,6 @@ uint32_t buscar_tabla_de_segmentos_de_restaurante(tablas_segmentos_restaurantes*
 	return encontrado;
 }
 
-//ToDo volver a revisar esto cuando tenga que agregar platos a un pedido
 uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegmentos, uint32_t idDelPedido)
 {
 	segmentos* tablaDePedidos = laTablaDeSegmentos->miTablaDePedidos;
@@ -337,22 +351,11 @@ uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegme
 
 void cargarPaginasEnMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento)
 {
-	segmentos* laTablaDeSegmentos = tablaDePedidosDelRestaurante->miTablaDePedidos;
-	segmentos* segmentoSeleccionado = NULL;
-	tabla_paginas* tablaDePlatos = NULL;
+	segmentos* segmentoSeleccionado = selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento);
+	tabla_paginas* tablaDePlatos = segmentoSeleccionado->mi_tabla;
 	int32_t numeroDeMarcoEnMP = -10;
 
-	//recorro la lista hasta que encuentre el numero del segmento seleccionado
-	while(laTablaDeSegmentos->numero_de_segmento != numeroDeSegmento)
-	{
-		laTablaDeSegmentos = laTablaDeSegmentos->sig_segmento;
-	}
-
-	segmentoSeleccionado = laTablaDeSegmentos;
-	tablaDePlatos = segmentoSeleccionado->mi_tabla;
-
 	//ahora que tengo el pedido seleccionado, tengo que cargar 1 por 1, todas las paginas en MP si no lo estan
-
 	//avanzo en la lista de platos hasta que llegue al final
 	while(tablaDePlatos != NULL)
 	{
@@ -374,6 +377,29 @@ void cargarPaginasEnMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 			//ToDO temporalmente asumido que siempre existen marcos libres en MP
 			mover_pagina_a_memoriaPrincipal(tablaDePlatos, tablaDePlatos->posicionInicialEnSWAP, numeroDeMarcoEnMP*32);
 		}
+		//avanzo...
+		tablaDePlatos = tablaDePlatos->sig_pagina;
+	}
+}
+
+void actualizarTodosLosPlatosConDatosDeMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento)
+{
+	segmentos* segmentoSeleccionado = selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento);
+	tabla_paginas* tablaDePlatos = segmentoSeleccionado->mi_tabla;
+	int32_t numeroDeMarcoEnMP = -10;
+
+	//avanzo en la lista de platos hasta que llegue al final
+	while(tablaDePlatos != NULL)
+	{
+		//ToDo terminar cuando esté la funcion que saca datos de MP
+
+
+
+
+
+
+
+
 		//avanzo...
 		tablaDePlatos = tablaDePlatos->sig_pagina;
 	}
@@ -477,6 +503,7 @@ void agregar_pagina_a_swap(tabla_paginas* tablaDePlatosDelPedido, uint32_t posic
 	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 	tablaDePlatosDelPedido->cargadoEnSWAP = 1;
 	tablaDePlatosDelPedido->posicionInicialEnSWAP = posicionInicial;
+	borrar_datos_del_plato(tablaDePlatosDelPedido); //le borro los datos para que solo existan en MP
 	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 }
 
@@ -498,3 +525,33 @@ void mover_pagina_a_memoriaPrincipal(tabla_paginas* tablaDePlatosDelPedido, uint
 	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 }
 
+void tomar_datos_de_MP(tabla_paginas* platoDelPedido)
+{
+	uint32_t desplazamiento = platoDelPedido->numeroDeMarco * 32;
+
+	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+	//nos traemos los datos desde MP...
+	//obtengo cantidad de platos pedidos
+	memcpy(&platoDelPedido->cantidadPedidaComida, MEMORIA_PRINCIPAL + desplazamiento, sizeof(platoDelPedido->cantidadPedidaComida));
+	desplazamiento += sizeof(platoDelPedido->cantidadPedidaComida);
+
+	//obtengo cantidad de platos preparados
+	memcpy(&platoDelPedido->cantidadComidaPreparada, MEMORIA_PRINCIPAL + desplazamiento, sizeof(platoDelPedido->cantidadComidaPreparada));
+	desplazamiento += sizeof(platoDelPedido->cantidadComidaPreparada);
+
+	//por ultimo, obtengo el nombre del plato
+	memcpy(platoDelPedido->nombreDeMorfi, MEMORIA_PRINCIPAL + desplazamiento, 24); //harcodeado el 24 para cumplir con la norma del enunciado
+
+	//por ultimo hago la correccion de agregarle su \0 al final del nombre posta del morfi //ToDO testear en varios casos
+	platoDelPedido->nombreDeMorfi[platoDelPedido->largoPostaDeMorfi] = '\0';
+
+	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+}
+
+void borrar_datos_del_plato(tabla_paginas* platoDelPedido)
+{
+	platoDelPedido->cantidadPedidaComida = 0;
+	platoDelPedido->cantidadComidaPreparada = 0;
+	strcpy(platoDelPedido->nombreDeMorfi, "<Censored>");
+}

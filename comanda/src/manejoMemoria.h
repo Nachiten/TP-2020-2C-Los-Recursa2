@@ -41,6 +41,8 @@ void asignarNumeroDeVictima(uint32_t* miNumeroDeVictima);
 
 //devuelve la lista de pedidos del restaurante solicitado, si no existe, la crea
 tablas_segmentos_restaurantes* selector_de_tabla_de_pedidos(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante, uint32_t negarCreacion);
+//dada la tabla de segmentos de un restaurante y el Nº de segmento, devuelve puntero al pedido
+segmentos* selectordePedidoDeRestaurante(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento);
 //busca si ya existe la lista de pedidos de X restaurante
 uint32_t buscar_tabla_de_segmentos_de_restaurante(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante);
 //para ver si ya existe el pedido, y devolver FAIL, o si no (Existe = 1, no existe = 0)
@@ -48,7 +50,10 @@ uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedi
 //devuelve el numero de segmento si lo encontro, o 0 si no existe
 uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegmentos, uint32_t idDelPedido);
 
+//toma todos los platos de un pedido y se asegura que esten cargados en MP (NO los carga en SWAP, ya deberían estar ahi)
 void cargarPaginasEnMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento);
+
+
 
 //busco si existe el plato con el nombre provisto en la lista de platos del pedido seleccionado (Existe = 1, no existe = 0)
 uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombrePlato);
@@ -60,5 +65,14 @@ void agregar_pagina_a_swap(tabla_paginas* tablaDePlatosDelPedido, uint32_t posic
 
 //copiamos la info que tenemos en el area de SWAP a MEMORIA PRINCIPAL
 void mover_pagina_a_memoriaPrincipal(tabla_paginas* tablaDePlatosDelPedido, uint32_t posicionInicialDeSWAP, uint32_t posicionInicialDeMEMORIA);
+
+//toma los datos de MP y los devuelve a su PAGINA
+void tomar_datos_de_MP(tabla_paginas* platoDelPedido);
+
+//dada una pagina, borra los datos del plato, para cumplir con enunciado
+void borrar_datos_del_plato(tabla_paginas* platoDelPedido);
+
+//dado un PEDIDO (no la ID, el segmento), borra todos los datos de sus paginas
+void borrar_datos_de_todos_los_platos_del_pedido(segmentos* tablaDePedidos);
 
 #endif /* SRC_MANEJOMEMORIA_H_ */
