@@ -163,36 +163,45 @@ void escuchar_mensajes(int32_t* socket_conexion_establecida)
 	bytesRecibidosCodOP = recv(*socket_conexion_establecida, &cod_op, sizeof(cod_op), MSG_WAITALL);
 	bytesRecibidos(bytesRecibidosCodOP);
 
-	//si se cayo la conexion, basicamente no hacemos hada
-	if(bytesRecibidosCodOP < 1)
+	//seguro en contra de que me llegue un CONSULTAR_RESTAURANTES mala leche
+	if(cod_op != CONSULTAR_RESTAURANTES)
 	{
-		cod_op = 0;
-		sizeAAllocar = 0;
-	}
-
-	//si la conexion NO se cayo, intento recibir lo que sigue
-	else
-	{
-		//recibo tamaño de lo que sigue
-		recibidosSize = recv(*socket_conexion_establecida, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
-		bytesRecibidos(recibidosSize);
-
-		//si se cayo la conexion, no se hace nada con esto
-		if(recibidosSize < 1)
+		//si se cayo la conexion, basicamente no hacemos hada
+		if(bytesRecibidosCodOP < 1)
 		{
 			cod_op = 0;
 			sizeAAllocar = 0;
 		}
 
+		//si la conexion NO se cayo, intento recibir lo que sigue
+		else
+		{
+			//recibo tamaño de lo que sigue
+			recibidosSize = recv(*socket_conexion_establecida, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
+			bytesRecibidos(recibidosSize);
+
+			//si se cayo la conexion, no se hace nada con esto
+			if(recibidosSize < 1)
+			{
+				cod_op = 0;
+				sizeAAllocar = 0;
+			}
+
+		}
+
+		if(cod_op != 0)
+		{
+			printf("Tamaño del Payload: %i.\n", sizeAAllocar);
+		}
+
+		//mando lo que me llego para que lo procesen
+		procesar_mensaje(cod_op, sizeAAllocar, *socket_conexion_establecida);
 	}
 
-	if(cod_op != 0)
+	else
 	{
-		printf("Tamaño del Payload: %i.\n", sizeAAllocar);
+		puts("El mensaje mala leche fue recibido y felizmente ignorado.");
 	}
-
-	//mando lo que me llego para que lo procesen
-	procesar_mensaje(cod_op, sizeAAllocar, *socket_conexion_establecida);
 }
 
 void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t socket)
@@ -205,6 +214,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	finalizar_pedido* recibidoFinalizarPedido;
 
 	respuesta_ok_error* resultado;
+	respuesta_obtener_pedido* resultadoObtenerPedido;
 
 	tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante = NULL;
 	uint32_t numeroDeSegmento;
@@ -341,6 +351,68 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibidoObtenerPedido = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoObtenerPedido, cod_op, socket);
 
+        	resultadoObtenerPedido = malloc(sizeof(respuesta_obtener_pedido)); //ToDo hacer los free dentro de CADA CASO POSIBLE, si es por fuera revienta
+
+        	printf("Buscando datos del pedido %u del restaurante %s...\n", recibidoObtenerPedido->idPedido, recibidoObtenerPedido->nombreRestaurante);
+
+        	//buscamos la tabla de pedidos de dicho restaurante, si no existe, se envia FAIL
+        	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+        	tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoObtenerPedido->nombreRestaurante, 1);
+        	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+        	//no existe este restaurante, se responde el default
+        	if(tablaDePedidosDelRestaurante == NULL)
+        	{
+        		puts("El restaurante solicitado no existe.");
+        		resultadoObtenerPedido->comidas = malloc(2);
+        		strcpy(resultadoObtenerPedido->comidas, "[]");
+        		//resultadoObtenerPedido->comidas = "[]";
+        		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
+        		//resultadoObtenerPedido->cantTotales = "[]";
+        		resultadoObtenerPedido->cantTotales = malloc(2);
+        		strcpy(resultadoObtenerPedido->cantTotales, "[]");
+        		resultadoObtenerPedido->sizeCantTotales = strlen(resultadoObtenerPedido->cantTotales);
+        		//resultadoObtenerPedido->cantListas = "[]";
+        		resultadoObtenerPedido->cantListas = malloc(2);
+        		strcpy(resultadoObtenerPedido->cantListas, "[]");
+        		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
+
+            	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
+
+            	free(resultadoObtenerPedido);
+        	}
+
+        	//la tabla si existe, buscamos el segmento...
+        	else
+        	{
+        		//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
+        		if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoObtenerPedido->idPedido))
+        		{
+        			//tomamos el numero de segmento del pedido
+        			sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+            		numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoObtenerPedido->idPedido);
+            		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+
+        		}
+
+        		//el pedido no existe
+        		else
+        		{
+        			puts("El pedido solicitado no existe.");
+            		resultadoObtenerPedido->comidas = "[]";
+            		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
+            		resultadoObtenerPedido->cantTotales = "[]";
+            		resultadoObtenerPedido->sizeCantTotales = strlen(resultadoObtenerPedido->cantTotales);
+            		resultadoObtenerPedido->cantListas = "[]";
+            		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
+
+                	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
+
+                	free(resultadoObtenerPedido);
+        		}
+        	}
+
 			free(recibidoObtenerPedido);
         	break;
 
@@ -373,8 +445,13 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	//no hago un carajo porque se cerro la conexion
         	break;
 
+        case HANDSHAKE:
+        	puts("Se recibió un HANDSHAKE, que fue exitosamente ignorado.");
+        	break;
+
         default://no deberia pasar nunca por aca, solo esta para que desaparezca el warning
         	puts("PASE POR EL CASO DEFAULT DEL SWITCH DE PROCESAR MENSAJE!!!! BUSCAR ERROR!!!!");
+        	//puts("El mensaje mala leche fue recibido y felizmente ignorado.");
         	break;
     }
 

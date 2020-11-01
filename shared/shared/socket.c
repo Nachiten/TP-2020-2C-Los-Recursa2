@@ -135,7 +135,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 
 	switch(tipoMensaje){
 		case CONSULTAR_RESTAURANTES: //este se pasa el mensaje por el culo, solo manda el codigo de operacion
-			paquete->buffer->stream = malloc(1); //malloc flashero para que no rompa despues con el free, ToDo ver si funciona o rompe
+			paquete->buffer->stream = malloc(1); //malloc flashero para que no rompa despues con el free
 			paquete->buffer->size = 0;
 			size_ya_armado = sizeof(tipoMensaje);
 			break;
@@ -267,7 +267,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			break;
 
 		case RESPUESTA_OBTENER_PEDIDO:
-
+			size_ya_armado = serializar_paquete_respuesta_obtener_pedido(paquete, mensaje);
 			break;
 
 		case RESPUESTA_FINALIZAR_PEDIDO:
@@ -941,12 +941,12 @@ uint32_t serializar_paquete_respuesta_crear_pedido(t_paquete* paquete, respuesta
 	}
 }
 
-uint32_t serializar_respuesta_consultar_pedido(t_paquete* paquete, respuesta_consultar_pedido* estructura){
+uint32_t serializar_paquete_respuesta_consultar_pedido(t_paquete* paquete, respuesta_consultar_pedido* estructura){
 
 			return 0;
 }
 
-uint32_t serializar_respuesta_obtener_pedido(t_paquete* paquete, respuesta_obtener_pedido* estructura){
+uint32_t serializar_paquete_respuesta_obtener_pedido(t_paquete* paquete, respuesta_obtener_pedido* estructura){
 	uint32_t size = 0;
 	uint32_t desplazamiento = 0;
 	uint32_t pesoDeElementosAEnviar = 0;
