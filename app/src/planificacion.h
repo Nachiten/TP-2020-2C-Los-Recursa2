@@ -60,6 +60,9 @@ typedef struct{
 	int posY;
 	// Cada cuanto tiene que descansar
 	int frecuenciaDescanso;
+	// Cuantas instrucciones totales realizo
+	// sin descanso
+	int instruccionesRealizadas;
 	// Cuanto tiempo tiene que descansar
 	int tiempoDescanso;
 	// Cuanto tiempo ya descanso
@@ -68,13 +71,18 @@ typedef struct{
 }repartidor;
 
 typedef enum{
-	// No esta en blocked
-	NO,
-	// Esta esperando un msg
-	ESPERANDO_MSG,
-	// Esta descansando
+	// No esta en block
+	NO_BLOCK,
+	// No tiene nada que hacer (solo esta descansando)
 	DESCANSANDO,
-}estadoBlock;
+	// Esta esperando un msg (llego al restaurant)
+	ESPERANDO_MSG,
+	// Esperando para terminar el pedido (llego a cliente)
+	ESPERANDO_EXIT,
+
+	// Esta descansando
+	//DESCANSANDO,
+}accionBlock;
 
 typedef enum{
 	RESTAURANTE,
@@ -99,7 +107,9 @@ typedef struct{
 	int posClienteX;
 	int posClienteY;
 	objetivoViaje objetivo;
-	estadoBlock estadoBlocked;
+	accionBlock estadoBlocked;
+	// Esta cansado o no
+	int cansado;
 	int tiempoEspera;
 }pcb_pedido;
 
