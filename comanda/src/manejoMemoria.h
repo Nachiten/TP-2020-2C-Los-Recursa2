@@ -4,6 +4,7 @@
 #include "estructurasCoMAnda.h"
 #include "comanda.h"
 #include "semaphore.h"
+#include "shared/estructuras.h"
 
 //cosas que necesita coMAnda para trabajar
 void* MEMORIA_PRINCIPAL;
@@ -53,7 +54,8 @@ uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegme
 //toma todos los platos de un pedido y se asegura que esten cargados en MP (NO los carga en SWAP, ya deberían estar ahi)
 void cargarPaginasEnMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento);
 
-
+//se trae los datos de MP a las paginas del pedido ToDO revisar si en realidad hay que traerlas desde SWAP
+void actualizarTodosLosPlatosConDatosDeMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento);
 
 //busco si existe el plato con el nombre provisto en la lista de platos del pedido seleccionado (Existe = 1, no existe = 0)
 uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombrePlato);
@@ -74,5 +76,8 @@ void borrar_datos_del_plato(tabla_paginas* platoDelPedido);
 
 //dado un PEDIDO (no la ID, el segmento), borra todos los datos de sus paginas
 void borrar_datos_de_todos_los_platos_del_pedido(segmentos* tablaDePedidos);
+
+//prepara la respuesta de OBTENER_PEDIDO con el formato acordado
+void preparar_datos_de_platos_con_formato_de_obtener_pedido(segmentos* tablaDePedidos, respuesta_obtener_pedido* resultadoObtenerPedido);
 
 #endif /* SRC_MANEJOMEMORIA_H_ */

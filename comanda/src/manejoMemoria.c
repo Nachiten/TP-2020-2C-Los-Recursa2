@@ -382,23 +382,16 @@ void cargarPaginasEnMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 	}
 }
 
+//ToDo checkear que esto no vaya contra el enunciado
 void actualizarTodosLosPlatosConDatosDeMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento)
 {
 	segmentos* segmentoSeleccionado = selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento);
 	tabla_paginas* tablaDePlatos = segmentoSeleccionado->mi_tabla;
-	int32_t numeroDeMarcoEnMP = -10;
 
 	//avanzo en la lista de platos hasta que llegue al final
 	while(tablaDePlatos != NULL)
 	{
-		//ToDo terminar cuando esté la funcion que saca datos de MP
 		tomar_datos_de_MP(tablaDePlatos);
-
-
-
-
-
-
 
 		//avanzo...
 		tablaDePlatos = tablaDePlatos->sig_pagina;
@@ -568,4 +561,69 @@ void borrar_datos_de_todos_los_platos_del_pedido(segmentos* tablaDePedidos)
 		//avanzo...
 		selector_de_plato = selector_de_plato->sig_pagina;
 	}
+}
+
+//todo testear
+void preparar_datos_de_platos_con_formato_de_obtener_pedido(segmentos* tablaDePedidos, respuesta_obtener_pedido* resultadoObtenerPedido)
+{
+	tabla_paginas* selector_de_plato = tablaDePedidos->mi_tabla;
+
+	char* nombresComidas = malloc(100);
+	char* cantidadesPedidasComidas = malloc(100);
+	char* cantidadesPreparadasComidas = malloc(100);
+	char* charParaPisar = malloc (5);
+
+	strcpy(nombresComidas, "[");
+	strcpy(cantidadesPedidasComidas, "[");
+	strcpy(cantidadesPreparadasComidas, "[");
+
+	//avanzo en las paginas 1 por 1 hasta llegar al final
+	while(selector_de_plato != NULL)
+	{
+		//agrego el nombre del plato a la lista
+		strcat(nombresComidas, selector_de_plato->nombreDeMorfi);
+
+		//agrego la cantidad pedida del plato a la lista
+		sprintf(charParaPisar, "%u", selector_de_plato->cantidadPedidaComida);
+		strcat(cantidadesPedidasComidas, charParaPisar);
+
+		//agrego la cantidad preparada de esa comida a la lista
+		sprintf(charParaPisar, "%u", selector_de_plato->cantidadComidaPreparada);
+		strcat(cantidadesPreparadasComidas, charParaPisar);
+
+		//por ultimo, si hay un "siguiente plato", les agrego una , a las 3 listas para continuar con el siguiente
+		if(selector_de_plato->sig_pagina != NULL)
+		{
+			strcat(nombresComidas, ",");
+			strcat(cantidadesPedidasComidas, ",");
+			strcat(cantidadesPreparadasComidas, ",");
+		}
+
+		//avanzo...
+		selector_de_plato = selector_de_plato->sig_pagina;
+	}
+
+	//les pego el corchete final a cada una de las listas
+	strcat(nombresComidas, "]");
+	strcat(cantidadesPedidasComidas, "]");
+	strcat(cantidadesPreparadasComidas, "]");
+
+	//cargo los datos en la estructura que voy a mandar
+	resultadoObtenerPedido->sizeComidas = strlen(nombresComidas);
+	resultadoObtenerPedido->comidas = malloc(resultadoObtenerPedido->sizeComidas + 1);
+	strcpy(resultadoObtenerPedido->comidas, nombresComidas);
+
+	resultadoObtenerPedido->sizeCantTotales = strlen(cantidadesPedidasComidas);
+	resultadoObtenerPedido->cantTotales = malloc(resultadoObtenerPedido->sizeCantTotales + 1);
+	strcpy(resultadoObtenerPedido->cantTotales, cantidadesPedidasComidas);
+
+	resultadoObtenerPedido->sizeCantListas = strlen(cantidadesPreparadasComidas);
+	resultadoObtenerPedido->cantListas = malloc(resultadoObtenerPedido->sizeCantListas + 1);
+	strcpy(resultadoObtenerPedido->cantListas, cantidadesPreparadasComidas);
+
+	//por ultimo, librero los strings que arme para armar las listas de datos
+	free(nombresComidas);
+	free(cantidadesPedidasComidas);
+	free(cantidadesPreparadasComidas);
+	free(charParaPisar);
 }

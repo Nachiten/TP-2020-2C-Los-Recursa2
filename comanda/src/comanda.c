@@ -385,16 +385,21 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		//hay que cargar cada una de las paginas del pedido en MP
             		cargarPaginasEnMP(tablaDePedidosDelRestaurante, numeroDeSegmento);
 
-            		//toDO una vez cargadas en MP, copio los datos de MP sobre las listas
-
-
-
-
-
+            		//una vez cargadas en MP, copio los datos de MP sobre los platos del pedido
+            		actualizarTodosLosPlatosConDatosDeMP(tablaDePedidosDelRestaurante, numeroDeSegmento);
 
             		//ToDo una vez tengo las listas, me armo los datos de resultadoObtenerPedido
-            		//ToDO reseteo los datos de las listas <---
-            		//ToDo mando el mensaje con los datos pedidos
+            		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+            		preparar_datos_de_platos_con_formato_de_obtener_pedido(selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento), resultadoObtenerPedido);
+            		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+            		//reseteo los datos de las listas
+            		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+            		borrar_datos_de_todos_los_platos_del_pedido(selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento));
+            		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+            		//por ultimo, mando el mensaje con los datos pedidos
+            		mandar_mensaje(resultadoObtenerPedido, RESPUESTA_OBTENER_PEDIDO, socket);
         		}
 
         		//el pedido no existe
