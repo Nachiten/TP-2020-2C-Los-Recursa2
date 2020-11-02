@@ -28,10 +28,12 @@ void iniciarPlanificacion(){
 	//sleep(7);
 
 	pcb_pedido* unPedido = malloc(sizeof(pcb_pedido));
-	unPedido->posRestauranteX = 7;
-	unPedido->posRestauranteY = 4;
-	unPedido->posClienteX = 3;
-	unPedido->posClienteY = 5;
+	// 7 distancia hacia restaurant
+	unPedido->posRestauranteX = 9;
+	unPedido->posRestauranteY = 5;
+	// 5 distancia hacia cliente
+	unPedido->posClienteX = 11;
+	unPedido->posClienteY = 8;
 	unPedido->pedidoID = 1;
 
 	agregarANew(unPedido);
@@ -176,10 +178,8 @@ void hiloBlock_Ready(){
 
 			// Escaneo los elementos de ready para sumarles tiempo de espera
 			for (i = 0; i < elementosEnReady; i++){
-
-			pcb_pedido* pedidoActual = list_get(colaReady, i);
-			pedidoActual->tiempoEspera += 1;
-
+				pcb_pedido* pedidoActual = list_get(colaReady, i);
+				pedidoActual->tiempoEspera += 1;
 			}
 			sem_post(mutexReady);
 		}
@@ -187,7 +187,7 @@ void hiloBlock_Ready(){
 		int elementosEnBlock = list_size(colaBlock);
 
 		if(elementosEnBlock == 0)
-			log_trace(logger, "[HiloBlock] No hay pedidos en block.\n");
+			log_trace(logger, "[BLOCK] No hay pedidos en block.");
 
 		int i;
 		// Escaneo todos los elementos en block para sumar 1 ciclo de descanso a cada proceso
@@ -199,28 +199,43 @@ void hiloBlock_Ready(){
 
 			repartidor* repartidorActual = pedidoActual->repartidorAsignado;
 
-			switch(pedidoActual->estadoBlocked){
+			switch(pedidoActual->accionBlocked){
 				case DESCANSANDO:
 
 					repartidorActual->tiempoDescansado++;
 
-					log_trace(logger, "[HiloBlock] El pedido %i ya descanso %i ciclos.", pedidoActual->pedidoID, repartidorActual->tiempoDescansado);
+					log_trace(logger, "[BLOCK] El pedido %i ya descanso %i ciclos.", pedidoActual->pedidoID, repartidorActual->tiempoDescansado);
 
 					// Ya descanso lo que tenia que descansar
 					if (repartidorActual->tiempoDescansado == repartidorActual->tiempoDescanso){
 
+						log_trace(logger, "[BLOCK] El pedido %i ya descanso todos los %i ciclos que necesitaba.", pedidoActual->pedidoID, repartidorActual->tiempoDescansado);
+
 						sem_wait(mutexBlock);
-						pcb_pedido* pedidoAReady = list_remove(colaBlock, i);
+						pcb_pedido* pedidoAMover = list_remove(colaBlock, i);
 						sem_post(mutexBlock);
 
-						log_trace(logger, "[HiloBlock] El pedido %i ya descanso todos los %i ciclos que necesitaba.", pedidoActual->pedidoID, repartidorActual->tiempoDescansado);
+						if (pedidoActual->proximoEstado == READY){
+							// Cuando termina de descansar y tiene que continuar rafagas
+							log_info(logger, "[READY] Ingresa pedido %i por terminar de descansar.", pedidoAMover->pedidoID);
 
-						pedidoAReady->estadoBlocked = NO;
-						pedidoAReady->repartidorAsignado->tiempoDescansado = 0;
+							pedidoAMover->accionBlocked = NO_BLOCK;
+							pedidoAMover->repartidorAsignado->tiempoDescansado = 0;
+							pedidoAMover->repartidorAsignado->cansado = 0;
 
-						// Se va a ready porque termino de descansar
-						log_info(logger, "[READY] Ingresa pedido %i por terminar de descansar.", pedidoAReady->pedidoID);
-						agregarAReady(pedidoAReady);
+							agregarAReady(pedidoAMover);
+
+						} else if (pedidoActual->proximoEstado == EXIT){
+
+							pedidoAMover->accionBlocked = NO_BLOCK;
+
+							//log_info(logger, "[EXIT] Ingresa pedido %i por estar terminado.", pedidoAMover->pedidoID);
+							agregarAExit(pedidoAMover);
+						} else {
+							printf("BLOCK | ERROR: El proximo estado tiene un valor invalido.\n");
+							exit(7);
+						}
+
 					}
 
 					break;
@@ -228,24 +243,59 @@ void hiloBlock_Ready(){
 
 					// Ya esta listo el pedido
 					if (checkearPedidoListo(pedidoActual->pedidoID)){
-						log_trace(logger, "[HiloBlock] El pedido %i ya esta listo.\n", pedidoActual->pedidoID);
+						log_trace(logger, "[BLOCK] El pedido %i ya esta listo.\n", pedidoActual->pedidoID);
 
-						sem_wait(mutexBlock);
-						pcb_pedido* pedidoAReady = list_remove(colaBlock, i);
-						sem_post(mutexBlock);
+						// Debe descansar antes de volver a ready
+						if (pedidoActual->repartidorAsignado->cansado){
+							pedidoActual->accionBlocked = DESCANSANDO;
 
-						pedidoAReady->estadoBlocked = NO;
+						// No esta cansado, va a ready
+						} else {
+							sem_wait(mutexBlock);
+							pcb_pedido* pedidoAReady = list_remove(colaBlock, i);
+							sem_post(mutexBlock);
 
-						log_info(logger, "[READY] Ingresa pedido %i por ya estar listo.", pedidoAReady->pedidoID);
-						agregarAReady(pedidoActual);
+							pedidoAReady->accionBlocked = NO_BLOCK;
+
+							log_info(logger, "[READY] Ingresa pedido %i por ya estar listo.", pedidoAReady->pedidoID);
+							agregarAReady(pedidoActual);
+						}
+
+
 					// No esta listo
 					} else {
-						log_trace(logger, "[HiloBlock] El pedido %i todavia no esta listo.\n", pedidoActual->pedidoID);
+						log_trace(logger, "[BLOCK] El pedido %i todavia no esta listo.\n", pedidoActual->pedidoID);
 					}
 
 					break;
+
+				case ESPERANDO_EXIT:
+
+					// Acciones que corresponden a terminar el pedido
+					// TODO
+					log_info(logger, "[BLOCK] Repartidor %i entrega pedido %i.", pedidoActual->repartidorAsignado->numeroRepartidor, pedidoActual->pedidoID);
+
+					// Debe descansar antes de volver a ready
+					if (pedidoActual->repartidorAsignado->cansado){
+						pedidoActual->accionBlocked = DESCANSANDO;
+						pedidoActual->proximoEstado = EXIT;
+
+					// No esta cansado, va a exit
+					} else {
+						sem_wait(mutexBlock);
+						pcb_pedido* pedidoAExit = list_remove(colaBlock, i);
+						sem_post(mutexBlock);
+
+						pedidoAExit->accionBlocked = NO_BLOCK;
+
+						//log_info(logger, "[EXIT] Ingresa pedido %i por estar terminado.", pedidoAExit->pedidoID);
+						agregarAExit(pedidoActual);
+					}
+
+					break;
+
 				default:
-					printf("[HiloBlock | ERROR] El pedido %i esta en blocked pero no se le asigno por que esta bloqueado.\n", pedidoActual->pedidoID);
+					printf("[BLOCK | ERROR] El pedido %i esta en blocked pero no se le asigno por que esta bloqueado.\n", pedidoActual->pedidoID);
 					exit(5);
 
 					break;
@@ -272,72 +322,72 @@ void hiloExec(int* numHiloExecPuntero){
 			log_info(logger, "[EXEC-%i] Ingresa pedido %i. Instruciones restantes: %i",
 					numHiloExec, pedidoAEjecutar->pedidoID, pedidoAEjecutar->instruccionesTotales);
 
-			int desalojoCode;
 			int cantidadCiclos = 1;
 
 			// Calculo si tiene que desalojar o no y por que razon
-			while ( (desalojoCode = codigoDesalojo(pedidoAEjecutar) ) == 0){
+			while (sigoEjecutando(pedidoAEjecutar)){
 				waitSemaforoHabilitarCicloExec(numHiloExec);
-				printf("[EXEC-%i] Ejecuto ciclo numero: %i\n", numHiloExec, cantidadCiclos);
+				log_trace(logger, "[EXEC-%i] Ejecuto ciclo numero: %i.", numHiloExec, cantidadCiclos);
 
 				pedidoAEjecutar->instruccionesRealizadas++;
+				pedidoAEjecutar->repartidorAsignado->instruccionesRealizadas++;
 
-				printf("[EXEC-%i] Instrucciones restantes: %i\n", numHiloExec, pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
+				log_trace(logger, "[EXEC-%i] Instrucciones restantes: %i.", numHiloExec, pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
 
 				signalSemaforoFinalizarCicloExec(numHiloExec);
 
 				cantidadCiclos++;
 			}
 
-			// Esta cansado
-			if (desalojoCode == 1){
-				//printf("[EXEC-%i] Estoy cansado.\n", numHiloExec);
+			agregarABlock(pedidoAEjecutar);
 
-				// Ahora las instrucciones totales reflejan las que faltan
-				pedidoAEjecutar->instruccionesTotales -= pedidoAEjecutar->instruccionesRealizadas;
-				pedidoAEjecutar->instruccionesRealizadas = 0;
-				pedidoAEjecutar->estadoBlocked = DESCANSANDO;
-
-				log_info(logger, "[BLOCK] Ingresa pedido %i por estar cansado.", pedidoAEjecutar->pedidoID);
-				agregarABlock(pedidoAEjecutar);
-			// Termino rafaga
-			} else if (desalojoCode == 2){
-				if(pedidoAEjecutar->objetivo == RESTAURANTE){
-					log_info(logger, "[EXEC-%i] Pedido %i llega al restaurant en posicion %i-%i.", numHiloExec, pedidoAEjecutar->pedidoID, pedidoAEjecutar->posRestauranteX, pedidoAEjecutar->posRestauranteY);
-
-					pedidoAEjecutar->instruccionesRealizadas = 0;
-					pedidoAEjecutar->repartidorAsignado->posX = pedidoAEjecutar->posRestauranteX;
-					pedidoAEjecutar->repartidorAsignado->posY = pedidoAEjecutar->posRestauranteY;
-					pedidoAEjecutar->estadoBlocked = ESPERANDO_MSG;
-					pedidoAEjecutar->objetivo = CLIENTE;
-					pedidoAEjecutar->instruccionesTotales = distanciaDeRepartidorAObjetivo(pedidoAEjecutar->repartidorAsignado,pedidoAEjecutar);
-
-					log_info(logger, "[BLOCK] Ingresa pedido %i para esperar mensaje.", pedidoAEjecutar->pedidoID);
-					agregarABlock(pedidoAEjecutar);
-				} else if (pedidoAEjecutar->objetivo == CLIENTE){
-					log_info(logger, "[EXEC-%i] Pedido %i llega al cliente en posicion %i-%i.", numHiloExec, pedidoAEjecutar->pedidoID, pedidoAEjecutar->posClienteX, pedidoAEjecutar->posClienteY);
-					log_info(logger, "[EXEC-%i] Repartidor %i entrega pedido %i.", numHiloExec, pedidoAEjecutar->repartidorAsignado->numeroRepartidor, pedidoAEjecutar->pedidoID);
-
-					// TODO | Se deben mandar todos los mensajes aclarados en consigna
-
-					agregarAExit(pedidoAEjecutar);
-					//ToDo se manda a exit y se liberan todos los recursos del pedido por puntero salvo el repartidor (pertenecen a una lista que no se puede tocar)
-				} else {
-					printf("[EXEC-%i] | [ERROR] El objetivo del pedido es invalido\n", numHiloExec);
-					exit(6);
-				}
-
-
-			} else {
-				printf("[EXEC-%i | ERROR] El desalojo code tiene un valor invalido.\n", numHiloExec);
-				exit(6);
-			}
+//			// Esta cansado
+//			if (desalojoCode == 1){
+//				//printf("[EXEC-%i] Estoy cansado.\n", numHiloExec);
+//
+//
+//				log_info(logger, "[BLOCK] Ingresa pedido %i por estar cansado.", pedidoAEjecutar->pedidoID);
+//				agregarABlock(pedidoAEjecutar);
+//			// Termino rafaga
+//			} else if (desalojoCode == 2){
+//				if(pedidoAEjecutar->objetivo == RESTAURANTE){
+//					log_info(logger, "[EXEC-%i] Pedido %i llega al restaurant en posicion %i-%i.", numHiloExec, pedidoAEjecutar->pedidoID, pedidoAEjecutar->posRestauranteX, pedidoAEjecutar->posRestauranteY);
+//
+//					// Acciones al llegar al resutante
+//					pedidoAEjecutar->instruccionesRealizadas = 0;
+//					pedidoAEjecutar->repartidorAsignado->posX = pedidoAEjecutar->posRestauranteX;
+//					pedidoAEjecutar->repartidorAsignado->posY = pedidoAEjecutar->posRestauranteY;
+//					pedidoAEjecutar->accionBlocked = ESPERANDO_MSG;
+//					pedidoAEjecutar->objetivo = CLIENTE;
+//					pedidoAEjecutar->instruccionesTotales = distanciaDeRepartidorAObjetivo(pedidoAEjecutar->repartidorAsignado,pedidoAEjecutar);
+//
+//					log_info(logger, "[BLOCK] Ingresa pedido %i para esperar mensaje.", pedidoAEjecutar->pedidoID);
+//					agregarABlock(pedidoAEjecutar);
+//				} else if (pedidoAEjecutar->objetivo == CLIENTE){
+//					log_info(logger, "[EXEC-%i] Pedido %i llega al cliente en posicion %i-%i.", numHiloExec, pedidoAEjecutar->pedidoID, pedidoAEjecutar->posClienteX, pedidoAEjecutar->posClienteY);
+//					log_info(logger, "[EXEC-%i] Repartidor %i entrega pedido %i.", numHiloExec, pedidoAEjecutar->repartidorAsignado->numeroRepartidor, pedidoAEjecutar->pedidoID);
+//
+//					// TODO | Se deben mandar todos los mensajes aclarados en consigna
+//
+//					// Acciones al llegar al cliente
+//					//agregarAExit(pedidoAEjecutar);
+//					//ToDo se manda a exit y se liberan todos los recursos del pedido por puntero salvo el repartidor (pertenecen a una lista que no se puede tocar)
+//				} else {
+//					printf("[EXEC-%i] | [ERROR] El objetivo del pedido es invalido\n", numHiloExec);
+//					exit(6);
+//				}
+//
+//
+//			} else {
+//				printf("[EXEC-%i | ERROR] El desalojo code tiene un valor invalido.\n", numHiloExec);
+//				exit(6);
+//			}
 
 
 
 		} else {
 			waitSemaforoHabilitarCicloExec(numHiloExec);
-			log_trace(logger, "[EXEC-%i] Desperdicio un ciclo porque no hay nadie en ready.\n", numHiloExec);
+			log_trace(logger, "[EXEC-%i] Desperdicio un ciclo porque no hay nadie en ready.", numHiloExec);
 			signalSemaforoFinalizarCicloExec(numHiloExec);
 		}
 
@@ -345,20 +395,78 @@ void hiloExec(int* numHiloExecPuntero){
 }
 
 // 0: No se desaloja, 1: Se desaloja por estar cansado, 2: Se desaloja porque termino la rafaga
-int codigoDesalojo(pcb_pedido* unPedido){
+//int codigoDesalojo(pcb_pedido* unPedido){
+//
+//	// Si termino de reliazar toda la rafaga
+//	if (unPedido->instruccionesRealizadas == unPedido->instruccionesTotales){
+//		return 2;
+//	}
+//
+//	// Si se canso ya y debe ir a blocked
+//	if (unPedido->instruccionesRealizadas == unPedido->repartidorAsignado->frecuenciaDescanso){
+//		return 1;
+//	}
+//
+//	// Ninguna (sigue ejecutando)
+//	return 0;
+//}
 
-	// Si termino de reliazar toda la rafaga
-	if (unPedido->instruccionesRealizadas == unPedido->instruccionesTotales){
-		return 2;
+// 1 Si sigue ejecutando 0 Si desalojo
+int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
+	int retorno = 1;
+
+	repartidor* repartidorActual = pedidoEnEjecucion->repartidorAsignado;
+
+	// Se canso
+	if (repartidorActual->instruccionesRealizadas == repartidorActual->frecuenciaDescanso){
+		pedidoEnEjecucion->accionBlocked = DESCANSANDO;
+		repartidorActual->cansado = 1;
+
+		// Acciones al cansarse
+		pedidoEnEjecucion->instruccionesTotales -= pedidoEnEjecucion->instruccionesRealizadas;
+		pedidoEnEjecucion->instruccionesRealizadas = 0;
+		repartidorActual->instruccionesRealizadas = 0;
+
+		log_info(logger, "[BLOCK] Ingresa pedido %i por estar cansado.", pedidoEnEjecucion->pedidoID);
+
+		retorno = 0;
 	}
 
-	// Si se canso ya y debe ir a blocked
-	if (unPedido->instruccionesRealizadas == unPedido->repartidorAsignado->frecuenciaDescanso){
-		return 1;
+	// Termino la rafaga
+	if (pedidoEnEjecucion->instruccionesRealizadas == pedidoEnEjecucion->instruccionesTotales){
+
+		// Me fijo cual era el objetivo
+		if (pedidoEnEjecucion->objetivo == RESTAURANTE){
+			// La accoin en block es esperar el mensaje de pedido listo
+			pedidoEnEjecucion->accionBlocked = ESPERANDO_MSG;
+
+			// Acciones al llegar al resutante
+			// Cuando se inicie la nueva rafaga tendra 0 instrucciones ejecutadas
+			pedidoEnEjecucion->instruccionesRealizadas = 0;
+			// Mi nueva posicion es la del restaurant
+			pedidoEnEjecucion->repartidorAsignado->posX = pedidoEnEjecucion->posRestauranteX;
+			pedidoEnEjecucion->repartidorAsignado->posY = pedidoEnEjecucion->posRestauranteY;
+			// El nuevo objetivo es el cliente
+			pedidoEnEjecucion->objetivo = CLIENTE;
+			// Genero la nueva rafaga con la distancia hacia el cliente
+			pedidoEnEjecucion->instruccionesTotales = distanciaDeRepartidorAObjetivo(pedidoEnEjecucion->repartidorAsignado,pedidoEnEjecucion);
+
+			log_info(logger, "[BLOCK] Ingresa pedido %i para esperar mensaje.", pedidoEnEjecucion->pedidoID);
+
+		} else if (pedidoEnEjecucion->objetivo == CLIENTE){
+			pedidoEnEjecucion->accionBlocked = ESPERANDO_EXIT;
+
+			log_info(logger, "[BLOCK] Pedido %i llega al cliente en posicion %i-%i.", pedidoEnEjecucion->pedidoID, pedidoEnEjecucion->posClienteX, pedidoEnEjecucion->posClienteY);
+
+		} else {
+			printf("ERROR | El objetivo del pedido es invalido");
+			exit(6);
+		}
+
+		retorno = 0;
 	}
 
-	// Ninguna (sigue ejecutando)
-	return 0;
+	return retorno;
 }
 
 void agregarABlock(pcb_pedido* elPedido){
@@ -565,8 +673,9 @@ void asignarRepartidorAPedido(pcb_pedido* unPedido){
 	unPedido->repartidorAsignado = mejorRepartidor;
 	unPedido->instruccionesTotales = mejorDistancia;
 	unPedido->instruccionesRealizadas = 0;
-	unPedido->estadoBlocked = NO;
+	unPedido->accionBlocked = NO_BLOCK;
 	unPedido->tiempoEspera = 0;
+	unPedido->proximoEstado = READY;
 
 	log_info(logger,"[READY] Ingresa pedido %i desde new.", unPedido->pedidoID);
 	agregarAReady(unPedido);
@@ -728,6 +837,8 @@ void leerPlanificacionConfig(t_config* config){
 		miRepartidor->tiempoDescanso = atoi(tiemposDescanso[i]);
 		miRepartidor->asignado = 0;
 		miRepartidor->tiempoDescansado = 0;
+		miRepartidor->cansado = 0;
+		miRepartidor->instruccionesRealizadas = 0;
 
 		freeDeArray(posiciones);
 
@@ -771,7 +882,7 @@ void hiloCiclosMaestro(){
 
     while(1){
 
-		log_trace(logger, "[HCM] Habilitando ciclo: %i", numCiclo);
+		log_trace(logger, "[HCM] Habilitando ciclo: %i\n", numCiclo);
 
 		for(i = 0; i < GRADO_MULTIPROCE; i++){
 			signalSemaforoHabilitarCicloExec(i);

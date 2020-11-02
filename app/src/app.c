@@ -21,7 +21,7 @@ int main(){
 	//cargo el path del archivo log
 	LOG_PATH = config_get_string_value(config,"ARCHIVO_LOG");
 	//Dejo cargado un logger para loguear los eventos.
-	logger = cargarUnLog(LOG_PATH, "App");
+	logger = cargarUnLogApp(LOG_PATH, "App");
 	if(logger != NULL)
 	{
 		puts("Archivo de LOGS cargado correctamente.");

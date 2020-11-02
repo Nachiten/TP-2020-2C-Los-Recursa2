@@ -55,7 +55,9 @@ sem_t* finalizarCicloBlockReady;
 
 // *** ESTRUCTURA DE PLANIFICACION ***
 typedef struct{
+	// ID Repartidor
 	int numeroRepartidor;
+	// Posicion Repartidor
 	int posX;
 	int posY;
 	// Cada cuanto tiene que descansar
@@ -67,6 +69,9 @@ typedef struct{
 	int tiempoDescanso;
 	// Cuanto tiempo ya descanso
 	int tiempoDescansado;
+	// Esta cansado o no
+	int cansado;
+	// Esta asignado a algun pedido
 	int asignado;
 }repartidor;
 
@@ -79,9 +84,6 @@ typedef enum{
 	ESPERANDO_MSG,
 	// Esperando para terminar el pedido (llego a cliente)
 	ESPERANDO_EXIT,
-
-	// Esta descansando
-	//DESCANSANDO,
 }accionBlock;
 
 typedef enum{
@@ -97,6 +99,12 @@ typedef enum{
 
 algoritmo_planif algoritmo;
 
+typedef enum{
+	READY,
+	EXIT,
+}estado;
+
+
 typedef struct{
 	int pedidoID;
 	int instruccionesTotales;
@@ -107,11 +115,11 @@ typedef struct{
 	int posClienteX;
 	int posClienteY;
 	objetivoViaje objetivo;
-	accionBlock estadoBlocked;
-	// Esta cansado o no
-	int cansado;
+	accionBlock accionBlocked;
+	estado proximoEstado;
 	int tiempoEspera;
 }pcb_pedido;
+
 
 // PEDIDO LISTO
 void guardarPedidoListo(int);
@@ -141,6 +149,8 @@ pcb_pedido* obtenerSiguienteDeReady();
 pcb_pedido* obtenerSiguienteHRRN();
 pcb_pedido* obtenerSiguienteSJFSD();
 int codigoDesalojo(pcb_pedido*);
+int sigoEjecutando(pcb_pedido*);
+
 
 // SEMAFOROS
 void waitSemaforoHabilitarCicloExec(uint32_t);

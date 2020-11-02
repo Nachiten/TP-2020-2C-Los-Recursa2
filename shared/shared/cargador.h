@@ -11,5 +11,6 @@
 
 t_log* cargarUnLog(char*, char*); //tirarle la ruta del log y el nombre del log
 t_config* leerConfiguracion(char*); //tirarle la ruta del config
+t_log* cargarUnLogApp(char*, char*); // Cargar un log para app
 
 #endif /* SHARED_CARGADOR_H_ */
