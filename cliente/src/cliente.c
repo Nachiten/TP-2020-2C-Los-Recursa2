@@ -23,7 +23,7 @@ int main(){
 	miPosicionY = config_get_int_value(config, "POSICION_Y");
 
 	//Dejo cargado un logger para loguear los eventos.
-	logger = cargarUnLog(LOG_PATH, "Cliente");
+	logger = cargarUnLogDeCliente(LOG_PATH, "Cliente");
 
 	//ToDo levantamos socket para recibir mensajes (hilo)
 
@@ -158,12 +158,12 @@ void obtenerInputConsolaCliente(){
 	string_trim(&lineaEntera);
 
 	if(strcmp(lineaEntera, "") == 0)
-	  {
-		printf("No se ingresó ningun comando.\n");
-		free(lineaEntera);
-		sem_post(comandoParaEjecutar);
-		return;
-	  }
+    {
+			printf("No se ingresó ningun comando.\n");
+			free(lineaEntera);
+			sem_post(comandoParaEjecutar);
+			return;
+    }
 
 
 
@@ -173,10 +173,8 @@ void obtenerInputConsolaCliente(){
 	// El nombre del comando es la primer palabra (POR EL MOMENTO CON GUIONES_BAJOS) -> EJ: CONSULTAR_RESTAURANTES
     char* comandoIngresado = malloc(strlen(palabrasSeparadas[0])+1);
     strcpy(comandoIngresado,palabrasSeparadas[0]);
-
     //printf("El comando solicitado fue: %s. \n", comandoIngresado);
-    sem_post(comandoParaEjecutar);
-    sem_post(comandoParaEjecutar);
+
 
     switcher = valor_para_switch_case(comandoIngresado);
 
@@ -377,6 +375,7 @@ void obtenerInputConsolaCliente(){
         free(estructuraAEnviar->nombreRestaurante);
 		free(estructuraAEnviar);
 		close(socketCliente);
+		sem_post(comandoParaEjecutar);
 		break;
 
 	case GUARDAR_PLATO:
