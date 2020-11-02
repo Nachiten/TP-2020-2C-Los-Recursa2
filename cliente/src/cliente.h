@@ -10,26 +10,30 @@
 #include "shared/utilidades.h"
 #include "funcionesCliente.h"
 #include <pthread.h>
+#include <semaphore.h>
 
 
 t_log* logger;
 t_config* config;
 int32_t socketEscucha;
 pthread_t hiloConsola;
-
+pthread_t hiloNotificaciones;
+sem_t* comandoParaEjecutar;
 
 //cosas cargadas del archivo config
 char* LOG_PATH;
 char* ip_destino;
 char* puerto_destino;
 char* puerto_local;
-char* puerto_APP;
+//char* puerto_APP;
+//char* ip_APP;
 char* idCliente;
 uint32_t miPosicionX;
 uint32_t miPosicionY;
 
 //obtiene el comando que quiere ejecutar el usuario
-void obtenerInputConsolaCliente(char* lineaEntera);
+void obtenerInputConsolaCliente();
+void recibirNotificaciones(int32_t* elSocketInicial);
 
 
 

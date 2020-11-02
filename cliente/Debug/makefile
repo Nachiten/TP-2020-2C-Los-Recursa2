@@ -27,6 +27,8 @@ all: cliente
 
 dependents:
 	-cd /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug && $(MAKE) clean all
+	-cd /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug && $(MAKE) all
+	-cd /home/utnso/workspace/commons/Debug && $(MAKE) all
 
 # Tool invocations
 cliente: $(OBJS) $(USER_OBJS) /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug/libshared.so
