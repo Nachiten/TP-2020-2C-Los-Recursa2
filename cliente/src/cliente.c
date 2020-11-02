@@ -64,8 +64,8 @@ int main(){
     mandar_mensaje(elHandshake, HANDSHAKE, socketCliente);
 */
 
-    pthread_create(&hiloNotificaciones, NULL, (void*)recibirNotificaciones, &socketCliente);
-    pthread_detach(hiloNotificaciones);
+    //pthread_create(&hiloNotificaciones, NULL, (void*)recibirNotificaciones, &socketCliente);
+    //pthread_detach(hiloNotificaciones);
     //close(socketCliente);
 
 	while(1)
@@ -123,7 +123,7 @@ void recibirNotificaciones(int32_t* socketInicial){
 	        recibir_mensaje(notificacionPedidoFinalizado, FINALIZAR_PEDIDO ,*socketInicial);
 
 
-			printf("El pedido nro <%d> del restaurante <%s> ha arribado.\n", notificacionPedidoFinalizado->idPedido, notificacionPedidoFinalizado->nombreRestaurante);
+			log_info(logger, "El pedido nro <%d> del restaurante <%s> ha arribado.\n", notificacionPedidoFinalizado->idPedido, notificacionPedidoFinalizado->nombreRestaurante);
 			free(notificacionPedidoFinalizado->nombreRestaurante);
 			free(notificacionPedidoFinalizado);
 		}
@@ -140,16 +140,13 @@ void recibirNotificaciones(int32_t* socketInicial){
 
 
 void obtenerInputConsolaCliente(){
-	//char* lineaEntera = NULL;
-	//size_t longitud = 0;
+	char* lineaEntera = NULL;
 	uint32_t switcher;
 	respuesta_ok_error* estructuraRespuesta;
     int32_t socketCliente;
 	int32_t iterador = 0;
 	int32_t sizeAAllocar = 0;
 	uint32_t exito = 0;
-	char* lineaEntera;
-	lineaEntera = NULL;
 	size_t longitud = 0;
 
 	//char* nombreRestaurante; puede que este al pedo
@@ -177,11 +174,11 @@ void obtenerInputConsolaCliente(){
     char* comandoIngresado = malloc(strlen(palabrasSeparadas[0])+1);
     strcpy(comandoIngresado,palabrasSeparadas[0]);
 
+    //printf("El comando solicitado fue: %s. \n", comandoIngresado);
     sem_post(comandoParaEjecutar);
 
-    //printf("El comando solicitado fue: %s. \n", comandoIngresado);
-
     switcher = valor_para_switch_case(comandoIngresado);
+
 
 
     //todo me parece que por cuestion de "prolijidad" y que despues sea mas facil encontrar cada CASE, lo ideal seria ir poniendolos en orden,
@@ -364,7 +361,8 @@ void obtenerInputConsolaCliente(){
 		respuesta_consultar_platos* estructuraRespuestaConsultarPlatos = malloc(sizeAAllocar);
 		recibir_mensaje(estructuraRespuestaConsultarPlatos, RESPUESTA_CONSULTAR_PLATOS, socketCliente);
 
-		log_info(logger, "Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreRestaurante, estructuraRespuestaConsultarPlatos->nombresPlatos);
+		//log_info(logger, "Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreRestaurante, estructuraRespuestaConsultarPlatos->nombresPlatos);
+		printf("Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreRestaurante, estructuraRespuestaConsultarPlatos->nombresPlatos);
 
 		free(estructuraRespuestaConsultarPlatos->nombresPlatos);
 		free(estructuraRespuestaConsultarPlatos);

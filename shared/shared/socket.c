@@ -751,18 +751,6 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 	uint32_t pesoDeElementosAEnviar = 0;
 
 
-	//strlen(estructura->afinidades) tiene que ser equivalente con sizeof(estructura->longitudAfinidades) numericamente
-	if(strlen(estructura->afinidades)+1 != estructura->longitudAfinidades){
-	   printf("Error en la serializacion de longitudes, sos pollo\n");
-	   return -1;
-	}
-
-	//idem arriba
-	if(strlen(estructura->platos) != estructura->longitudPlatos){
-	   printf("Error en la serializacion de longitudes, sos pollo\n");
-	   return -1;
-	}
-
 
     //reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
 	t_buffer* buffer = malloc(sizeof(t_buffer));
@@ -874,7 +862,7 @@ uint32_t serializar_paquete_respuesta_consultar_platos(t_paquete* paquete, respu
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
 	pesoDeElementosAEnviar = sizeof(estructura->longitudNombresPlatos)
-						   + estructura->longitudNombresPlatos;
+						   + estructura->longitudNombresPlatos+1;
 
 
 
