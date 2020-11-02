@@ -63,7 +63,10 @@ int main(){
 
     mandar_mensaje(elHandshake, HANDSHAKE, socketCliente);
 */
- //close(socketCliente);
+
+    pthread_create(&hiloNotificaciones, NULL, (void*)recibirNotificaciones, &socketCliente);
+    pthread_detach(hiloNotificaciones);
+    //close(socketCliente);
 
 	while(1)
 	{
@@ -86,7 +89,7 @@ int main(){
 //
 //		//string_trim_right(&auxLinea);
 		sem_wait(comandoParaEjecutar);
-		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, &socketCliente);
+		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, NULL);
 		//pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, auxLinea);
 		pthread_detach(hiloConsola);
 
@@ -106,8 +109,37 @@ int main(){
 	return EXIT_SUCCESS;
 }
 
+void recibirNotificaciones(int32_t* socketInicial){
+	int32_t sizeAAllocar = 0;
+	uint32_t exito = 0;
 
-void obtenerInputConsolaCliente(int32_t* elSocketInicial){
+	while(1){
+
+		los_recv_repetitivos(*socketInicial, &exito, &sizeAAllocar);
+
+		if(exito == 1){
+
+			guardar_pedido* notificacionPedidoFinalizado = malloc(sizeAAllocar);
+	        recibir_mensaje(notificacionPedidoFinalizado, FINALIZAR_PEDIDO ,*socketInicial);
+
+
+			printf("El pedido nro <%d> del restaurante <%s> ha arribado.\n", notificacionPedidoFinalizado->idPedido, notificacionPedidoFinalizado->nombreRestaurante);
+			free(notificacionPedidoFinalizado->nombreRestaurante);
+			free(notificacionPedidoFinalizado);
+		}
+
+		else
+		{
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
+		}
+
+		}
+
+	}
+
+
+
+void obtenerInputConsolaCliente(){
 	//char* lineaEntera = NULL;
 	//size_t longitud = 0;
 	uint32_t switcher;
@@ -524,27 +556,7 @@ void obtenerInputConsolaCliente(int32_t* elSocketInicial){
     case CONFIRMAR_PEDIDO:
 
 //mando msj y recibo respuesta ok/fail
-//y luego
 
-
-
-   /*
-    	los_recv_repetitivos(*elSocketInicial, &exito, &sizeAAllocar);
-
-
-    	if(exito == 1)
-    			{
-    				recibir_mensaje(estructuraRespuesta,FINALIZAR_PEDIDO,*elSocketInicial);
-    				//mutex
-
-    				printf("El pedido tal %d ha arribado: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
-    			}
-
-    			else
-    			{
-    				printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
-    			}
-*/
     	break;
 
     case CONSULTAR_PEDIDO:

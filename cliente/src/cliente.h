@@ -17,6 +17,7 @@ t_log* logger;
 t_config* config;
 int32_t socketEscucha;
 pthread_t hiloConsola;
+pthread_t hiloNotificaciones;
 sem_t* comandoParaEjecutar;
 
 //cosas cargadas del archivo config
@@ -31,7 +32,8 @@ uint32_t miPosicionX;
 uint32_t miPosicionY;
 
 //obtiene el comando que quiere ejecutar el usuario
-void obtenerInputConsolaCliente(int32_t* elSocketInicial);
+void obtenerInputConsolaCliente();
+void recibirNotificaciones(int32_t* elSocketInicial);
 
 
 
