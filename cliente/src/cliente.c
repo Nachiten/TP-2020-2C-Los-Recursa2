@@ -176,6 +176,7 @@ void obtenerInputConsolaCliente(){
 
     //printf("El comando solicitado fue: %s. \n", comandoIngresado);
     sem_post(comandoParaEjecutar);
+    sem_post(comandoParaEjecutar);
 
     switcher = valor_para_switch_case(comandoIngresado);
 
@@ -361,8 +362,8 @@ void obtenerInputConsolaCliente(){
 		respuesta_consultar_platos* estructuraRespuestaConsultarPlatos = malloc(sizeAAllocar);
 		recibir_mensaje(estructuraRespuestaConsultarPlatos, RESPUESTA_CONSULTAR_PLATOS, socketCliente);
 
-		//log_info(logger, "Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreRestaurante, estructuraRespuestaConsultarPlatos->nombresPlatos);
-		printf("Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreRestaurante, estructuraRespuestaConsultarPlatos->nombresPlatos);
+		log_info(logger, "Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreRestaurante, estructuraRespuestaConsultarPlatos->nombresPlatos);
+		//printf("Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreRestaurante, estructuraRespuestaConsultarPlatos->nombresPlatos);
 
 		free(estructuraRespuestaConsultarPlatos->nombresPlatos);
 		free(estructuraRespuestaConsultarPlatos);
