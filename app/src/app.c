@@ -323,12 +323,22 @@ void aniadir_plato(a_plato* recibidoAPlato){
 	}
 }
 
-void plato_Listo(plato_listo* platoListo){
+void plato_Listo(plato_listo* platoListo, int32_t socket_cliente){
 	respuesta_ok_error* respuesta = malloc(sizeof(respuesta_ok_error));
 	obtener_pedido* obtener_Pedido;
 	respuesta_obtener_pedido* respuesta_consulta;
 	int32_t recibidos, recibidosSize = 0, sizeAAllocar;
 	codigo_operacion cod_op;
+	info_resto* resto;
+	perfil_cliente* cliente;
+
+	int numResto = buscar_resto_por_socket(socket_cliente), numCliente;
+
+	if(numResto != -2){
+		resto = list_get(listaRestos,numResto);
+		numCliente = buscar_pedido_por_id_y_resto(platoListo->idPedido,resto);
+		cliente = list_get(listaPedidos,numCliente);
+	}
 
 	respuesta->respuesta = 0;
 
@@ -387,8 +397,7 @@ void plato_Listo(plato_listo* platoListo){
 						log_info(logger, "pedido completo, avisando al repartidor");
 						sem_post(semLog);
 
-
-						guardarPedidoListo(3);
+						guardarPedidoListo(cliente->id_global);
 						// TODO | Se debe avisar a planif con guardarPedidoListo(id)
 
 					}else{
@@ -596,6 +605,18 @@ int buscar_pedido_por_id(uint32_t id_pedido){
 	return -2;
 }
 
+int buscar_pedido_por_id_y_resto(uint32_t id_pedido, info_resto* resto){
+	perfil_cliente* cliente;
+	for(int i = 0; i < listaPedidos->elements_count; i++){
+		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
+
+		if(cliente->id_global == id_global && strcmp(resto->nombre_resto,cliente->nombre_resto) == 0){
+			return i;
+		}
+	}
+	return -2;
+}
+
 int buscar_cliente(int32_t socket_cliente_buscado){
 	perfil_cliente* cliente;
 	for(int i = 0; i < listaPedidos->elements_count; i++){
@@ -616,6 +637,22 @@ int buscar_resto(char* nombreResto){
 			resto = list_get(listaRestos,i);// coseguis el restaurante de la posicion i
 
 			if(strcmp(resto->nombre_resto,nombreResto) == 0){
+				return i;
+			}
+		}
+	}
+
+	return -2;
+}
+
+int buscar_resto_por_socket(int32_t socket_resto){
+	info_resto* resto;
+	if(listaRestos->elements_count != 0){
+
+		for(int i = 0; i < listaRestos->elements_count; i++){
+			resto = list_get(listaRestos,i);// coseguis el restaurante de la posicion i
+
+			if(resto->socket == socket_resto){
 				return i;
 			}
 		}
@@ -724,6 +761,26 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 		break;
 	}
 }
+
+void pedido_entregado(int32_t id_pedido){
+	int numCliente = buscar_pedido_por_id(id_pedido);
+	perfil_cliente* cliente = list_get(listaPedidos,numCliente);
+
+	finalizar_pedido* pedidoFinalizado;
+	pedidoFinalizado = malloc(sizeof(finalizar_pedido));
+	pedidoFinalizado->idPedido = id_pedido;
+	pedidoFinalizado->nombreRestaurante = malloc(strlen(cliente->nombre_resto)+1);
+	strcpy(pedidoFinalizado->nombreRestaurante, cliente->nombre_resto);
+	pedidoFinalizado->largoNombreRestaurante = strlen(cliente->nombre_resto);
+
+	pedido_finalizado* aMandar = malloc(sizeof(pedido_finalizado));
+	aMandar->mensaje = "Pedido Finalizado";
+	aMandar->sizeMensaje = strlen("Pedido Finalizado");
+
+	mandar_mensaje(pedidoFinalizado, FINALIZAR_PEDIDO,socket_commanda);
+	mandar_mensaje(aMandar,FINALIZAR_PEDIDO,cliente->socket_cliente);
+}
+
 //************* FUNCIONES DE SERVER *************
 
 void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t sizeAAllocar)  {
@@ -763,7 +820,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		case PLATO_LISTO:
 			recibidoPlatoListo = malloc(sizeAAllocar);
 			recibir_mensaje(recibidoPlatoListo,PLATO_LISTO,socket_cliente);
-			plato_Listo(recibidoPlatoListo);
+			plato_Listo(recibidoPlatoListo,socket_cliente);
 			free(recibidoPlatoListo); //todo ver si esto no rompe nada
 			break;
 
