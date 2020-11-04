@@ -10,6 +10,21 @@
 #include <stdio.h>
 #include "restaurante.h"
 
+// t_list lista_cola_afinidades = [t_cola_afinidad, t_cola__afinidad2]
+// t_list_cocineros = [t_cocinero_1, t_cocinero_2, t_cocinero3]
+// t_list_hornos = [t_horno]
+// t_queue cola_horno = [t_plato]
+// t_list milanesa
+// t_list sandwich
+
+
+
+//{
+// t_list* cola
+//char* afinidad
+
+
+//}t_cola_afinidad
 
 int main(){
 
