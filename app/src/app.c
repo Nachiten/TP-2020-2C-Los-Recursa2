@@ -45,6 +45,8 @@ int main(){
 	posX_resto = config_get_int_value(config,"POSICION_REST_DEFAULT_X");
 	posY_resto = config_get_int_value(config,"POSICION_REST_DEFAULT_Y");
 
+
+
 	// NOTA: Alterar el orden de estos llamados va a romper (dependen uno del anterior)
 	// Inicializo semaforos necesarios para planif
 	iniciarSemaforosPlanificacion();

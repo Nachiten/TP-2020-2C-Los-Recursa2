@@ -1,7 +1,7 @@
 #ifndef SRC_APP_H_
 #define SRC_APP_H_
 
-#include"planificacion.h"
+#include "planificacion.h"
 
 
 // *** ESTRUCTURAS DE APP***

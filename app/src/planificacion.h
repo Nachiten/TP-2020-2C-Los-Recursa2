@@ -98,6 +98,8 @@ typedef enum{
 }algoritmo_planif;
 
 algoritmo_planif algoritmo;
+double alpha;
+uint32_t estimacion_inicial;
 
 typedef enum{
 	READY,
@@ -107,8 +109,11 @@ typedef enum{
 
 typedef struct{
 	int pedidoID;
-	int instruccionesTotales;
-	int instruccionesRealizadas;
+	int instruccionesTotales;//rafaga a realizar
+	int instruccionesRealizadas;//lo cumplido de la rafaga a realizar
+	int instruccionesAnteriores;
+	int estimacionActual;
+	int estimacionAnterior;
 	repartidor* repartidorAsignado;
 	int posRestauranteX;
 	int posRestauranteY;
@@ -139,7 +144,7 @@ void agregarANew(pcb_pedido*);
 void agregarAExit(pcb_pedido*);
 
 // OTROS
-uint32_t valor_para_switch_case(char* algoritmo);
+uint32_t valor_para_switch_case_planificacion(char* algoritmo);
 void freeDeArray(char**);
 void asignarRepartidorAPedido(pcb_pedido*);
 void printearValorSemaforo(sem_t*, char*);

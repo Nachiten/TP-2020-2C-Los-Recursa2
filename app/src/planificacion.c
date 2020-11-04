@@ -27,18 +27,38 @@ void iniciarPlanificacion(){
 
 	//sleep(7);
 
+    //------------------------------------PRUEBAS-------------------------------------------------------
+
 	pcb_pedido* unPedido = malloc(sizeof(pcb_pedido));
 	// 7 distancia hacia restaurant
-	unPedido->posRestauranteX = 9;
-	unPedido->posRestauranteY = 5;
+	unPedido->posRestauranteX = 8;
+	unPedido->posRestauranteY = 8;
 	// 5 distancia hacia cliente
 	unPedido->posClienteX = 11;
-	unPedido->posClienteY = 8;
+	unPedido->posClienteY = 11;
 	unPedido->pedidoID = 1;
 
 	agregarANew(unPedido);
 
-	sleep(3);
+	pcb_pedido* otroPedido = malloc(sizeof(pcb_pedido));
+	otroPedido->posRestauranteX = 5;
+	otroPedido->posRestauranteY = 5;
+	otroPedido->posClienteX = 50;
+	otroPedido->posClienteY = 50;
+	otroPedido->pedidoID = 2;
+
+    agregarANew(otroPedido);
+
+    sleep(4);
+
+    pcb_pedido* unPedido3 = malloc(sizeof(pcb_pedido));
+	unPedido3->posRestauranteX = 2;
+	unPedido3->posRestauranteY = 2;
+	unPedido3->posClienteX = 20;
+	unPedido3->posClienteY = 20;
+	unPedido3->pedidoID = 3;
+
+	agregarANew(unPedido3);
 
 	pthread_t hiloBlockReady;
 	pthread_create(&hiloBlockReady, NULL, (void*)hiloBlock_Ready, NULL);
@@ -64,6 +84,10 @@ void iniciarPlanificacion(){
 	sleep(25);
 
 	guardarPedidoListo(1);
+	guardarPedidoListo(2);
+	/*
+	guardarPedidoListo(3);
+	guardarPedidoListo(4);*/
 
 //	pcb_pedido* unPedido2 = malloc(sizeof(pcb_pedido));
 //	unPedido2->posRestauranteX = 3;
@@ -423,8 +447,12 @@ int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
 		repartidorActual->cansado = 1;
 
 		// Acciones al cansarse
+		pedidoEnEjecucion->instruccionesAnteriores = pedidoEnEjecucion->instruccionesRealizadas;
 		pedidoEnEjecucion->instruccionesTotales -= pedidoEnEjecucion->instruccionesRealizadas;
 		pedidoEnEjecucion->instruccionesRealizadas = 0;
+		pedidoEnEjecucion->estimacionAnterior = pedidoEnEjecucion->estimacionActual;
+		pedidoEnEjecucion->estimacionActual = alpha*pedidoEnEjecucion->instruccionesAnteriores
+				                            + (1-alpha)*pedidoEnEjecucion->estimacionAnterior;
 		repartidorActual->instruccionesRealizadas = 0;
 
 		log_info(logger, "[BLOCK] Ingresa pedido %i por estar cansado.", pedidoEnEjecucion->pedidoID);
@@ -440,6 +468,15 @@ int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
 			// La accoin en block es esperar el mensaje de pedido listo
 			pedidoEnEjecucion->accionBlocked = ESPERANDO_MSG;
 
+			//en el caso de que sea solo termino de rafaga, pero el vago no se canso tengo que ajustar aca tambien mis estimaciones
+			//caso contrario dejo la estimacion como estaba, es correcta la que ya fue calculada arriba
+			if(repartidorActual->cansado == 0){
+				pedidoEnEjecucion->instruccionesAnteriores = pedidoEnEjecucion->instruccionesRealizadas;
+				pedidoEnEjecucion->estimacionAnterior = pedidoEnEjecucion->estimacionActual;
+				pedidoEnEjecucion->estimacionActual = alpha*pedidoEnEjecucion->instruccionesAnteriores
+								                    + (1-alpha)*pedidoEnEjecucion->estimacionAnterior;
+			}
+
 			// Acciones al llegar al resutante
 			// Cuando se inicie la nueva rafaga tendra 0 instrucciones ejecutadas
 			pedidoEnEjecucion->instruccionesRealizadas = 0;
@@ -449,12 +486,19 @@ int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
 			// El nuevo objetivo es el cliente
 			pedidoEnEjecucion->objetivo = CLIENTE;
 			// Genero la nueva rafaga con la distancia hacia el cliente
+			pedidoEnEjecucion->instruccionesAnteriores = pedidoEnEjecucion->instruccionesTotales;
 			pedidoEnEjecucion->instruccionesTotales = distanciaDeRepartidorAObjetivo(pedidoEnEjecucion->repartidorAsignado,pedidoEnEjecucion);
 
 			log_info(logger, "[BLOCK] Ingresa pedido %i para esperar mensaje.", pedidoEnEjecucion->pedidoID);
 
 		} else if (pedidoEnEjecucion->objetivo == CLIENTE){
 			pedidoEnEjecucion->accionBlocked = ESPERANDO_EXIT;
+			//ajusto las estimaciones aca tambien por si se quisiera establecer alguna metrica, pero a fines del tp
+			//no seria necesario ya que el que entro por aca no vuelve a ready
+			pedidoEnEjecucion->instruccionesAnteriores = pedidoEnEjecucion->instruccionesRealizadas;
+			pedidoEnEjecucion->estimacionAnterior = pedidoEnEjecucion->estimacionActual;
+			pedidoEnEjecucion->estimacionActual = alpha*pedidoEnEjecucion->instruccionesAnteriores
+												+ (1-alpha)*pedidoEnEjecucion->estimacionAnterior;
 
 			log_info(logger, "[BLOCK] Pedido %i llega al cliente en posicion %i-%i.", pedidoEnEjecucion->pedidoID, pedidoEnEjecucion->posClienteX, pedidoEnEjecucion->posClienteY);
 
@@ -544,8 +588,8 @@ pcb_pedido* obtenerSiguienteHRRN(){
 
 	pedidoAux = list_get(colaReady,0);
 	elMejorResponseRatio = (pedidoAux->tiempoEspera
-						 + pedidoAux->instruccionesTotales)
-			   	   	   	 / pedidoAux->instruccionesTotales;
+						 + pedidoAux->estimacionActual)
+			   	   	   	 / pedidoAux->estimacionActual;
 	indexARemover = 0;
 
 	//itero buscando al pedido con mayor response ratio, cada vez que encuentro uno que supere al mejor,
@@ -554,8 +598,8 @@ pcb_pedido* obtenerSiguienteHRRN(){
     for(i=1;i<list_size(colaReady);i++){
     	pedidoAux = list_get(colaReady,i);
     	responseRatioAux = (pedidoAux->tiempoEspera
-    				     + pedidoAux->instruccionesTotales)
-    				     / pedidoAux->instruccionesTotales;
+    				     + pedidoAux->estimacionActual)
+    				     / pedidoAux->estimacionActual;
     	//piso el valor ancla (indice del pedido en la lista ready)
     	//que sera removido para ser planificado con repartidor solo si el iterado supera al mejor
     	if(elMejorResponseRatio < responseRatioAux){
@@ -583,14 +627,14 @@ pcb_pedido* obtenerSiguienteSJFSD(){
 	sem_wait(mutexReady);
 	pedidoAux = list_get(colaReady,0);
 	indexARemover = 0;
-	shortestJob = pedidoAux->instruccionesTotales;
+	shortestJob = pedidoAux->estimacionActual;
 
 	//itero por la lista de Ready
     for(i=1;i<list_size(colaReady);i++){
     	pedidoAux = list_get(colaReady,i);
-    	//idem HRRN pero en vez de response ratio solo comparo las rafagas a realizar
-    	if(shortestJob > pedidoAux->instruccionesTotales){
-    		shortestJob = pedidoAux->instruccionesTotales;
+    	//idem HRRN pero en vez de response ratio solo comparo las estimaciones de las rafagas a realizar
+    	if(shortestJob > pedidoAux->estimacionActual){
+    		shortestJob = pedidoAux->estimacionActual;
     		indexARemover = i;
     	}
 
@@ -673,6 +717,9 @@ void asignarRepartidorAPedido(pcb_pedido* unPedido){
 	unPedido->repartidorAsignado = mejorRepartidor;
 	unPedido->instruccionesTotales = mejorDistancia;
 	unPedido->instruccionesRealizadas = 0;
+	unPedido->instruccionesAnteriores = 0;
+	unPedido->estimacionAnterior = 0;
+	unPedido->estimacionActual = estimacion_inicial;
 	unPedido->accionBlocked = NO_BLOCK;
 	unPedido->tiempoEspera = 0;
 	unPedido->proximoEstado = READY;
@@ -817,6 +864,8 @@ void leerPlanificacionConfig(t_config* config){
 
 	GRADO_MULTIPROCE = config_get_int_value(config, "GRADO_DE_MULTIPROCESAMIENTO");
 	RETARDO_CICLO_CPU = config_get_int_value(config, "RETARDO_CICLO_CPU");
+	alpha = config_get_double_value(config,"ALPHA");
+	estimacion_inicial = config_get_int_value(config, "ESTIMACION_INICIAL");
 
 	char** posicionesRepartidores = config_get_array_value(config, "REPARTIDORES");
 	char** frecuenciasDescansos = config_get_array_value(config, "FRECUENCIA_DE_DESCANSO");
