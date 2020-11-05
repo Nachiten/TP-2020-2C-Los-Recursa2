@@ -153,3 +153,91 @@
 [INFO] 16:55:19:706 Cliente/(4203:4206): Conexión establecida con socket de destino.
 [INFO] 16:57:52:987 Cliente/(4203:4206): El intento de guardar un pedido fue: exitoso.
 
+[INFO] 21:03:00:34 Cliente/(6000:6000): Conexión establecida con socket de destino.
+[INFO] 21:03:54:915 Cliente/(6000:6035): Conexión establecida con socket de destino.
+[INFO] 21:03:54:958 Cliente/(6000:6035): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:04:07:186 Cliente/(6000:6039): Conexión establecida con socket de destino.
+[INFO] 21:04:07:204 Cliente/(6000:6039): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:04:11:467 Cliente/(6000:6041): Conexión establecida con socket de destino.
+[INFO] 21:07:20:546 Cliente/(6000:6119): Conexión establecida con socket de destino.
+[INFO] 21:07:20:556 Cliente/(6000:6121): Conexión establecida con socket de destino.
+[INFO] 21:07:20:558 Cliente/(6000:6119): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:07:20:565 Cliente/(6000:6121): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:07:40:104 Cliente/(6000:6123): Conexión establecida con socket de destino.
+[INFO] 21:11:18:750 Cliente/(6000:6231): Conexión establecida con socket de destino.
+[INFO] 21:16:02:895 Cliente/(6000:6231): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:16:11:266 Cliente/(6000:6233): Conexión establecida con socket de destino.
+[INFO] 21:20:09:45 Cliente/(6000:6464): Conexión establecida con socket de destino.
+[INFO] 21:20:40:858 Cliente/(6000:6464): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:20:48:549 Cliente/(6000:6466): Conexión establecida con socket de destino.
+[INFO] 21:22:32:910 Cliente/(6000:6581): Conexión establecida con socket de destino.
+[INFO] 21:22:32:916 Cliente/(6000:6581): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:22:36:494 Cliente/(6000:6583): Conexión establecida con socket de destino.
+[INFO] 21:23:54:406 Cliente/(6000:6664): Conexión establecida con socket de destino.
+[INFO] 21:29:10:248 Cliente/(6000:6844): Conexión establecida con socket de destino.
+[INFO] 21:30:50:633 Cliente/(6000:6907): Conexión establecida con socket de destino.
+[INFO] 21:31:05:192 Cliente/(6000:6907): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:31:13:310 Cliente/(6000:6909): Conexión establecida con socket de destino.
+[INFO] 21:32:15:698 Cliente/(6000:6909): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:50:45:284 Cliente/(11525:11525): Conexión establecida con socket de destino.
+[INFO] 21:50:52:131 Cliente/(11525:11528): Conexión establecida con socket de destino.
+[INFO] 21:50:57:663 Cliente/(11525:11528): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:51:05:708 Cliente/(11525:11530): Conexión establecida con socket de destino.
+[INFO] 21:51:48:853 Cliente/(11525:11530): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:51:55:773 Cliente/(11525:11538): Conexión establecida con socket de destino.
+[INFO] 21:55:06:777 Cliente/(11525:11714): Conexión establecida con socket de destino.
+[INFO] 21:55:14:726 Cliente/(11525:11714): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:55:20:284 Cliente/(11525:11716): Conexión establecida con socket de destino.
+[INFO] 21:55:20:298 Cliente/(11525:11716): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:55:23:746 Cliente/(11525:11723): Conexión establecida con socket de destino.
+[INFO] 21:58:02:429 Cliente/(11525:11796): Conexión establecida con socket de destino.
+[INFO] 21:58:02:438 Cliente/(11525:11796): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:58:02:780 Cliente/(11525:11798): Conexión establecida con socket de destino.
+[INFO] 21:58:02:796 Cliente/(11525:11798): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:58:26:180 Cliente/(11525:11800): Conexión establecida con socket de destino.
+[INFO] 23:31:57:525 Cliente/(11525:12903): Conexión establecida con socket de destino.
+[INFO] 23:31:57:530 Cliente/(11525:12903): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 23:32:04:572 Cliente/(11525:12905): Conexión establecida con socket de destino.
+[INFO] 23:32:04:579 Cliente/(11525:12905): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 23:32:08:172 Cliente/(11525:12909): Conexión establecida con socket de destino.
+[INFO] 23:36:02:112 Cliente/(11525:13078): Conexión establecida con socket de destino.
+[INFO] 23:36:02:113 Cliente/(11525:13079): Conexión establecida con socket de destino.
+[INFO] 23:36:02:293 Cliente/(11525:13079): El intento de guardar un pedido fue: fallido.
+
+[INFO] 23:36:02:477 Cliente/(11525:13078): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 23:36:02:506 Cliente/(11525:13080): Conexión establecida con socket de destino.
+[INFO] 23:36:02:567 Cliente/(11525:13080): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [1]. Cantidad ya cocinada: [0]
+[INFO] 23:36:41:439 Cliente/(11525:13084): Conexión establecida con socket de destino.
+[INFO] 23:36:41:447 Cliente/(11525:13084): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 23:36:59:672 Cliente/(11525:13092): Conexión establecida con socket de destino.
+[INFO] 23:36:59:680 Cliente/(11525:13092): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas,PapasFritas]. Su/s cantidad/es: [1,2]. Cantidad ya cocinada: [0,0]
+[WARNING] 23:42:55:910 Cliente/(13186:13186): Conexión fallida con socket de destino.
+[INFO] 23:42:55:910 Cliente/(13186:13186): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 23:43:03:475 Cliente/(13217:13217): Conexión establecida con socket de destino.
+[INFO] 23:43:19:369 Cliente/(13217:13225): Conexión establecida con socket de destino.
+[INFO] 23:43:19:375 Cliente/(13217:13227): Conexión establecida con socket de destino.
+[INFO] 23:43:19:376 Cliente/(13217:13225): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 23:43:19:388 Cliente/(13217:13227): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 23:43:44:530 Cliente/(13217:13229): Conexión establecida con socket de destino.
+[INFO] 23:44:38:123 Cliente/(13217:13229): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas,PapasFritas]. Su/s cantidad/es: [1,2]. Cantidad ya cocinada: [0,0]

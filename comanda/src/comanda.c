@@ -298,6 +298,8 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		//busco si hay un espacio libre en SWAP para poner la pagina nueva/editada
             		sem_wait(semaforoTocarListaEspaciosEnSWAP);
             		numeroDeEspacioEnSwap = buscarPrimerEspacioLibre(lista_de_espacios_en_SWAP);
+            		//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
+            		marcarEspacioComoOcupado(lista_de_espacios_en_SWAP, numeroDeEspacioEnSwap);
             		sem_post(semaforoTocarListaEspaciosEnSWAP);
 
             		if(numeroDeEspacioEnSwap == -1)

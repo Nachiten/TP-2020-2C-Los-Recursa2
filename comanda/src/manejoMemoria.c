@@ -26,8 +26,7 @@ void inicializar_tabla_de_paginas(tabla_paginas* laTablaDePaginas)
 	laTablaDePaginas->numero_de_victima = 0;
 	laTablaDePaginas->cantidadPedidaComida = 0;
 	laTablaDePaginas->cantidadComidaPreparada = 0;
-	laTablaDePaginas->nombreDeMorfi = malloc(24);
-	laTablaDePaginas->largoPostaDeMorfi = 24;
+	laTablaDePaginas->nombreDeMorfi = malloc(24); //harcodeado 24 para cumplir con enunciado
 	laTablaDePaginas->cargadoEnSWAP = 0;
 	laTablaDePaginas->posicionInicialEnSWAP = -1;
 	laTablaDePaginas->cargadoEnMEMORIA = 0;
@@ -145,7 +144,6 @@ tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePl
 		auxiliarRecorrer->cantidadComidaPreparada = 0;
 		auxiliarRecorrer->cantidadPedidaComida = cantidadPlatos;
 		auxiliarRecorrer->largoPostaDeMorfi = strlen(nombrePlato);
-		auxiliarRecorrer->nombreDeMorfi = malloc(24); //harcodeado 24 por enunciado
 		memcpy(auxiliarRecorrer->nombreDeMorfi, nombrePlato, strlen(nombrePlato)+1);
 		auxiliarRecorrer->numero_de_pagina++;
 
@@ -157,11 +155,16 @@ tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePl
 	{
 		nuevoPlato->cantidadComidaPreparada = 0;
 		nuevoPlato->cantidadPedidaComida = cantidadPlatos;
-		nuevoPlato->nombreDeMorfi = malloc(strlen(nombrePlato)+1);
+		nuevoPlato->nombreDeMorfi = malloc(24); //harcodeado 24 para cumplir con enunciado
+		nuevoPlato->largoPostaDeMorfi = strlen(nombrePlato);
 		memcpy(nuevoPlato->nombreDeMorfi, nombrePlato, strlen(nombrePlato)+1);
 		nuevoPlato->numero_de_pagina = auxiliarRecorrer->numero_de_pagina + 1;
 		nuevoPlato->anter_pagina = auxiliarRecorrer;
 		nuevoPlato->sig_pagina = NULL;
+		nuevoPlato->cargadoEnSWAP = 0;
+		nuevoPlato->posicionInicialEnSWAP = -1;
+		nuevoPlato->cargadoEnMEMORIA = 0;
+		nuevoPlato->numeroDeMarco = -1;
 
 		//"pego" el nuevo plato al final de la lista de platos
 		auxiliarRecorrer->sig_pagina = nuevoPlato;
