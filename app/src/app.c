@@ -85,7 +85,7 @@ void inicializar_semaforos(){
 //manda un array con los nombres de todos los restaurantes conectados o restoDefault si no hay ninguno
 void consultar_restaurantes(int32_t socket_cliente){
 
-	char* stringCompleto = string_new();
+	char* stringCompleto;
 	char* stringNuevoParaAgregar;
 	char* stringInicial = "[";
 	char* stringFinal = "]";
@@ -540,11 +540,22 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 }
 
 void consultar_Pedido(consultar_pedido* pedido){
+	perfil_cliente* cliente;
 	respuesta_consultar_pedido* datosObtenerPedido;
+	obtener_pedido* obtener_Pedido;
 	respuesta_obtener_pedido* respuesta_consulta;
+	int32_t recibidos, recibidosSize = 0, sizeAAllocar, numero_cliente;
+	codigo_operacion cod_op;
 
+	numero_cliente = buscar_pedido_por_id(pedido->idPedido);
+	cliente = list_get(listaPedidos,numero_cliente);
 
-	/*
+	obtener_Pedido = malloc(sizeof(obtener_pedido));
+	obtener_Pedido->largoNombreRestaurante = strlen(cliente->nombre_resto);
+	obtener_Pedido->nombreRestaurante = malloc(strlen(cliente->nombre_resto)+1);
+	strcpy(obtener_Pedido->nombreRestaurante,cliente->nombre_resto);
+	obtener_Pedido->idPedido = cliente->id_global;
+
 	mandar_mensaje(obtener_Pedido,OBTENER_PEDIDO,socket_commanda);
 
 	recibidos = recv(socket_commanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
@@ -561,7 +572,43 @@ void consultar_Pedido(consultar_pedido* pedido){
 		char** listaComidasTotales = string_get_string_as_array(respuesta_consulta->cantTotales);
 		char** listaComidasListas = string_get_string_as_array(respuesta_consulta->cantListas);
 		int i = 0, j = 0;
-	}*/
+
+		char* stringCompleto = string_new();
+		char* stringInicial = "[";
+		char* stringFinal = "]";
+		char* stringSeparador = ",";
+		char* stringCorcheteInicial = "{";
+		char* stringCorcheteFinal = "}";
+
+		string_append(&stringCompleto, stringInicial);
+
+		while(listaComidas[i] != NULL){
+			string_append(&stringCompleto, stringCorcheteInicial);
+			string_append(&stringCompleto, listaComidas[i]);
+			string_append(&stringCompleto, stringSeparador);
+			string_append(&stringCompleto, listaComidasTotales[i]);
+			string_append(&stringCompleto, stringSeparador);
+			string_append(&stringCompleto, listaComidasListas[i]);
+			string_append(&stringCompleto, stringCorcheteFinal);
+
+			if(listaComidas[i+1] != NULL){
+					string_append(&stringCompleto, stringSeparador);// agregas una , si ya hay elementos agregados
+				}
+			i++;
+			j++;
+		}
+		string_append(&stringCompleto, stringFinal);
+
+		datosObtenerPedido = malloc(sizeof(respuesta_consultar_pedido));
+		datosObtenerPedido->largoNombreRestaurante = strlen(cliente->nombre_resto);
+		datosObtenerPedido->nombreRestaurante = malloc(strlen(cliente->nombre_resto) + 1);
+		strcpy(datosObtenerPedido->nombreRestaurante,cliente->nombre_resto);
+		datosObtenerPedido->listaplatos = malloc(strlen(stringCompleto) + 1);
+		strcpy(datosObtenerPedido->listaplatos,stringCompleto);
+		datosObtenerPedido->cantidadPlatos = j;
+
+		mandar_mensaje(datosObtenerPedido,RESPUESTA_CONSULTAR_PEDIDO,cliente->socket_cliente);
+	}
 }
 
 

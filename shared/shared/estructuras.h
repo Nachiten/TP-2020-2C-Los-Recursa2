@@ -164,10 +164,9 @@ typedef struct{
 typedef struct{
 	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
-	uint32_t repartidor;
 	uint32_t estado; //ver como implementan la planificacion
 	uint32_t cantidadPlatos;
-	char** listaplatos[];
+	char* listaplatos;
 }respuesta_consultar_pedido;
 
 typedef struct{
