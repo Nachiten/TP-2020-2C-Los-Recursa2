@@ -257,3 +257,51 @@
 [INFO] 11:37:35:121 Cliente/(10486:10748): El intento de guardar un pedido fue: exitoso.
 
 [INFO] 11:38:20:805 Cliente/(10486:10755): Conexión establecida con socket de destino.
+[INFO] 18:09:33:100 Cliente/(16793:16793): Conexión establecida con socket de destino.
+[INFO] 18:09:34:939 Cliente/(16793:16803): Conexión establecida con socket de destino.
+[INFO] 18:09:34:941 Cliente/(16793:16805): Conexión establecida con socket de destino.
+[INFO] 18:09:34:942 Cliente/(16793:16803): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 18:09:34:962 Cliente/(16793:16805): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 18:10:06:397 Cliente/(16793:16807): Conexión establecida con socket de destino.
+[INFO] 18:10:06:402 Cliente/(16793:16807): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 18:11:01:531 Cliente/(16793:16810): Conexión establecida con socket de destino.
+[INFO] 18:49:10:844 Cliente/(16793:17796): Conexión establecida con socket de destino.
+[INFO] 18:49:10:849 Cliente/(16793:17798): Conexión establecida con socket de destino.
+[INFO] 18:49:10:853 Cliente/(16793:17796): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 18:49:10:857 Cliente/(16793:17798): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 18:49:14:985 Cliente/(16793:17800): Conexión establecida con socket de destino.
+[INFO] 18:49:14:997 Cliente/(16793:17800): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 18:49:37:586 Cliente/(16793:17802): Conexión establecida con socket de destino.
+[INFO] 18:59:25:202 Cliente/(16793:18068): Conexión establecida con socket de destino.
+[INFO] 19:02:17:100 Cliente/(16793:18068): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:02:23:878 Cliente/(16793:18082): Conexión establecida con socket de destino.
+[INFO] 19:03:44:260 Cliente/(16793:18082): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:03:50:377 Cliente/(16793:18177): Conexión establecida con socket de destino.
+[INFO] 19:05:50:120 Cliente/(16793:18177): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:06:11:258 Cliente/(16793:18220): Conexión establecida con socket de destino.
+[INFO] 19:11:49:699 Cliente/(16793:18220): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:17:28:930 Cliente/(16793:18627): Conexión establecida con socket de destino.
+[INFO] 19:17:28:932 Cliente/(16793:18629): Conexión establecida con socket de destino.
+[INFO] 19:17:28:932 Cliente/(16793:18627): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:17:28:934 Cliente/(16793:18629): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:17:35:874 Cliente/(16793:18631): Conexión establecida con socket de destino.
+[INFO] 19:17:35:876 Cliente/(16793:18631): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:18:00:443 Cliente/(16793:18633): Conexión establecida con socket de destino.
+[INFO] 19:18:00:444 Cliente/(16793:18633): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas,Bondiolita]. Su/s cantidad/es: [1,1]. Cantidad ya cocinada: [0,0]
+[INFO] 19:18:35:923 Cliente/(16793:18635): Conexión establecida con socket de destino.
+[INFO] 19:18:35:923 Cliente/(16793:18635): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:18:44:605 Cliente/(16793:18640): Conexión establecida con socket de destino.

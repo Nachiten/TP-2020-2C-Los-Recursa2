@@ -240,7 +240,7 @@ void marcarEspacioComoLibre(espacio* listaDeEspacios, uint32_t numeroDeEspacioEl
 	}
 
 	//ya lo encontre, marco como libre
-	auxiliarMoverme->espacioOcupado = 1;
+	auxiliarMoverme->espacioOcupado = 0;
 }
 
 void asignarNumeroDeVictima(uint32_t* miNumeroDeVictima)
@@ -593,7 +593,7 @@ void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes
 	uint32_t primeraIteracion = 1;
 
 	sem_wait(semaforoLogger);
-	log_info(logger,"--Inicializado Algoritmo de reemplazo de página--");
+	log_info(logger,"--Inicializado Algoritmo de reemplazo de Páginas--");
 	sem_post(semaforoLogger);
 
 	if(strcmp(ALGOR_REEMPLAZO, "LRU") == 0)
@@ -643,7 +643,7 @@ void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes
 
 		//en este punto ya tengo la pagina q vamos a volar para SWAP
 		sem_wait(semaforoLogger);
-		log_info(logger,"Víctima seleccionada para reemplazo: %s", victima->nombreDeMorfi);
+		log_info(logger,"La víctima seleccionada para el reemplazo se encuentra en el marco: %i", victima->numeroDeMarco);
 		sem_post(semaforoLogger);
 
 		//hay que mover la pagina a SWAP
@@ -659,16 +659,19 @@ void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes
 		victima->numeroDeMarco = -1;
 	}
 
-	if(strcmp(ALGOR_REEMPLAZO, "CLOCK_MEJ") == 0)
-	{
-		puts("ALGOR PENDIENTE");//ToDo
-		abort();
-	}
-
 	else
 	{
-		puts("Pusieron un algoritmo que nada que ver, me prendo fuego");
-		abort();
+		if(strcmp(ALGOR_REEMPLAZO, "CLOCK_MEJ") == 0)
+		{
+			puts("ALGOR PENDIENTE");//ToDo
+			abort();
+		}
+
+		else
+		{
+			puts("Pusieron un algoritmo que nada que ver, me prendo fuego");
+			abort();
+		}
 	}
 }
 

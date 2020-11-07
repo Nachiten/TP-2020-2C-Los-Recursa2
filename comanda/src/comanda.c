@@ -47,8 +47,6 @@ int main()
 	printf("Tamaño de Memoria Principal: %u bytes.\n", TAMANIO_MEMORIA_PRINCIPAL);
 	TAMANIO_AREA_DE_SWAP = config_get_int_value(config,"TAMANIO_SWAP");
 	printf("Tamaño del Área de Swapping: %u bytes.\n", TAMANIO_AREA_DE_SWAP);
-	FRECUENCIA_COMPACTACION = config_get_int_value(config,"FRECUENCIA_COMPACTACION");
-	printf("Frecuencia de compactación: %u.\n", FRECUENCIA_COMPACTACION);
 	ALGOR_REEMPLAZO = config_get_string_value(config,"ALGORITMO_REEMPLAZO");
 	printf("Algoritmo de reemplazo: %s.\n", ALGOR_REEMPLAZO);
 	puts("****************************************");
@@ -302,41 +300,47 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		marcarEspacioComoOcupado(lista_de_espacios_en_SWAP, numeroDeEspacioEnSwap);
             		sem_post(semaforoTocarListaEspaciosEnSWAP);
 
-            		if(numeroDeEspacioEnSwap == -1)
+            		if(numeroDeEspacioEnSwap != -1)
             		{
-            			//ToDo si no hay un espacio libre hay que llamar al grim reaper
+						agregar_pagina_a_swap(plato_creado_o_editado, numeroDeEspacioEnSwap*32);
+
+						//busco si hay un marco libre en MP para poner la pagina nueva/editada
+						sem_wait(semaforoTocarListaEspaciosEnMP);
+						numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+
+						//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
+						if(numeroDeMarcoEnMP != -1)
+						{
+							marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
+						}
+						sem_post(semaforoTocarListaEspaciosEnMP);
+
+						//si no hay un espacio libre hay que llamar al grim reaper
+						if(numeroDeMarcoEnMP == -1)
+						{
+							sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+							sem_wait(semaforoTocarListaEspaciosEnMP);
+							algoritmo_de_reemplazo(ALGOR_REEMPLAZO, lista_de_pedidos_de_todos_los_restaurantes, lista_de_espacios_en_MP);
+							numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+							marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
+							sem_post(semaforoTocarListaEspaciosEnMP);
+							sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+						}
+
+						//una vez tengo un marco listo para poner la Página, pongo los datos en MP
+						mover_pagina_a_memoriaPrincipal(plato_creado_o_editado, numeroDeEspacioEnSwap*32, numeroDeMarcoEnMP*32);
+						printf("--Se guardó %u plato/s %s para %s, en el pedido de ID %u--\n",recibidoGuardarPlato->cantidadPlatos, recibidoGuardarPlato->nombrePlato, recibidoGuardarPlato->nombreRestaurante, recibidoGuardarPlato->idPedido);
+
+						//por ultimo, respondemos que no crasheo nada
+						resultado->respuesta = 1;
             		}
 
-            		//ToDO temporalmente asumido que siempre existe espacio en SWAP
-            		agregar_pagina_a_swap(plato_creado_o_editado, numeroDeEspacioEnSwap*32);
-
-            		//busco si hay un marco libre en MP para poner la pagina nueva/editada
-					sem_wait(semaforoTocarListaEspaciosEnMP);
-					numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
-
-					//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
-					if(numeroDeMarcoEnMP != -1)
-					{
-						marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
-					}
-					sem_post(semaforoTocarListaEspaciosEnMP);
-
-					if(numeroDeMarcoEnMP == -1)
-					{
-						//ToDo si no hay un espacio libre hay que llamar al grim reaper
-	            		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
-						sem_wait(semaforoTocarListaEspaciosEnMP);
-						algoritmo_de_reemplazo(ALGOR_REEMPLAZO, lista_de_pedidos_de_todos_los_restaurantes, lista_de_espacios_en_MP);
-						sem_post(semaforoTocarListaEspaciosEnMP);
-	            		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
-					}
-
-					//ToDO temporalmente asumido que siempre existen marcos libres en MP
-					mover_pagina_a_memoriaPrincipal(plato_creado_o_editado, numeroDeEspacioEnSwap*32, numeroDeMarcoEnMP*32);
-					printf("--Se guardó %u plato/s %s para %s con ID %u--\n",recibidoGuardarPlato->cantidadPlatos, recibidoGuardarPlato->nombrePlato, recibidoGuardarPlato->nombreRestaurante, recibidoGuardarPlato->idPedido);
-
-					//por ultimo, respondemos que no crasheo nada
-					resultado->respuesta = 1;
+            		//si no hay espacio en SWAP se deniega la solicitud
+            		else
+            		{
+            			puts("SWAP se encuentra hasta las manos, no se puede poner ninguna Página más por el momento.");
+            			resultado->respuesta = 0;
+            		}
         		}
 
         		//el pedido no existe

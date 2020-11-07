@@ -30,7 +30,6 @@ char* app_puerto;
 char* cliente_puerto;
 uint32_t TAMANIO_MEMORIA_PRINCIPAL;
 uint32_t TAMANIO_AREA_DE_SWAP;
-uint32_t FRECUENCIA_COMPACTACION;
 char* ALGOR_REEMPLAZO;
 
 //para manejo de mensajes que llegan**********************************************************
