@@ -35,3 +35,7 @@
 [INFO] 23:36:41:445 Cliente/(13075:13093): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x423e658
 [INFO] 23:43:19:375 Cliente/(13205:13228): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804e640
 [INFO] 23:43:19:386 Cliente/(13205:13230): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804e660
+[INFO] 11:26:17:491 Cliente/(10447:10506): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804e640
+[INFO] 11:36:55:876 Cliente/(10725:10741): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804e640
+[INFO] 11:37:31:325 Cliente/(10725:10749): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804e660
+[INFO] 11:37:35:121 Cliente/(10725:10756): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804e680

@@ -313,17 +313,27 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		//busco si hay un marco libre en MP para poner la pagina nueva/editada
 					sem_wait(semaforoTocarListaEspaciosEnMP);
 					numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+
 					//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
-					marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
+					if(numeroDeMarcoEnMP != -1)
+					{
+						marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
+					}
 					sem_post(semaforoTocarListaEspaciosEnMP);
 
 					if(numeroDeMarcoEnMP == -1)
 					{
 						//ToDo si no hay un espacio libre hay que llamar al grim reaper
+	            		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+						sem_wait(semaforoTocarListaEspaciosEnMP);
+						algoritmo_de_reemplazo(ALGOR_REEMPLAZO, lista_de_pedidos_de_todos_los_restaurantes, lista_de_espacios_en_MP);
+						sem_post(semaforoTocarListaEspaciosEnMP);
+	            		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 					}
 
 					//ToDO temporalmente asumido que siempre existen marcos libres en MP
 					mover_pagina_a_memoriaPrincipal(plato_creado_o_editado, numeroDeEspacioEnSwap*32, numeroDeMarcoEnMP*32);
+					printf("--Se guardó %u plato/s %s para %s con ID %u--\n",recibidoGuardarPlato->cantidadPlatos, recibidoGuardarPlato->nombrePlato, recibidoGuardarPlato->nombreRestaurante, recibidoGuardarPlato->idPedido);
 
 					//por ultimo, respondemos que no crasheo nada
 					resultado->respuesta = 1;
@@ -347,7 +357,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibidoObtenerPedido = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoObtenerPedido, cod_op, socket);
 
-        	resultadoObtenerPedido = malloc(sizeof(respuesta_obtener_pedido)); //ToDo hacer los free dentro de CADA CASO POSIBLE, si es por fuera revienta
+        	resultadoObtenerPedido = malloc(sizeof(respuesta_obtener_pedido));
 
         	printf("Buscando datos del pedido %u del restaurante %s...\n", recibidoObtenerPedido->idPedido, recibidoObtenerPedido->nombreRestaurante);
 
@@ -390,7 +400,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		//una vez cargadas en MP, copio los datos de MP sobre los platos del pedido
             		actualizarTodosLosPlatosConDatosDeMP(tablaDePedidosDelRestaurante, numeroDeSegmento);
 
-            		//ToDo una vez tengo las listas, me armo los datos de resultadoObtenerPedido
+            		//una vez tengo las listas, me armo los datos de resultadoObtenerPedido
             		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
             		preparar_datos_de_platos_con_formato_de_obtener_pedido(selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento), resultadoObtenerPedido);
             		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
@@ -479,11 +489,15 @@ void inicializarSemaforos() //Todo matar semaforos?
 	semaforoTocarListaPedidosTodosLosRestaurantes = malloc(sizeof(sem_t));
 	semaforoTocarListaEspaciosEnSWAP = malloc(sizeof(sem_t));
 	semaforoTocarListaEspaciosEnMP = malloc(sizeof(sem_t));
+	semaforoTocarMP = malloc(sizeof(sem_t));
+	semaforoTocarSWAP = malloc(sizeof(sem_t));
 
 	sem_init(semaforoNumeroVictima, 0, 1);
 	sem_init(semaforoLogger, 0, 1);
 	sem_init(semaforoTocarListaPedidosTodosLosRestaurantes, 0, 1);
 	sem_init(semaforoTocarListaEspaciosEnSWAP, 0, 1);
 	sem_init(semaforoTocarListaEspaciosEnMP, 0, 1);
+	sem_init(semaforoTocarMP, 0, 1);//ToDo revisar todos los lugares donde deberian estar estos 2 semaforos!!!
+	sem_init(semaforoTocarSWAP, 0, 1);
 }
 

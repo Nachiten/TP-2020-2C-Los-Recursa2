@@ -241,3 +241,19 @@
 
 [INFO] 23:43:44:530 Cliente/(13217:13229): Conexión establecida con socket de destino.
 [INFO] 23:44:38:123 Cliente/(13217:13229): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas,PapasFritas]. Su/s cantidad/es: [1,2]. Cantidad ya cocinada: [0,0]
+[WARNING] 11:24:24:526 Cliente/(10483:10483): Conexión fallida con socket de destino.
+[INFO] 11:24:24:552 Cliente/(10483:10483): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 11:24:35:164 Cliente/(10486:10486): Conexión establecida con socket de destino.
+[INFO] 11:26:17:480 Cliente/(10486:10503): Conexión establecida con socket de destino.
+[INFO] 11:26:17:511 Cliente/(10486:10503): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 11:36:55:861 Cliente/(10486:10738): Conexión establecida con socket de destino.
+[INFO] 11:36:55:877 Cliente/(10486:10738): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 11:37:31:309 Cliente/(10486:10740): Conexión establecida con socket de destino.
+[INFO] 11:37:31:326 Cliente/(10486:10740): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 11:37:35:101 Cliente/(10486:10748): Conexión establecida con socket de destino.
+[INFO] 11:37:35:121 Cliente/(10486:10748): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 11:38:20:805 Cliente/(10486:10755): Conexión establecida con socket de destino.

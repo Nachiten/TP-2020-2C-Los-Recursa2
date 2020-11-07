@@ -15,6 +15,8 @@ sem_t* semaforoNumeroVictima;
 sem_t* semaforoTocarListaPedidosTodosLosRestaurantes;
 sem_t* semaforoTocarListaEspaciosEnSWAP;
 sem_t* semaforoTocarListaEspaciosEnMP;
+sem_t* semaforoTocarMP;
+sem_t* semaforoTocarSWAP;
 
 tablas_segmentos_restaurantes* lista_de_pedidos_de_todos_los_restaurantes; //aca empiezan las lista de segmentos que tiene CoMAnda para cada restaurante
 espacio* lista_de_espacios_en_SWAP; //aca comienza la lista de los espacios disponibles/ocupados en area de SWAP
@@ -36,6 +38,7 @@ tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePl
 void crearNuevoEspacio(espacio* espacio); //para preparar los espacios que puede haber en SWAP/MP
 int32_t buscarPrimerEspacioLibre(espacio* listaDeEspacios); //devuelve el numero del espacio encontrado, o -1 si no se encontro
 void marcarEspacioComoOcupado(espacio* listaDeEspacios, uint32_t numeroDeEspacioElegido);
+void marcarEspacioComoLibre(espacio* listaDeEspacios, uint32_t numeroDeEspacioElegido);
 
 //crea y asigna un nuevo numero de victima a la pagina
 void asignarNumeroDeVictima(uint32_t* miNumeroDeVictima);
@@ -68,8 +71,14 @@ void agregar_pagina_a_swap(tabla_paginas* tablaDePlatosDelPedido, uint32_t posic
 //copiamos la info que tenemos en el area de SWAP a MEMORIA PRINCIPAL
 void mover_pagina_a_memoriaPrincipal(tabla_paginas* tablaDePlatosDelPedido, uint32_t posicionInicialDeSWAP, uint32_t posicionInicialDeMEMORIA);
 
+//actualiza los datos de una Pagina de SWAP con la data que hay en MP
+void actualizar_pagina_en_SWAP (tabla_paginas* laPagina);
+
 //toma los datos de MP y los devuelve a su PAGINA
 void tomar_datos_de_MP(tabla_paginas* platoDelPedido);
+
+// Grim Reaper
+void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, espacio* lista_de_espacios_en_MP);
 
 //dada una pagina, borra los datos del plato, para cumplir con enunciado
 void borrar_datos_del_plato(tabla_paginas* platoDelPedido);
