@@ -61,3 +61,13 @@
 [INFO] 19:18:35:923 Cliente/(18561:18641): --Inicializado Algoritmo de reemplazo de Páginas--
 [INFO] 19:18:35:923 Cliente/(18561:18641): La víctima seleccionada para el reemplazo se encuentra en el marco: 0
 [INFO] 19:18:35:923 Cliente/(18561:18641): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x864c640
+[INFO] 14:34:08:128 Cliente/(6370:6386): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f640
+[INFO] 14:34:39:457 Cliente/(6370:6399): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f660
+[INFO] 14:34:43:257 Cliente/(6370:6401): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f680
+[INFO] 14:35:08:784 Cliente/(6370:6411): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f6a0
+[INFO] 14:35:36:944 Cliente/(6370:6416): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f6c0
+[INFO] 14:37:03:297 Cliente/(6457:6477): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f640
+[INFO] 14:43:31:431 Cliente/(6562:6582): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f640
+[INFO] 15:51:05:497 Cliente/(7876:7899): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f640
+[INFO] 15:57:27:448 Cliente/(8056:8073): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f640
+[INFO] 15:59:44:105 Cliente/(8056:8115): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f640

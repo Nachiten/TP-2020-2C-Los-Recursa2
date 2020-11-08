@@ -449,20 +449,28 @@ uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombr
 {
 	tabla_paginas* tablaDePlatos = segmentoSeleccionado->mi_tabla;
 	uint32_t existe = 0;
+	uint32_t cargado = 0;
 
 	//avanzo en la tabla de paginas a ver si existe una de el plato solicitado
 	while(tablaDePlatos != NULL)
 	{
+		cargado = 0;//ToDo ver si borrar a la mierda el cargado
+
 		//si la pagina esta en MP, me traigo sus datos de ahi
 		if(tablaDePlatos->cargadoEnMEMORIA == 1)
 		{
 			tomar_datos_de_MP(tablaDePlatos);
+			cargado = 1;
 		}
 
 		//si no esta en MP, los tengo que buscar de SWAP
 		else
 		{
-			tomar_datos_de_SWAP(tablaDePlatos);
+			if(tablaDePlatos->cargadoEnSWAP == 1)
+			{
+				tomar_datos_de_SWAP(tablaDePlatos);
+				cargado = 1;
+			}
 		}
 
 		//una vez tengo los datos, comparo nombres de platos a ver si ya existe
@@ -489,7 +497,9 @@ tabla_paginas* agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidos
 	segmentos* laTablaDeSegmentos = tablaDePedidosDelRestaurante->miTablaDePedidos;
 	segmentos* segmentoSeleccionado = NULL;
 	tabla_paginas* tablaDePlatos = NULL;
+	uint32_t encontrado = 0;
 
+	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 	//recorro la lista hasta que encuentre el numero del segmento seleccionado
 	while(laTablaDeSegmentos->numero_de_segmento != numeroDeSegmento)
 	{
@@ -498,10 +508,51 @@ tabla_paginas* agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidos
 
 	segmentoSeleccionado = laTablaDeSegmentos;
 	tablaDePlatos = segmentoSeleccionado->mi_tabla;
+	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 
 	//vemos si existe el plato en el pedido
 	if(verificarExistenciaDePlato(segmentoSeleccionado, nombrePlato))
 	{
+		//avanzo en la tabla de paginas hasta encontrar el del plato solicitado
+		while(tablaDePlatos != NULL && encontrado == 0)
+		{
+			//si la pagina esta en MP, me traigo sus datos de ahi
+			if(tablaDePlatos->cargadoEnMEMORIA == 1)
+			{
+				tomar_datos_de_MP(tablaDePlatos);
+			}
+
+			//si no esta en MP, los tengo que buscar de SWAP
+			else
+			{
+				if(tablaDePlatos->cargadoEnSWAP == 1)
+				{
+					tomar_datos_de_SWAP(tablaDePlatos);
+				}
+			}
+
+			sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+			//una vez tengo los datos, comparo nombres de platos a ver si es el que busco
+			if(strcmp(tablaDePlatos->nombreDeMorfi,nombrePlato) == 0)
+			{
+				encontrado = 1;
+				//sumo la cantidad de platos nueva que llego
+				tablaDePlatos->cantidadPedidaComida += cantidadPlatos;
+			}
+
+			//no es el que busco
+			else
+			{
+				//censuro los datos de la pagina nuevamente
+				borrar_datos_del_plato(tablaDePlatos);
+
+				//y avanzo...
+				tablaDePlatos = tablaDePlatos->sig_pagina;
+			}
+			sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+		}
+		/* ToDo borrar esto
+		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 		//mietras que no encuentre el plato con el nombre que me llego
 		while(strcmp(tablaDePlatos->nombreDeMorfi,nombrePlato) == 1)
 		{
@@ -511,12 +562,16 @@ tabla_paginas* agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidos
 
 		//sumo la cantidad de platos nueva que llego
 		tablaDePlatos->cantidadPedidaComida += cantidadPlatos;
+		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+		*/
 	}
 
 	//es un plato nuevo que agregar al pedido
 	else
 	{
+		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 		tablaDePlatos = crearPagina(tablaDePlatos, nombrePlato, cantidadPlatos);
+		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 	}
 
 	//devuelvo un puntero al plato, ya sea uno nuevo, o el plato al que le sumamos cantidades

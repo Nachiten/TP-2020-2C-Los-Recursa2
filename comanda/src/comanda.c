@@ -288,25 +288,42 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 
         			//al segmento que corresponde al pedido, se le agrega el nuevo plato si no existia
-            		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+
             		//obtengo el plato editado, o creado en caso de que no exista antes
             		plato_creado_o_editado = agregarPlatoAPedido(tablaDePedidosDelRestaurante, numeroDeSegmento, recibidoGuardarPlato->nombrePlato, recibidoGuardarPlato->cantidadPlatos);
-            		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 
-            		//busco si hay un espacio libre en SWAP para poner la pagina nueva/editada
-            		sem_wait(semaforoTocarListaEspaciosEnSWAP);
-            		numeroDeEspacioEnSwap = buscarPrimerEspacioLibre(lista_de_espacios_en_SWAP);
-            		//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
-            		marcarEspacioComoOcupado(lista_de_espacios_en_SWAP, numeroDeEspacioEnSwap);
-            		sem_post(semaforoTocarListaEspaciosEnSWAP);
+            		//si no esta en SWAP, le busco un lugar
+            		if(plato_creado_o_editado->cargadoEnSWAP == 0)
+            		{
+                		//busco si hay un espacio libre en SWAP para poner la pagina nueva/editada
+                		sem_wait(semaforoTocarListaEspaciosEnSWAP);
+                		numeroDeEspacioEnSwap = buscarPrimerEspacioLibre(lista_de_espacios_en_SWAP);
+                		//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
+                		marcarEspacioComoOcupado(lista_de_espacios_en_SWAP, numeroDeEspacioEnSwap);
+                		sem_post(semaforoTocarListaEspaciosEnSWAP);
+            		}
+
+            		else//si ya estaba en SWAP, le doy el espacio que tenia antes
+            		{
+            			numeroDeEspacioEnSwap = plato_creado_o_editado->posicionInicialEnSWAP;
+            		}
 
             		if(numeroDeEspacioEnSwap != -1)
             		{
 						agregar_pagina_a_swap(plato_creado_o_editado, numeroDeEspacioEnSwap*32);
 
-						//busco si hay un marco libre en MP para poner la pagina nueva/editada
-						sem_wait(semaforoTocarListaEspaciosEnMP);
-						numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+						//si la pagina no esta en MP, le busco un lugar
+						if(plato_creado_o_editado->cargadoEnMEMORIA == 0)
+						{
+							//busco si hay un marco libre en MP para poner la pagina nueva/editada
+							sem_wait(semaforoTocarListaEspaciosEnMP);
+							numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+						}
+
+						else//si ya estaba en SWAP, le doy el espacio que tenia antes
+						{
+							numeroDeMarcoEnMP = plato_creado_o_editado->numeroDeMarco;
+						}
 
 						//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
 						if(numeroDeMarcoEnMP != -1)
