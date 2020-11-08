@@ -384,15 +384,25 @@ void cargarPaginasEnMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 			sem_wait(semaforoTocarListaEspaciosEnMP);
 			numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
 			//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
-			marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
+			if(numeroDeMarcoEnMP != -1)
+			{
+				marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
+			}
 			sem_post(semaforoTocarListaEspaciosEnMP);
 
+			//si no hay un espacio libre hay que llamar al grim reaper
 			if(numeroDeMarcoEnMP == -1)
 			{
-				//ToDo si no hay un espacio libre hay que llamar al grim reaper
+				sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+				sem_wait(semaforoTocarListaEspaciosEnMP);
+				algoritmo_de_reemplazo(ALGOR_REEMPLAZO, lista_de_pedidos_de_todos_los_restaurantes, lista_de_espacios_en_MP);
+				numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+				marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
+				sem_post(semaforoTocarListaEspaciosEnMP);
+				sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 			}
 
-			//ToDO temporalmente asumido que siempre existen marcos libres en MP
+			//una vez tengo un marco listo para poner la Página, pongo los datos en MP
 			mover_pagina_a_memoriaPrincipal(tablaDePlatos, tablaDePlatos->posicionInicialEnSWAP, numeroDeMarcoEnMP*32);
 		}
 		//avanzo...
@@ -435,7 +445,7 @@ uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedi
 	return existe;
 }
 
-uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombrePlato)
+uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombrePlato)//ToDo probare
 {
 	tabla_paginas* tablaDePlatos = segmentoSeleccionado->mi_tabla;
 	uint32_t existe = 0;
@@ -443,14 +453,34 @@ uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombr
 	//avanzo en la tabla de paginas a ver si existe una de el plato solicitado
 	while(tablaDePlatos != NULL)
 	{
-		//comparo nombres de platos
+		//si la pagina esta en MP, me traigo sus datos de ahi
+		if(tablaDePlatos->cargadoEnMEMORIA == 1)
+		{
+			tomar_datos_de_MP(tablaDePlatos);
+		}
+
+		//si no esta en MP, los tengo que buscar de SWAP
+		else
+		{
+			tomar_datos_de_SWAP(tablaDePlatos);
+		}
+
+		//una vez tengo los datos, comparo nombres de platos a ver si ya existe
 		if(strcmp(tablaDePlatos->nombreDeMorfi,nombrePlato) == 0)
 		{
 			existe = 1;
 		}
+
+		//avanzo...
 		tablaDePlatos = tablaDePlatos->sig_pagina;
 	}
 
+	//a lo ultimo, vuelvo a censurar todos los datos de los platos del pedido
+	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+	borrar_datos_de_todos_los_platos_del_pedido(segmentoSeleccionado);
+	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+	//devuelvo el resultado
 	return existe;
 }
 
@@ -577,13 +607,40 @@ void tomar_datos_de_MP(tabla_paginas* platoDelPedido)
 
 	sem_post(semaforoTocarMP);
 
-	//por ultimo hago la correccion de agregarle su \0 al final del nombre posta del morfi //ToDO testear en varios casos
+	//por ultimo hago la correccion de agregarle su \0 al final del nombre posta del morfi
 	platoDelPedido->nombreDeMorfi[platoDelPedido->largoPostaDeMorfi] = '\0';
 
 	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 }
 
-//temporalmente void, ToDo chequear si tiene que devolver algo
+void tomar_datos_de_SWAP(tabla_paginas* platoDelPedido)
+{
+	uint32_t desplazamiento = platoDelPedido->posicionInicialEnSWAP * 32;
+
+	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+	//nos traemos los datos desde SWAP...
+	sem_wait(semaforoTocarSWAP);
+
+	//obtengo cantidad de platos pedidos
+	memcpy(&platoDelPedido->cantidadPedidaComida, AREA_DE_SWAP + desplazamiento, sizeof(platoDelPedido->cantidadPedidaComida));
+	desplazamiento += sizeof(platoDelPedido->cantidadPedidaComida);
+
+	//obtengo cantidad de platos preparados
+	memcpy(&platoDelPedido->cantidadComidaPreparada, AREA_DE_SWAP + desplazamiento, sizeof(platoDelPedido->cantidadComidaPreparada));
+	desplazamiento += sizeof(platoDelPedido->cantidadComidaPreparada);
+
+	//por ultimo, obtengo el nombre del plato
+	memcpy(platoDelPedido->nombreDeMorfi, AREA_DE_SWAP + desplazamiento, 24); //harcodeado el 24 para cumplir con la norma del enunciado
+
+	sem_post(semaforoTocarSWAP);
+
+	//por ultimo hago la correccion de agregarle su \0 al final del nombre posta del morfi
+	platoDelPedido->nombreDeMorfi[platoDelPedido->largoPostaDeMorfi] = '\0';
+
+	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+}
+
 void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, espacio* lista_de_espacios_en_MP) //AKA Grim Reaper
 {
 	tablas_segmentos_restaurantes* recorrerRestaurantes = lasListasDePedidosDeRestaurantes;

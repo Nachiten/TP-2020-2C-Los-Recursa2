@@ -77,6 +77,9 @@ void actualizar_pagina_en_SWAP (tabla_paginas* laPagina);
 //toma los datos de MP y los devuelve a su PAGINA
 void tomar_datos_de_MP(tabla_paginas* platoDelPedido);
 
+//toma los datos de SWAP y los devuelve a su PAGINA
+void tomar_datos_de_SWAP(tabla_paginas* platoDelPedido);
+
 // Grim Reaper
 void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, espacio* lista_de_espacios_en_MP);
 
