@@ -14,6 +14,7 @@ void inicializar_tabla_de_segmentos(segmentos* laTablaDeSegmentos)
 {
 	laTablaDeSegmentos->numero_de_segmento = 0;
 	laTablaDeSegmentos->id_Pedido = 0;
+	laTablaDeSegmentos->estado = NADA_CARGADO;
 	laTablaDeSegmentos->mi_tabla = malloc(sizeof(tabla_paginas));
 	inicializar_tabla_de_paginas(laTablaDeSegmentos->mi_tabla);
 	laTablaDeSegmentos->anter_segmento = NULL;
@@ -90,6 +91,7 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 	if(tablaDePedidos->id_Pedido == 0)
 	{
 		tablaDePedidos->id_Pedido = idDelPedido;
+		tablaDePedidos->estado = PENDIENTE;
 		return tablaDePedidos->numero_de_segmento;
 	}
 
@@ -113,6 +115,7 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 		ultimoSegmento->sig_segmento = nuevoSegmento; //lo unimos al final de la tabla
 
 		nuevoSegmento->id_Pedido = idDelPedido;
+		tablaDePedidos->estado = PENDIENTE;
 		nuevoSegmento->anter_segmento = ultimoSegmento;
 		nuevoSegmento->sig_segmento = NULL;
 		nuevoSegmento->numero_de_segmento = ultimoSegmento->numero_de_segmento + 1;
@@ -870,4 +873,21 @@ void preparar_datos_de_platos_con_formato_de_obtener_pedido(segmentos* tablaDePe
 	free(cantidadesPedidasComidas);
 	free(cantidadesPreparadasComidas);
 	free(charParaPisar);
+}
+
+uint32_t verificarEstado(segmentos* pedido, estado_de_pedido estado_a_comparar)
+{
+	uint32_t igual = 0;
+
+	if(pedido->estado == estado_a_comparar)
+	{
+		igual = 1;
+	}
+
+	return igual;
+}
+
+void cambiarEstado(segmentos* pedido, estado_de_pedido estado_a_establecer)
+{
+	pedido->estado = estado_a_establecer;
 }

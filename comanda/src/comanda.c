@@ -211,6 +211,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante = NULL;
 	uint32_t numeroDeSegmento;
 	tabla_paginas* plato_creado_o_editado = NULL;
+	segmentos* segmentoSeleccionado = NULL;
 	int32_t numeroDeEspacioEnSwap = -10;
 	int32_t numeroDeMarcoEnMP = -10;
 
@@ -369,6 +370,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
         	mandar_mensaje(resultado,RESPUESTA_GUARDAR_PLATO,socket);
 
+        	free(resultado);
         	free(recibidoGuardarPlato->nombreRestaurante);
         	free(recibidoGuardarPlato->nombrePlato);
 			free(recibidoGuardarPlato);
@@ -400,10 +402,8 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         		resultadoObtenerPedido->cantListas = malloc(2);
         		strcpy(resultadoObtenerPedido->cantListas, "[]");
         		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
-
-            	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
         	}
-    		//resultadoObtenerPedido->cantListas = "[]";
+
         	//la tabla si existe, buscamos el segmento...
         	else
         	{
@@ -430,9 +430,6 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
             		borrar_datos_de_todos_los_platos_del_pedido(selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento));
             		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
-
-            		//por ultimo, mando el mensaje con los datos pedidos
-            		mandar_mensaje(resultadoObtenerPedido, RESPUESTA_OBTENER_PEDIDO, socket);
         		}
 
         		//el pedido no existe
@@ -448,10 +445,11 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		resultadoObtenerPedido->cantListas = malloc(2);
             		strcpy(resultadoObtenerPedido->cantListas, "[]");
             		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
-
-                	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
         		}
         	}
+
+        	//por ultimo, mando el mensaje con los datos que correspondan
+        	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
 
         	free(resultadoObtenerPedido->comidas);
         	free(resultadoObtenerPedido->cantTotales);
@@ -464,7 +462,63 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibidoConfirmarPedido = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoConfirmarPedido, cod_op, socket);
 
+        	resultado = malloc(sizeof(respuesta_ok_error));
 
+        	printf("Buscando datos del pedido %u del restaurante %s...\n", recibidoConfirmarPedido->idPedido, recibidoConfirmarPedido->nombreRestaurante);
+
+        	//buscamos la tabla de pedidos de dicho restaurante, si no existe, se envia FAIL
+			sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+			tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoConfirmarPedido->nombreRestaurante, 1);
+			sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+			//no existe este restaurante, se responde FAIL
+			if(tablaDePedidosDelRestaurante == NULL)
+			{
+				puts("El restaurante solicitado no existe.");
+				resultado->respuesta = 0;
+			}
+
+			//la tabla si existe, buscamos el segmento...
+			else
+			{
+				//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
+				if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoConfirmarPedido->idPedido))
+				{
+					//tomamos el numero de segmento del pedido
+					sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+					numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoConfirmarPedido->idPedido);
+					segmentoSeleccionado = selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento);
+					sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+					//verificamos si se encuentra en estado PENDIENTE
+					if(verificarEstado(segmentoSeleccionado, PENDIENTE))
+					{
+						//pasamos el pedido a CONFIRMADO
+						cambiarEstado(segmentoSeleccionado, CONFIRMADO);
+					}
+
+					//nop
+					else
+					{
+						puts("El pedido solicitado NO se encuentra en estado PENDIENTE.");
+						resultado->respuesta = 0;
+					}
+
+				}
+
+				//el pedido no existe
+				else
+				{
+					puts("El pedido solicitado no existe.");
+					resultado->respuesta = 0;
+				}
+			}
+
+			//mando el resultado de lo que consultaron
+			mandar_mensaje(resultado,RESPUESTA_CONFIRMAR_PEDIDO,socket);
+
+        	free(resultado);
+        	free(recibidoConfirmarPedido->nombreRestaurante);
         	free(recibidoConfirmarPedido);
         	break;
 

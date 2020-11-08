@@ -382,3 +382,25 @@
 
 [INFO] 16:00:11:803 Cliente/(8067:8114): Conexión establecida con socket de destino.
 [INFO] 16:00:11:808 Cliente/(8067:8114): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [4]. Cantidad ya cocinada: [0]
+[INFO] 16:05:03:884 Cliente/(8067:8192): Conexión establecida con socket de destino.
+[INFO] 16:05:19:139 Cliente/(8067:8226): Conexión establecida con socket de destino.
+[INFO] 16:05:36:268 Cliente/(8067:8228): Conexión establecida con socket de destino.
+[INFO] 16:06:52:989 Cliente/(8067:8238): Conexión establecida con socket de destino.
+[INFO] 16:07:03:785 Cliente/(8067:8238): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 16:07:11:285 Cliente/(8067:8245): Conexión establecida con socket de destino.
+[INFO] 16:07:11:300 Cliente/(8067:8245): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 16:07:14:941 Cliente/(8067:8261): Conexión establecida con socket de destino.
+[INFO] 16:07:14:949 Cliente/(8067:8261): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 16:07:18:189 Cliente/(8067:8263): Conexión establecida con socket de destino.
+[INFO] 16:07:18:196 Cliente/(8067:8263): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas,Bondiolita]. Su/s cantidad/es: [1,1]. Cantidad ya cocinada: [0,0]
+[INFO] 16:07:28:133 Cliente/(8067:8265): Conexión establecida con socket de destino.
+[INFO] 16:07:28:139 Cliente/(8067:8265): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 16:07:32:725 Cliente/(8067:8267): Conexión establecida con socket de destino.
+[INFO] 16:07:32:730 Cliente/(8067:8267): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas,Bondiolita]. Su/s cantidad/es: [2,1]. Cantidad ya cocinada: [0,0]
+[INFO] 16:07:37:198 Cliente/(8067:8269): Conexión establecida con socket de destino.
+[INFO] 16:07:37:212 Cliente/(8067:8269): Obtuve del pedido 2 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]
+[INFO] 17:09:01:668 Cliente/(9318:9318): Conexión establecida con socket de destino.

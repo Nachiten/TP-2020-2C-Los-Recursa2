@@ -92,4 +92,10 @@ void borrar_datos_de_todos_los_platos_del_pedido(segmentos* tablaDePedidos);
 //prepara la respuesta de OBTENER_PEDIDO con el formato acordado
 void preparar_datos_de_platos_con_formato_de_obtener_pedido(segmentos* tablaDePedidos, respuesta_obtener_pedido* resultadoObtenerPedido);
 
+//dado un segmento y un estado, devuelve 1 si el segmento tiene ese estado, 0 si no se encuentra en ese estado
+uint32_t verificarEstado(segmentos* pedido, estado_de_pedido estado_a_comparar);
+
+//dado un segmento y un estado, asigna ese estado al PEDIDO
+void cambiarEstado(segmentos* pedido, estado_de_pedido estado_a_establecer);
+
 #endif /* SRC_MANEJOMEMORIA_H_ */
