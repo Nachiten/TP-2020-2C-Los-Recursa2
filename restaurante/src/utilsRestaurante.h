@@ -42,6 +42,7 @@ char* ip_app;
 char* algoritmoElegido;
 uint32_t quantumElegido;
 char* nombreRestaurante;
+int32_t socket_sindicato;
 
 uint32_t miPosicionX;
 uint32_t miPosicionY;

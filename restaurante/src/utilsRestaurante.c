@@ -4,11 +4,9 @@
 
 void obtenerMetadataRestaurante(){
 
-	uint32_t socket_cliente;
-
 	//me trato de conectar con sindicato que deberia estar levantado esperando que le vaya a pedir la info
-    socket_cliente = establecer_conexion(ip_sindicato, puerto_sindicato);
-    resultado_de_conexion(socket_cliente, logger, "destino");
+	socket_sindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
+    resultado_de_conexion(socket_sindicato, logger, "destino");
 
     obtener_restaurante* estructura = malloc(sizeof(obtener_restaurante));
     estructura->largoNombreRestaurante = strlen(nombreRestaurante);
@@ -18,7 +16,7 @@ void obtenerMetadataRestaurante(){
     printf("El nombre rancio que estoy por mandar es: %s \n", estructura->nombreRestaurante);
 
     //emision del mensaje para pedir la info, OBTENER_RESTAURANTE [nombreR]
-    mandar_mensaje(estructura, OBTENER_RESTAURANTE, socket_cliente);
+    mandar_mensaje(estructura, OBTENER_RESTAURANTE, socket_sindicato);
 
     free(estructura->nombreRestaurante);
     free(estructura);
@@ -27,19 +25,19 @@ void obtenerMetadataRestaurante(){
 
     //recibo el codigo de operacion, ya se que va a ser RESPUESTA_OBTENER_R
     codigo_operacion codigoRecibido;
-    bytesRecibidos(recv(socket_cliente, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 
     printf("El codigo recibido del emisor es: %d", codigoRecibido);
 
     uint32_t sizePayload;
-    bytesRecibidos(recv(socket_cliente, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+    bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
 
     printf("El size del buffer/payload para la metadata es: %u", sizePayload);
 
     respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizePayload);
 
    //recepcion del choclo divino
-    recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_REST, socket_cliente);
+    recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_REST, socket_sindicato);
 
     printf("pude recibir toda la de metadata de sindic.\n");
 
