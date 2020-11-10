@@ -495,6 +495,8 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 					{
 						//pasamos el pedido a CONFIRMADO
 						cambiarEstado(segmentoSeleccionado, CONFIRMADO);
+						resultado->respuesta = 1;
+						puts("El pedido solicitado ahora se encuentra en estado CONFIRMADO.");
 					}
 
 					//nop
