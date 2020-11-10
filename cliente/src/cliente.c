@@ -23,7 +23,7 @@ int main(){
 	miPosicionY = config_get_int_value(config, "POSICION_Y");
 
 	//Dejo cargado un logger para loguear los eventos.
-	logger = cargarUnLog(LOG_PATH, "Cliente");
+	logger = cargarUnLogDeCliente(LOG_PATH, "Cliente");
 
 	//ToDo levantamos socket para recibir mensajes (hilo)
 
@@ -63,7 +63,10 @@ int main(){
 
     mandar_mensaje(elHandshake, HANDSHAKE, socketCliente);
 */
-    close(socketCliente);
+
+    //pthread_create(&hiloNotificaciones, NULL, (void*)recibirNotificaciones, &socketCliente);
+    //pthread_detach(hiloNotificaciones);
+    //close(socketCliente);
 
 	while(1)
 	{
@@ -86,7 +89,7 @@ int main(){
 //
 //		//string_trim_right(&auxLinea);
 		sem_wait(comandoParaEjecutar);
-		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, &socketCliente);
+		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, NULL);
 		//pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, auxLinea);
 		pthread_detach(hiloConsola);
 
@@ -106,18 +109,44 @@ int main(){
 	return EXIT_SUCCESS;
 }
 
+void recibirNotificaciones(int32_t* socketInicial){
+	int32_t sizeAAllocar = 0;
+	uint32_t exito = 0;
+
+	while(1){
+
+		los_recv_repetitivos(*socketInicial, &exito, &sizeAAllocar);
+
+		if(exito == 1){
+
+			guardar_pedido* notificacionPedidoFinalizado = malloc(sizeAAllocar);
+	        recibir_mensaje(notificacionPedidoFinalizado, FINALIZAR_PEDIDO ,*socketInicial);
+
+
+			log_info(logger, "El pedido nro <%d> del restaurante <%s> ha arribado.\n", notificacionPedidoFinalizado->idPedido, notificacionPedidoFinalizado->nombreRestaurante);
+			free(notificacionPedidoFinalizado->nombreRestaurante);
+			free(notificacionPedidoFinalizado);
+		}
+
+		else
+		{
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
+		}
+
+		}
+
+	}
+
+
 
 void obtenerInputConsolaCliente(){
-	//char* lineaEntera = NULL;
-	//size_t longitud = 0;
+	char* lineaEntera = NULL;
 	uint32_t switcher;
 	respuesta_ok_error* estructuraRespuesta;
     int32_t socketCliente;
 	int32_t iterador = 0;
 	int32_t sizeAAllocar = 0;
 	uint32_t exito = 0;
-	char* lineaEntera;
-	lineaEntera = NULL;
 	size_t longitud = 0;
 
 	//char* nombreRestaurante; puede que este al pedo
@@ -129,12 +158,12 @@ void obtenerInputConsolaCliente(){
 	string_trim(&lineaEntera);
 
 	if(strcmp(lineaEntera, "") == 0)
-	  {
-		printf("No se ingresó ningun comando.\n");
-		free(lineaEntera);
-		sem_post(comandoParaEjecutar);
-		return;
-	  }
+    {
+			printf("No se ingresó ningun comando.\n");
+			free(lineaEntera);
+			sem_post(comandoParaEjecutar);
+			return;
+    }
 
 
 
@@ -144,12 +173,11 @@ void obtenerInputConsolaCliente(){
 	// El nombre del comando es la primer palabra (POR EL MOMENTO CON GUIONES_BAJOS) -> EJ: CONSULTAR_RESTAURANTES
     char* comandoIngresado = malloc(strlen(palabrasSeparadas[0])+1);
     strcpy(comandoIngresado,palabrasSeparadas[0]);
-
-    sem_post(comandoParaEjecutar);
-
     //printf("El comando solicitado fue: %s. \n", comandoIngresado);
 
+
     switcher = valor_para_switch_case(comandoIngresado);
+
 
 
     //todo me parece que por cuestion de "prolijidad" y que despues sea mas facil encontrar cada CASE, lo ideal seria ir poniendolos en orden,
@@ -166,11 +194,11 @@ void obtenerInputConsolaCliente(){
     Consultar Platos -> Check and tested
     Guardar Plato -> Check and tested
     Aniadir Plato -> Check
-    Plato listo ->
+    Plato listo -> Check
     Crear Pedido -> Check
     Guardar Pedido -> Check and tested
-    Confirmar Pedido ->
-    Consultar Pedido ->
+    Confirmar Pedido -> Check
+    Consultar Pedido -> Check
     Obtener Pedido -> Check
     Finalizar Pedido -> Check
     Terminar Pedido -> Check
@@ -273,7 +301,7 @@ void obtenerInputConsolaCliente(){
 
 		obtener_restaurante* estructuraObtenerRestaurante = malloc(sizeof(uint32_t) + strlen(palabrasSeparadas[1]));
 		estructuraObtenerRestaurante->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
-		estructuraObtenerRestaurante->nombreRestaurante = malloc(estructuraObtenerRestaurante->largoNombreRestaurante);
+		estructuraObtenerRestaurante->nombreRestaurante = malloc(estructuraObtenerRestaurante->largoNombreRestaurante+1);
 		strcpy(estructuraObtenerRestaurante->nombreRestaurante, palabrasSeparadas[1]);
 
 		//emision del mensaje para pedir la info, OBTENER_RESTAURANTE [nombreR]
@@ -333,6 +361,7 @@ void obtenerInputConsolaCliente(){
 		recibir_mensaje(estructuraRespuestaConsultarPlatos, RESPUESTA_CONSULTAR_PLATOS, socketCliente);
 
 		log_info(logger, "Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreRestaurante, estructuraRespuestaConsultarPlatos->nombresPlatos);
+		//printf("Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreRestaurante, estructuraRespuestaConsultarPlatos->nombresPlatos);
 
 		free(estructuraRespuestaConsultarPlatos->nombresPlatos);
 		free(estructuraRespuestaConsultarPlatos);
@@ -407,7 +436,7 @@ void obtenerInputConsolaCliente(){
 
 		a_plato* mensajeAniadirPlato = malloc(sizeof(a_plato));
 		mensajeAniadirPlato->largoNombrePlato = strlen(palabrasSeparadas[1]);
-		mensajeAniadirPlato->nombrePlato = malloc(mensajeAniadirPlato->largoNombrePlato);
+		mensajeAniadirPlato->nombrePlato = malloc(mensajeAniadirPlato->largoNombrePlato+1);
 		strcpy(mensajeAniadirPlato->nombrePlato, palabrasSeparadas[1]);
 		mensajeAniadirPlato->idPedido = atoi(palabrasSeparadas[2]);
 
@@ -426,11 +455,43 @@ void obtenerInputConsolaCliente(){
 		free(mensajeAniadirPlato);
 		free(estructuraRespuesta);
 		close(socketCliente);
-
 		break;
 
 
 	case PLATO_LISTO:
+
+		if(palabrasSeparadas[1] == NULL || palabrasSeparadas[2] == NULL || palabrasSeparadas[3] == NULL ){
+			printf("El formato correcto es: PLATO_LISTO [nombreRest] [idPedido] [nombrePlato].\n");
+			break;
+		}
+		estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
+		socketCliente = establecer_conexion(ip_destino , puerto_destino);
+		resultado_de_conexion(socketCliente, logger, "destino");
+
+		plato_listo* mensajePlatoListo = malloc(sizeof(plato_listo));
+		mensajePlatoListo->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
+		mensajePlatoListo->nombreRestaurante = malloc(mensajePlatoListo->largoNombreRestaurante+1);
+		strcpy(mensajePlatoListo->nombreRestaurante, palabrasSeparadas[1]);
+		mensajePlatoListo->idPedido = atoi(palabrasSeparadas[2]);
+		mensajePlatoListo->largoNombrePlato = strlen(palabrasSeparadas[3]);
+		mensajePlatoListo->nombrePlato = malloc(mensajePlatoListo->largoNombrePlato+1);
+		strcpy(mensajePlatoListo->nombrePlato, palabrasSeparadas[3]);
+
+		mandar_mensaje(mensajePlatoListo, PLATO_LISTO, socketCliente);
+		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
+
+		if(exito == 1)
+		{
+			recibir_mensaje(estructuraRespuesta,RESPUESTA_PLATO_LISTO,socketCliente);
+			printf("La respuesta a notificar el plato listo fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+		} else {
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
+		}
+		free(mensajePlatoListo->nombreRestaurante);
+		free(mensajePlatoListo->nombrePlato);
+		free(mensajePlatoListo);
+		free(estructuraRespuesta);
+		close(socketCliente);
 
 
 		break;
@@ -487,7 +548,7 @@ void obtenerInputConsolaCliente(){
 		guardar_pedido* elMensajeGuardarPedido = malloc(sizeof(uint32_t)*2 + strlen(palabrasSeparadas[2]));
 		elMensajeGuardarPedido->idPedido = atoi(palabrasSeparadas[1]);
 		elMensajeGuardarPedido->largoNombreRestaurante = strlen(palabrasSeparadas[2]);
-		elMensajeGuardarPedido->nombreRestaurante = malloc(elMensajeGuardarPedido->largoNombreRestaurante);
+		elMensajeGuardarPedido->nombreRestaurante = malloc(elMensajeGuardarPedido->largoNombreRestaurante+1);
 		strcpy(elMensajeGuardarPedido->nombreRestaurante, palabrasSeparadas[2]);
 
 		printf("ID: %u \n", elMensajeGuardarPedido->idPedido);
@@ -523,10 +584,43 @@ void obtenerInputConsolaCliente(){
 
     case CONFIRMAR_PEDIDO:
 
+    	strcat(palabrasSeparadas[2],"\0"); //IMPORTANTISIMO
+
+		estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
+
+		socketCliente = establecer_conexion(ip_destino , puerto_destino);
+
+		guardar_pedido* elMensajeConfirmarPedido = malloc(sizeof(uint32_t)*2 + strlen(palabrasSeparadas[2]));
+		elMensajeConfirmarPedido->idPedido = atoi(palabrasSeparadas[1]);
+		elMensajeConfirmarPedido->largoNombreRestaurante = strlen(palabrasSeparadas[2]);
+		elMensajeConfirmarPedido->nombreRestaurante = malloc(elMensajeConfirmarPedido->largoNombreRestaurante+1);
+		strcpy(elMensajeConfirmarPedido->nombreRestaurante, palabrasSeparadas[2]);
+
+		mandar_mensaje(elMensajeConfirmarPedido, CONFIRMAR_PEDIDO, socketCliente);
+
+		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
+
+		if(exito == 1)
+		{
+			recibir_mensaje(estructuraRespuesta,RESPUESTA_CONFIRMAR_PEDIDO,socketCliente);
+
+			printf("El intento de guardar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+		}
+
+		else
+		{
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
+		}
+
+		free(elMensajeConfirmarPedido->nombreRestaurante); //porfa no olvidarse de este free, tambien es importante, no solo liberar la estructura, sino nos va a caber
+		free(elMensajeConfirmarPedido);
+		free(estructuraRespuesta);
+		close(socketCliente); //siempre cerrar socket cuando se termina de usar
 
     	break;
 
     case CONSULTAR_PEDIDO:
+
     	if(palabrasSeparadas[1] == NULL){
 			printf("Se requiere ingresar el numero de un pedido para operar.\n");
 			break;
@@ -541,14 +635,25 @@ void obtenerInputConsolaCliente(){
     	los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
     	if(exito == 1)
     	{
-    		/*
+
     		respuesta_consultar_pedido* estructuraRespuestaConsultarPedido = malloc(sizeAAllocar);
-    		recibir_mensaje(estructuraRespuesta, RESPUESTA_CONSULTAR_PEDIDO, socketCliente);
-    		*/
-    	} else
-    	{
+    		recibir_mensaje(estructuraRespuestaConsultarPedido, RESPUESTA_CONSULTAR_PEDIDO, socketCliente);
+    		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nRepartidor: %s\nEstado: %d\nComidas: %s"
+    			,estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante
+				,estructuraRespuestaConsultarPedido->repartidor, estructuraRespuestaConsultarPedido->estado
+				,estructuraRespuestaConsultarPedido->comidas);
+
+    		free(estructuraRespuestaConsultarPedido->nombreRestaurante);
+    		free(estructuraRespuestaConsultarPedido->comidas);
+    		free(estructuraRespuestaConsultarPedido->cantTotales);
+    		free(estructuraRespuestaConsultarPedido->cantListas);
+    	} else {
     		printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
     	}
+
+    	free(estructuraConsultarPedido);
+        close(socketCliente);
+
 
     	break;
 
