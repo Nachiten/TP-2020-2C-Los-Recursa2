@@ -404,3 +404,19 @@
 [INFO] 16:07:37:198 Cliente/(8067:8269): Conexión establecida con socket de destino.
 [INFO] 16:07:37:212 Cliente/(8067:8269): Obtuve del pedido 2 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]
 [INFO] 17:09:01:668 Cliente/(9318:9318): Conexión establecida con socket de destino.
+[WARNING] 21:22:55:168 Cliente/(5762:5762): Conexión fallida con socket de destino.
+[INFO] 21:22:55:169 Cliente/(5762:5762): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[WARNING] 21:22:58:990 Cliente/(5763:5763): Conexión fallida con socket de destino.
+[INFO] 21:22:58:991 Cliente/(5763:5763): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 21:23:22:470 Cliente/(5798:5798): Conexión establecida con socket de destino.
+[INFO] 21:25:20:439 Cliente/(5798:5826): Conexión establecida con socket de destino.
+[INFO] 21:25:20:442 Cliente/(5798:5826): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:26:08:121 Cliente/(5842:5842): Conexión establecida con socket de destino.
+[INFO] 21:27:40:112 Cliente/(5842:5901): Conexión establecida con socket de destino.
+[INFO] 21:27:40:131 Cliente/(5842:5901): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:29:28:467 Cliente/(6027:6027): Conexión establecida con socket de destino.
+[INFO] 21:30:32:312 Cliente/(6087:6087): Conexión establecida con socket de destino.
+[INFO] 21:31:14:857 Cliente/(6133:6133): Conexión establecida con socket de destino.
+[INFO] 21:31:26:642 Cliente/(6171:6171): Conexión establecida con socket de destino.

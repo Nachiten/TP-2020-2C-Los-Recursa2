@@ -604,7 +604,7 @@ void obtenerInputConsolaCliente(){
 		{
 			recibir_mensaje(estructuraRespuesta,RESPUESTA_CONFIRMAR_PEDIDO,socketCliente);
 
-			printf("El intento de guardar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+			printf("El intento de confirmar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
 		}
 
 		else
@@ -831,7 +831,7 @@ void obtenerInputConsolaCliente(){
     	break;
 
     default:
-    	printf("Se ha ingresado un comando no reconocido.");
+    	puts("Se ha ingresado un comando no reconocido.");
     	break;
     }
 
