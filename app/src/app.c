@@ -598,7 +598,7 @@ int buscar_pedido_por_id(uint32_t id_pedido){
 	for(int i = 0; i < listaPedidos->elements_count; i++){
 		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
 
-		if(cliente->id_global == id_global){
+		if(cliente->id_global == id_pedido){
 			return i;
 		}
 	}
