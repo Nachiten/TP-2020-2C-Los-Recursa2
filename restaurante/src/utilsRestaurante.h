@@ -41,9 +41,9 @@ char* puerto_app;
 char* ip_app;
 char* algoritmoElegido;
 uint32_t quantumElegido;
+uint32_t RETARDO_CICLO_CPU;
 char* nombreRestaurante;
 int32_t socket_sindicato;
-
 uint32_t miPosicionX;
 uint32_t miPosicionY;
 uint32_t cantCocineros;
@@ -53,7 +53,24 @@ char* platos;
 char* afinidades;
 char** listaPlatos;
 char** listaAfinidades;
+
+
+//Listas estrictamente usadas en la planificacion con sus mutuas exclusiones
+t_list* listaDeHornos;
+t_queue* colaNew;
 t_list* listaDeColasReady;
+t_list* colaBlock;
+t_queue* colaParaHornear;
+
+sem_t* mutexNew;
+sem_t* mutexListaReady;
+sem_t* mutexBlock;
+//los hornos no necesitarian mutex, usariamos un hilo que los va sacando y colocando en los mismos
+
+sem_t* contadorPlatosEnNew;
+
+
+
 
 typedef enum{
 	NEW = 1,
@@ -69,21 +86,32 @@ typedef enum{
 }t_algoritmoplanif;
 
 typedef enum{
-	REPOSAR,
+	REPOSAR = 1,
 	HORNEAR,
 	OTRO
 }t_paso_receta;
 
+/*
+typedef enum{
+	REPOSADO = 1,
+	HORNEADO,
+}accionBlock;
+*/
+
 typedef struct{
 	uint32_t idPedido;
 	char* nombrePlato;
-	//receta?
-	t_list pasosReceta;
-    int instruccionesRealizadas;
-
-
-
+	t_list* pasosReceta;
+    int instruccionesRealizadasDeUnPaso;
+    int quantumRestante;
+    //puede que no sea necesario
+    //accionBlock accionBlock
 }pcb_plato;
+
+typedef struct{
+	int idHorno;
+	int enUso;
+}t_horno;
 
 typedef struct{
 	t_paso_receta accion;
@@ -93,12 +121,18 @@ typedef struct{
 
 typedef struct{
 	char* afinidad;
-    t_list* cola;
+    t_queue* cola;
 }cola_ready;
 
 void inicializarRestaurante();
 void obtenerMetadataRestaurante();
 void crearColasPlanificacion();
+void hiloExecCocinero(char* afinidad);
+void agregarANew(pcb_plato*);
+void agregarAReady(pcb_plato*);
+void agregarABlock(pcb_plato*);
+void obtenerSiguiente(cola_ready*);
+pcb_plato* obtenerSiguiente();
 
 
 #endif /* SRC_UTILSRESTAURANTE_H_ */

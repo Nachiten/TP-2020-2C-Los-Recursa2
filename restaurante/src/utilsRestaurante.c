@@ -1,6 +1,33 @@
 #include "utilsRestaurante.h"
 
 
+void inicializarRestaurante(){
+
+	configuracion = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/restaurante.config");
+    LOG_PATH = config_get_string_value(configuracion,"LOG_FILE_PATH"); //cargo el path del archivo log
+	ip_sindicato = config_get_string_value(configuracion,"IP_SINDICATO");
+	puerto_sindicato = config_get_string_value(configuracion,"PUERTO_SINDICATO");
+	puerto_local = config_get_string_value(configuracion,"PUERTO_ESCUCHA");
+	ip_app = config_get_string_value(configuracion,"IP_APP");
+	puerto_app = config_get_string_value(configuracion,"PUERTO_APP");
+    nombreRestaurante = config_get_string_value(configuracion, "NOMBRE_RESTAURANTE");
+    quantumElegido = config_get_int_value(configuracion, "QUANTUM");
+    algoritmoElegido = config_get_string_value(configuracion, "ALGORITMO_PLANIFICACION");
+    RETARDO_CICLO_CPU = config_get_int_value(configuracion, "RETARDO_CICLO_CPU");
+
+    logger = cargarUnLog(LOG_PATH, "Cliente");
+    log_info(logger, "Obtuve de config el nombre: %s" , nombreRestaurante);
+
+    //comunicarme con sindicato -> socket -> mensaje OBTENER_RESTAURANTE
+    obtenerMetadataRestaurante();
+
+    crearColasPlanificacion();
+    crearHornos();
+    crearHilosPlanificacion();
+
+
+}
+
 
 void obtenerMetadataRestaurante(){
 
@@ -73,46 +100,113 @@ void obtenerMetadataRestaurante(){
 
 
 void crearColasPlanificacion(){
-   int i=0;
-   listaDeColasReady = list_create();
-   while(listaAfinidades[i] != NULL){
-     cola_ready* nuevaCola = malloc(sizeof(cola_ready));
-     nuevaCola->afinidad = malloc(strlen(listaAfinidades[i])+1);
-     strcpy(nuevaCola->afinidad, listaAfinidades[i]);
-     nuevaCola->cola = list_create();
-     list_add(listaDeColasReady, nuevaCola);
-   }
+  int i=0;
+  colaNew = list_create();
+  listaDeColasReady = list_create();
+  colaBlock = list_create();
 
+  while(listaAfinidades[i] != NULL){
+    cola_ready* nuevaColaConAfinidad = malloc(sizeof(cola_ready));
+    nuevaColaConAfinidad->afinidad = malloc(strlen(listaAfinidades[i])+1);
+    strcpy(nuevaColaConAfinidad->afinidad, listaAfinidades[i]);
+    nuevaColaConAfinidad->cola = list_create();
+    list_add(listaDeColasReady, nuevaColaConAfinidad);
+  }
+    cola_ready* colaSinAfinidad = malloc(sizeof(cola_ready));
+    colaSinAfinidad->afinidad = "SinAfinidad";
+    colaSinAfinidad->cola = list_create();
+    list_add(listaDeColasReady, colaSinAfinidad);
+}
+
+
+void crearHilosPlanificacion(){
+  int i=0;
+  int cantCocinerosConAfinidad = 0;
+  while(listaAfinidades[i] != NULL){
+	  pthread_t unCocineroConAfinidad;
+	  //ojo ver si no conviene hacer esto y pasarle el puntero dentro del array directamente
+	  char* afinidadDelCocinero = malloc(strlen(listaAfinidades[i])+1);
+	  strcpy(afinidadDelCocinero, listaAfinidades[i]);
+	  pthread_create(&unCocineroConAfinidad, NULL, (void*)hiloExecCocinero, afinidadDelCocinero);
+	  cantCocinerosConAfinidad++;
+	  i++;
+  }
+
+  for(i=0; i<cantCocineros-cantCocinerosConAfinidad; i++){
+	  pthread_t unCocineroSinAfinidad;
+	  pthread_create(&unCocineroSinAfinidad, NULL, (void*)hiloExecCocinero, NULL);
+  }
+
+}
+
+void crearHornos(){
+	int i;
+	listaDeHornos = list_create();
+	colaParaHornear = queue_create();
+
+	for(i=0; i<cantHornos; i++){
+		t_horno* unHorno = malloc(sizeof(t_horno));
+		unHorno->idHorno = i+1;
+		unHorno->enUso = 0;
+		list_add(listaDeHornos, unHorno);
+	}
 }
 
 
 
+void agregarANew(pcb_plato* unPlato)
+{
+	sem_wait(mutexNew);
 
-void inicializarRestaurante(){
+	queue_push(colaNew, unPlato);
 
-	configuracion = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/restaurante.config");
-    LOG_PATH = config_get_string_value(configuracion,"LOG_FILE_PATH"); //cargo el path del archivo log
-	ip_sindicato = config_get_string_value(configuracion,"IP_SINDICATO");
-	puerto_sindicato = config_get_string_value(configuracion,"PUERTO_SINDICATO");
-	puerto_local = config_get_string_value(configuracion,"PUERTO_ESCUCHA");
-	ip_app = config_get_string_value(configuracion,"IP_APP");
-	puerto_app = config_get_string_value(configuracion,"PUERTO_APP");
-    nombreRestaurante = config_get_string_value(configuracion, "NOMBRE_RESTAURANTE");
-    quantumElegido = config_get_int_value(configuracion, "QUANTUM");
-    algoritmoElegido = config_get_string_value(configuracion, "ALGORITMO_PLANIFICACION");
+	log_info(logger, "[NEW] Entra el nuevo plato %i, del pedido %i", unPlato->nombrePlato, unPlato->idPedido);
 
-    logger = cargarUnLog(LOG_PATH, "Cliente");
-    log_info(logger, "Obtuve de config el nombre: %s" , nombreRestaurante);
-
-    //comunicarme con sindicato -> socket -> mensaje OBTENER_RESTAURANTE
-
-    obtenerMetadataRestaurante();
-
-    crearColasPlanificacion();
+	sem_post(mutexNew);
+	//Habilito la señal para el hilo que administra las colas de afinidad lo absorba en la que corresponde
+	sem_post(contadorPlatosEnNew);
+}
 
 
+void agregarAReady(pcb_plato* unPlato){
+    int i;
+	sem_wait(mutexListaReady);
+
+	for(i=0;i<list_size(listaDeColasReady);i++){
+
+		cola_ready* unaColaReady = list_get(listaDeColasReady, i);
+		if(strcmp(unaColaReady->afinidad, unPlato->nombrePlato) == 0){
+			list_add(unPlato, unaColaReady->cola);
+			sem_post(mutexListaReady);
+			return;
+		} else {
+        //busco el siguiente
+		}
+
+
+	}
+	cola_ready* laColaReadySinAfinidad = list_get(listaDeColasReady, i);
+	list_add(unPlato, laColaReadySinAfinidad->cola);
+	sem_post(mutexListaReady);
 
 }
+
+
+/*
+ agregarAReady2 podria plantearse con la common de list_any_satisfy y una subfuncion bool, discutir con los pibe
+ */
+
+
+void agregarABlock(pcb_plato* unPlato){
+
+}
+
+/*
+void hiloExecCocinero(char* afinidad){
+
+}
+*/
+
 
 
 
