@@ -50,6 +50,9 @@ uint32_t cantRecetas;
 uint32_t cantHornos;
 char* platos;
 char* afinidades;
+char** listaPlatos;
+char** listaAfinidades;
+t_list* listaDeColasReady;
 
 typedef enum{
 	NEW = 1,
@@ -59,18 +62,42 @@ typedef enum{
 	EXIT,
 }t_estado;
 
-
 typedef enum{
 	FIFO = 1,
 	RR,
 }t_algoritmoplanif;
 
+typedef enum{
+	REPOSAR,
+	HORNEAR,
+	OTRO
+}t_paso_receta;
 
+typedef struct{
+	uint32_t idPedido;
+	char* nombrePlato;
+	//receta?
+	t_list pasosReceta;
+    int instruccionesRealizadas;
+
+
+
+}pcb_plato;
+
+typedef struct{
+	t_paso_receta accion;
+	uint32_t duracionAccion;
+}paso_receta;
+
+
+typedef struct{
+	char* afinidad;
+    t_list* cola;
+}cola_ready;
 
 void inicializarRestaurante();
 void obtenerMetadataRestaurante();
-//void crearColasPlanificacion();
-
+void crearColasPlanificacion();
 
 
 #endif /* SRC_UTILSRESTAURANTE_H_ */

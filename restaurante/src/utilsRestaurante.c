@@ -15,8 +15,6 @@ void obtenerMetadataRestaurante(){
     estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
     strcpy(estructura->nombreRestaurante, nombreRestaurante);
 
-    printf("El nombre rancio que estoy por mandar es: %s \n", estructura->nombreRestaurante);
-
     //emision del mensaje para pedir la info, OBTENER_RESTAURANTE [nombreR]
     mandar_mensaje(estructura, OBTENER_RESTAURANTE, socket_cliente);
 
@@ -43,13 +41,13 @@ void obtenerMetadataRestaurante(){
 
     printf("pude recibir toda la de metadata de sindic.\n");
 
-    char** listaPlatos = string_get_string_as_array(estructuraRespuestaObtenerRestaurante->platos);
 
     // SI > 0 => True, si = 0 => false
     if (cantidadDeElementosEnArray(listaPlatos)){
     	printf("Hay platos\n");
     } else {
     	printf("No hay platos (no hay restaurant)\n");
+    	exit(-2);
     }
 
     //trabajo interno con la metadata recibida
@@ -58,17 +56,15 @@ void obtenerMetadataRestaurante(){
     cantHornos = estructuraRespuestaObtenerRestaurante->cantHornos;
     cantCocineros = estructuraRespuestaObtenerRestaurante->cantidadCocineros;
 
-    printf("Voy a tener %d cocineros/cpus. \n", cantCocineros);
-    printf("Los platos que ofrece el restaurante son: %s \n", estructuraRespuestaObtenerRestaurante->platos);
-    printf("Las afinidades de los cocineros son: %s \n", estructuraRespuestaObtenerRestaurante->afinidades);
-
-    //rescato las variables char* en punteros globales aparte para luego usarlos en otro lado. (WIP)
+    //rescato las variables char* en punteros globales aparte para reutilizarlas en los mensajes futuros que tenga q contestar
     platos = malloc(estructuraRespuestaObtenerRestaurante->longitudPlatos+1);
     strcpy(platos, estructuraRespuestaObtenerRestaurante->platos);
 
     afinidades = malloc(estructuraRespuestaObtenerRestaurante->longitudAfinidades+1);
     strcpy(afinidades, estructuraRespuestaObtenerRestaurante->afinidades);
 
+    listaPlatos = string_get_string_as_array(platos);
+    listaAfinidades = string_get_string_as_array(afinidades);
 
     free(estructuraRespuestaObtenerRestaurante->platos);
     free(estructuraRespuestaObtenerRestaurante->afinidades);
@@ -79,11 +75,15 @@ void obtenerMetadataRestaurante(){
 
 
 void crearColasPlanificacion(){
-
-	for(int i=0; i<cantCocineros; i++){
-
-
-		}
+   int i=0;
+   listaDeColasReady = list_create();
+   while(listaAfinidades[i] != NULL){
+     cola_ready* nuevaCola = malloc(sizeof(cola_ready));
+     nuevaCola->afinidad = malloc(strlen(listaAfinidades[i])+1);
+     strcpy(nuevaCola->afinidad, listaAfinidades[i]);
+     nuevaCola->cola = list_create();
+     list_add(listaDeColasReady, nuevaCola);
+   }
 
 }
 
@@ -110,7 +110,8 @@ void inicializarRestaurante(){
 
     obtenerMetadataRestaurante();
 
-//    crearColasPlanificacion();
+    crearColasPlanificacion();
+
 
 
 }
