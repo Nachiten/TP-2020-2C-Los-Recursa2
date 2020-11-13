@@ -68,6 +68,11 @@ sem_t* mutexBlock;
 //los hornos no necesitarian mutex, usariamos un hilo que los va sacando y colocando en los mismos
 
 sem_t* contadorPlatosEnNew;
+// Semaforos para sincronizar hilos con HCM
+t_list* listaSemHabilitarCicloExec;
+t_list* listaSemFinalizarCicloExec;
+sem_t* habilitarCicloBlockReady;
+sem_t* finalizarCicloBlockReady;
 
 
 
@@ -88,7 +93,6 @@ typedef enum{
 typedef enum{
 	REPOSAR = 1,
 	HORNEAR,
-	OTRO
 }t_paso_receta;
 
 /*
@@ -105,7 +109,8 @@ typedef struct{
     int instruccionesRealizadasDeUnPaso;
     int quantumRestante;
     //puede que no sea necesario
-    //accionBlock accionBlock
+    //accionBlock motivoBlock;
+    //int duracionBlock;
 }pcb_plato;
 
 typedef struct{
@@ -118,11 +123,15 @@ typedef struct{
 	uint32_t duracionAccion;
 }paso_receta;
 
-
 typedef struct{
 	char* afinidad;
     t_queue* cola;
 }cola_ready;
+
+typedef struct{
+	int idHilo;
+	char* afinidad;
+}credencialesCocinero;
 
 void inicializarRestaurante();
 void obtenerMetadataRestaurante();
@@ -131,8 +140,7 @@ void hiloExecCocinero(char* afinidad);
 void agregarANew(pcb_plato*);
 void agregarAReady(pcb_plato*);
 void agregarABlock(pcb_plato*);
-void obtenerSiguiente(cola_ready*);
-pcb_plato* obtenerSiguiente();
+pcb_plato* obtenerSiguienteDeReady();
 
 
 #endif /* SRC_UTILSRESTAURANTE_H_ */

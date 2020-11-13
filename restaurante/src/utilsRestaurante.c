@@ -121,20 +121,29 @@ void crearColasPlanificacion(){
 
 void crearHilosPlanificacion(){
   int i=0;
+  int j=0;
   int cantCocinerosConAfinidad = 0;
   while(listaAfinidades[i] != NULL){
 	  pthread_t unCocineroConAfinidad;
 	  //ojo ver si no conviene hacer esto y pasarle el puntero dentro del array directamente
-	  char* afinidadDelCocinero = malloc(strlen(listaAfinidades[i])+1);
-	  strcpy(afinidadDelCocinero, listaAfinidades[i]);
-	  pthread_create(&unCocineroConAfinidad, NULL, (void*)hiloExecCocinero, afinidadDelCocinero);
+	  credencialesCocinero* datosCocineroConAfinidad = malloc(sizeof(credencialesCocinero));
+	  datosCocineroConAfinidad->afinidad = malloc(strlen(listaAfinidades[i])+1);
+	  strcpy(datosCocineroConAfinidad->afinidad, listaAfinidades[i]);
+	  datosCocineroConAfinidad->idHilo = j;
+	  pthread_create(&unCocineroConAfinidad, NULL, (void*)hiloExecCocinero, datosCocineroConAfinidad);
 	  cantCocinerosConAfinidad++;
 	  i++;
+	  j++;
   }
 
   for(i=0; i<cantCocineros-cantCocinerosConAfinidad; i++){
 	  pthread_t unCocineroSinAfinidad;
-	  pthread_create(&unCocineroSinAfinidad, NULL, (void*)hiloExecCocinero, NULL);
+	  credencialesCocinero* datosCocineroSinAfinidad = malloc(sizeof(credencialesCocinero));
+	  datosCocineroSinAfinidad->afinidad = NULL;
+	  datosCocineroSinAfinidad->idHilo = j;
+	  pthread_create(&datosCocineroSinAfinidad, NULL, (void*)hiloExecCocinero, datosCocineroSinAfinidad);
+	  i++;
+	  j++;
   }
 
 }
@@ -180,7 +189,6 @@ void agregarAReady(pcb_plato* unPlato){
 			sem_post(mutexListaReady);
 			return;
 		} else {
-        //busco el siguiente
 		}
 
 
@@ -191,22 +199,203 @@ void agregarAReady(pcb_plato* unPlato){
 
 }
 
+void agregarABlock(pcb_plato* unPlato){
+
+
+
+}
 
 /*
  agregarAReady2 podria plantearse con la common de list_any_satisfy y una subfuncion bool, discutir con los pibe
  */
 
 
-void agregarABlock(pcb_plato* unPlato){
 
-}
+
+
+void hiloExecCocinero(credencialesCocinero* datosCocinero){
+
+	if(algoritmoElegido == "FIFO"){
+
+		while(1){
+				pcb_plato* platoAEjecutar = obtenerSiguienteDeReady(datosCocinero->afinidad);
+		        if(platoAEjecutar != NULL){
+		        int cantidadCiclos = 1;
+                paso_receta* pasoPendiente = list_get(platoAEjecutar->pasosReceta);
 
 /*
-void hiloExecCocinero(char* afinidad){
-
-}
+                if(pasoPendiente == NULL){
+                	//esto no deberia pasar jamas
+                	exit(-6);
+                }
 */
 
+		        switch(pasoPendiente->accion){
+
+		        case REPOSAR:
 
 
+		        	break;
+
+		        case HORNEAR:
+
+		        	break;
+
+		        default:
+		        	while(pasoPendiente->duracionAccion != 0){
+		        	waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
+		        	pasoPendiente->duracionAccion--;
+		        	cantidadCiclos++;
+		        	}
+                    list_remove(pasoPendiente, platoAEjecutar->pasosReceta);
+
+
+		        	break;
+
+
+		        }
+
+
+
+		   }
+		        //no hay platos para ejecutar
+
+	}
+
+
+
+
+	} else {
+
+		while(1){
+				pcb_plato* platoAEjecutar = obtenerSiguienteDeReady(datosCocinero->afinidad);
+
+				if(platoAEjecutar != NULL){
+
+					int cantidadCiclos = 1;
+
+
+
+
+				}
+
+
+
+
+
+
+	}
+
+
+}
+
+
+
+/*
+void hiloBlockReady(){
+
+}
+ */
+
+
+pcb_plato* obtenerSiguienteDeReady(char* afinidad){
+	int i;
+	pcb_plato* elPlatoPlanificado;
+	for(i=0; i<list_size(listaDeColasReady);i++){
+		cola_ready* unaColaReady = list_get(listaDeColasReady[i]);
+		if(strcmp(afinidad, unaColaReady->afinidad) == 0){
+			elPlatoPlanificado = queue_pop(unaColaReady->cola);
+			return elPlatoPlanificado;
+		}
+	}
+	cola_ready* laColaReadySinAfinidad = list_get(listaDeColasReady[i]);
+	elPlatoPlanificado = queue_pop(laColaReadySinAfinidad->cola);
+	return elPlatoPlanificado;
+}
+
+
+
+// Inicializacion de semaforos necesarios
+void iniciarSemaforosPlanificacion(){
+	contadorPlatosEnNew = malloc(sizeof(sem_t));
+	sem_init(contadorPlatosEnNew, 0, 0);
+
+	mutexNew = malloc(sizeof(sem_t));
+	sem_init(mutexNew, 0, 1);
+
+	mutexListaReady = malloc(sizeof(sem_t));
+	sem_init(mutexListaReady, 0, 1);
+
+	mutexBlock = malloc(sizeof(sem_t));
+	sem_init(mutexBlock, 0, 1);
+
+}
+
+void iniciarSemaforosCiclos(){
+
+	habilitarCicloBlockReady= malloc(sizeof(sem_t));
+	sem_init(habilitarCicloBlockReady, 0, 0);
+	finalizarCicloBlockReady= malloc(sizeof(sem_t));
+	sem_init(finalizarCicloBlockReady, 0, 0);
+
+	listaSemHabilitarCicloExec = list_create();
+	listaSemFinalizarCicloExec = list_create();
+
+	int i;
+	for(i=0; i<cantCocineros; i++){
+		sem_t* semaforoHabilitarCiclo = malloc(sizeof(sem_t));
+		sem_init(semaforoHabilitarCiclo, 0, 0);
+		sem_t* semaforoFinalizarCiclo = malloc(sizeof(sem_t));
+		sem_init(semaforoFinalizarCiclo, 0, 0);
+		list_add(listaSemHabilitarCicloExec, semaforoHabilitarCiclo);
+		list_add(listaSemFinalizarCicloExec, semaforoFinalizarCiclo);
+	}
+}
+
+void hiloCiclosMaestro(){
+
+    int i;
+    int numCiclo = 1;
+
+    while(1){
+
+		log_trace(logger, "[HCM] Habilitando ciclo: %i\n", numCiclo);
+
+		for(i = 0; i < cantCocineros; i++){
+			signalSemaforoHabilitarCicloExec(i);
+		}
+		sem_post(habilitarCicloBlockReady);
+
+		sleep(RETARDO_CICLO_CPU);
+
+		log_trace(logger, "[HCM] Finalizando ciclo: %i", numCiclo);
+
+		for(i = 0; i < cantCocineros; i++){
+			waitSemaforoFinalizarCicloExec(i);
+		}
+		sem_wait(finalizarCicloBlockReady);
+
+		numCiclo++;
+    }
+}
+
+void waitSemaforoHabilitarCicloExec(uint32_t indice){
+	sem_t* semaforoObjetivo = list_get(listaSemHabilitarCicloExec, indice);
+	sem_wait(semaforoObjetivo);
+}
+
+void signalSemaforoHabilitarCicloExec(uint32_t indice){
+	sem_t* semaforoObjetivo = list_get(listaSemHabilitarCicloExec, indice);
+	sem_post(semaforoObjetivo);
+}
+
+void waitSemaforoFinalizarCicloExec(uint32_t indice){
+	sem_t* semaforoObjetivo = list_get(listaSemFinalizarCicloExec, indice);
+	sem_wait(semaforoObjetivo);
+}
+
+void signalSemaforoFinalizarCicloExec(uint32_t indice){
+	sem_t* semaforoObjetivo = list_get(listaSemFinalizarCicloExec, indice);
+	sem_post(semaforoObjetivo);
+}
 
