@@ -145,7 +145,7 @@ void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
 	free(respuesta);
 }
 
-void consultar_platos(int32_t socket_cliente){
+void consultarPlatos(int32_t socket_cliente){
 	int numero_cliente, numero_resto;
 	perfil_cliente* cliente;
 	info_resto* resto;
@@ -803,7 +803,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			break;
 
 		case CONSULTAR_PLATOS:
-			consultar_platos(socket_cliente);
+			consultarPlatos(socket_cliente);
 			break;
 
 		case CREAR_PEDIDO:

@@ -93,14 +93,14 @@ typedef enum{
 typedef enum{
 	REPOSAR = 1,
 	HORNEAR,
+	OTRO,
 }t_paso_receta;
 
-/*
 typedef enum{
-	REPOSADO = 1,
-	HORNEADO,
+	NO_BLOCK = 1,
+	REPOSO,
+	HORNO,
 }accionBlock;
-*/
 
 typedef struct{
 	uint32_t idPedido;
@@ -109,8 +109,8 @@ typedef struct{
     int instruccionesRealizadasDeUnPaso;
     int quantumRestante;
     //puede que no sea necesario
-    //accionBlock motivoBlock;
-    //int duracionBlock;
+    accionBlock motivoBlock;
+    int duracionBlock;
 }pcb_plato;
 
 typedef struct{
@@ -136,11 +136,18 @@ typedef struct{
 void inicializarRestaurante();
 void obtenerMetadataRestaurante();
 void crearColasPlanificacion();
-void hiloExecCocinero(char* afinidad);
+void hiloExecCocinero(credencialesCocinero*);
 void agregarANew(pcb_plato*);
 void agregarAReady(pcb_plato*);
 void agregarABlock(pcb_plato*);
 pcb_plato* obtenerSiguienteDeReady();
+void iniciarSemaforosPlanificacion();
+void iniciarSemaforosCiclos();
+void hiloCiclosMaestro();
+void waitSemaforoHabilitarCicloExec(uint32_t indice);
+void signalSemaforoHabilitarCicloExec(uint32_t indice);
+void waitSemaforoFinalizarCicloExec(uint32_t indice);
+void signalSemaforoFinalizarCicloExec(uint32_t indice);
 
 
 #endif /* SRC_UTILSRESTAURANTE_H_ */

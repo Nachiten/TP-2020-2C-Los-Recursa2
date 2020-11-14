@@ -199,93 +199,156 @@ void agregarAReady(pcb_plato* unPlato){
 
 }
 
-void agregarABlock(pcb_plato* unPlato){
+void agregarABlock(pcb_plato* elPlato){
 
+	sem_wait(mutexBlock);
 
+	list_add(colaBlock, elPlato);
+	//printf("[BLOCK] Ingresa el plato %s del pedido %i.\n", elPlato->nombrePlato, elPlato->idPedido);
+
+	sem_post(mutexBlock);
 
 }
-
-/*
- agregarAReady2 podria plantearse con la common de list_any_satisfy y una subfuncion bool, discutir con los pibe
- */
-
-
-
 
 
 void hiloExecCocinero(credencialesCocinero* datosCocinero){
 
-	if(algoritmoElegido == "FIFO"){
+	if(strcmp(algoritmoElegido, "FIFO") == 0){
+
+		int i;
 
 		while(1){
-				pcb_plato* platoAEjecutar = obtenerSiguienteDeReady(datosCocinero->afinidad);
-		        if(platoAEjecutar != NULL){
-		        int cantidadCiclos = 1;
-                paso_receta* pasoPendiente = list_get(platoAEjecutar->pasosReceta);
+			pcb_plato* platoAEjecutar = obtenerSiguienteDeReady(datosCocinero->afinidad);
 
-/*
-                if(pasoPendiente == NULL){
-                	//esto no deberia pasar jamas
-                	exit(-6);
-                }
-*/
+		    if(list_size(platoAEjecutar->pasosReceta) < 1){
+				  //el plato fue terminado, lo mando a exit
+			}
+
+		    int cantidadCiclos = 1;
+
+		    for(i=0;i<list_size(platoAEjecutar->pasosReceta); i++){
+
+                paso_receta* pasoPendiente = list_get(platoAEjecutar->pasosReceta, i);
 
 		        switch(pasoPendiente->accion){
 
 		        case REPOSAR:
+          //el plato tiene que cumplir sus ciclos en el estado BLOQUEADO, lo saco de aca
+                 platoAEjecutar->motivoBlock = REPOSO;
+                 platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
+                 list_remove(i, platoAEjecutar->pasosReceta);
+                 agregarABlock(platoAEjecutar);
+                 i=list_size(platoAEjecutar->pasosReceta);
 
-
-		        	break;
+		        break;
 
 		        case HORNEAR:
+          //el plato tiene que cumplir sus ciclos en el estado BLOQUEADO y dentro de un horno, lo saco de aca
+		         platoAEjecutar->motivoBlock = HORNO;
+				 platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
+				 list_remove(i, platoAEjecutar->pasosReceta);
+                 agregarABlock(platoAEjecutar);
+                 i=list_size(platoAEjecutar->pasosReceta);
 
-		        	break;
+		        break;
 
-		        default:
-		        	while(pasoPendiente->duracionAccion != 0){
-		        	waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
-		        	pasoPendiente->duracionAccion--;
-		        	cantidadCiclos++;
-		        	}
-                    list_remove(pasoPendiente, platoAEjecutar->pasosReceta);
+		        case OTRO:
+				 while(pasoPendiente->duracionAccion != 0){
+				 waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
+				 pasoPendiente->duracionAccion--;
+				 cantidadCiclos++;
+				 }
+				 list_remove(platoAEjecutar->pasosReceta, i);
 
-
-		        	break;
-
+		        break;
 
 		        }
 
 
 
 		   }
-		        //no hay platos para ejecutar
+		   //no hay platos para ejecutar
 
 	}
 
 
 
-
+    //si no es FIFO, se eligio RR
 	} else {
+		int i;
 
 		while(1){
-				pcb_plato* platoAEjecutar = obtenerSiguienteDeReady(datosCocinero->afinidad);
+			pcb_plato* platoAEjecutar = obtenerSiguienteDeReady(datosCocinero->afinidad);
 
-				if(platoAEjecutar != NULL){
+			if(list_size(platoAEjecutar->pasosReceta) < 1){
+			   //el plato fue terminado, lo mando a exit
+			}
+			int cantidadCiclos = 1;
+			platoAEjecutar->quantumRestante = quantumElegido;
 
-					int cantidadCiclos = 1;
+			for(i=0;i<list_size(platoAEjecutar->pasosReceta); i++){
+
+				paso_receta* pasoPendiente = list_get(platoAEjecutar->pasosReceta, i);
+
+				switch(pasoPendiente->accion){
+
+				case REPOSAR:
+		  //el plato tiene que cumplir sus ciclos en el estado BLOQUEADO, lo saco de aca
+				 platoAEjecutar->motivoBlock = REPOSO;
+				 platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
+				 list_remove(i, platoAEjecutar->pasosReceta);
+				 agregarABlock(platoAEjecutar);
+				 i=list_size(platoAEjecutar->pasosReceta);
+
+				break;
+
+				case HORNEAR:
+		  //el plato tiene que cumplir sus ciclos en el estado BLOQUEADO y dentro de un horno, lo saco de aca
+				 platoAEjecutar->motivoBlock = HORNO;
+				 platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
+				 list_remove(i, platoAEjecutar->pasosReceta);
+				 agregarABlock(platoAEjecutar);
+				 i=list_size(platoAEjecutar->pasosReceta);
+
+				break;
+
+				case OTRO:
+
+				 while(pasoPendiente->duracionAccion != 0){
+			  //Chequeo si se quedo sin quantum para desalojar
+				   if(platoAEjecutar->quantumRestante == 0){
+			  //Me fijo si el quantum que se le dio al cocinero para atender ese plato fue suficiente para
+			  //completar el paso, si no lo fue, lo devuelvo a ready sin tocar la lista de pasos
+			  //Si logro ser suficiente, saco el paso de la lista entero porque ya se que se van a ocupar de el luego
+					   if(pasoPendiente->duracionAccion == 0){
+					  	list_remove(platoAEjecutar->pasosReceta, i);
+					  	agregarAReady(platoAEjecutar);
+					  	break;
+					  } else {
+                        agregarAReady(platoAEjecutar);
+                        break;
+					  }
+				   }
+				   waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
+				   pasoPendiente->duracionAccion--;
+				   platoAEjecutar->quantumRestante--;
+				   cantidadCiclos++;
+				 }
+
+				break;
+
+			}
 
 
 
-
-				}
-
-
-
+		  }
 
 
 
 	}
 
+
+}
 
 }
 
@@ -302,13 +365,13 @@ pcb_plato* obtenerSiguienteDeReady(char* afinidad){
 	int i;
 	pcb_plato* elPlatoPlanificado;
 	for(i=0; i<list_size(listaDeColasReady);i++){
-		cola_ready* unaColaReady = list_get(listaDeColasReady[i]);
+		cola_ready* unaColaReady = list_get(listaDeColasReady, i);
 		if(strcmp(afinidad, unaColaReady->afinidad) == 0){
 			elPlatoPlanificado = queue_pop(unaColaReady->cola);
 			return elPlatoPlanificado;
 		}
 	}
-	cola_ready* laColaReadySinAfinidad = list_get(listaDeColasReady[i]);
+	cola_ready* laColaReadySinAfinidad = list_get(listaDeColasReady, i);
 	elPlatoPlanificado = queue_pop(laColaReadySinAfinidad->cola);
 	return elPlatoPlanificado;
 }

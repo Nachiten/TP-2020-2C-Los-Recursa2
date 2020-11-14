@@ -55,6 +55,7 @@ void inicializar_semaforos();
 void consultar_restaurantes(int32_t);
 void seleccionarRestaurante(char*, int32_t);
 void crear_pedido(int32_t);
+void consultarPlatos(int32_t);
 void aniadir_plato(a_plato*);
 void plato_Listo(plato_listo*, int32_t);
 void confirmar_Pedido(confirmar_pedido*);
