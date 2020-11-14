@@ -65,14 +65,18 @@ t_queue* colaParaHornear;
 sem_t* mutexNew;
 sem_t* mutexListaReady;
 sem_t* mutexBlock;
-//los hornos no necesitarian mutex, usariamos un hilo que los va sacando y colocando en los mismos
+sem_t* mutexColaHornos;
 
 sem_t* contadorPlatosEnNew;
+sem_t* contadorPlatosEnColaHornos;
+
 // Semaforos para sincronizar hilos con HCM
 t_list* listaSemHabilitarCicloExec;
 t_list* listaSemFinalizarCicloExec;
 sem_t* habilitarCicloBlockReady;
 sem_t* finalizarCicloBlockReady;
+sem_t* habilitarCicloEntradaSalida;
+sem_t* finalizarCicloEntradaSalida;
 
 
 
@@ -106,11 +110,12 @@ typedef struct{
 	uint32_t idPedido;
 	char* nombrePlato;
 	t_list* pasosReceta;
-    int instruccionesRealizadasDeUnPaso;
     int quantumRestante;
-    //puede que no sea necesario
+    //es necesario al final
     accionBlock motivoBlock;
     int duracionBlock;
+    int esperandoHorno;
+    int enHorno;
 }pcb_plato;
 
 typedef struct{
@@ -136,10 +141,16 @@ typedef struct{
 void inicializarRestaurante();
 void obtenerMetadataRestaurante();
 void crearColasPlanificacion();
+void crearHilosPlanificacion();
+void crearHornos();
+void hiloNew_Ready();
+void hiloBlock_Ready();
+void hiloEntradaSalida();
 void hiloExecCocinero(credencialesCocinero*);
 void agregarANew(pcb_plato*);
 void agregarAReady(pcb_plato*);
 void agregarABlock(pcb_plato*);
+void agregarAExit(pcb_plato*);
 pcb_plato* obtenerSiguienteDeReady();
 void iniciarSemaforosPlanificacion();
 void iniciarSemaforosCiclos();
