@@ -54,12 +54,10 @@ char* afinidades;
 char** listaPlatos;
 char** listaAfinidades;
 
-
 //Listas estrictamente usadas en la planificacion con sus mutuas exclusiones
-t_list* listaDeHornos;
 t_queue* colaNew;
-t_list* listaDeColasReady;
 t_list* colaBlock;
+t_list* listaDeColasReady;
 t_queue* colaParaHornear;
 t_list* platosHorneandose;
 
@@ -80,7 +78,7 @@ sem_t* finalizarCicloEntradaSalida;
 
 
 
-
+/*
 typedef enum{
 	NEW = 1,
 	READY,
@@ -89,10 +87,13 @@ typedef enum{
 	EXIT,
 }t_estado;
 
+
+
 typedef enum{
 	FIFO = 1,
 	RR,
 }t_algoritmoplanif;
+*/
 
 typedef enum{
 	REPOSAR = 1,
@@ -142,7 +143,8 @@ void inicializarRestaurante();
 void obtenerMetadataRestaurante();
 void crearColasPlanificacion();
 void crearHilosPlanificacion();
-void crearHornos();
+//al final no la termine necesitando
+//void crearHornos();
 void hiloNew_Ready();
 void hiloBlock_Ready();
 void hiloEntradaSalida();

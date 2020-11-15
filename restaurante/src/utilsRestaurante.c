@@ -168,14 +168,13 @@ void crearHornos(){
 void agregarANew(pcb_plato* unPlato)
 {
 	sem_wait(mutexNew);
-
 	queue_push(colaNew, unPlato);
+	sem_post(mutexNew);
 
 	//LOG DE ENUNCIADO!!!!1!1!
 	log_info(logger, "[NEW] Entra el nuevo plato < %s >, del pedido < %i >"
 			,unPlato->nombrePlato, unPlato->idPedido);
 
-	sem_post(mutexNew);
 	//Habilito la señal para el hilo que administra las colas de afinidad lo absorba en la que corresponde
 	sem_post(contadorPlatosEnNew);
 }
@@ -206,10 +205,8 @@ void agregarAReady(pcb_plato* unPlato){
 void agregarABlock(pcb_plato* elPlato){
 
 	sem_wait(mutexBlock);
-
 	list_add(colaBlock, elPlato);
 	//printf("[BLOCK] Ingresa el plato %s del pedido %i.\n", elPlato->nombrePlato, elPlato->idPedido);
-
 	sem_post(mutexBlock);
 
 }
@@ -284,8 +281,9 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
                  platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
                  list_remove(platoAEjecutar->pasosReceta, i);
                  agregarABlock(platoAEjecutar);
+                 //esto es para forzar al for a terminar y poder pasar al siguiente plato inmediatamente
                  i=list_size(platoAEjecutar->pasosReceta);
-
+                 cantidadCiclos++;
 		        break;
 
 		        case HORNEAR:
@@ -294,8 +292,9 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 				 platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
 				 list_remove(platoAEjecutar->pasosReceta, i);
                  agregarABlock(platoAEjecutar);
+                 //esto es para forzar al for a terminar y poder pasar al siguiente plato inmediatamente
                  i=list_size(platoAEjecutar->pasosReceta);
-
+                 cantidadCiclos++;
 		        break;
 
 		        case OTRO:
@@ -317,7 +316,7 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 
 
 		   }
-		   //no hay platos para ejecutar
+		   //no hay platos para ejecutar, no pasa naranja
 
 	}
 
@@ -532,9 +531,9 @@ pcb_plato* obtenerSiguienteDeReady(char* afinidad){
 	int i;
 	pcb_plato* elPlatoPlanificado;
 	for(i=0; i<list_size(listaDeColasReady);i++){
-		cola_ready* unaColaReady = list_get(listaDeColasReady, i);
-		if(strcmp(afinidad, unaColaReady->afinidad) == 0){
-			elPlatoPlanificado = queue_pop(unaColaReady->cola);
+		cola_ready* unaColaReadyConAfinidad = list_get(listaDeColasReady, i);
+		if(strcmp(afinidad, unaColaReadyConAfinidad->afinidad) == 0){
+			elPlatoPlanificado = queue_pop(unaColaReadyConAfinidad->cola);
 			return elPlatoPlanificado;
 		}
 	}
