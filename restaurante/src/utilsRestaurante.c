@@ -22,7 +22,9 @@ void inicializarRestaurante(){
     obtenerMetadataRestaurante();
 
     crearColasPlanificacion();
-    crearHornos();
+    //crearHornos();
+    iniciarSemaforosPlanificacion();
+    iniciarSemaforosCiclos();
     crearHilosPlanificacion();
 
 }
@@ -147,6 +149,7 @@ void crearHilosPlanificacion(){
 
 }
 
+/*
 void crearHornos(){
 	int i;
 	listaDeHornos = list_create();
@@ -159,7 +162,7 @@ void crearHornos(){
 		list_add(listaDeHornos, unHorno);
 	}
 }
-
+*/
 
 
 void agregarANew(pcb_plato* unPlato)
@@ -168,7 +171,9 @@ void agregarANew(pcb_plato* unPlato)
 
 	queue_push(colaNew, unPlato);
 
-	log_info(logger, "[NEW] Entra el nuevo plato %i, del pedido %i", unPlato->nombrePlato, unPlato->idPedido);
+	//LOG DE ENUNCIADO!!!!1!1!
+	log_info(logger, "[NEW] Entra el nuevo plato < %s >, del pedido < %i >"
+			,unPlato->nombrePlato, unPlato->idPedido);
 
 	sem_post(mutexNew);
 	//Habilito la señal para el hilo que administra las colas de afinidad lo absorba en la que corresponde
@@ -211,6 +216,22 @@ void agregarABlock(pcb_plato* elPlato){
 
 void agregarAExit(pcb_plato* elPlato){
 
+	//LOG DE ENUNCIADO!!!!1!1!
+	log_info(logger, "[EXIT] Entra el plato < %s >, del pedido < %i > por haber culminado su receta."
+				, elPlato->nombrePlato, elPlato->idPedido);
+
+	//No se si hace falta esto, confirmenme
+	//list_destroy(elPlato->pasosReceta)
+
+	//se libera memoria ocupada por donPlato
+	free(elPlato->nombrePlato);
+	free(elPlato);
+
+
+	//se envia un mensaje a sindicato para q actualice el estado del pedido,
+	//con el id del mismo y mi restaurante, aparentemente tambien al modulo que lo solicito el pedido
+	//Se enviaria PLATO_LISTO, ver con nico despues los detalles
+
 }
 
 // Hilo que maneja pasar los procesos de new a ready (preparar el Plato control block)
@@ -230,8 +251,6 @@ void hiloNew_Ready(){
 		sem_post(mutexNew);
 
         //preparo el PCB para meterlo en ready
-        unPlato->enHorno = 0;
-        unPlato->esperandoHorno = 0;
         unPlato->motivoBlock = NO_BLOCK;
         unPlato->quantumRestante = 0;
         unPlato->duracionBlock = 0;
@@ -250,10 +269,6 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 
 		while(1){
 			pcb_plato* platoAEjecutar = obtenerSiguienteDeReady(datosCocinero->afinidad);
-
-		    if(list_size(platoAEjecutar->pasosReceta) < 1){
-				  //el plato fue terminado, lo mando a exit
-			}
 
 		    int cantidadCiclos = 1;
 
@@ -290,6 +305,10 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 				 cantidadCiclos++;
 				 }
 				 list_remove(platoAEjecutar->pasosReceta, i);
+
+				 if(list_size(platoAEjecutar->pasosReceta) < 1){
+					agregarAExit(platoAEjecutar);
+				 }
 
 		        break;
 
@@ -405,15 +424,15 @@ void hiloBlockReady(){
 	  	pcb_plato* platoActual = list_get(colaBlock, i);
 	  	sem_post(mutexBlock);
 
-	  	switch(platoActual->motivoBlock){
-
+	  	switch(platoActual->motivoBlock)
+	  	{
 	  	case NO_BLOCK:
-	  		//error, jamas deberia pasar
+	  		//jamas deberia entrar un plato aca sin tener su motivoBlock alterado
 	  		break;
 
 	  	case REPOSO:
           if(platoActual->duracionBlock == 0){
-        	//el plato termino de reposar, es devuelto a ready
+        	//el plato termino de reposar, es devuelto a ready siempre A MENOS QUE este fue su ultimo paso
         	platoActual->motivoBlock = NO_BLOCK;
         	if(list_size(platoActual->pasosReceta) < 1){
         	  agregarAExit(platoActual);
@@ -427,31 +446,83 @@ void hiloBlockReady(){
 
 
 	  	case HORNO:
-	  	  if(platoActual->esperandoHorno == 1){
-	  		 //el plato ya se encuentra esperando para entrar a un horno, no me ocupo de hacer nada
-	  	  } else {
+	  		 sem_wait(mutexBlock);
+	  	     list_remove(colaBlock, i);
+	  		 sem_post(mutexBlock);
 	  		//le tengo que buscar un horno, lo pongo en la cola para hornear
 	  		 sem_wait(mutexColaHornos);
 	  		 queue_push(colaParaHornear, platoActual);
-	  		 platoActual->esperandoHorno = 1;
 	  		 sem_post(mutexColaHornos);
-	  		 sem_post(contadorPlatosEnColaHornos);
-	  	  }
-
-	  	}
-
-
+	  	  break;
+	  	 }
 
 	  }
 
+	  sem_post(finalizarCicloBlockReady);
 
-   sem_post(finalizarCicloBlockReady);
+	  }
 }
-}
+
+
+
 
 
 void hiloEntradaSalida(){
+	int i;
+	while(1){
 
+		sem_wait(habilitarCicloEntradaSalida);
+
+		for(i=0; i<list_size(platosHorneandose);i++){
+			pcb_plato* unPlatoHorneandose = list_get(platosHorneandose, i);
+			if(unPlatoHorneandose->duracionBlock == 0){
+				//el plato termino de hornearse, me fijo si le quedan mas pasos por hacer en su receta
+				//sino lo mando a exit (raro)
+				if(list_size(unPlatoHorneandose->pasosReceta)<1){
+					unPlatoHorneandose->motivoBlock = NO_BLOCK;
+					list_remove(platosHorneandose, i);
+
+					//LOG DE ENUNCIADO!!!!1!!
+					log_info(logger, "[ENTRADA/SALIDA] El horneado del plato < %s >, "
+						"del pedido < %i > ha finalizado."
+						,unPlatoHorneandose->nombrePlato, unPlatoHorneandose->idPedido);
+
+					agregarAExit(unPlatoHorneandose);
+				} else {
+					unPlatoHorneandose->motivoBlock = NO_BLOCK;
+					list_remove(platosHorneandose, i);
+
+					//LOG DE ENUNCIADO!!!!1!
+					log_info(logger, "[ENTRADA/SALIDA] El horneado del plato < %s >, "
+						"del pedido < %i > ha finalizado."
+						,unPlatoHorneandose->nombrePlato, unPlatoHorneandose->idPedido);
+
+					agregarAReady(unPlatoHorneandose);
+				}
+			}
+			unPlatoHorneandose->duracionBlock--;
+		}
+
+        //me fijo si puedo agregar un plato a hornear en este ciclo, de ser posible lo hago
+
+
+		if(list_size(platosHorneandose) < cantHornos){
+            pcb_plato* platoAHornear = queue_pop(colaParaHornear);
+            if(platoAHornear == NULL){
+            	//no hay platos para hornear
+            } else {
+            list_add(platosHorneandose, platoAHornear);
+            //LOG DE ENUNCIADO!!!1!!!1
+			log_info(logger, "[ENTRADA/SALIDA] Comienza a hornearse el plato < %s >, del pedido < %i >."
+								, platoAHornear->nombrePlato, platoAHornear->idPedido);
+            }
+		}
+
+
+         sem_post(finalizarCicloEntradaSalida);
+
+
+	}
 
 
 }
@@ -478,9 +549,6 @@ pcb_plato* obtenerSiguienteDeReady(char* afinidad){
 void iniciarSemaforosPlanificacion(){
 	contadorPlatosEnNew = malloc(sizeof(sem_t));
 	sem_init(contadorPlatosEnNew, 0, 0);
-
-	contadorPlatosEnColaHornos = malloc(sizeof(sem_t));
-	sem_init(contadorPlatosEnColaHornos, 0, 0);
 
 	mutexNew = malloc(sizeof(sem_t));
 	sem_init(mutexNew, 0, 1);

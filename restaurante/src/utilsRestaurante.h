@@ -61,6 +61,7 @@ t_queue* colaNew;
 t_list* listaDeColasReady;
 t_list* colaBlock;
 t_queue* colaParaHornear;
+t_list* platosHorneandose;
 
 sem_t* mutexNew;
 sem_t* mutexListaReady;
@@ -68,7 +69,6 @@ sem_t* mutexBlock;
 sem_t* mutexColaHornos;
 
 sem_t* contadorPlatosEnNew;
-sem_t* contadorPlatosEnColaHornos;
 
 // Semaforos para sincronizar hilos con HCM
 t_list* listaSemHabilitarCicloExec;
@@ -114,14 +114,14 @@ typedef struct{
     //es necesario al final
     accionBlock motivoBlock;
     int duracionBlock;
-    int esperandoHorno;
-    int enHorno;
 }pcb_plato;
 
+/*
 typedef struct{
 	int idHorno;
 	int enUso;
 }t_horno;
+*/
 
 typedef struct{
 	t_paso_receta accion;
