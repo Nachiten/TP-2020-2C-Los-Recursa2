@@ -95,11 +95,175 @@ void crear_Pedido(int32_t socket_cliente){
 	free(respuesta);
 }
 
-void aniadir_plato(a_plato* recibidoAPlato){
+void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
+	respuesta_ok_error* respuesta = malloc(sizeof(respuesta_ok_error));
 
+	if(buscar_pedido_por_id(recibidoAPlato->idPedido) != -2){
+		mandar_mensaje(recibidoAPlato,GUARDAR_PLATO,socket_sindicato);
+
+		codigo_operacion codigoRecibido;
+	    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+
+	    printf("El codigo recibido del emisor es: %d", codigoRecibido);
+
+	    uint32_t sizePayload;
+	    bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+
+	    printf("El size del buffer/payload es: %u", sizePayload);
+
+	    recibir_mensaje(respuesta,RESPUESTA_GUARDAR_PLATO,socket_sindicato);
+
+	    mandar_mensaje(respuesta,RESPUESTA_A_PLATO,socket_cliente);
+
+	}else{
+		respuesta->respuesta = 0;
+		mandar_mensaje(respuesta,RESPUESTA_A_PLATO,socket_cliente);
+	}
+	free(respuesta);
+}
+
+void confirmar_Pedido(int32_t id, int32_t socket_cliente){
+	obtener_pedido* datosPedido = malloc(sizeof(obtener_pedido));
+	datosPedido->idPedido = id;
+	datosPedido->largoNombreRestaurante = strlen(nombreRestaurante);
+	datosPedido->nombreRestaurante = malloc(strlen(nombreRestaurante) +1);
+	strcpy(datosPedido->nombreRestaurante,nombreRestaurante);
+
+	respuesta_obtener_pedido* pedido = malloc(sizeof(respuesta_obtener_pedido));
+	int i = 0;
+
+	mandar_mensaje(datosPedido,OBTENER_PEDIDO,socket_sindicato);
+
+    codigo_operacion codigoRecibido;
+    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+
+    printf("El codigo recibido del emisor es: %d", codigoRecibido);
+
+    uint32_t sizePayload;
+    bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+
+    printf("El size del buffer/payload es: %u", sizePayload);
+
+    recibir_mensaje(pedido,RESPUESTA_OBTENER_PEDIDO,socket_sindicato);
+
+	char** listaComidas = string_get_string_as_array(pedido->comidas);
+	char** listaComidasTotales = string_get_string_as_array(pedido->cantTotales);
+
+	int respuesta;
+	while(listaComidas[i] != NULL){
+		respuesta = preparar_pcb_plato(listaComidas[i],listaComidasTotales[i]);
+		if(respuesta == 0){
+			break;
+		}
+	}
+
+	respuesta_ok_error* respuestaAMandar = malloc(sizeof(respuesta_ok_error));
+	respuestaAMandar->respuesta = respuesta;
+
+	mandar_mensaje(respuestaAMandar,RESPUESTA_CONFIRMAR_PEDIDO,socket_cliente);
+
+	free(datosPedido->nombreRestaurante);
+	free(datosPedido);
+	free(pedido->cantTotales);
+	free(pedido->cantListas);
+	free(pedido->comidas);
+	free(pedido);
+	free(respuestaAMandar);
+}
+void consultar_Pedido(int32_t id,int32_t socket_cliente){
+	obtener_pedido* datosPedido = malloc(sizeof(obtener_pedido));
+	datosPedido->idPedido = id;
+	datosPedido->largoNombreRestaurante = strlen(nombreRestaurante);
+	datosPedido->nombreRestaurante = malloc(strlen(nombreRestaurante) +1);
+	strcpy(datosPedido->nombreRestaurante,nombreRestaurante);
+
+	respuesta_obtener_pedido* pedido = malloc(sizeof(respuesta_obtener_pedido));
+	int i = 0;
+
+	mandar_mensaje(datosPedido,OBTENER_PEDIDO,socket_sindicato);
+
+    codigo_operacion codigoRecibido;
+    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+
+    printf("El codigo recibido del emisor es: %d", codigoRecibido);
+
+    uint32_t sizePayload;
+    bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+
+    printf("El size del buffer/payload es: %u", sizePayload);
+
+    recibir_mensaje(pedido,RESPUESTA_OBTENER_PEDIDO,socket_sindicato);
+
+    mandar_mensaje(pedido,RESPUESTA_CONSULTAR_PEDIDO,socket_cliente);
 }
 
 //*******************FUNCIONES DE RESTO*******************
+int preparar_pcb_plato(char* nombreComida, char* cantComida){
+	int i = 0;
+
+	obtener_receta* receta_a_buscar = malloc(sizeof(obtener_receta));
+	receta_a_buscar->largoNombreReceta = strlen(nombreComida);
+	receta_a_buscar->nombreReceta = malloc(strlen(nombreComida) +1);
+	strcpy(receta_a_buscar->nombreReceta,nombreComida);
+
+	mandar_mensaje(receta_a_buscar,OBTENER_RECETA,socket_sindicato);
+
+    codigo_operacion codigoRecibido;
+    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+
+    printf("El codigo recibido del emisor es: %d", codigoRecibido);
+
+    uint32_t sizePayload;
+    bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+
+    printf("El size del buffer/payload es: %u", sizePayload);
+
+    respuesta_obtener_receta* receta_obtenida = malloc(sizeof(respuesta_obtener_receta));
+
+    recibir_mensaje(receta_obtenida,RESPUESTA_OBTENER_PEDIDO,socket_sindicato);
+
+    if(strcmp(receta_obtenida->pasos,"[]") != 0){
+    	char** listaPasos = string_get_string_as_array(receta_obtenida->pasos);
+    	char** listaDuracion = string_get_string_as_array(receta_obtenida->tiempoPasos);
+
+    	int cantPlatos = atoi(cantComida);
+
+    	for(int j = 0;j<cantPlatos;j++){
+    		pcb_plato* plato = malloc(sizeof(pcb_plato));
+    		plato->nombrePlato = malloc(strlen(nombreComida) +1);
+    		strcpy(plato->nombrePlato,nombreComida);
+    		plato->pasosReceta = list_create();
+
+    		while(listaPasos[i] != NULL){
+    			paso_receta* paso = malloc(sizeof(paso_receta));
+
+    			if(strcmp(listaPasos[i],"Hornear") == 0){
+    				paso->accion = HORNEAR;
+    				paso->duracionAccion = atoi(listaDuracion[i]);
+
+    			}else if(strcmp(listaPasos[i],"Reposar") == 0){
+    				paso->accion = REPOSAR;
+    				paso->duracionAccion = atoi(listaDuracion[i]);
+
+    			}else{
+    				paso->accion = OTRO;
+    				paso->duracionAccion = atoi(listaDuracion[i]);
+    			}
+    			list_add(plato->pasosReceta,paso);
+    		}
+    		agregarANew(plato);
+    	}
+    	freeDeArray(listaPasos);
+    	freeDeArray(listaDuracion);
+
+    	return 1;
+
+    }else{
+    	return 0;
+    }
+
+}
+
 void inicializar_semaforos(){
 	semId = malloc(sizeof(sem_t));
 	semLog = malloc(sizeof(sem_t));
@@ -131,10 +295,25 @@ int buscar_pedido_por_id(uint32_t id_pedido){
 	return -2;
 }
 
+// Hacer free de un array con cosas
+void freeDeArray(char** array){
+    int cantidadElementosArray = cantidadDeElementosEnArray(array);
+
+    int i;
+
+    for (i = cantidadElementosArray; i>= 0; i--){
+        free(array[i]);
+    }
+
+    free(array);
+}
+
 //*******************FUNCIONES DEL SERVER*******************
 
 void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t sizeAAllocar)  {
 	a_plato* recibidoAPlato;
+	consultar_pedido* recibidoConsultarPedido;
+	confirmar_pedido* recibidoConfirmarPedido;
 	switch(cod_op){
 
 	case CONSULTAR_PLATOS:
@@ -148,8 +327,20 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	case A_PLATO:
 		recibidoAPlato = malloc(sizeAAllocar);
 		recibir_mensaje(recibidoAPlato,A_PLATO,socket_cliente);
-		aniadir_plato(recibidoAPlato);
+		aniadir_plato(recibidoAPlato,socket_cliente);
+		free(recibidoAPlato->nombrePlato);
 		free(recibidoAPlato);
+		break;
+
+	case CONFIRMAR_PEDIDO:
+		recibidoConfirmarPedido = malloc(sizeAAllocar);
+		recibir_mensaje(recibidoConfirmarPedido,CONFIRMAR_PEDIDO,socket_cliente);
+		confirmar_Pedido(recibidoConfirmarPedido->idPedido,socket_cliente);
+		free(recibidoConfirmarPedido->nombreRestaurante);
+		free(recibidoConfirmarPedido);
+		break;
+
+	case CONSULTAR_PEDIDO:
 		break;
 
 	default:
