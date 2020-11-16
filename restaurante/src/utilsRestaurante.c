@@ -268,6 +268,8 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 	if(strcmp(algoritmoElegido, "FIFO") == 0){
 
 		int i;
+		int deboDesalojar;
+		int cantidadCiclos;
 
 		while(1){
 			pcb_plato* platoAEjecutar = obtenerSiguienteDeReady(datosCocinero->afinidad);
@@ -285,53 +287,61 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 				exit(-1);
 			}
 
-		    int cantidadCiclos = 1;
+			cantidadCiclos = 1;
+			deboDesalojar = 0;
 
 		    for(i=0;i<list_size(platoAEjecutar->pasosReceta); i++){
 
                 paso_receta* pasoPendiente = list_get(platoAEjecutar->pasosReceta, i);
 
-		        switch(pasoPendiente->accion){
+		      switch(pasoPendiente->accion){
 
 		        case REPOSAR:
           //el plato tiene que cumplir sus ciclos en el estado BLOQUEADO, lo saco de aca
+		         waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
                  platoAEjecutar->motivoBlock = REPOSO;
                  platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
                  list_remove(platoAEjecutar->pasosReceta, i);
                  agregarABlock(platoAEjecutar);
           //esto es para forzar al for a terminar y poder pasar al siguiente plato inmediatamente
-                 i=list_size(platoAEjecutar->pasosReceta);
+                 deboDesalojar = 1;
                  cantidadCiclos++;
+                 signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
 		        break;
 
 		        case HORNEAR:
           //el plato tiene que cumplir sus ciclos en el estado BLOQUEADO y dentro de un horno, lo saco de aca
+		         waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
 		         platoAEjecutar->motivoBlock = HORNO;
 				 platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
 				 list_remove(platoAEjecutar->pasosReceta, i);
                  agregarABlock(platoAEjecutar);
           //esto es para forzar al for a terminar y poder pasar al siguiente plato inmediatamente
-                 i=list_size(platoAEjecutar->pasosReceta);
+                 deboDesalojar = 1;
                  cantidadCiclos++;
+                 signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
 		        break;
 
 		        case OTRO:
-				 while(pasoPendiente->duracionAccion != 0){
+				 while(pasoPendiente->duracionAccion > 0){
 				 waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
 				 pasoPendiente->duracionAccion--;
 				 cantidadCiclos++;
+				 signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
 				 }
 				 list_remove(platoAEjecutar->pasosReceta, i);
-
+                 i--;
 				 if(list_size(platoAEjecutar->pasosReceta) < 1){
 					agregarAExit(platoAEjecutar);
+					deboDesalojar = 1;
 				 }
-
 		        break;
 
+		      }
+
+		        if(deboDesalojar == 1){
+		        	break;
 		        }
-
-
 
 		   }
 		   //no hay platos para ejecutar, no pasa naranja
@@ -343,6 +353,8 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
     //si no es FIFO, se eligio RR
 	} else {
 		int i;
+		int deboDesalojar;
+		int cantidadCiclos;
 
 		while(1){
 			pcb_plato* platoAEjecutar = obtenerSiguienteDeReady(datosCocinero->afinidad);
@@ -352,7 +364,9 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 			   exit(-1);
 			}
 
-			int cantidadCiclos = 1;
+			cantidadCiclos = 1;
+			deboDesalojar = 0;
+
 			platoAEjecutar->quantumRestante = quantumElegido;
 
 			for(i=0;i<list_size(platoAEjecutar->pasosReceta); i++){
@@ -361,7 +375,7 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 
 				switch(pasoPendiente->accion){
 
-				case REPOSAR:
+			case REPOSAR:
 		  //el plato tiene que cumplir sus ciclos en el estado BLOQUEADO, lo saco de aca
 		  //gasto 1 ciclo en solicitar su cambio de estado
 
@@ -370,12 +384,12 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 				 platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
 				 list_remove(platoAEjecutar->pasosReceta, i);
 				 agregarABlock(platoAEjecutar);
-				 i=list_size(platoAEjecutar->pasosReceta);
+				 deboDesalojar = 1;
 				 signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
 
 				break;
 
-				case HORNEAR:
+			case HORNEAR:
 		  //el plato tiene que cumplir sus ciclos en el estado BLOQUEADO y dentro de un horno, lo saco de aca
 		  //gasto 1 ciclo en solicitar su cambio de estado
 
@@ -384,73 +398,62 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 				 platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
 				 list_remove(platoAEjecutar->pasosReceta, i);
 				 agregarABlock(platoAEjecutar);
-				 i=list_size(platoAEjecutar->pasosReceta);
+				 deboDesalojar = 1;
 				 signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
 
 				break;
 
-				case OTRO:
+			case OTRO:
 
-				 while(pasoPendiente->duracionAccion != 0){
-			  //Chequeo si se quedo sin quantum para desalojar
-				   if(platoAEjecutar->quantumRestante == 0){
-			  //Me fijo si el quantum que se le dio al cocinero para atender ese plato fue suficiente para
-			  //completar el paso, si no lo fue, lo devuelvo a ready sin tocar la lista de pasos
-			  //Si logro ser suficiente,
-			  //saco el paso de la lista entero y me fijo si ese era el ultimo paso, en cuyo caso se va a exit
-					   if(pasoPendiente->duracionAccion == 0){
+			  while(pasoPendiente->duracionAccion > 0){
+			  //Chequeo si aun tiene quantum para laburar
 
-					  	list_remove(platoAEjecutar->pasosReceta, i);
+				   if(platoAEjecutar->quantumRestante > 0)
+				   {
 
-					  	if(list_size(platoAEjecutar->pasosReceta)<1){
-					  	   agregarAExit(platoAEjecutar);
-					  	}
-					  //si no la concluyo entera, me fijo si su proximo paso es bloqueante para ya solicitar
-					  //su cambio a estado bloqueado
+					  waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
+					  pasoPendiente->duracionAccion--;
+					  platoAEjecutar->quantumRestante--;
+					  cantidadCiclos++;
+					  signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
 
-					  	paso_receta* pasoProximo = list_get(platoAEjecutar->pasosReceta, i);
-					  	switch(pasoProximo->accion){
+					   if(pasoPendiente->duracionAccion == 0)
+					   {
 
-					  	case REPOSAR:
-					  		platoAEjecutar->motivoBlock = REPOSO;
-						    platoAEjecutar->duracionBlock = pasoProximo->duracionAccion;
-						    list_remove(platoAEjecutar->pasosReceta, i);
-						    agregarABlock(platoAEjecutar);
-						    i=list_size(platoAEjecutar->pasosReceta);
-					  	break;
+					  	 list_remove(platoAEjecutar->pasosReceta, i);
+                         i--;
 
-					  	case HORNEAR:
-					  		platoAEjecutar->motivoBlock = HORNO;
-							platoAEjecutar->duracionBlock = pasoProximo->duracionAccion;
-							list_remove(platoAEjecutar->pasosReceta, i);
-							agregarABlock(platoAEjecutar);
-							i=list_size(platoAEjecutar->pasosReceta);
-					  	break;
+					  	   if(list_size(platoAEjecutar->pasosReceta)<1)
+					  	   {
+					  	     agregarAExit(platoAEjecutar);
+					  	     deboDesalojar = 1;
+					  	     break;
+					  	   } else {
+					  		 break;
+					  	   }
 
-					  	case OTRO:
-					  		agregarAReady(platoAEjecutar);
-					  	}
-					  	break;
-					  } else {
-                        agregarAReady(platoAEjecutar);
-                        break;
 					  }
+
+
+				   } else {
+					   agregarAReady(platoAEjecutar);
+					   deboDesalojar = 1;
+					   break;
 				   }
-				   waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
-				   pasoPendiente->duracionAccion--;
-				   platoAEjecutar->quantumRestante--;
-				   cantidadCiclos++;
-				   signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
+
+
 				 }
 
 				break;
 
 			}
 
+				if(deboDesalojar == 1){
+					break;
+				}
 
 
 		  }
-
 
 
 	}
@@ -574,7 +577,7 @@ void hiloEntradaSalida(){
 
 
         //me fijo si puedo agregar un plato a hornear en este ciclo, de ser posible lo hago
-		if(list_size(colaParaHornear)<1){
+		if(queue_size(colaParaHornear)<1){
 			//no hay platos en la cola para hornear, no intentare agregar ninguno
 		} else {
 			//hay platos en la cola para hornear, me fijo si tengo hornos disponibles
@@ -617,7 +620,7 @@ pcb_plato* obtenerSiguienteDeReady(char* afinidad){
 	for(i=0; i<list_size(listaDeColasReady);i++){
 		cola_ready* unaColaReadyConAfinidad = list_get(listaDeColasReady, i);
 		if(strcmp(afinidad, unaColaReadyConAfinidad->afinidad) == 0){
-			if(list_size(unaColaReadyConAfinidad->cola) == 0){
+			if(queue_size(unaColaReadyConAfinidad->cola) == 0){
 				elPlatoPlanificado = NULL;
 				return elPlatoPlanificado;
 			} else {
@@ -629,7 +632,7 @@ pcb_plato* obtenerSiguienteDeReady(char* afinidad){
 
 
 	cola_ready* laColaReadySinAfinidad = list_get(listaDeColasReady, i);
-	if(list_size(laColaReadySinAfinidad->cola) == 0){
+	if(queue_size(laColaReadySinAfinidad->cola) == 0){
 		elPlatoPlanificado = NULL;
 		return elPlatoPlanificado;
 	} else {
