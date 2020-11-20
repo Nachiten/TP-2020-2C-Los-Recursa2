@@ -399,8 +399,9 @@ void plato_Listo(plato_listo* platoListo, int32_t socket_cliente){
 						log_info(logger, "pedido completo, avisando al repartidor");
 						sem_post(semLog);
 
+						// Se avisa a planificacion que el pedido esta listo
 						guardarPedidoListo(cliente->id_global);
-						// TODO | Se debe avisar a planif con guardarPedidoListo(id)
+
 
 					}else{
 						sem_wait(semLog);

@@ -149,7 +149,7 @@ void guardarPedidoListo(int idPedido){
 	list_add(pedidosListos, pedidoAGuardar);
 	sem_post(mutexPedidosListos);
 
-	printf("[GuardarPedido] Se guarda como listo el pedido %i\n", idPedido);
+	log_trace(logger, "[GuardarPedido] Se guarda como listo el pedido %i\n", idPedido);
 }
 
 void eliminarPedidoListo(int idPedido){
@@ -162,7 +162,7 @@ void eliminarPedidoListo(int idPedido){
 		if (*pedidoCandidato == idPedido){
 			int* pedidoAEliminar = list_remove(pedidosListos, i);
 			free(pedidoAEliminar);
-			printf("[Pedidos] Eliminado pedido %i de pedidos listos.\n", idPedido);
+			log_trace(logger, "[Pedidos] Eliminado pedido %i de pedidos listos.\n", idPedido);
 		}
 	}
 	sem_post(mutexPedidosListos);
@@ -189,6 +189,26 @@ int checkearPedidoListo(int idPedido){
 	return retorno;
 }
 
+void moverPedidoDeBlockAReady(int indicePedido){
+	sem_wait(mutexBlock);
+	pcb_pedido* pedidoAReady = list_remove(colaBlock, indicePedido);
+	sem_post(mutexBlock);
+
+	pedidoAReady->accionBlocked = NO_BLOCK;
+
+	agregarAReady(pedidoAReady);
+}
+
+void moverPedidoDeBlockAExit(int indicePedido){
+	sem_wait(mutexBlock);
+	pcb_pedido* pedidoAExit = list_remove(colaBlock, indicePedido);
+	sem_post(mutexBlock);
+
+	pedidoAExit->accionBlocked = NO_BLOCK;
+
+	agregarAExit(pedidoAExit);
+}
+
 void hiloBlock_Ready(){
 
 	while(1){
@@ -213,12 +233,12 @@ void hiloBlock_Ready(){
 		if(elementosEnBlock == 0)
 			log_trace(logger, "[BLOCK] No hay pedidos en block.");
 
-		int i;
+		int indicePedido;
 		// Escaneo todos los elementos en block para sumar 1 ciclo de descanso a cada proceso
-		for (i = 0; i < elementosEnBlock; i++){
+		for (indicePedido = 0; indicePedido < elementosEnBlock; indicePedido++){
 
 			sem_wait(mutexBlock);
-			pcb_pedido* pedidoActual = list_get(colaBlock, i);
+			pcb_pedido* pedidoActual = list_get(colaBlock, indicePedido);
 			sem_post(mutexBlock);
 
 			repartidor* repartidorActual = pedidoActual->repartidorAsignado;
@@ -235,26 +255,20 @@ void hiloBlock_Ready(){
 
 						log_trace(logger, "[BLOCK] El pedido %i ya descanso todos los %i ciclos que necesitaba.", pedidoActual->pedidoID, repartidorActual->tiempoDescansado);
 
-						sem_wait(mutexBlock);
-						pcb_pedido* pedidoAMover = list_remove(colaBlock, i);
-						sem_post(mutexBlock);
-
 						if (pedidoActual->proximoEstado == READY){
 							// Cuando termina de descansar y tiene que continuar rafagas
-							log_info(logger, "[READY] Ingresa pedido %i por terminar de descansar.", pedidoAMover->pedidoID);
 
-							pedidoAMover->accionBlocked = NO_BLOCK;
-							pedidoAMover->repartidorAsignado->tiempoDescansado = 0;
-							pedidoAMover->repartidorAsignado->cansado = 0;
+							pedidoActual->repartidorAsignado->tiempoDescansado = 0;
+							pedidoActual->repartidorAsignado->cansado = 0;
 
-							agregarAReady(pedidoAMover);
+							log_info(logger, "[READY] Ingresa pedido %i por terminar de descansar.", pedidoActual->pedidoID);
+							moverPedidoDeBlockAReady(indicePedido);
 
 						} else if (pedidoActual->proximoEstado == EXIT){
 
-							pedidoAMover->accionBlocked = NO_BLOCK;
+							// Termina de descansar y ya esta terminado
+							moverPedidoDeBlockAExit(indicePedido);
 
-							//log_info(logger, "[EXIT] Ingresa pedido %i por estar terminado.", pedidoAMover->pedidoID);
-							agregarAExit(pedidoAMover);
 						} else {
 							printf("BLOCK | ERROR: El proximo estado tiene un valor invalido.\n");
 							exit(7);
@@ -272,17 +286,12 @@ void hiloBlock_Ready(){
 						// Debe descansar antes de volver a ready
 						if (pedidoActual->repartidorAsignado->cansado){
 							pedidoActual->accionBlocked = DESCANSANDO;
+							pedidoActual->proximoEstado = READY;
 
 						// No esta cansado, va a ready
 						} else {
-							sem_wait(mutexBlock);
-							pcb_pedido* pedidoAReady = list_remove(colaBlock, i);
-							sem_post(mutexBlock);
-
-							pedidoAReady->accionBlocked = NO_BLOCK;
-
-							log_info(logger, "[READY] Ingresa pedido %i por ya estar listo.", pedidoAReady->pedidoID);
-							agregarAReady(pedidoActual);
+							log_info(logger, "[READY] Ingresa pedido %i por ya estar listo.", pedidoActual->pedidoID);
+							moverPedidoDeBlockAReady(indicePedido);
 						}
 
 
@@ -295,9 +304,9 @@ void hiloBlock_Ready(){
 
 				case ESPERANDO_EXIT:
 
-					// Acciones que corresponden a terminar el pedido
-					// TODO
+					// Se entrega el pedido
 					log_info(logger, "[BLOCK] Repartidor %i entrega pedido %i.", pedidoActual->repartidorAsignado->numeroRepartidor, pedidoActual->pedidoID);
+					pedido_entregado(pedidoActual->pedidoID);
 
 					// Debe descansar antes de volver a ready
 					if (pedidoActual->repartidorAsignado->cansado){
@@ -306,14 +315,7 @@ void hiloBlock_Ready(){
 
 					// No esta cansado, va a exit
 					} else {
-						sem_wait(mutexBlock);
-						pcb_pedido* pedidoAExit = list_remove(colaBlock, i);
-						sem_post(mutexBlock);
-
-						pedidoAExit->accionBlocked = NO_BLOCK;
-
-						//log_info(logger, "[EXIT] Ingresa pedido %i por estar terminado.", pedidoAExit->pedidoID);
-						agregarAExit(pedidoActual);
+						moverPedidoDeBlockAExit(indicePedido);
 					}
 
 					break;
@@ -325,7 +327,6 @@ void hiloBlock_Ready(){
 					break;
 			}
 		}
-
 
 		sem_post(finalizarCicloBlockReady);
 
@@ -364,50 +365,6 @@ void hiloExec(int* numHiloExecPuntero){
 			}
 
 			agregarABlock(pedidoAEjecutar);
-
-//			// Esta cansado
-//			if (desalojoCode == 1){
-//				//printf("[EXEC-%i] Estoy cansado.\n", numHiloExec);
-//
-//
-//				log_info(logger, "[BLOCK] Ingresa pedido %i por estar cansado.", pedidoAEjecutar->pedidoID);
-//				agregarABlock(pedidoAEjecutar);
-//			// Termino rafaga
-//			} else if (desalojoCode == 2){
-//				if(pedidoAEjecutar->objetivo == RESTAURANTE){
-//					log_info(logger, "[EXEC-%i] Pedido %i llega al restaurant en posicion %i-%i.", numHiloExec, pedidoAEjecutar->pedidoID, pedidoAEjecutar->posRestauranteX, pedidoAEjecutar->posRestauranteY);
-//
-//					// Acciones al llegar al resutante
-//					pedidoAEjecutar->instruccionesRealizadas = 0;
-//					pedidoAEjecutar->repartidorAsignado->posX = pedidoAEjecutar->posRestauranteX;
-//					pedidoAEjecutar->repartidorAsignado->posY = pedidoAEjecutar->posRestauranteY;
-//					pedidoAEjecutar->accionBlocked = ESPERANDO_MSG;
-//					pedidoAEjecutar->objetivo = CLIENTE;
-//					pedidoAEjecutar->instruccionesTotales = distanciaDeRepartidorAObjetivo(pedidoAEjecutar->repartidorAsignado,pedidoAEjecutar);
-//
-//					log_info(logger, "[BLOCK] Ingresa pedido %i para esperar mensaje.", pedidoAEjecutar->pedidoID);
-//					agregarABlock(pedidoAEjecutar);
-//				} else if (pedidoAEjecutar->objetivo == CLIENTE){
-//					log_info(logger, "[EXEC-%i] Pedido %i llega al cliente en posicion %i-%i.", numHiloExec, pedidoAEjecutar->pedidoID, pedidoAEjecutar->posClienteX, pedidoAEjecutar->posClienteY);
-//					log_info(logger, "[EXEC-%i] Repartidor %i entrega pedido %i.", numHiloExec, pedidoAEjecutar->repartidorAsignado->numeroRepartidor, pedidoAEjecutar->pedidoID);
-//
-//					// TODO | Se deben mandar todos los mensajes aclarados en consigna
-//
-//					// Acciones al llegar al cliente
-//					//agregarAExit(pedidoAEjecutar);
-//					//ToDo se manda a exit y se liberan todos los recursos del pedido por puntero salvo el repartidor (pertenecen a una lista que no se puede tocar)
-//				} else {
-//					printf("[EXEC-%i] | [ERROR] El objetivo del pedido es invalido\n", numHiloExec);
-//					exit(6);
-//				}
-//
-//
-//			} else {
-//				printf("[EXEC-%i | ERROR] El desalojo code tiene un valor invalido.\n", numHiloExec);
-//				exit(6);
-//			}
-
-
 
 		} else {
 			waitSemaforoHabilitarCicloExec(numHiloExec);
@@ -532,7 +489,6 @@ void agregarABlock(pcb_pedido* elPedido){
 
 pcb_pedido* obtenerSiguienteDeReady(){
 
-
 	// Solo para FIFO
 	// [1,2,3,4] (en ese orden) ----> Sale 1
 	// Solo para SJF
@@ -566,8 +522,6 @@ pcb_pedido* obtenerSiguienteDeReady(){
 
 	  }
 	}
-
-
 
 	// Devuelve NULL si no hay nada en ready
 	// Caso contrario devuelve el que tiene mas prioridad segun el algoritmo que se este empleando
@@ -677,7 +631,7 @@ int estaDesocupado(repartidor* unRepartidor){
 	return !unRepartidor->asignado;
 }
 
-// TODO | Se debe checkear correctamente cuando hay 0 repartidores disponibles
+
 void asignarRepartidorAPedido(pcb_pedido* unPedido){
 	// Filtro la lista y solo dejo los repartidores que no estan ocupados
 	t_list* repartidoresDisponibles = list_filter(repartidores, (void*)estaDesocupado);
@@ -983,3 +937,5 @@ void freeDeArray(char** array){
 
 	free(array);
 }
+
+
