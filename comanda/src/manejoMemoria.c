@@ -966,6 +966,7 @@ void aumentarCantidadLista(segmentos* pedido, char* nombrePlato)
 	if(todoPiola == 1)
 	{
 		cambiarEstado(pedido, TERMINADO);
+		puts("Este pedido está TERMINADO.");
 	}
 
 	//a lo ultimo, vuelvo a censurar todos los datos de los platos del pedido
