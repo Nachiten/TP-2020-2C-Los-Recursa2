@@ -1,12 +1,12 @@
 #include "cargador.h"
 
-//Deja un log listo para usar.
+//Deja un log listo para usar
 t_log* cargarUnLog(char* ruta, char* nombreLog)
 {
 	return log_create(ruta, nombreLog, 1, LOG_LEVEL_INFO);
 }
 
-// Deja un log listo para usar.
+//Deja un log listo para usar
 t_log* cargarUnLogApp(char* ruta, char* nombreLog)
 {
 	return log_create(ruta, nombreLog, 0, LOG_LEVEL_INFO);
