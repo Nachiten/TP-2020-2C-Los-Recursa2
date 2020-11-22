@@ -185,9 +185,9 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			size_ya_armado = serializar_paquete_guardar_pedido(paquete, mensaje);
 			break;
 
-		//ATENCION!!! REUTILIZAMOS SERIALIZAR DE RESPUESTA_CREAR_PEDIDO
+		//ATENCION!!! REUTILIZAMOS SERIALIZAR DE RESPUESTA_CONSULTAR_PLATOS
 		case CONSULTAR_PEDIDO:
-            size_ya_armado = serializar_paquete_respuesta_crear_pedido(paquete, mensaje);
+            size_ya_armado = serializar_paquete_respuesta_consultar_platos(paquete, mensaje);
 			break;
 
 	    //ATENCION!!! REUTILIZAMOS SERIALIZAR DE GUARDAR_PEDIDO
