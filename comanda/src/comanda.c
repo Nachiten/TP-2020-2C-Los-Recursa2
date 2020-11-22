@@ -580,6 +580,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 					else
 					{
 						puts("El plato solicitado no existe en este pedido.");
+						resultado->respuesta = 0;
 					}
 
 				}

@@ -953,6 +953,8 @@ void aumentarCantidadLista(segmentos* pedido, char* nombrePlato)
 	//reviso si todos los platos estan preparados
 	while(tablaDePlatos != NULL)
 	{
+		tomar_datos_de_MP(tablaDePlatos);
+
 		//a menos que no este preparado, lo ignoro
 		if(tablaDePlatos->cantidadPedidaComida > tablaDePlatos->cantidadComidaPreparada)
 		{
