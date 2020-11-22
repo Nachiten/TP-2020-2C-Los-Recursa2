@@ -540,6 +540,7 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 	free(respuesta);
 }
 
+// TODO | Ver si esto es cliente
 void consultar_Pedido(consultar_pedido* pedido){
 	perfil_cliente* cliente;
 	respuesta_consultar_pedido* datosObtenerPedido;
@@ -604,9 +605,11 @@ void consultar_Pedido(consultar_pedido* pedido){
 		datosObtenerPedido->largoNombreRestaurante = strlen(cliente->nombre_resto);
 		datosObtenerPedido->nombreRestaurante = malloc(strlen(cliente->nombre_resto) + 1);
 		strcpy(datosObtenerPedido->nombreRestaurante,cliente->nombre_resto);
-		datosObtenerPedido->listaplatos = malloc(strlen(stringCompleto) + 1);
-		strcpy(datosObtenerPedido->listaplatos,stringCompleto);
-		datosObtenerPedido->cantidadPlatos = j;
+
+		// TODO | Revisar
+		datosObtenerPedido->comidas = malloc(strlen(stringCompleto) + 1);
+		strcpy(datosObtenerPedido->comidas,stringCompleto);
+		datosObtenerPedido->sizeComidas = strlen(stringCompleto);
 
 		mandar_mensaje(datosObtenerPedido,RESPUESTA_CONSULTAR_PEDIDO,cliente->socket_cliente);
 	}
