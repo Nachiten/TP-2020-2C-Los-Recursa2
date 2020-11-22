@@ -214,4 +214,9 @@ typedef struct{
 	char* mensaje;
 }pedido_finalizado;
 
+typedef struct{
+	uint32_t sizeNombre;
+	char* nombre;
+}consultar_platos;
+
 #endif /* SHARED_ESTRUCTURAS_H_ */

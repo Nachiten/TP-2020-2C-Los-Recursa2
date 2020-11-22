@@ -147,7 +147,7 @@ void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
 	free(respuesta);
 }
 
-void consultar_platos(int32_t socket_cliente){
+void consultarPlatos(int32_t socket_cliente){
 	int numero_cliente, numero_resto;
 	perfil_cliente* cliente;
 	info_resto* resto;
@@ -540,6 +540,7 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 	free(respuesta);
 }
 
+// TODO | Ver si esto es cliente
 void consultar_Pedido(consultar_pedido* pedido){
 	perfil_cliente* cliente;
 	respuesta_consultar_pedido* datosObtenerPedido;
@@ -604,9 +605,11 @@ void consultar_Pedido(consultar_pedido* pedido){
 		datosObtenerPedido->largoNombreRestaurante = strlen(cliente->nombre_resto);
 		datosObtenerPedido->nombreRestaurante = malloc(strlen(cliente->nombre_resto) + 1);
 		strcpy(datosObtenerPedido->nombreRestaurante,cliente->nombre_resto);
-		datosObtenerPedido->listaplatos = malloc(strlen(stringCompleto) + 1);
-		strcpy(datosObtenerPedido->listaplatos,stringCompleto);
-		datosObtenerPedido->cantidadPlatos = j;
+
+		// TODO | Revisar
+		datosObtenerPedido->comidas = malloc(strlen(stringCompleto) + 1);
+		strcpy(datosObtenerPedido->comidas,stringCompleto);
+		datosObtenerPedido->sizeComidas = strlen(stringCompleto);
 
 		mandar_mensaje(datosObtenerPedido,RESPUESTA_CONSULTAR_PEDIDO,cliente->socket_cliente);
 	}
@@ -648,7 +651,7 @@ int buscar_pedido_por_id(uint32_t id_pedido){
 	for(int i = 0; i < listaPedidos->elements_count; i++){
 		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
 
-		if(cliente->id_global == id_global){
+		if(cliente->id_global == id_pedido){
 			return i;
 		}
 	}
@@ -853,7 +856,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			break;
 
 		case CONSULTAR_PLATOS:
-			consultar_platos(socket_cliente);
+			consultarPlatos(socket_cliente);
 			break;
 
 		case CREAR_PEDIDO:
