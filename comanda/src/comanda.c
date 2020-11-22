@@ -216,9 +216,6 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	int32_t numeroDeMarcoEnMP = -10;
 
 	/*ToDo CODIGOS DE OPERACION QUE FALTAN CODEAR:
-	 GUARDAR_PLATO
-	 OBTENER_PEDIDO
-	 CONFIRMAR_PEDIDO
 	 PLATO_LISTO
 	 FINALIZAR_PEDIDO -> finalizar pedido y terminar pedido son practicamente lo mismo
 	 */
@@ -313,15 +310,16 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		{
 						agregar_pagina_a_swap(plato_creado_o_editado, numeroDeEspacioEnSwap*32);
 
+						sem_wait(semaforoTocarListaEspaciosEnMP);
 						//si la pagina no esta en MP, le busco un lugar
 						if(plato_creado_o_editado->cargadoEnMEMORIA == 0)
 						{
 							//busco si hay un marco libre en MP para poner la pagina nueva/editada
-							sem_wait(semaforoTocarListaEspaciosEnMP);
+
 							numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
 						}
 
-						else//si ya estaba en SWAP, le doy el espacio que tenia antes
+						else//si ya estaba en MP, le doy el espacio que tenia antes
 						{
 							numeroDeMarcoEnMP = plato_creado_o_editado->numeroDeMarco;
 						}
@@ -528,9 +526,79 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibidoPlatoListo = malloc(sizeAAllocar);
 			recibir_mensaje(recibidoPlatoListo, cod_op, socket);
 
+			resultado = malloc(sizeof(respuesta_ok_error));
 
+			printf("Buscando datos del pedido %u del restaurante %s...\n", recibidoPlatoListo->idPedido, recibidoPlatoListo->nombreRestaurante);
+
+			//buscamos la tabla de pedidos de dicho restaurante, si no existe, se envia FAIL
+			sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+			tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoPlatoListo->nombreRestaurante, 1);
+			sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+			//no existe este restaurante, se responde FAIL
+			if(tablaDePedidosDelRestaurante == NULL)
+			{
+				puts("El restaurante solicitado no existe.");
+				resultado->respuesta = 0;
+			}
+
+			//la tabla si existe, buscamos el segmento...
+			else
+			{
+				//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
+				if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoPlatoListo->idPedido))
+				{
+					//tomamos el numero de segmento del pedido
+					sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+					numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoPlatoListo->idPedido);
+					segmentoSeleccionado = selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento);
+					sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+					//verificamos si existe el plato
+					if(verificarExistenciaDePlato(segmentoSeleccionado, recibidoPlatoListo->nombrePlato))
+					{
+						//cargamos todas las paginas del pedido en MP antes de continuar...
+						cargarPaginasEnMP(tablaDePedidosDelRestaurante, numeroDeSegmento);
+
+						//verificamos si se encuentra en estado CONFIRMADO
+						if(verificarEstado(segmentoSeleccionado, CONFIRMADO))
+						{
+							puts("Aumentando en 1 la cantidad de platos preparados...");
+							aumentarCantidadLista(segmentoSeleccionado, recibidoPlatoListo->nombrePlato);
+							resultado->respuesta = 1;
+						}
+
+						//nop
+						else
+						{
+							puts("El pedido solicitado NO se encuentra en estado CONFIRMADO.");
+							resultado->respuesta = 0;
+						}
+					}
+
+					//nop
+					else
+					{
+						puts("El plato solicitado no existe en este pedido.");
+					}
+
+				}
+
+				//el pedido no existe
+				else
+				{
+					puts("El pedido solicitado no existe.");
+					resultado->respuesta = 0;
+				}
+			}
+
+			//mando el resultado de lo que consultaron
+			mandar_mensaje(resultado,RESPUESTA_CONFIRMAR_PEDIDO,socket);
+
+			free(resultado);
+			free(recibidoPlatoListo->nombreRestaurante);
+			free(recibidoPlatoListo->nombrePlato);
 			free(recibidoPlatoListo);
-
         	break;
 
         case FINALIZAR_PEDIDO:

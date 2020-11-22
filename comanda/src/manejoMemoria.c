@@ -452,18 +452,14 @@ uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombr
 {
 	tabla_paginas* tablaDePlatos = segmentoSeleccionado->mi_tabla;
 	uint32_t existe = 0;
-	uint32_t cargado = 0;
 
 	//avanzo en la tabla de paginas a ver si existe una de el plato solicitado
 	while(tablaDePlatos != NULL)
 	{
-		cargado = 0;//ToDo ver si borrar a la mierda el cargado
-
 		//si la pagina esta en MP, me traigo sus datos de ahi
 		if(tablaDePlatos->cargadoEnMEMORIA == 1)
 		{
 			tomar_datos_de_MP(tablaDePlatos);
-			cargado = 1;
 		}
 
 		//si no esta en MP, los tengo que buscar de SWAP
@@ -472,7 +468,6 @@ uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombr
 			if(tablaDePlatos->cargadoEnSWAP == 1)
 			{
 				tomar_datos_de_SWAP(tablaDePlatos);
-				cargado = 1;
 			}
 		}
 
@@ -890,4 +885,91 @@ uint32_t verificarEstado(segmentos* pedido, estado_de_pedido estado_a_comparar)
 void cambiarEstado(segmentos* pedido, estado_de_pedido estado_a_establecer)
 {
 	pedido->estado = estado_a_establecer;
+}
+
+void aumentarCantidadLista(segmentos* pedido, char* nombrePlato)
+{
+	tabla_paginas* tablaDePlatos = pedido->mi_tabla;
+	int32_t numeroDeMarcoEnMP = 0;
+	uint32_t todoPiola = 1;
+
+	//avanzo en la tabla de paginas a ver si existe una de el plato solicitado
+	while(tablaDePlatos != NULL)
+	{
+		tomar_datos_de_MP(tablaDePlatos);
+
+		//una vez tengo los datos, comparo nombres de platos a ver si es el que busco
+		if(strcmp(tablaDePlatos->nombreDeMorfi,nombrePlato) == 0)
+		{
+			//aumento en 1 la cantidad preparada
+			tablaDePlatos->cantidadComidaPreparada++;
+
+			//a continuación, guardo sus datos en SWAP/MP
+			agregar_pagina_a_swap(tablaDePlatos, tablaDePlatos->posicionInicialEnSWAP*32);
+
+			//si la pagina no esta en MP, le busco un lugar
+			sem_wait(semaforoTocarListaEspaciosEnMP);
+			if(tablaDePlatos->cargadoEnMEMORIA == 0)
+			{
+				//busco si hay un marco libre en MP para poner la pagina nueva/editada
+				numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+			}
+
+			else//si ya estaba en MP, le doy el espacio que tenia antes
+			{
+				numeroDeMarcoEnMP = tablaDePlatos->numeroDeMarco;
+			}
+
+			//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
+			if(numeroDeMarcoEnMP != -1)
+			{
+				marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
+			}
+			sem_post(semaforoTocarListaEspaciosEnMP);
+
+			//si no hay un espacio libre hay que llamar al grim reaper
+			if(numeroDeMarcoEnMP == -1)
+			{
+				sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+				sem_wait(semaforoTocarListaEspaciosEnMP);
+				algoritmo_de_reemplazo(ALGOR_REEMPLAZO, lista_de_pedidos_de_todos_los_restaurantes, lista_de_espacios_en_MP);
+				numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+				marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
+				sem_post(semaforoTocarListaEspaciosEnMP);
+				sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+			}
+
+			//una vez tengo un marco listo para poner la Página, pongo los datos en MP
+			mover_pagina_a_memoriaPrincipal(tablaDePlatos, tablaDePlatos->posicionInicialEnSWAP*32, numeroDeMarcoEnMP*32);
+		}
+
+		//avanzo...
+		tablaDePlatos = tablaDePlatos->sig_pagina;
+	}
+
+	//restauro el auxiliar al valor original
+	tablaDePlatos = pedido->mi_tabla;
+
+	//reviso si todos los platos estan preparados
+	while(tablaDePlatos != NULL)
+	{
+		//a menos que no este preparado, lo ignoro
+		if(tablaDePlatos->cantidadPedidaComida > tablaDePlatos->cantidadComidaPreparada)
+		{
+			todoPiola = 0;
+		}
+
+		//avanzo...
+		tablaDePlatos = tablaDePlatos->sig_pagina;
+	}
+
+	if(todoPiola == 1)
+	{
+		cambiarEstado(pedido, TERMINADO);
+	}
+
+	//a lo ultimo, vuelvo a censurar todos los datos de los platos del pedido
+	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+	borrar_datos_de_todos_los_platos_del_pedido(pedido);
+	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 }
