@@ -165,8 +165,6 @@ void obtenerInputConsolaCliente(){
 			return;
     }
 
-
-
 	//char** palabrasSeparadas = string_split(lineaEntera , " ");
 	char** palabrasSeparadas = string_split(lineaEntera , " ");
 
@@ -174,7 +172,7 @@ void obtenerInputConsolaCliente(){
     char* comandoIngresado = malloc(strlen(palabrasSeparadas[0])+1);
     strcpy(comandoIngresado,palabrasSeparadas[0]);
     //printf("El comando solicitado fue: %s. \n", comandoIngresado);
-
+    sem_post(comandoParaEjecutar);
 
     switcher = valor_para_switch_case(comandoIngresado);
 

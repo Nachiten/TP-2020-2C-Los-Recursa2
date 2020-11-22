@@ -166,7 +166,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			break;
 
 		case PLATO_LISTO:
-
+			size_ya_armado = serializar_paquete_plato_listo(paquete, mensaje);
 			break;
 
 		case CREAR_PEDIDO: //este se pasa el mensaje por el culo, solo manda el codigo de operacion

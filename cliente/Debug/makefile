@@ -29,10 +29,10 @@ dependents:
 	-cd /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug && $(MAKE) clean all
 
 # Tool invocations
-cliente: $(OBJS) $(USER_OBJS) /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug/libshared.so
+cliente: $(OBJS) $(USER_OBJS) /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug/libshared.so /home/utnso/workspace/commons/Debug/libcommons.so
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -L"/home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug" -pthread -o "cliente" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L"/home/utnso/workspace/commons/Debug" -L"/home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug" -pthread -o "cliente" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -43,5 +43,6 @@ clean:
 
 .PHONY: all clean dependents
 /home/utnso/workspace/tp-2020-2c-Los-Recursa2/shared/Debug/libshared.so:
+/home/utnso/workspace/commons/Debug/libcommons.so:
 
 -include ../makefile.targets
