@@ -120,7 +120,7 @@ void consultar_restaurantes(int32_t socket_cliente){
  * restaurante para el cliente, en caso de no encontrar el nombre manda un 0 en señal de error
 */
 void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
-	int restoBuscado;
+	int restoBuscado,numero_cliente;
 	respuesta_ok_error* respuesta;
 	perfil_cliente* perfil;
 
@@ -128,14 +128,11 @@ void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
 	respuesta = malloc(sizeof(respuesta_ok_error));
 
 	if(restoBuscado != -2 || strcmp(nombreResto,"RestoDefault") == 0){
-		perfil = malloc(sizeof(perfil_cliente));
-		perfil->socket_cliente = socket_cliente;
+		numero_cliente = buscar_cliente(socket_cliente);
+		perfil = list_get(listaPedidos,numero_cliente);
 		perfil->nombre_resto = malloc(strlen(nombreResto)+1);
 		strcpy(perfil->nombre_resto,nombreResto);
-		perfil->id_pedido_resto = 0;
 		perfil->id_global = crear_id_pedidos(id_global);
-		perfil->perfilActivo = 1;
-		list_add(listaPedidos,perfil);
 
 		respuesta->respuesta = 1;
 		mandar_mensaje(respuesta,RESPUESTA_SELECCIONAR_R,socket_cliente);
@@ -637,6 +634,21 @@ void agregar_restaurante(info_resto* recibidoAgregarRestaurante){
 	}
 }
 
+void Handshake(handshake* recibidohandshake, int32_t socket_cliente){
+	perfil_cliente* perfil;
+
+	perfil = malloc(sizeof(perfil_cliente));
+	perfil->socket_cliente = socket_cliente;
+	perfil->perfilActivo = 1;
+	perfil->posX = recibidohandshake->posX;
+	perfil->posY = recibidohandshake->posY;
+	list_add(listaPedidos,perfil);
+
+	sem_wait(semLog);
+	log_info(logger, "perfil creado");
+	sem_post(semLog);
+}
+
 // **************************************FIN MENSAJES**************************************
 
 int32_t crear_id_pedidos(){
@@ -842,6 +854,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	a_plato* recibidoAPlato;
 	plato_listo* recibidoPlatoListo ;
 	confirmar_pedido* recibidoConfirmarPedido;
+	handshake* recibidohandshake;
 
 	switch (cod_op) {
 		case CONSULTAR_RESTAURANTES:
@@ -877,17 +890,22 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			free(recibidoPlatoListo); //todo ver si esto no rompe nada
 			break;
 
+		case CONFIRMAR_PEDIDO:
+			recibidoConfirmarPedido = malloc(sizeAAllocar);
+			recibir_mensaje(recibidoConfirmarPedido,CONFIRMAR_PEDIDO,socket_cliente);
+			confirmar_Pedido(recibidoConfirmarPedido);
+			free(recibidoConfirmarPedido);
+			break;
+
 		case AGREGAR_RESTAURANTE:
 			recibidoAgregarRestaurante = malloc(sizeAAllocar);
 			recibir_mensaje(recibidoAgregarRestaurante,AGREGAR_RESTAURANTE,socket_cliente);
 			agregar_restaurante(recibidoAgregarRestaurante);
 			break;
 
-		case CONFIRMAR_PEDIDO:
-			recibidoConfirmarPedido = malloc(sizeAAllocar);
-			recibir_mensaje(recibidoConfirmarPedido,CONFIRMAR_PEDIDO,socket_cliente);
-			confirmar_Pedido(recibidoConfirmarPedido);
-			free(recibidoConfirmarPedido);
+		case HANDSHAKE:
+			recibidohandshake = malloc(sizeAAllocar);
+			recibir_mensaje(recibidohandshake,HANDSHAKE,socket_cliente);
 			break;
 
 		case DESCONEXION:
