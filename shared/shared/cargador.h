@@ -10,6 +10,7 @@
 //Usar para dejar cargadas las cosas que necesitamos.
 
 t_log* cargarUnLog(char*, char*); //tirarle la ruta del log y el nombre del log
+t_log* cargarUnLogDeCliente(char*, char*);
 t_config* leerConfiguracion(char*); //tirarle la ruta del config
 t_log* cargarUnLogApp(char*, char*); // Cargar un log para app
 

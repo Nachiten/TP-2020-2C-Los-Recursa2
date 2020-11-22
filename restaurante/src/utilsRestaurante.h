@@ -41,8 +41,9 @@ char* puerto_app;
 char* ip_app;
 char* algoritmoElegido;
 uint32_t quantumElegido;
+uint32_t RETARDO_CICLO_CPU;
 char* nombreRestaurante;
-
+int32_t socket_sindicato;
 uint32_t miPosicionX;
 uint32_t miPosicionY;
 uint32_t cantCocineros;
@@ -50,7 +51,34 @@ uint32_t cantRecetas;
 uint32_t cantHornos;
 char* platos;
 char* afinidades;
+char** listaPlatos;
+char** listaAfinidades;
 
+//Listas estrictamente usadas en la planificacion con sus mutuas exclusiones
+t_queue* colaNew;
+t_list* colaBlock;
+t_list* listaDeColasReady;
+t_queue* colaParaHornear;
+t_list* platosHorneandose;
+
+sem_t* mutexNew;
+sem_t* mutexListaReady;
+sem_t* mutexBlock;
+sem_t* mutexColaHornos;
+
+sem_t* contadorPlatosEnNew;
+
+// Semaforos para sincronizar hilos con HCM
+t_list* listaSemHabilitarCicloExec;
+t_list* listaSemFinalizarCicloExec;
+sem_t* habilitarCicloBlockReady;
+sem_t* finalizarCicloBlockReady;
+sem_t* habilitarCicloEntradaSalida;
+sem_t* finalizarCicloEntradaSalida;
+
+
+
+/*
 typedef enum{
 	NEW = 1,
 	READY,
@@ -60,17 +88,79 @@ typedef enum{
 }t_estado;
 
 
+
 typedef enum{
 	FIFO = 1,
 	RR,
 }t_algoritmoplanif;
+*/
 
+typedef enum{
+	REPOSAR = 1,
+	HORNEAR,
+	OTRO,
+}t_paso_receta;
 
+typedef enum{
+	NO_BLOCK = 1,
+	REPOSO,
+	HORNO,
+}accionBlock;
+
+typedef struct{
+	uint32_t idPedido;
+	char* nombrePlato;
+	t_list* pasosReceta;
+    int quantumRestante;
+    //es necesario al final
+    accionBlock motivoBlock;
+    int duracionBlock;
+}pcb_plato;
+
+/*
+typedef struct{
+	int idHorno;
+	int enUso;
+}t_horno;
+*/
+
+typedef struct{
+	t_paso_receta accion;
+	uint32_t duracionAccion;
+}paso_receta;
+
+typedef struct{
+	char* afinidad;
+    t_queue* cola;
+}cola_ready;
+
+typedef struct{
+	int idHilo;
+	char* afinidad;
+}credencialesCocinero;
 
 void inicializarRestaurante();
 void obtenerMetadataRestaurante();
-//void crearColasPlanificacion();
-
+void crearColasPlanificacion();
+void crearHilosPlanificacion();
+//al final no la termine necesitando
+//void crearHornos();
+void hiloNew_Ready();
+void hiloBlock_Ready();
+void hiloEntradaSalida();
+void hiloExecCocinero(credencialesCocinero*);
+void agregarANew(pcb_plato*);
+void agregarAReady(pcb_plato*);
+void agregarABlock(pcb_plato*);
+void agregarAExit(pcb_plato*);
+pcb_plato* obtenerSiguienteDeReady();
+void iniciarSemaforosPlanificacion();
+void iniciarSemaforosCiclos();
+void hiloCiclosMaestro();
+void waitSemaforoHabilitarCicloExec(uint32_t indice);
+void signalSemaforoHabilitarCicloExec(uint32_t indice);
+void waitSemaforoFinalizarCicloExec(uint32_t indice);
+void signalSemaforoFinalizarCicloExec(uint32_t indice);
 
 
 #endif /* SRC_UTILSRESTAURANTE_H_ */
