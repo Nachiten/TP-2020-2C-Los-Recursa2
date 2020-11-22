@@ -47,8 +47,6 @@ int main()
 	printf("Tamaño de Memoria Principal: %u bytes.\n", TAMANIO_MEMORIA_PRINCIPAL);
 	TAMANIO_AREA_DE_SWAP = config_get_int_value(config,"TAMANIO_SWAP");
 	printf("Tamaño del Área de Swapping: %u bytes.\n", TAMANIO_AREA_DE_SWAP);
-	FRECUENCIA_COMPACTACION = config_get_int_value(config,"FRECUENCIA_COMPACTACION");
-	printf("Frecuencia de compactación: %u.\n", FRECUENCIA_COMPACTACION);
 	ALGOR_REEMPLAZO = config_get_string_value(config,"ALGORITMO_REEMPLAZO");
 	printf("Algoritmo de reemplazo: %s.\n", ALGOR_REEMPLAZO);
 	puts("****************************************");
@@ -111,7 +109,6 @@ int main()
 	//puts("despues recepcion");
 
 
-
 	//liberamos las memorias reservadas
 	free(MEMORIA_PRINCIPAL);
 	puts("Memoria Principal Liberada Correctamente.");
@@ -121,11 +118,6 @@ int main()
 
 	return EXIT_SUCCESS;
 }
-
-//ToDo ver si estos 2 sirven para algo (en comanda.h)
-	//socketApp;
-	//socketCliente;
-
 
 void recepcion_mensajes()
 {
@@ -219,13 +211,11 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante = NULL;
 	uint32_t numeroDeSegmento;
 	tabla_paginas* plato_creado_o_editado = NULL;
+	segmentos* segmentoSeleccionado = NULL;
 	int32_t numeroDeEspacioEnSwap = -10;
 	int32_t numeroDeMarcoEnMP = -10;
 
 	/*ToDo CODIGOS DE OPERACION QUE FALTAN CODEAR:
-	 GUARDAR_PLATO
-	 OBTENER_PEDIDO
-	 CONFIRMAR_PEDIDO
 	 PLATO_LISTO
 	 FINALIZAR_PEDIDO -> finalizar pedido y terminar pedido son practicamente lo mismo
 	 */
@@ -263,7 +253,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
         	mandar_mensaje(resultado,RESPUESTA_GUARDAR_PEDIDO,socket);
 
-        	free(recibidoGuardarPedido->nombreRestaurante); //shit, esto me va a armar quilombo ToDo revisar
+        	free(recibidoGuardarPedido->nombreRestaurante);
 			free(recibidoGuardarPedido);
 			free(resultado);
         	break;
@@ -296,41 +286,77 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 
         			//al segmento que corresponde al pedido, se le agrega el nuevo plato si no existia
-            		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+
             		//obtengo el plato editado, o creado en caso de que no exista antes
             		plato_creado_o_editado = agregarPlatoAPedido(tablaDePedidosDelRestaurante, numeroDeSegmento, recibidoGuardarPlato->nombrePlato, recibidoGuardarPlato->cantidadPlatos);
-            		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 
-            		//busco si hay un espacio libre en SWAP para poner la pagina nueva/editada
-            		sem_wait(semaforoTocarListaEspaciosEnSWAP);
-            		numeroDeEspacioEnSwap = buscarPrimerEspacioLibre(lista_de_espacios_en_SWAP);
-            		sem_post(semaforoTocarListaEspaciosEnSWAP);
-
-            		if(numeroDeEspacioEnSwap == -1)
+            		//si no esta en SWAP, le busco un lugar
+            		if(plato_creado_o_editado->cargadoEnSWAP == 0)
             		{
-            			//ToDo si no hay un espacio libre hay que llamar al grim reaper
+                		//busco si hay un espacio libre en SWAP para poner la pagina nueva/editada
+                		sem_wait(semaforoTocarListaEspaciosEnSWAP);
+                		numeroDeEspacioEnSwap = buscarPrimerEspacioLibre(lista_de_espacios_en_SWAP);
+                		//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
+                		marcarEspacioComoOcupado(lista_de_espacios_en_SWAP, numeroDeEspacioEnSwap);
+                		sem_post(semaforoTocarListaEspaciosEnSWAP);
             		}
 
-            		//ToDO temporalmente asumido que siempre existe espacio en SWAP
-            		agregar_pagina_a_swap(plato_creado_o_editado, numeroDeEspacioEnSwap*32);
+            		else//si ya estaba en SWAP, le doy el espacio que tenia antes
+            		{
+            			numeroDeEspacioEnSwap = plato_creado_o_editado->posicionInicialEnSWAP;
+            		}
 
-            		//busco si hay un marco libre en MP para poner la pagina nueva/editada
-					sem_wait(semaforoTocarListaEspaciosEnMP);
-					numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
-					//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
-					marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
-					sem_post(semaforoTocarListaEspaciosEnMP);
+            		if(numeroDeEspacioEnSwap != -1)
+            		{
+						agregar_pagina_a_swap(plato_creado_o_editado, numeroDeEspacioEnSwap*32);
 
-					if(numeroDeMarcoEnMP == -1)
-					{
-						//ToDo si no hay un espacio libre hay que llamar al grim reaper
-					}
+						sem_wait(semaforoTocarListaEspaciosEnMP);
+						//si la pagina no esta en MP, le busco un lugar
+						if(plato_creado_o_editado->cargadoEnMEMORIA == 0)
+						{
+							//busco si hay un marco libre en MP para poner la pagina nueva/editada
 
-					//ToDO temporalmente asumido que siempre existen marcos libres en MP
-					mover_pagina_a_memoriaPrincipal(plato_creado_o_editado, numeroDeEspacioEnSwap*32, numeroDeMarcoEnMP*32);
+							numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+						}
 
-					//por ultimo, respondemos que no crasheo nada
-					resultado->respuesta = 1;
+						else//si ya estaba en MP, le doy el espacio que tenia antes
+						{
+							numeroDeMarcoEnMP = plato_creado_o_editado->numeroDeMarco;
+						}
+
+						//una vez seleccionado lo marco como ocupado para que ningun otro hilo lo quiera usar
+						if(numeroDeMarcoEnMP != -1)
+						{
+							marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
+						}
+						sem_post(semaforoTocarListaEspaciosEnMP);
+
+						//si no hay un espacio libre hay que llamar al grim reaper
+						if(numeroDeMarcoEnMP == -1)
+						{
+							sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+							sem_wait(semaforoTocarListaEspaciosEnMP);
+							algoritmo_de_reemplazo(ALGOR_REEMPLAZO, lista_de_pedidos_de_todos_los_restaurantes, lista_de_espacios_en_MP);
+							numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
+							marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
+							sem_post(semaforoTocarListaEspaciosEnMP);
+							sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+						}
+
+						//una vez tengo un marco listo para poner la Página, pongo los datos en MP
+						mover_pagina_a_memoriaPrincipal(plato_creado_o_editado, numeroDeEspacioEnSwap*32, numeroDeMarcoEnMP*32);
+						printf("--Se guardó %u plato/s %s para %s, en el pedido de ID %u--\n",recibidoGuardarPlato->cantidadPlatos, recibidoGuardarPlato->nombrePlato, recibidoGuardarPlato->nombreRestaurante, recibidoGuardarPlato->idPedido);
+
+						//por ultimo, respondemos que no crasheo nada
+						resultado->respuesta = 1;
+            		}
+
+            		//si no hay espacio en SWAP se deniega la solicitud
+            		else
+            		{
+            			puts("SWAP se encuentra hasta las manos, no se puede poner ninguna Página más por el momento.");
+            			resultado->respuesta = 0;
+            		}
         		}
 
         		//el pedido no existe
@@ -342,6 +368,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
         	mandar_mensaje(resultado,RESPUESTA_GUARDAR_PLATO,socket);
 
+        	free(resultado);
         	free(recibidoGuardarPlato->nombreRestaurante);
         	free(recibidoGuardarPlato->nombrePlato);
 			free(recibidoGuardarPlato);
@@ -351,7 +378,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibidoObtenerPedido = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoObtenerPedido, cod_op, socket);
 
-        	resultadoObtenerPedido = malloc(sizeof(respuesta_obtener_pedido)); //ToDo hacer los free dentro de CADA CASO POSIBLE, si es por fuera revienta
+        	resultadoObtenerPedido = malloc(sizeof(respuesta_obtener_pedido));
 
         	printf("Buscando datos del pedido %u del restaurante %s...\n", recibidoObtenerPedido->idPedido, recibidoObtenerPedido->nombreRestaurante);
 
@@ -366,20 +393,13 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         		puts("El restaurante solicitado no existe.");
         		resultadoObtenerPedido->comidas = malloc(2);
         		strcpy(resultadoObtenerPedido->comidas, "[]");
-        		//resultadoObtenerPedido->comidas = "[]";
         		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
-        		//resultadoObtenerPedido->cantTotales = "[]";
         		resultadoObtenerPedido->cantTotales = malloc(2);
         		strcpy(resultadoObtenerPedido->cantTotales, "[]");
         		resultadoObtenerPedido->sizeCantTotales = strlen(resultadoObtenerPedido->cantTotales);
-        		//resultadoObtenerPedido->cantListas = "[]";
         		resultadoObtenerPedido->cantListas = malloc(2);
         		strcpy(resultadoObtenerPedido->cantListas, "[]");
         		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
-
-            	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
-
-            	free(resultadoObtenerPedido);
         	}
 
         	//la tabla si existe, buscamos el segmento...
@@ -393,26 +413,46 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
             		numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoObtenerPedido->idPedido);
             		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 
+            		//hay que cargar cada una de las paginas del pedido en MP
+            		cargarPaginasEnMP(tablaDePedidosDelRestaurante, numeroDeSegmento);
 
+            		//una vez cargadas en MP, copio los datos de MP sobre los platos del pedido
+            		actualizarTodosLosPlatosConDatosDeMP(tablaDePedidosDelRestaurante, numeroDeSegmento);
+
+            		//una vez tengo las listas, me armo los datos de resultadoObtenerPedido
+            		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+            		preparar_datos_de_platos_con_formato_de_obtener_pedido(selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento), resultadoObtenerPedido);
+            		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+            		//reseteo los datos de las listas
+            		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+            		borrar_datos_de_todos_los_platos_del_pedido(selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento));
+            		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
         		}
 
         		//el pedido no existe
         		else
         		{
         			puts("El pedido solicitado no existe.");
-            		resultadoObtenerPedido->comidas = "[]";
+            		resultadoObtenerPedido->comidas = malloc(2);
+            		strcpy(resultadoObtenerPedido->comidas, "[]");
             		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
-            		resultadoObtenerPedido->cantTotales = "[]";
+            		resultadoObtenerPedido->cantTotales = malloc(2);
+            		strcpy(resultadoObtenerPedido->cantTotales, "[]");
             		resultadoObtenerPedido->sizeCantTotales = strlen(resultadoObtenerPedido->cantTotales);
-            		resultadoObtenerPedido->cantListas = "[]";
+            		resultadoObtenerPedido->cantListas = malloc(2);
+            		strcpy(resultadoObtenerPedido->cantListas, "[]");
             		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
-
-                	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
-
-                	free(resultadoObtenerPedido);
         		}
         	}
 
+        	//por ultimo, mando el mensaje con los datos que correspondan
+        	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
+
+        	free(resultadoObtenerPedido->comidas);
+        	free(resultadoObtenerPedido->cantTotales);
+        	free(resultadoObtenerPedido->cantListas);
+        	free(resultadoObtenerPedido);
 			free(recibidoObtenerPedido);
         	break;
 
@@ -420,7 +460,65 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibidoConfirmarPedido = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoConfirmarPedido, cod_op, socket);
 
+        	resultado = malloc(sizeof(respuesta_ok_error));
 
+        	printf("Buscando datos del pedido %u del restaurante %s...\n", recibidoConfirmarPedido->idPedido, recibidoConfirmarPedido->nombreRestaurante);
+
+        	//buscamos la tabla de pedidos de dicho restaurante, si no existe, se envia FAIL
+			sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+			tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoConfirmarPedido->nombreRestaurante, 1);
+			sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+			//no existe este restaurante, se responde FAIL
+			if(tablaDePedidosDelRestaurante == NULL)
+			{
+				puts("El restaurante solicitado no existe.");
+				resultado->respuesta = 0;
+			}
+
+			//la tabla si existe, buscamos el segmento...
+			else
+			{
+				//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
+				if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoConfirmarPedido->idPedido))
+				{
+					//tomamos el numero de segmento del pedido
+					sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+					numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoConfirmarPedido->idPedido);
+					segmentoSeleccionado = selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento);
+					sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+					//verificamos si se encuentra en estado PENDIENTE
+					if(verificarEstado(segmentoSeleccionado, PENDIENTE))
+					{
+						//pasamos el pedido a CONFIRMADO
+						cambiarEstado(segmentoSeleccionado, CONFIRMADO);
+						resultado->respuesta = 1;
+						puts("El pedido solicitado ahora se encuentra en estado CONFIRMADO.");
+					}
+
+					//nop
+					else
+					{
+						puts("El pedido solicitado NO se encuentra en estado PENDIENTE.");
+						resultado->respuesta = 0;
+					}
+
+				}
+
+				//el pedido no existe
+				else
+				{
+					puts("El pedido solicitado no existe.");
+					resultado->respuesta = 0;
+				}
+			}
+
+			//mando el resultado de lo que consultaron
+			mandar_mensaje(resultado,RESPUESTA_CONFIRMAR_PEDIDO,socket);
+
+        	free(resultado);
+        	free(recibidoConfirmarPedido->nombreRestaurante);
         	free(recibidoConfirmarPedido);
         	break;
 
@@ -428,9 +526,79 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibidoPlatoListo = malloc(sizeAAllocar);
 			recibir_mensaje(recibidoPlatoListo, cod_op, socket);
 
+			resultado = malloc(sizeof(respuesta_ok_error));
 
+			printf("Buscando datos del pedido %u del restaurante %s...\n", recibidoPlatoListo->idPedido, recibidoPlatoListo->nombreRestaurante);
+
+			//buscamos la tabla de pedidos de dicho restaurante, si no existe, se envia FAIL
+			sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+			tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoPlatoListo->nombreRestaurante, 1);
+			sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+			//no existe este restaurante, se responde FAIL
+			if(tablaDePedidosDelRestaurante == NULL)
+			{
+				puts("El restaurante solicitado no existe.");
+				resultado->respuesta = 0;
+			}
+
+			//la tabla si existe, buscamos el segmento...
+			else
+			{
+				//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
+				if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoPlatoListo->idPedido))
+				{
+					//tomamos el numero de segmento del pedido
+					sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+					numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoPlatoListo->idPedido);
+					segmentoSeleccionado = selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento);
+					sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+					//verificamos si existe el plato
+					if(verificarExistenciaDePlato(segmentoSeleccionado, recibidoPlatoListo->nombrePlato))
+					{
+						//cargamos todas las paginas del pedido en MP antes de continuar...
+						cargarPaginasEnMP(tablaDePedidosDelRestaurante, numeroDeSegmento);
+
+						//verificamos si se encuentra en estado CONFIRMADO
+						if(verificarEstado(segmentoSeleccionado, CONFIRMADO))
+						{
+							puts("Aumentando en 1 la cantidad de platos preparados...");
+							aumentarCantidadLista(segmentoSeleccionado, recibidoPlatoListo->nombrePlato);
+							resultado->respuesta = 1;
+						}
+
+						//nop
+						else
+						{
+							puts("El pedido solicitado NO se encuentra en estado CONFIRMADO.");
+							resultado->respuesta = 0;
+						}
+					}
+
+					//nop
+					else
+					{
+						puts("El plato solicitado no existe en este pedido.");
+					}
+
+				}
+
+				//el pedido no existe
+				else
+				{
+					puts("El pedido solicitado no existe.");
+					resultado->respuesta = 0;
+				}
+			}
+
+			//mando el resultado de lo que consultaron
+			mandar_mensaje(resultado,RESPUESTA_CONFIRMAR_PEDIDO,socket);
+
+			free(resultado);
+			free(recibidoPlatoListo->nombreRestaurante);
+			free(recibidoPlatoListo->nombrePlato);
 			free(recibidoPlatoListo);
-
         	break;
 
         case FINALIZAR_PEDIDO:
@@ -447,6 +615,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
         case HANDSHAKE:
         	puts("Se recibió un HANDSHAKE, que fue exitosamente ignorado.");
+        	close(socket);
         	break;
 
         default://no deberia pasar nunca por aca, solo esta para que desaparezca el warning
@@ -455,7 +624,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	break;
     }
 
-    //ToDo agregar un close para el socket?
+    //ToDo agregar un close para el socket? -> o no? mejor que las conexiones las cierren del otro lado
 }
 
 void inicializarSemaforos() //Todo matar semaforos?
@@ -465,11 +634,15 @@ void inicializarSemaforos() //Todo matar semaforos?
 	semaforoTocarListaPedidosTodosLosRestaurantes = malloc(sizeof(sem_t));
 	semaforoTocarListaEspaciosEnSWAP = malloc(sizeof(sem_t));
 	semaforoTocarListaEspaciosEnMP = malloc(sizeof(sem_t));
+	semaforoTocarMP = malloc(sizeof(sem_t));
+	semaforoTocarSWAP = malloc(sizeof(sem_t));
 
 	sem_init(semaforoNumeroVictima, 0, 1);
 	sem_init(semaforoLogger, 0, 1);
 	sem_init(semaforoTocarListaPedidosTodosLosRestaurantes, 0, 1);
 	sem_init(semaforoTocarListaEspaciosEnSWAP, 0, 1);
 	sem_init(semaforoTocarListaEspaciosEnMP, 0, 1);
+	sem_init(semaforoTocarMP, 0, 1);//ToDo revisar todos los lugares donde deberian estar estos 2 semaforos!!!
+	sem_init(semaforoTocarSWAP, 0, 1);
 }
 

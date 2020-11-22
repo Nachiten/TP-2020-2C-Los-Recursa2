@@ -3,6 +3,14 @@
 
 #include<stdint.h> //WTF?!?!?!?
 
+typedef enum
+{
+	NADA_CARGADO = 0,
+	PENDIENTE,
+	CONFIRMADO,
+	TERMINADO
+}estado_de_pedido;
+
 typedef struct tabla_paginas
 {
 	uint32_t numero_de_pagina;
@@ -11,6 +19,8 @@ typedef struct tabla_paginas
 	uint32_t cantidadPedidaComida;
 	uint32_t cantidadComidaPreparada;
 	char* nombreDeMorfi; //allocar siempre con 24 bytes
+
+	uint32_t largoPostaDeMorfi;
 
 	uint32_t cargadoEnSWAP;
 	int32_t posicionInicialEnSWAP;
@@ -27,6 +37,7 @@ typedef struct tabla_segmentos
 {
 	uint32_t numero_de_segmento;
 	int32_t id_Pedido;
+	estado_de_pedido estado;//0 = NADA CARGADO, 1 = Pendiente, 2 = CONFIRMADO, 3 = TERMINADO
 
 	tabla_paginas* mi_tabla; //cada segmento tiene su tabla de paginas
 

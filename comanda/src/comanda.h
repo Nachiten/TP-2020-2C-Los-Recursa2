@@ -18,8 +18,6 @@ uint32_t PIDCoMAnda;
 t_log* logger;
 t_config* config;
 int32_t socketEscucha;
-int32_t socketApp;
-int32_t socketCliente;
 
 sem_t* semaforoLogger;
 
@@ -32,7 +30,6 @@ char* app_puerto;
 char* cliente_puerto;
 uint32_t TAMANIO_MEMORIA_PRINCIPAL;
 uint32_t TAMANIO_AREA_DE_SWAP;
-uint32_t FRECUENCIA_COMPACTACION;
 char* ALGOR_REEMPLAZO;
 
 //para manejo de mensajes que llegan**********************************************************
