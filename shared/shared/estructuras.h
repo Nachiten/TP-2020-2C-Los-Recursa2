@@ -209,5 +209,9 @@ typedef struct{
 	char* tiempoPasos;
 }respuesta_obtener_receta;
 
+typedef struct{
+	uint32_t sizeMensaje;
+	char* mensaje;
+}pedido_finalizado;
 
 #endif /* SHARED_ESTRUCTURAS_H_ */
