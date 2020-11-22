@@ -1437,6 +1437,13 @@ int main(){
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
     pthread_detach(hiloConsola);
 
+    obtenerRestaurante("PanaderiaJorge", 1);
+    obtenerRestaurante("Bataglia", 1);
+
+    sleep(5);
+
+    obtenerRestaurante("Hola", 1);
+
     // Iniciar servidor para recibir mensajes
     iniciar_server(PUERTO_ESCUCHA);
 
