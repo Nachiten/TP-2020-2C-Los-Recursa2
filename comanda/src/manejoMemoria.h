@@ -101,4 +101,10 @@ void cambiarEstado(segmentos* pedido, estado_de_pedido estado_a_establecer);
 //dado un segmento y un plato, aumenta en 1 la cantidad de platos listos
 void aumentarCantidadLista(segmentos* pedido, char* nombrePlato);
 
+//mata el pedido seleccionado de este restaurante
+void matarPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento);
+
+//mata todos los platos del pedido seleccionado;
+void matarPlatos(segmentos* segmentoSeleccionado);
+
 #endif /* SRC_MANEJOMEMORIA_H_ */

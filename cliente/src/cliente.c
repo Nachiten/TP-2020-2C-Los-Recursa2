@@ -683,8 +683,9 @@ void obtenerInputConsolaCliente(){
 
 				if(strcmp(respuestaObtenerPedido->comidas,"[]") != 0)
 				{
-					log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es: %s. Cantidad ya cocinada: %s"
-					,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas);
+					log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es pedida/s: %s. Cantidad ya cocinada: %s.",mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas);
+					//esta 2 veces x q el log info no muestra x pantalla
+					printf("Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es pedida/s: %s. Cantidad ya cocinada: %s.\n",mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas);
 				}
 
 				else

@@ -760,7 +760,7 @@ void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes
 		actualizar_pagina_en_SWAP(victima);
 
 		//marcamos el marco como libre para que lo puedan usar
-		sem_wait(semaforoTocarListaEspaciosEnSWAP);
+		sem_wait(semaforoTocarListaEspaciosEnMP);
 		marcarEspacioComoLibre(lista_de_espacios_en_MP, victima->numeroDeMarco);
 		sem_post(semaforoTocarListaEspaciosEnMP);
 
@@ -968,11 +968,92 @@ void aumentarCantidadLista(segmentos* pedido, char* nombrePlato)
 	if(todoPiola == 1)
 	{
 		cambiarEstado(pedido, TERMINADO);
-		puts("Este pedido está TERMINADO.");
+		puts("Este pedido ahora se encuentra en estado TERMINADO.");
 	}
 
 	//a lo ultimo, vuelvo a censurar todos los datos de los platos del pedido
 	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 	borrar_datos_de_todos_los_platos_del_pedido(pedido);
 	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+}
+
+void matarPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento)
+{
+	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+	segmentos* segmentoSeleccionado = selectordePedidoDeRestaurante(tablaDePedidosDelRestaurante, numeroDeSegmento);
+	segmentos* pedidoAnterior = segmentoSeleccionado->anter_segmento;
+	segmentos* pedidoSiguiente = segmentoSeleccionado->sig_segmento;
+
+	//primero, matamos los platos del Pedido
+	matarPlatos(segmentoSeleccionado);
+
+	//ahora sacamos el pedido de la lista
+
+	//si tiene pedidos antes, le apuntamos a lo que siga
+	if(pedidoAnterior != NULL)
+	{
+		pedidoAnterior->sig_segmento = pedidoSiguiente;
+
+		//si tambien tiene uno despues, los unimos
+		if(pedidoSiguiente != NULL)
+		{
+			pedidoSiguiente->anter_segmento = pedidoAnterior;
+		}
+	}
+
+	//este es el primer pedido al que apunta el restaurante
+	else
+	{
+		//si este no es el unico pedido que tiene, el restaurante debe apuntar al siguiente
+		if(pedidoSiguiente != NULL)
+		{
+			tablaDePedidosDelRestaurante->miTablaDePedidos = pedidoSiguiente;
+		}
+
+		//este es el unico pedido que tiene... pos que lastima, a la mierda!
+		free(segmentoSeleccionado);
+
+		//its the circle of life...
+		tablaDePedidosDelRestaurante->miTablaDePedidos = malloc(sizeof(segmentos));
+		inicializar_tabla_de_segmentos(tablaDePedidosDelRestaurante->miTablaDePedidos);
+	}
+	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+}
+
+void matarPlatos(segmentos* segmentoSeleccionado)
+{
+	tabla_paginas* tablaDePlatos = segmentoSeleccionado->mi_tabla;
+	tabla_paginas* siguientePlato = NULL;
+
+	while(tablaDePlatos != NULL)
+	{
+		//primero, mato las paginas, esten en MP, o SWAP
+		//si esta cargada en MP, mato las de MP
+		if(tablaDePlatos->cargadoEnMEMORIA == 1)
+		{
+			sem_wait(semaforoTocarListaEspaciosEnMP);
+			marcarEspacioComoLibre(lista_de_espacios_en_MP, tablaDePlatos->numeroDeMarco);
+			sem_post(semaforoTocarListaEspaciosEnMP);
+		}
+
+		//si esta cargada en SWAP, mato las de SWAP
+		if(tablaDePlatos->cargadoEnSWAP == 1)
+		{
+			sem_wait(semaforoTocarListaEspaciosEnMP);
+			marcarEspacioComoLibre(lista_de_espacios_en_SWAP, tablaDePlatos->posicionInicialEnSWAP);
+			sem_post(semaforoTocarListaEspaciosEnMP);
+		}
+
+		//me guardo una manera de acceder al siguiente plato
+		siguientePlato = tablaDePlatos->sig_pagina;
+
+		//y ahora que mate todas las referencias, hora de hacer mierda el plato
+		free(tablaDePlatos->nombreDeMorfi);
+		free(tablaDePlatos);
+
+		//avanzo...
+		tablaDePlatos = siguientePlato;
+	}
+//hasta la vista baby
 }

@@ -98,23 +98,19 @@ int main()
 	lista_de_espacios_en_MP = malloc(sizeof(espacio));
 	inicializar_lista_de_espacios(lista_de_espacios_en_MP, TAMANIO_MEMORIA_PRINCIPAL); //este separa logicamente los espacios de MP
 
+	recepcion_mensajes();
+
 	//ToDo matar la lista de las tablas de segmento
 	//ToDo matar la tabla de segmentos
 	//ToDo matar las tablas de paginas
 	//ToDo matar la lista de los espacios existentes en SWAP
 	//ToDo matar la lista de los espacios existentes en MP
 
-	//puts("antes recepcion");
-	recepcion_mensajes();
-	//puts("despues recepcion");
-
-
 	//liberamos las memorias reservadas
 	free(MEMORIA_PRINCIPAL);
 	puts("Memoria Principal Liberada Correctamente.");
 	free(AREA_DE_SWAP);
 	puts("Área de Swap Liberada Correctamente.");
-
 
 	return EXIT_SUCCESS;
 }
@@ -215,10 +211,6 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	int32_t numeroDeEspacioEnSwap = -10;
 	int32_t numeroDeMarcoEnMP = -10;
 
-	/*ToDo CODIGOS DE OPERACION QUE FALTAN CODEAR:
-	 PLATO_LISTO
-	 FINALIZAR_PEDIDO -> finalizar pedido y terminar pedido son practicamente lo mismo
-	 */
     switch(cod_op)
     {
         case GUARDAR_PEDIDO:
@@ -606,8 +598,53 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	recibidoFinalizarPedido = malloc(sizeAAllocar);
         	recibir_mensaje(recibidoFinalizarPedido, cod_op, socket);
 
-			free(recibidoFinalizarPedido);
+        	resultado = malloc(sizeof(respuesta_ok_error));
 
+			printf("Buscando datos del pedido %u del restaurante %s...\n", recibidoFinalizarPedido->idPedido, recibidoFinalizarPedido->nombreRestaurante);
+
+			//buscamos la tabla de pedidos de dicho restaurante, si no existe, se envia FAIL
+			sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+			tablaDePedidosDelRestaurante = selector_de_tabla_de_pedidos(lista_de_pedidos_de_todos_los_restaurantes, recibidoFinalizarPedido->nombreRestaurante, 1);
+			sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+			//no existe este restaurante, se responde FAIL
+			if(tablaDePedidosDelRestaurante == NULL)
+			{
+				puts("El restaurante solicitado no existe.");
+				resultado->respuesta = 0;
+			}
+
+			//la tabla si existe, buscamos el segmento...
+			else
+			{
+				//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
+				if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoFinalizarPedido->idPedido))
+				{
+					//tomamos el numero de segmento del pedido
+					sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+					numeroDeSegmento = buscar_segmento_de_pedido(tablaDePedidosDelRestaurante, recibidoFinalizarPedido->idPedido);
+					sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+
+					//hora de dejar este mundo...
+					printf("Procedo a matar el pedido %u.\n", recibidoFinalizarPedido->idPedido);
+					matarPedido(tablaDePedidosDelRestaurante, numeroDeSegmento);
+					resultado->respuesta = 1;
+				}
+
+				//el pedido no existe
+				else
+				{
+					puts("El pedido solicitado no existe.");
+					resultado->respuesta = 0;
+				}
+			}
+
+			//mando el resultado de lo que consultaron
+			mandar_mensaje(resultado,RESPUESTA_CONFIRMAR_PEDIDO,socket);
+
+			free(resultado);
+			free(recibidoFinalizarPedido->nombreRestaurante);
+			free(recibidoFinalizarPedido);
         	break;
 
         case DESCONEXION:
@@ -620,8 +657,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	break;
 
         default://no deberia pasar nunca por aca, solo esta para que desaparezca el warning
-        	puts("PASE POR EL CASO DEFAULT DEL SWITCH DE PROCESAR MENSAJE!!!! BUSCAR ERROR!!!!");
-        	//puts("El mensaje mala leche fue recibido y felizmente ignorado.");
+        	puts("El mensaje mala leche fue recibido y felizmente ignorado.");
         	break;
     }
 

@@ -473,3 +473,68 @@
 
 [INFO] 17:16:49:82 Cliente/(9365:9477): Conexión establecida con socket de destino.
 [INFO] 17:17:18:906 Cliente/(9365:9479): Conexión establecida con socket de destino.
+[INFO] 17:23:34:231 Cliente/(9946:9946): Conexión establecida con socket de destino.
+[INFO] 17:24:03:692 Cliente/(9946:9957): Conexión establecida con socket de destino.
+[INFO] 17:24:03:700 Cliente/(9946:9957): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 17:24:30:105 Cliente/(9946:9959): Conexión establecida con socket de destino.
+[INFO] 17:28:20:295 Cliente/(9946:9959): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es: [1]. Cantidad ya cocinada: [0]
+[INFO] 17:31:54:483 Cliente/(9946:9961): Conexión establecida con socket de destino.
+[INFO] 17:32:43:631 Cliente/(9946:10105): Conexión establecida con socket de destino.
+[INFO] 17:35:11:659 Cliente/(10317:10317): Conexión establecida con socket de destino.
+[INFO] 17:36:08:826 Cliente/(10317:10330): Conexión establecida con socket de destino.
+[INFO] 17:36:08:832 Cliente/(10317:10330): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 17:36:26:794 Cliente/(10317:10337): Conexión establecida con socket de destino.
+[INFO] 17:36:26:800 Cliente/(10317:10337): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]
+[INFO] 17:41:23:78 Cliente/(10394:10394): Conexión establecida con socket de destino.
+[INFO] 17:41:31:252 Cliente/(10394:10397): Conexión establecida con socket de destino.
+[INFO] 17:41:31:259 Cliente/(10394:10397): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]
+[INFO] 17:44:23:739 Cliente/(12327:12327): Conexión establecida con socket de destino.
+[INFO] 17:44:49:903 Cliente/(12327:12336): Conexión establecida con socket de destino.
+[INFO] 17:45:21:486 Cliente/(12327:12366): Conexión establecida con socket de destino.
+[INFO] 17:45:21:502 Cliente/(12327:12366): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 17:45:29:488 Cliente/(12327:12368): Conexión establecida con socket de destino.
+[INFO] 17:45:51:942 Cliente/(12327:12368): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]
+[INFO] 17:46:27:138 Cliente/(12439:12439): Conexión establecida con socket de destino.
+[INFO] 17:46:29:551 Cliente/(12439:12448): Conexión establecida con socket de destino.
+[INFO] 17:46:43:501 Cliente/(12439:12448): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]
+[INFO] 17:47:17:839 Cliente/(12439:12470): Conexión establecida con socket de destino.
+[INFO] 17:47:21:817 Cliente/(12439:12472): Conexión establecida con socket de destino.
+[INFO] 17:47:21:827 Cliente/(12439:12472): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [1]
+[INFO] 17:48:01:655 Cliente/(12439:12481): Conexión establecida con socket de destino.
+[INFO] 17:48:13:357 Cliente/(12439:12489): Conexión establecida con socket de destino.
+[INFO] 17:48:13:367 Cliente/(12439:12489): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [2]
+[WARNING] 17:48:48:737 Cliente/(12538:12538): Conexión fallida con socket de destino.
+[INFO] 17:48:48:737 Cliente/(12538:12538): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 17:49:00:601 Cliente/(12611:12611): Conexión establecida con socket de destino.
+[INFO] 17:49:16:727 Cliente/(12611:12616): Conexión establecida con socket de destino.
+[INFO] 17:49:16:733 Cliente/(12611:12616): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 17:49:20:673 Cliente/(12611:12618): Conexión establecida con socket de destino.
+[INFO] 17:49:20:681 Cliente/(12611:12618): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [0].
+[INFO] 17:49:27:80 Cliente/(12611:12622): Conexión establecida con socket de destino.
+[INFO] 17:50:24:873 Cliente/(12611:12630): Conexión establecida con socket de destino.
+[INFO] 17:53:18:245 Cliente/(12611:12636): Conexión establecida con socket de destino.
+[INFO] 17:53:18:250 Cliente/(12611:12636): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [1].
+[INFO] 17:53:26:341 Cliente/(12611:12664): Conexión establecida con socket de destino.
+[INFO] 17:53:40:629 Cliente/(12611:12669): Conexión establecida con socket de destino.
+[INFO] 17:53:40:635 Cliente/(12611:12669): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [2].
+[INFO] 17:53:55:460 Cliente/(12611:12674): Conexión establecida con socket de destino.
+[INFO] 17:53:55:467 Cliente/(12611:12674): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [2].
+[INFO] 19:48:01:474 Cliente/(14593:14593): Conexión establecida con socket de destino.
+[INFO] 19:48:08:376 Cliente/(14593:14596): Conexión establecida con socket de destino.
+[INFO] 19:48:21:975 Cliente/(14593:14596): El intento de agregar un plato a un pedido fue: fallido.
+
+[INFO] 19:48:38:792 Cliente/(14593:14617): Conexión establecida con socket de destino.
+[INFO] 19:50:23:969 Cliente/(14593:14680): Conexión establecida con socket de destino.
+[INFO] 19:50:23:0 Cliente/(14593:14680): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:50:31:865 Cliente/(14593:14686): Conexión establecida con socket de destino.
+[INFO] 19:50:33:330 Cliente/(14593:14694): Conexión establecida con socket de destino.
+[INFO] 19:50:36:929 Cliente/(14593:14697): Conexión establecida con socket de destino.
+[INFO] 19:50:36:945 Cliente/(14593:14697): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [2].
+[INFO] 19:50:55:666 Cliente/(14593:14702): Conexión establecida con socket de destino.
+[INFO] 19:51:29:207 Cliente/(14593:14702): El intento de agregar un plato a un pedido fue: fallido.
+
