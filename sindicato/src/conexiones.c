@@ -10,26 +10,32 @@
 void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t sizeAAllocar)  {
 
 	switch(cod_op){
-		case CONSULTAR_PLATOS:
-			break;
+		case CONSULTAR_PLATOS: ;
+			obtener_restaurante* estructuraMensajePlatos = malloc(sizeof(obtener_restaurante));
+			recibir_mensaje(estructuraMensajePlatos, OBTENER_RESTAURANTE, *socket_cliente);
+
+			consultarPlatos(estructuraMensajePlatos->nombreRestaurante, *socket_cliente);
+
+			free(estructuraMensajePlatos->nombreRestaurante);
+			free(estructuraMensajePlatos);
+	    break;
 		case OBTENER_RESTAURANTE: ;
-			obtener_restaurante* estructuraMensaje = malloc(sizeof(obtener_restaurante));
-            recibir_mensaje(estructuraMensaje, OBTENER_RESTAURANTE, *socket_cliente);
+			obtener_restaurante* estructuraMensajeRest = malloc(sizeof(obtener_restaurante));
+            recibir_mensaje(estructuraMensajeRest, OBTENER_RESTAURANTE, *socket_cliente);
 
-            obtenerRestaurante(estructuraMensaje->nombreRestaurante, *socket_cliente);
+            obtenerRestaurante(estructuraMensajeRest->nombreRestaurante, *socket_cliente);
 
-            free(estructuraMensaje->nombreRestaurante);
-            free(estructuraMensaje);
-
-			break;
+            free(estructuraMensajeRest->nombreRestaurante);
+            free(estructuraMensajeRest);
+		break;
 		case ERROR:
 			pthread_exit(NULL);
-			break;
+		break;
 		case DESCONEXION:
 			pthread_exit(NULL);
-			break;
+		break;
 		default:
-			break;
+		break;
 	}
 
 }
