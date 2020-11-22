@@ -438,3 +438,38 @@
 [INFO] 18:49:55:923 Cliente/(4934:4936): El intento de guardar un pedido fue: exitoso.
 
 [INFO] 18:49:58:414 Cliente/(4943:4943): Conexión establecida con socket de destino.
+[INFO] 16:19:58:289 Cliente/(7678:7678): Conexión establecida con socket de destino.
+[INFO] 16:20:05:215 Cliente/(7678:7680): Conexión establecida con socket de destino.
+[INFO] 16:20:48:738 Cliente/(7692:7692): Conexión establecida con socket de destino.
+[INFO] 16:26:50:264 Cliente/(7794:7794): Conexión establecida con socket de destino.
+[INFO] 16:27:11:619 Cliente/(7794:7816): Conexión establecida con socket de destino.
+[INFO] 16:44:09:6 Cliente/(8413:8413): Conexión establecida con socket de destino.
+[INFO] 16:44:24:760 Cliente/(8413:8424): Conexión establecida con socket de destino.
+[INFO] 16:45:03:421 Cliente/(8476:8476): Conexión establecida con socket de destino.
+[INFO] 16:45:25:807 Cliente/(8476:8486): Conexión establecida con socket de destino.
+[INFO] 16:52:25:82 Cliente/(8601:8601): Conexión establecida con socket de destino.
+[INFO] 16:52:52:661 Cliente/(8601:8613): Conexión establecida con socket de destino.
+[INFO] 16:54:13:902 Cliente/(8688:8688): Conexión establecida con socket de destino.
+[INFO] 16:54:33:741 Cliente/(8688:8698): Conexión establecida con socket de destino.
+[INFO] 17:00:40:895 Cliente/(8969:8969): Conexión establecida con socket de destino.
+[INFO] 17:01:24:886 Cliente/(8969:8982): Conexión establecida con socket de destino.
+[INFO] 17:05:22:971 Cliente/(9171:9171): Conexión establecida con socket de destino.
+[INFO] 17:08:24:917 Cliente/(9171:9176): Conexión establecida con socket de destino.
+[INFO] 17:08:24:926 Cliente/(9171:9176): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 17:08:39:726 Cliente/(9171:9193): Conexión establecida con socket de destino.
+[INFO] 17:08:39:735 Cliente/(9171:9193): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]
+[INFO] 17:09:34:575 Cliente/(9171:9200): Conexión establecida con socket de destino.
+[INFO] 17:10:45:816 Cliente/(9171:9210): Conexión establecida con socket de destino.
+[INFO] 17:11:27:985 Cliente/(9171:9245): Conexión establecida con socket de destino.
+[INFO] 17:12:03:882 Cliente/(9171:9267): Conexión establecida con socket de destino.
+[INFO] 17:13:13:198 Cliente/(9365:9365): Conexión establecida con socket de destino.
+[INFO] 17:13:24:149 Cliente/(9365:9368): Conexión establecida con socket de destino.
+[INFO] 17:13:24:166 Cliente/(9365:9368): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 17:13:33:573 Cliente/(9365:9374): Conexión establecida con socket de destino.
+[INFO] 17:16:42:642 Cliente/(9365:9473): Conexión establecida con socket de destino.
+[INFO] 17:16:42:648 Cliente/(9365:9473): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 17:16:49:82 Cliente/(9365:9477): Conexión establecida con socket de destino.
+[INFO] 17:17:18:906 Cliente/(9365:9479): Conexión establecida con socket de destino.
