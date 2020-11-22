@@ -10,43 +10,31 @@
 // ---- MENSAJES POR SOCKET ----
 
 /*
- * Mensajes Hechos:
+ * Mensajes Terminados:
  *
- * Corregidos Problemas:
- * Obtener restaurante - [Envio mensajes completo]
- * Obtener receta - [Envio mensajes completo]
- * Obtener pedido - [Envio mensajes completo]
- * Plato listo - [Envio mensajes completo]
- * Guardar plato - [Envio mensajes completo]
- * Consultar platos - [Envio mensajes completo]
- * Guardar pedido - [Envio mensajes completo]
- * Confirmar pedido - [Envio mensajes completo]
- * Terminar pedido - [Envio mensajes completo]
+ * Obtener restaurante - Logs hechos
+ * Obtener receta - Logs hechos
+ * Obtener pedido - Logs hechos
+ * Plato listo - Logs hechos
+ * Guardar plato - Logs hechos
+ * Guardar pedido - Logs hechos
+ * Confirmar pedido - Logs hechos
+ * Terminar pedido - Logs hechos
+ * Consultar platos - Logs hechos
  *
  */
-
-//
-
-void enviarRespuestaBooleana(uint32_t socketCliente, codigo_operacion codOp, respuestaBool valorRespuesta){
-
-	respuesta_ok_error* rta = malloc(sizeof(respuesta_ok_error));
-
-	rta->respuesta = valorRespuesta;
-
-	mandar_mensaje(rta, codOp, socketCliente);
-
-	free(rta);
-}
 
 void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_t socketCliente){
 	if ( !existeRestaurant(nombreRestaurant) ){
 		printf("ERROR | No existe el restaurant buscado.\n");
+		log_info(logger, "[EnvioMSG] RTA_PLATO_LISTO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_PLATO_LISTO, FAIL);
 		return;
 	}
 
 	if( !existePedido(nombreRestaurant, IDPedido) ){
 		printf("ERROR | No existe el pedido solicitado.\n");
+		log_info(logger, "[EnvioMSG] RTA_PLATO_LISTO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_PLATO_LISTO, FAIL);
 		return;
 	}
@@ -59,6 +47,7 @@ void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_
 		printf("ERROR | No esta en estado pendiente.\n");
 		signalSemaforoPedido(nombreRestaurant, IDPedido);
 		free(datosPedido);
+		log_info(logger, "[EnvioMSG] RTA_PLATO_LISTO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_PLATO_LISTO, FAIL);
 		return;
 	}
@@ -69,6 +58,7 @@ void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_
 	if (indexPlatoEnPedido == -1){
 		printf("ERROR | El plato solicitado no está en el pedido.\n");
 		signalSemaforoPedido(nombreRestaurant, IDPedido);
+		log_info(logger, "[EnvioMSG] RTA_PLATO_LISTO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_PLATO_LISTO, FAIL);
 		return;
 	}
@@ -103,6 +93,7 @@ void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_
 
 	signalSemaforoPedido(nombreRestaurant, IDPedido);
 
+	log_info(logger, "[EnvioMSG] RTA_PLATO_LISTO | Valor: OK");
 	enviarRespuestaBooleana(socketCliente, RESPUESTA_PLATO_LISTO, OK);
 
 	destruirListaYElementos(listaBloquesActual);
@@ -119,6 +110,8 @@ void freeRtaObtenerReceta(respuesta_obtener_receta* rta){
 	free(rta->tiempoPasos);
 	free(rta);
 }
+
+
 
 void obtenerReceta(char* nombreReceta, uint32_t socketCliente){
 
@@ -139,6 +132,7 @@ void obtenerReceta(char* nombreReceta, uint32_t socketCliente){
 
 		freeRtaObtenerReceta(miRespuesta);
 
+		loguearRtaObtenerReceta(miRespuesta);
 		mandar_mensaje(miRespuesta, RESPUESTA_OBTENER_RECETA, socketCliente);
 
 		return;
@@ -168,10 +162,11 @@ void obtenerReceta(char* nombreReceta, uint32_t socketCliente){
 	miRespuesta->tiempoPasos = malloc(strlen(tiemposPasos) + 1);
 	strcpy(miRespuesta->tiempoPasos, tiemposPasos);
 
-	printearRespuestaObtenerReceta(miRespuesta);
+	//printearRespuestaObtenerReceta(miRespuesta);
 
 	freeRtaObtenerReceta(miRespuesta);
 
+	loguearRtaObtenerReceta(miRespuesta);
 	mandar_mensaje(miRespuesta, RESPUESTA_OBTENER_RECETA, socketCliente);
 
 	free(datosReceta);
@@ -183,12 +178,14 @@ void obtenerReceta(char* nombreReceta, uint32_t socketCliente){
 void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int cantidadPlatos, uint32_t socketCliente){
 	if ( !existeRestaurant(nombreRestaurant) ){
 		printf("ERROR | No existe el restaurant buscado.\n");
+		log_info(logger, "[EnvioMSG] RTA_GUARDAR_PLATO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_GUARDAR_PLATO, FAIL);
 		return;
 	}
 
 	if( !existePedido(nombreRestaurant, IDPedido) ){
 		printf("ERROR | No existe el pedido solicitado.\n");
+		log_info(logger, "[EnvioMSG] RTA_GUARDAR_PLATO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_GUARDAR_PLATO, FAIL);
 		return;
 	}
@@ -201,6 +198,7 @@ void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int c
 		printf("ERROR | No esta en estado pendiente.\n");
 		signalSemaforoPedido(nombreRestaurant, IDPedido);
 		free(datosPedido);
+		log_info(logger, "[EnvioMSG] RTA_GUARDAR_PLATO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_GUARDAR_PLATO, FAIL);
 		return;
 	}
@@ -218,6 +216,8 @@ void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int c
 	if (precioPlato == -1){
 		printf("ERROR | El plato dado no puede cocinarse en el restaurant.\n");
 		signalSemaforoPedido(nombreRestaurant, IDPedido);
+		free(datosPedido);
+		log_info(logger, "[EnvioMSG] RTA_GUARDAR_PLATO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_GUARDAR_PLATO, FAIL);
 		return;
 	}
@@ -269,6 +269,7 @@ void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int c
 	signalSemaforoPedido(nombreRestaurant, IDPedido);
 
 	// Envio respuesta OK
+	log_info(logger, "[EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK");
 	enviarRespuestaBooleana(socketCliente, RESPUESTA_GUARDAR_PLATO, OK);
 
 	destruirListaYElementos(listaBloquesActual);
@@ -294,6 +295,7 @@ void consultarPlatos(char* nombreRestaurant, uint32_t socket_cliente){
 		respuestaMensaje->nombresPlatos = malloc(strlen(arrayVacio)+1);
 		strcpy(respuestaMensaje->nombresPlatos, arrayVacio);
 
+		loguearRtaConsultarPlatos(respuestaMensaje);
 		mandar_mensaje(respuestaMensaje, RESPUESTA_CONSULTAR_PLATOS, socket_cliente);
 
 		free(respuestaMensaje->nombresPlatos);
@@ -329,9 +331,10 @@ void consultarPlatos(char* nombreRestaurant, uint32_t socket_cliente){
 	respuestaPlatos->longitudNombresPlatos = longitudLineaPlatos;
 	strcpy(respuestaPlatos->nombresPlatos, lineaPlatos[1]);
 
-	printearRespuestaConsultarPlatos(respuestaPlatos);
+	//printearRespuestaConsultarPlatos(respuestaPlatos);
 
 	// Se envia la respuesta
+	loguearRtaConsultarPlatos(respuestaPlatos);
 	mandar_mensaje(respuestaPlatos, RESPUESTA_CONSULTAR_PLATOS, socket_cliente);
 
 	freeDeArray(datosSeparados);
@@ -345,12 +348,14 @@ void terminarPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente
 
 	if ( !existeRestaurant(nombreRestaurant) ){
 		printf("ERROR | No existe el restaurant buscado.\n");
+		log_info(logger, "[EnvioMSG] RTA_TERMINAR_PEDIDO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_TERMINAR_PEDIDO, FAIL);
 		return;
 	}
 
 	if( !existePedido(nombreRestaurant, IDPedido) ){
 		printf("ERROR | No existe el pedido solicitado.\n");
+		log_info(logger, "[EnvioMSG] RTA_TERMINAR_PEDIDO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_TERMINAR_PEDIDO, FAIL);
 		return;
 	}
@@ -361,8 +366,9 @@ void terminarPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente
 
 	if(!pedidoEstaEnEstado("Confirmado", datosPedido)){
 		printf("ERROR | No está en estado pendiente.\n");
-		free(datosPedido);
 		signalSemaforoPedido(nombreRestaurant, IDPedido);
+		free(datosPedido);
+		log_info(logger, "[EnvioMSG] RTA_TERMINAR_PEDIDO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_TERMINAR_PEDIDO, FAIL);
 		return;
 	}
@@ -408,6 +414,7 @@ void terminarPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente
 	signalSemaforoPedido(nombreRestaurant, IDPedido);
 
 	// Retorna OK
+	log_info(logger, "[EnvioMSG] RTA_TERMINAR_PEDIDO | Valor: OK");
 	enviarRespuestaBooleana(socketCliente, RESPUESTA_TERMINAR_PEDIDO, OK);
 
 	free(datosPedido);
@@ -423,12 +430,14 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido, uint32_t socketClient
 
 	if ( !existeRestaurant(nombreRestaurant) ){
 		printf("ERROR | No existe el restaurant buscado.\n");
+		log_info(logger, "[EnvioMSG] RTA_CONFIRMAR_PEDIDO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_CONFIRMAR_PEDIDO, FAIL);
 		return;
 	}
 
 	if( !existePedido(nombreRestaurant, IDPedido) ){
 		printf("ERROR | No existe el pedido solicitado.\n");
+		log_info(logger, "[EnvioMSG] RTA_CONFIRMAR_PEDIDO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_CONFIRMAR_PEDIDO, FAIL);
 		return;
 	}
@@ -440,6 +449,8 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido, uint32_t socketClient
 	if(!pedidoEstaEnEstado("Pendiente", datosPedido)){
 		printf("ERROR | No esta en estado pendiente.\n");
 		signalSemaforoPedido(nombreRestaurant, IDPedido);
+		free(datosPedido);
+		log_info(logger, "[EnvioMSG] RTA_CONFIRMAR_PEDIDO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_CONFIRMAR_PEDIDO, FAIL);
 		return;
 	}
@@ -485,6 +496,7 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido, uint32_t socketClient
 	signalSemaforoPedido(nombreRestaurant, IDPedido);
 
 	// Respuesta OK
+	log_info(logger, "[EnvioMSG] RTA_CONFIRMAR_PEDIDO | Valor: OK");
 	enviarRespuestaBooleana(socketCliente, RESPUESTA_CONFIRMAR_PEDIDO, OK);
 
 	free(datosPedido);
@@ -524,11 +536,13 @@ respuesta_obtener_pedido* generarRtaObtenerPedidoDefault(){
 	return rta;
 }
 
+
 void obtenerPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente){
 	if ( !existeRestaurant(nombreRestaurant)){
 		printf("ERROR | No existe el restaurant buscado.\n");
 		respuesta_obtener_pedido* rtaDefault = generarRtaObtenerPedidoDefault();
 
+		loguearRtaObtenerPedido(rtaDefault);
 		mandar_mensaje(rtaDefault, RESPUESTA_OBTENER_PEDIDO, socketCliente);
 
 		freeRtaObtenerPedido(rtaDefault);
@@ -540,6 +554,7 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente)
 		printf("ERROR | No existe el pedido solicitado");
 		respuesta_obtener_pedido* rtaDefault = generarRtaObtenerPedidoDefault();
 
+		loguearRtaObtenerPedido(rtaDefault);
 		mandar_mensaje(rtaDefault, RESPUESTA_OBTENER_PEDIDO, socketCliente);
 
 		freeRtaObtenerPedido(rtaDefault);
@@ -585,6 +600,7 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente)
 	//printearRespuestaObtenerPedido(respuestaPedido);
 
 	// Se envia respuesta correcta
+	loguearRtaObtenerPedido(respuestaPedido);
 	mandar_mensaje(respuestaPedido, RESPUESTA_OBTENER_PEDIDO, socketCliente);
 
 	freeRtaObtenerPedido(respuestaPedido);
@@ -604,12 +620,7 @@ void freeRtaObtenerRestaurante(respuesta_obtener_restaurante* rta){
 	free(rta);
 }
 
-void loguearRtaObtenerRestaurante(respuesta_obtener_restaurante* rta){
-	log_info(logger, "[EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=%i | posX=%i | posY=%i "
-			"| cantHornos=%i | afinidades=%s | platos=%s | precioPlatos=%s",
-			rta->cantidadCocineros, rta->posX, rta->posY,
-			rta->cantHornos, rta->afinidades, rta->platos, rta->precioPlatos);
-}
+
 
 // Obtiene todos los datos de un restaurant
 void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
@@ -640,7 +651,7 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 		strcpy(respuestaMensaje->precioPlatos, arrayVacio);
 
 		loguearRtaObtenerRestaurante(respuestaMensaje);
-		//mandar_mensaje(respuestaMensaje, RESPUESTA_OBTENER_REST, socket_cliente);
+		mandar_mensaje(respuestaMensaje, RESPUESTA_OBTENER_REST, socket_cliente);
 
 		freeRtaObtenerRestaurante(respuestaMensaje);
 		return;
@@ -704,7 +715,7 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 
 	// Se envia respuesta
 	loguearRtaObtenerRestaurante(respuestaMensaje);
-	//mandar_mensaje(respuestaMensaje, RESPUESTA_OBTENER_REST, socket_cliente);
+	mandar_mensaje(respuestaMensaje, RESPUESTA_OBTENER_REST, socket_cliente);
 
 	freeRtaObtenerRestaurante(respuestaMensaje);
 
@@ -726,6 +737,7 @@ void guardarPedido(char* nombreRestaurante, int IDPedido, uint32_t socketCliente
 	if (!existeRestaurant(nombreRestaurante)){
 		printf("ERROR | No existe el restaurant solicitado.\n");
 		// Se envia respuesta fail
+		log_info(logger, "[EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_GUARDAR_PEDIDO, FAIL);
 		return;
 	}
@@ -733,6 +745,7 @@ void guardarPedido(char* nombreRestaurante, int IDPedido, uint32_t socketCliente
 	if (existePedido(nombreRestaurante, IDPedido)){
 		printf("ERROR | Ya existe el pedido con ID solicitado.\n");
 		// Se envia respuesta fail
+		log_info(logger, "[EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: FAIL");
 		enviarRespuestaBooleana(socketCliente, RESPUESTA_GUARDAR_PEDIDO, FAIL);
 		return;
 	}
@@ -766,6 +779,7 @@ void guardarPedido(char* nombreRestaurante, int IDPedido, uint32_t socketCliente
 	crearSemaforoPedido(nombreRestaurante, IDPedido);
 
 	// Se envia respuesta afirmativa
+	log_info(logger, "[EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK");
 	enviarRespuestaBooleana(socketCliente, RESPUESTA_GUARDAR_PEDIDO, OK);
 
 	free(pathCarpetaRestaurant);
@@ -821,4 +835,37 @@ void crearReceta(char* nombreReceta, datosReceta unaReceta){
 	free(nombreArchivoReceta);
 	free(pathArchivoReceta);
 	free(stringReceta);
+}
+
+void enviarRespuestaBooleana(uint32_t socketCliente, codigo_operacion codOp, respuestaBool valorRespuesta){
+
+	respuesta_ok_error* rta = malloc(sizeof(respuesta_ok_error));
+
+	rta->respuesta = valorRespuesta;
+
+	mandar_mensaje(rta, codOp, socketCliente);
+
+	free(rta);
+}
+
+
+void loguearRtaObtenerPedido(respuesta_obtener_pedido* rta){
+	log_info(logger, "[EnvioMSG] RTA_OBTENER_PEDIDO con valores: comidas=%s | cantTotales=%s | cantListas=%s",
+			rta->comidas, rta->cantTotales, rta->cantListas);
+}
+
+void loguearRtaObtenerReceta(respuesta_obtener_receta* rta){
+	log_info(logger, "[EnvioMSG] RTA_OBTENER_RECETA con valores: pasos=%s | tiempoPasos=%s",
+			rta->pasos, rta->tiempoPasos);
+}
+
+void loguearRtaObtenerRestaurante(respuesta_obtener_restaurante* rta){
+	log_info(logger, "[EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=%i | posX=%i | posY=%i "
+			"| cantHornos=%i | afinidades=%s | platos=%s | precioPlatos=%s",
+			rta->cantidadCocineros, rta->posX, rta->posY,
+			rta->cantHornos, rta->afinidades, rta->platos, rta->precioPlatos);
+}
+
+void loguearRtaConsultarPlatos(respuesta_consultar_platos* rta){
+	log_info(logger, "[EnvioMSG] RTA_CONSULTAR_PLATOS con valores: nombresPlatos=%s", rta->nombresPlatos);
 }
