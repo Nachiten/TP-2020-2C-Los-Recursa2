@@ -17,9 +17,7 @@ typedef struct{
 
 
 //***VARIABLES***
-int32_t socket_sindicato;
 sem_t* semId;
-sem_t* semLog;
 int32_t id_global;
 t_list* listaPedidos;
 
