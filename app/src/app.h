@@ -14,16 +14,6 @@ typedef struct{
 	int32_t posY;
 }info_resto;
 
-typedef struct{
-	int32_t socket_cliente;
-	char* nombre_resto;
-	uint32_t id_global;
-	uint32_t id_pedido_resto;
-	int perfilActivo;
-	int32_t posX;
-	int32_t posY;
-}perfil_cliente;
-
 
 //***VARIABLES***
 t_list* listaRestos;
@@ -43,7 +33,6 @@ int32_t posX_resto;
 int32_t posY_resto;
 
 sem_t* semId;
-sem_t* semLog;
 int32_t id_global;
 int32_t socket_commanda;
 
@@ -56,14 +45,15 @@ void consultar_restaurantes(int32_t);
 void seleccionarRestaurante(char*, int32_t);
 void crear_pedido(int32_t);
 void consultarPlatos(int32_t);
-void aniadir_plato(a_plato*);
+void aniadir_plato(a_plato*, int32_t);
 void plato_Listo(plato_listo*, int32_t);
-void confirmar_Pedido(confirmar_pedido*);
+void confirmar_Pedido(confirmar_pedido*, int32_t);
 void agregar_restaurante(info_resto*);
+void registrarHandshake(handshake*, int32_t);
 
 // ***MANEJO DE MENSAJES***
 int32_t crear_id_pedidos();
-void crear_pedido(int32_t);
+//void crear_pedido(int32_t);
 int buscar_pedido_por_id(uint32_t);
 int buscar_pedido_por_id_y_resto(uint32_t, info_resto*);
 int buscar_cliente(int32_t);

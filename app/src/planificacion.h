@@ -35,6 +35,7 @@ t_list* pedidosListos;
 
 // OTROS
 t_log* logger;
+sem_t* semLog;
 
 // VARIABLES DE CONFIG
 int GRADO_MULTIPROCE;
@@ -106,6 +107,16 @@ typedef enum{
 	EXIT,
 }estado;
 
+typedef struct{
+	int32_t socket_cliente;
+	char* nombre_resto;
+	uint32_t id_global;
+	uint32_t id_pedido_resto;
+	int perfilActivo;
+	int32_t posX;
+	int32_t posY;
+}perfil_cliente;
+
 
 typedef struct{
 	int pedidoID;
@@ -123,6 +134,7 @@ typedef struct{
 	accionBlock accionBlocked;
 	estado proximoEstado;
 	int tiempoEspera;
+	int32_t socketCliente;
 }pcb_pedido;
 
 
