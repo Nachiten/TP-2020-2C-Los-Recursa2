@@ -10,6 +10,8 @@
 void* MEMORIA_PRINCIPAL;
 void* AREA_DE_SWAP;
 uint32_t numero_de_victima;
+uint32_t clock_mejorado_primera_iteracion;
+uint32_t punteroClockM;
 
 sem_t* semaforoNumeroVictima;
 sem_t* semaforoTocarListaPedidosTodosLosRestaurantes;
@@ -17,6 +19,7 @@ sem_t* semaforoTocarListaEspaciosEnSWAP;
 sem_t* semaforoTocarListaEspaciosEnMP;
 sem_t* semaforoTocarMP;
 sem_t* semaforoTocarSWAP;
+sem_t* semaforoAlgoritmoReemplazo; //probablemente al re pedo, pero queda como medida de seguridad
 
 tablas_segmentos_restaurantes* lista_de_pedidos_de_todos_los_restaurantes; //aca empiezan las lista de segmentos que tiene CoMAnda para cada restaurante
 espacio* lista_de_espacios_en_SWAP; //aca comienza la lista de los espacios disponibles/ocupados en area de SWAP
@@ -80,7 +83,7 @@ void tomar_datos_de_MP(tabla_paginas* platoDelPedido);
 //toma los datos de SWAP y los devuelve a su PAGINA
 void tomar_datos_de_SWAP(tabla_paginas* platoDelPedido);
 
-// Grim Reaper
+//Grim Reaper
 void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, espacio* lista_de_espacios_en_MP);
 
 //dada una pagina, borra los datos del plato, para cumplir con enunciado
@@ -106,5 +109,8 @@ void matarPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, ui
 
 //mata todos los platos del pedido seleccionado;
 void matarPlatos(segmentos* segmentoSeleccionado);
+
+//dado un numero de marco, devuelve la pagina guardada en ese marco
+tabla_paginas* buscarPaginaAsociadaAlMarco(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, uint32_t numeroDeMarco);
 
 #endif /* SRC_MANEJOMEMORIA_H_ */

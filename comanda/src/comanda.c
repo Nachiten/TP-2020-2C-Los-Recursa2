@@ -8,6 +8,8 @@ int main()
 	MEMORIA_PRINCIPAL = NULL;
 	AREA_DE_SWAP = NULL;
 	numero_de_victima = 0;
+	clock_mejorado_primera_iteracion = 1;
+	punteroClockM = 0;
 
 	//Cargo las configuraciones del .config
 	config = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/comanda.config");
@@ -307,7 +309,6 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 						if(plato_creado_o_editado->cargadoEnMEMORIA == 0)
 						{
 							//busco si hay un marco libre en MP para poner la pagina nueva/editada
-
 							numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
 						}
 
@@ -328,7 +329,9 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 						{
 							sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 							sem_wait(semaforoTocarListaEspaciosEnMP);
+							sem_wait(semaforoAlgoritmoReemplazo);
 							algoritmo_de_reemplazo(ALGOR_REEMPLAZO, lista_de_pedidos_de_todos_los_restaurantes, lista_de_espacios_en_MP);
+							sem_post(semaforoAlgoritmoReemplazo);
 							numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
 							marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
 							sem_post(semaforoTocarListaEspaciosEnMP);
@@ -673,12 +676,14 @@ void inicializarSemaforos() //Todo matar semaforos?
 	semaforoTocarListaEspaciosEnMP = malloc(sizeof(sem_t));
 	semaforoTocarMP = malloc(sizeof(sem_t));
 	semaforoTocarSWAP = malloc(sizeof(sem_t));
+	semaforoAlgoritmoReemplazo = malloc(sizeof(sem_t));
 
 	sem_init(semaforoNumeroVictima, 0, 1);
 	sem_init(semaforoLogger, 0, 1);
 	sem_init(semaforoTocarListaPedidosTodosLosRestaurantes, 0, 1);
 	sem_init(semaforoTocarListaEspaciosEnSWAP, 0, 1);
 	sem_init(semaforoTocarListaEspaciosEnMP, 0, 1);
+	sem_init(semaforoAlgoritmoReemplazo, 0, 1);
 	sem_init(semaforoTocarMP, 0, 1);//ToDo revisar todos los lugares donde deberian estar estos 2 semaforos!!!
 	sem_init(semaforoTocarSWAP, 0, 1);
 }

@@ -27,6 +27,9 @@ typedef struct tabla_paginas
 	uint32_t cargadoEnMEMORIA;
 	int32_t numeroDeMarco;
 
+	uint32_t bitDeUso;
+	uint32_t bitDeModificacion;
+
 	struct tabla_paginas* anter_pagina;
 	struct tabla_paginas* sig_pagina;
 }tabla_paginas;
@@ -61,7 +64,7 @@ typedef struct espacio
 	uint32_t numeroDeEspacio;
 	uint32_t espacioOcupado;
 
-	struct espacio* anter_espacio;
+	//struct espacio* anter_espacio;
 	struct espacio* sig_espacio;
 }espacio;
 

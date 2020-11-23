@@ -45,7 +45,7 @@ void inicializar_lista_de_espacios(espacio* listaDeEspacios, uint32_t TAMANIO_AR
 	//inicializamos el primer espacio
 	listaDeEspacios->numeroDeEspacio = 0;
 	listaDeEspacios->espacioOcupado = 0;
-	listaDeEspacios->anter_espacio = NULL;
+	//listaDeEspacios->anter_espacio = NULL;
 	listaDeEspacios->sig_espacio = NULL;
 
 	while(iterador < cantidadPosibleDeEspacios-1)
@@ -187,7 +187,7 @@ void crearNuevoEspacio(espacio* unEspacio)
 	//preparo el espacio nuevo
 	nuevoEspacio->numeroDeEspacio = auxiliarEspacioAnterior->numeroDeEspacio + 1;
 	nuevoEspacio->espacioOcupado = 0;
-	nuevoEspacio->anter_espacio = auxiliarEspacioAnterior;
+	//nuevoEspacio->anter_espacio = auxiliarEspacioAnterior;
 	nuevoEspacio->sig_espacio = NULL;
 }
 
@@ -398,7 +398,9 @@ void cargarPaginasEnMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 			{
 				sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 				sem_wait(semaforoTocarListaEspaciosEnMP);
+				sem_wait(semaforoAlgoritmoReemplazo);
 				algoritmo_de_reemplazo(ALGOR_REEMPLAZO, lista_de_pedidos_de_todos_los_restaurantes, lista_de_espacios_en_MP);
+				sem_post(semaforoAlgoritmoReemplazo);
 				numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
 				marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
 				sem_post(semaforoTocarListaEspaciosEnMP);
@@ -448,7 +450,7 @@ uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedi
 	return existe;
 }
 
-uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombrePlato)//ToDo probare
+uint32_t verificarExistenciaDePlato(segmentos* segmentoSeleccionado, char* nombrePlato)
 {
 	tabla_paginas* tablaDePlatos = segmentoSeleccionado->mi_tabla;
 	uint32_t existe = 0;
@@ -549,19 +551,6 @@ tabla_paginas* agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidos
 			}
 			sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 		}
-		/* ToDo borrar esto
-		sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
-		//mietras que no encuentre el plato con el nombre que me llego
-		while(strcmp(tablaDePlatos->nombreDeMorfi,nombrePlato) == 1)
-		{
-			//avanzo
-			tablaDePlatos = tablaDePlatos->sig_pagina;
-		}
-
-		//sumo la cantidad de platos nueva que llego
-		tablaDePlatos->cantidadPedidaComida += cantidadPlatos;
-		sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
-		*/
 	}
 
 	//es un plato nuevo que agregar al pedido
@@ -694,13 +683,21 @@ void tomar_datos_de_SWAP(tabla_paginas* platoDelPedido)
 	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 }
 
-void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, espacio* lista_de_espacios_en_MP) //AKA Grim Reaper
+void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, espacio* lista_de_marcos_en_MP) //AKA Grim Reaper
 {
 	tablas_segmentos_restaurantes* recorrerRestaurantes = lasListasDePedidosDeRestaurantes;
 	segmentos* recorrerSegmentos = NULL;
 	tabla_paginas* recorrerPlatos = NULL;
 	tabla_paginas* victima = NULL;
 	uint32_t primeraIteracion = 1;
+	uint32_t posicionInicial = 0;
+	espacio* auxiliarMoverme = lista_de_marcos_en_MP;
+	tabla_paginas* paginaEnMarco = NULL;
+	uint32_t bitDeUsoBuscado = 0;
+	uint32_t bitDeModificacionBuscado = 0;
+	uint32_t victimaEncontrada = 0;
+	uint32_t numeroDeIteracion = 0;
+	uint32_t flagAlterarBit = 0;
 
 	sem_wait(semaforoLogger);
 	log_info(logger,"--Inicializado Algoritmo de reemplazo de Páginas--");
@@ -756,12 +753,15 @@ void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes
 		log_info(logger,"La víctima seleccionada para el reemplazo se encuentra en el marco: %i", victima->numeroDeMarco);
 		sem_post(semaforoLogger);
 
-		//hay que mover la pagina a SWAP
-		actualizar_pagina_en_SWAP(victima);
+		//hay que mover la pagina a SWAP si esta modificada
+		if(victima->bitDeModificacion == 1)
+		{
+			actualizar_pagina_en_SWAP(victima);
+		}
 
 		//marcamos el marco como libre para que lo puedan usar
 		sem_wait(semaforoTocarListaEspaciosEnMP);
-		marcarEspacioComoLibre(lista_de_espacios_en_MP, victima->numeroDeMarco);
+		marcarEspacioComoLibre(lista_de_marcos_en_MP, victima->numeroDeMarco);
 		sem_post(semaforoTocarListaEspaciosEnMP);
 
 		//actualizamos el dato de la pagina (que ya no esta en MP)
@@ -773,8 +773,94 @@ void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes
 	{
 		if(strcmp(ALGOR_REEMPLAZO, "CLOCK_MEJ") == 0)
 		{
-			puts("ALGOR PENDIENTE");//ToDo
-			abort();
+			posicionInicial = punteroClockM;
+
+			//avanzo en la lista de marcos hasta pararme en el marco del puntero
+			while(auxiliarMoverme->numeroDeEspacio != punteroClockM)
+			{
+				//avanzo...
+				auxiliarMoverme = auxiliarMoverme->sig_espacio;
+			}
+
+			//mientras que no encuentre una victima...
+			while(victimaEncontrada == 0)
+			{
+				//si puntero pasa por posición original, cambia comportamiento de algoritmo
+				if(punteroClockM == posicionInicial)
+				{
+					if(numeroDeIteracion == 0 || numeroDeIteracion == 2)
+					{
+						bitDeUsoBuscado = 0;
+						bitDeModificacionBuscado = 0;
+
+						flagAlterarBit = 0;
+					}
+
+					if(numeroDeIteracion == 1 || numeroDeIteracion == 3)
+					{
+						bitDeUsoBuscado = 0;
+						bitDeModificacionBuscado = 1;
+
+						flagAlterarBit = 1;
+					}
+
+					numeroDeIteracion++;
+				}
+
+				//solo me interesa si esta en uso
+				if(auxiliarMoverme->espacioOcupado == 1)
+				{
+					punteroClockM = auxiliarMoverme->numeroDeEspacio;
+					//tengo un marco ocupado, me busco la pagina que está en este marco
+					paginaEnMarco = buscarPaginaAsociadaAlMarco(lasListasDePedidosDeRestaurantes, auxiliarMoverme->numeroDeEspacio);
+
+					//analizo sus bits
+					if(paginaEnMarco->bitDeUso == bitDeUsoBuscado && paginaEnMarco->bitDeModificacion == bitDeModificacionBuscado)
+					{
+						//tenemos un ganador
+						victima = paginaEnMarco;
+						victimaEncontrada = 1;
+					}
+
+					else
+					{
+						if(flagAlterarBit == 1)
+						{
+							paginaEnMarco->bitDeUso = 0;
+						}
+					}
+				}
+
+				//avanzo...
+				auxiliarMoverme = auxiliarMoverme->sig_espacio;
+
+				//si llegue al final...
+				if(auxiliarMoverme == NULL)
+				{
+					//restauro...
+					auxiliarMoverme = lista_de_marcos_en_MP;
+				}
+			}
+
+			//en este punto ya tengo la pagina q vamos a volar para SWAP
+			sem_wait(semaforoLogger);
+			log_info(logger,"La víctima seleccionada para el reemplazo se encuentra en el marco: %i", victima->numeroDeMarco);
+			sem_post(semaforoLogger);
+
+			//hay que mover la pagina a SWAP si esta modificada
+			if(victima->bitDeModificacion == 1)
+			{
+				actualizar_pagina_en_SWAP(victima);
+			}
+
+			//marcamos el marco como libre para que lo puedan usar
+			sem_wait(semaforoTocarListaEspaciosEnMP);
+			marcarEspacioComoLibre(lista_de_marcos_en_MP, victima->numeroDeMarco);
+			sem_post(semaforoTocarListaEspaciosEnMP);
+
+			//actualizamos el dato de la pagina (que ya no esta en MP)
+			victima->cargadoEnMEMORIA = 0;
+			victima->numeroDeMarco = -1;
 		}
 
 		else
@@ -932,7 +1018,9 @@ void aumentarCantidadLista(segmentos* pedido, char* nombrePlato)
 			{
 				sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 				sem_wait(semaforoTocarListaEspaciosEnMP);
+				sem_wait(semaforoAlgoritmoReemplazo);
 				algoritmo_de_reemplazo(ALGOR_REEMPLAZO, lista_de_pedidos_de_todos_los_restaurantes, lista_de_espacios_en_MP);
+				sem_post(semaforoAlgoritmoReemplazo);
 				numeroDeMarcoEnMP = buscarPrimerEspacioLibre(lista_de_espacios_en_MP);
 				marcarEspacioComoOcupado(lista_de_espacios_en_MP, numeroDeMarcoEnMP);
 				sem_post(semaforoTocarListaEspaciosEnMP);
@@ -1056,4 +1144,47 @@ void matarPlatos(segmentos* segmentoSeleccionado)
 		tablaDePlatos = siguientePlato;
 	}
 //hasta la vista baby
+}
+
+tabla_paginas* buscarPaginaAsociadaAlMarco(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, uint32_t numeroDeMarco)
+{
+	tablas_segmentos_restaurantes* recorrerRestaurantes = lasListasDePedidosDeRestaurantes;
+	segmentos* recorrerSegmentos = NULL;
+	tabla_paginas* recorrerPlatos = NULL;
+	tabla_paginas* paginaBuscada = NULL;
+
+	//mientras haya restaurantes que revisar...
+	while(recorrerRestaurantes != NULL)
+	{
+		//selecciono el primer segmento
+		recorrerSegmentos = recorrerRestaurantes->miTablaDePedidos;
+
+		//mientras haya pedidos que revisar...
+		while(recorrerSegmentos != NULL)
+		{
+			//selecciono el primer plato
+			recorrerPlatos = recorrerSegmentos->mi_tabla;
+
+			//mientras haya platos que revisar...
+			while(recorrerPlatos != NULL)
+			{
+				//solo me interesa si esta cargada en MP
+				if(recorrerPlatos->cargadoEnMEMORIA == 1)
+				{
+					//si la pagina está cargada en el marco que busco
+					if(recorrerPlatos->numeroDeMarco == numeroDeMarco)
+					{
+						paginaBuscada = recorrerPlatos;
+					}
+				}
+				//avanzo a revisar el siguiente plato
+				recorrerPlatos = recorrerPlatos->sig_pagina;
+			}
+			//avanzo a revisar el siguiente pedido
+			recorrerSegmentos = recorrerSegmentos->sig_segmento;
+		}
+		//avanzo a revisar el siguiente restaurante
+		recorrerRestaurantes = recorrerRestaurantes->sig_lista;
+	}
+	return paginaBuscada;
 }

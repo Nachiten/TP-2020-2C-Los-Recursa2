@@ -538,3 +538,7 @@
 [INFO] 19:50:55:666 Cliente/(14593:14702): Conexión establecida con socket de destino.
 [INFO] 19:51:29:207 Cliente/(14593:14702): El intento de agregar un plato a un pedido fue: fallido.
 
+[WARNING] 15:08:41:854 Cliente/(7260:7260): Conexión fallida con socket de destino.
+[INFO] 15:08:41:857 Cliente/(7260:7260): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 15:08:48:657 Cliente/(7262:7262): Conexión establecida con socket de destino.
+[INFO] 15:09:48:192 Cliente/(7262:7272): Conexión establecida con socket de destino.
