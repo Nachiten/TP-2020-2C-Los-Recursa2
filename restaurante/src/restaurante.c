@@ -178,7 +178,6 @@ void consultar_Pedido(int32_t id,int32_t socket_cliente){
 	strcpy(datosPedido->nombreRestaurante,nombreRestaurante);
 
 	respuesta_obtener_pedido* pedido = malloc(sizeof(respuesta_obtener_pedido));
-	int i = 0;
 
 	mandar_mensaje(datosPedido,OBTENER_PEDIDO,socket_sindicato);
 
@@ -314,6 +313,8 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	a_plato* recibidoAPlato;
 	consultar_pedido* recibidoConsultarPedido;
 	confirmar_pedido* recibidoConfirmarPedido;
+	handshake* recibidohandshake;
+
 	switch(cod_op){
 
 	case CONSULTAR_PLATOS:
@@ -341,6 +342,17 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		break;
 
 	case CONSULTAR_PEDIDO:
+		recibidoConsultarPedido = malloc(sizeAAllocar);
+		recibir_mensaje(recibidoConsultarPedido,CONSULTAR_PEDIDO,socket_cliente);
+		consultar_Pedido(recibidoConsultarPedido->idPedido, socket_cliente);
+		free(recibidoConsultarPedido);
+		break;
+
+	case HANDSHAKE:
+		recibidohandshake = malloc(sizeAAllocar);
+		recibir_mensaje(recibidohandshake,HANDSHAKE,socket_cliente);
+		free(recibidohandshake->id);
+		free(recibidohandshake);
 		break;
 
 	default:

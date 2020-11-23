@@ -58,6 +58,11 @@ int main(){
 
 	//coneccion a commanda
 	socket_commanda = establecer_conexion(ip_commanda,puerto_commanda);
+	if(socket_commanda<0){
+		log_info(logger, "Comanda esta muerto, procedo a fallecer");
+		exit(-2);
+	}
+	close(socket_commanda);
 
 	//inicio el server | TODO Se quita esto para testear planificacion
 	//iniciar_server(mi_puerto);
@@ -120,7 +125,7 @@ void consultar_restaurantes(int32_t socket_cliente){
  * restaurante para el cliente, en caso de no encontrar el nombre manda un 0 en señal de error
 */
 void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
-	int restoBuscado;
+	int restoBuscado,numero_cliente;
 	respuesta_ok_error* respuesta;
 	perfil_cliente* perfil;
 
@@ -128,14 +133,11 @@ void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
 	respuesta = malloc(sizeof(respuesta_ok_error));
 
 	if(restoBuscado != -2 || strcmp(nombreResto,"RestoDefault") == 0){
-		perfil = malloc(sizeof(perfil_cliente));
-		perfil->socket_cliente = socket_cliente;
+		numero_cliente = buscar_cliente(socket_cliente);
+		perfil = list_get(listaPedidos,numero_cliente);
 		perfil->nombre_resto = malloc(strlen(nombreResto)+1);
 		strcpy(perfil->nombre_resto,nombreResto);
-		perfil->id_pedido_resto = 0;
 		perfil->id_global = crear_id_pedidos(id_global);
-		perfil->perfilActivo = 1;
-		list_add(listaPedidos,perfil);
 
 		respuesta->respuesta = 1;
 		mandar_mensaje(respuesta,RESPUESTA_SELECCIONAR_R,socket_cliente);
@@ -193,7 +195,7 @@ void crear_pedido(int32_t socket_cliente){
 	info_resto* resto;
 	guardar_pedido* estructura_guardar_pedido;
 	respuesta_ok_error* respuesta;
-	int32_t recibidos, recibidosSize = 0, sizeAAllocar;
+	int32_t recibidos, recibidosSize = 0, sizeAAllocar, nuevoSocketComanda;
 	codigo_operacion cod_op;
 
 	numero_cliente = buscar_cliente(socket_cliente);
@@ -220,39 +222,54 @@ void crear_pedido(int32_t socket_cliente){
 			respuesta = malloc(sizeof(respuesta_ok_error));
 			respuesta = 0;
 
-			mandar_mensaje(estructura_guardar_pedido,GUARDAR_PEDIDO,socket_commanda);
-
-			recibidos = recv(socket_commanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
-
-			if(recibidos >= 1){
-				recibidosSize = recv(socket_commanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
-				bytesRecibidos(recibidosSize);
-
-				recibir_mensaje(respuesta,GUARDAR_PEDIDO,socket_commanda);
+			nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+			if(nuevoSocketComanda < 0){
+				sem_wait(semLog);
+				log_info(logger, "Comanda sigue morido, me muero yo tambien");
+				sem_post(semLog);
+				exit(-2);
 			}
 
-			mandar_mensaje(respuesta,CREAR_PEDIDO,socket_cliente);
+			mandar_mensaje(estructura_guardar_pedido,GUARDAR_PEDIDO,nuevoSocketComanda);
+
+			recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+
+			if(recibidos >= 1){
+				recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+				bytesRecibidos(recibidosSize);
+
+				recibir_mensaje(respuesta,RESPUESTA_GUARDAR_PEDIDO,nuevoSocketComanda);
+
+				mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socket_cliente);
+
+			} else {
+				sem_wait(semLog);
+				log_info(logger, "Problemas recibiendo la respuesta de crear pedido de comanda");
+				sem_post(semLog);
+			}
+
+            close(nuevoSocketComanda);
 			free(estructura_guardar_pedido);
 			free(respuesta);
 		}
 		sem_wait(semLog);
-		log_info(logger, "no se logro crear pedido");
+		log_info(logger, "Problemas creando el pedido");
 		sem_post(semLog);
 
 	}else{
 		sem_wait(semLog);
-		log_info(logger, "hace falta seleccionar restaurante");
+		log_info(logger, "Se requiere seleccionar restaurante antes de poder crear un pedido");
 		sem_post(semLog);
 	}
 }
 
-void aniadir_plato(a_plato* recibidoAPlato){
+void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 	int numero_cliente, numero_resto;
 	perfil_cliente* cliente;
 	info_resto* resto;
 	int32_t socketRespuestas;
 	respuesta_ok_error* respuesta;
-	int32_t recibidos, recibidosSize = 0, sizeAAllocar;
+	int32_t recibidos, recibidosSize = 0, sizeAAllocar, nuevoSocketComanda;
 	codigo_operacion cod_op;
 
 	numero_cliente = buscar_pedido_por_id(recibidoAPlato->idPedido);
@@ -264,17 +281,26 @@ void aniadir_plato(a_plato* recibidoAPlato){
 			respuesta = malloc(sizeof(respuesta_ok_error));
 			respuesta->respuesta = 0;
 
-			mandar_mensaje(recibidoAPlato,A_PLATO,socket_commanda);
-
-			recibidos = recv(socket_commanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
-
-			if(recibidos >= 1){
-				recibidosSize = recv(socket_commanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
-				bytesRecibidos(recibidosSize);
-				recibir_mensaje(respuesta,RESPUESTA_A_PLATO,socket_commanda);
+			nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+			if(nuevoSocketComanda < 0){
+				sem_wait(semLog);
+				log_info(logger, "Comanda esta muerta, me muero yo tambien");
+				sem_post(semLog);
+				exit(-2);
 			}
 
-			mandar_mensaje(respuesta,RESPUESTA_A_PLATO,cliente->socket_cliente);
+			mandar_mensaje(recibidoAPlato,A_PLATO,nuevoSocketComanda);
+
+			recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+
+			if(recibidos >= 1){
+				recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+				bytesRecibidos(recibidosSize);
+				recibir_mensaje(respuesta,RESPUESTA_A_PLATO,nuevoSocketComanda);
+			}
+
+			mandar_mensaje(respuesta,RESPUESTA_A_PLATO, socket_cliente);
+			close(nuevoSocketComanda);
 			free(respuesta);
 
 		}else{
@@ -298,22 +324,32 @@ void aniadir_plato(a_plato* recibidoAPlato){
 				}
 
 				if(respuesta->respuesta == 1){
-					mandar_mensaje(recibidoAPlato,A_PLATO,socket_commanda);
 
-					recibidos = recv(socket_commanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
-
-					if(recibidos >= 1){
-						recibidosSize = recv(socket_commanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
-						bytesRecibidos(recibidosSize);
-						recibir_mensaje(respuesta,RESPUESTA_A_PLATO,socket_commanda);
+					nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+					if(nuevoSocketComanda < 0){
+						sem_wait(semLog);
+						log_info(logger, "Comanda esta muerta, me muero yo tambien");
+						sem_post(semLog);
+						exit(-2);
 					}
 
-					mandar_mensaje(respuesta,RESPUESTA_A_PLATO,cliente->socket_cliente);
+					mandar_mensaje(recibidoAPlato,A_PLATO,nuevoSocketComanda);
+
+					recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+
+					if(recibidos >= 1){
+						recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+						bytesRecibidos(recibidosSize);
+						recibir_mensaje(respuesta,RESPUESTA_A_PLATO,nuevoSocketComanda);
+					}
+
+					mandar_mensaje(respuesta,RESPUESTA_A_PLATO, socket_cliente);
 
 				}else{
-					mandar_mensaje(respuesta,RESPUESTA_A_PLATO,cliente->socket_cliente);
+					mandar_mensaje(respuesta,RESPUESTA_A_PLATO, socket_cliente);
 				}
 				free(respuesta);
+				close(nuevoSocketComanda);
 				close(socketRespuestas);
 			}
 		}
@@ -329,7 +365,7 @@ void plato_Listo(plato_listo* platoListo, int32_t socket_cliente){
 	respuesta_ok_error* respuesta = malloc(sizeof(respuesta_ok_error));
 	obtener_pedido* obtener_Pedido;
 	respuesta_obtener_pedido* respuesta_consulta;
-	int32_t recibidos, recibidosSize = 0, sizeAAllocar;
+	int32_t recibidos, recibidosSize = 0, sizeAAllocar, nuevoSocketComanda;
 	codigo_operacion cod_op;
 	info_resto* resto;
 	perfil_cliente* cliente;
@@ -350,28 +386,36 @@ void plato_Listo(plato_listo* platoListo, int32_t socket_cliente){
 	strcpy(obtener_Pedido->nombreRestaurante,platoListo->nombreRestaurante);
 	obtener_Pedido->idPedido = platoListo->idPedido;
 
-	mandar_mensaje(platoListo,PLATO_LISTO,socket_commanda);
+	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+	if(nuevoSocketComanda < 0){
+		sem_wait(semLog);
+		log_info(logger, "Comanda esta muerta, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
 
-	recibidos = recv(socket_commanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+	mandar_mensaje(platoListo,PLATO_LISTO,nuevoSocketComanda);
+
+	recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 
 	if(recibidos >= 1){
-		recibidosSize = recv(socket_commanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+		recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 		bytesRecibidos(recibidosSize);
-		recibir_mensaje(respuesta,RESPUESTA_PLATO_LISTO,socket_commanda);
+		recibir_mensaje(respuesta,RESPUESTA_PLATO_LISTO,nuevoSocketComanda);
 	}
 
 	if(respuesta->respuesta == 1){
-		mandar_mensaje(obtener_Pedido,OBTENER_PEDIDO,socket_commanda);
+		mandar_mensaje(obtener_Pedido,OBTENER_PEDIDO,nuevoSocketComanda);
 
-		recibidos = recv(socket_commanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+		recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 
 		if(recibidos >= 1){
-			recibidosSize = recv(socket_commanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+			recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 			bytesRecibidos(recibidosSize);
 
 			respuesta_consulta = malloc(sizeAAllocar);
 
-			recibir_mensaje(respuesta_consulta,RESPUESTA_OBTENER_PEDIDO,socket_commanda);
+			recibir_mensaje(respuesta_consulta,RESPUESTA_OBTENER_PEDIDO,nuevoSocketComanda);
 
 			char** listaComidas = string_get_string_as_array(respuesta_consulta->comidas);
 			char** listaComidasTotales = string_get_string_as_array(respuesta_consulta->cantTotales);
@@ -414,7 +458,7 @@ void plato_Listo(plato_listo* platoListo, int32_t socket_cliente){
 					log_info(logger, "pedido incompleto, actualizando commanda");
 					sem_post(semLog);
 
-					mandar_mensaje(platoListo,PLATO_LISTO,socket_commanda);
+					mandar_mensaje(platoListo,PLATO_LISTO,nuevoSocketComanda);
 				}
 
 			}else{
@@ -429,22 +473,31 @@ void plato_Listo(plato_listo* platoListo, int32_t socket_cliente){
 		log_info(logger, "ocurrio un error");
 		sem_post(semLog);
 	}
+	close(nuevoSocketComanda);
 	free(respuesta);
 }
 
-void confirmar_Pedido(confirmar_pedido* pedido){
+void confirmar_Pedido(confirmar_pedido* pedido, int32_t socket_cliente){
 	//todo ver si hay que hacer el obtener pedido
 	int numero_cliente, numero_resto;
 	perfil_cliente* cliente;
 	info_resto* resto;
 	respuesta_ok_error* respuesta = malloc(sizeof(respuesta_ok_error));
 	pcb_pedido* nuevoPcb;
-	int32_t recibidos, recibidosSize = 0, sizeAAllocar;
+	int32_t recibidos, recibidosSize = 0, sizeAAllocar, nuevoSocketComanda;
 	codigo_operacion cod_op;
 	confirmar_pedido* aux;
 	respuesta->respuesta = 0;
 
 	numero_cliente = buscar_pedido_por_id(pedido->idPedido);
+
+	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+	if(nuevoSocketComanda < 0){
+		sem_wait(semLog);
+		log_info(logger, "Comanda esta muerta, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
 
 	if(numero_cliente != -2){
 		cliente = list_get(listaPedidos,numero_cliente);
@@ -455,17 +508,18 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 			nuevoPcb->pedidoID = pedido->idPedido;
 			nuevoPcb->posRestauranteX = posX_resto;
 			nuevoPcb->posRestauranteY = posY_resto;
+			nuevoPcb->socketCliente = cliente->socket_cliente;
 
-			//agregarANew(nuevoPcb); todo poner como se debe
+			agregarANew(nuevoPcb);
 
-			mandar_mensaje(pedido,CONFIRMAR_PEDIDO,socket_commanda);
+			mandar_mensaje(pedido,CONFIRMAR_PEDIDO,nuevoSocketComanda);
 
-			recibidos = recv(socket_commanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+			recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 
 			if(recibidos >= 1){
-				recibidosSize = recv(socket_commanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+				recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 				bytesRecibidos(recibidosSize);
-				recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,socket_commanda);
+				recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,nuevoSocketComanda);
 
 			}else{
 				sem_wait(semLog);
@@ -473,7 +527,7 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 				sem_post(semLog);
 			}
 
-			mandar_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,cliente->socket_cliente);
+			mandar_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO, socket_cliente);
 
 		}else{
 			numero_resto = buscar_resto(cliente->nombre_resto);
@@ -506,22 +560,22 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 					nuevoPcb->posRestauranteX = posX_resto;
 					nuevoPcb->posRestauranteY = posY_resto;
 
-					//agregarANew(nuevoPcb); todo poner bien
+					agregarANew(nuevoPcb);
 
-					mandar_mensaje(pedido,CONFIRMAR_PEDIDO,socket_commanda);
+					mandar_mensaje(pedido,CONFIRMAR_PEDIDO,nuevoSocketComanda);
 
-					recibidos = recv(socket_commanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+					recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 
 					if(recibidos >= 1){
-						recibidosSize = recv(socket_commanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+						recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 						bytesRecibidos(recibidosSize);
-						recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,socket_commanda);
+						recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,nuevoSocketComanda);
 					}
 
-					mandar_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,cliente->socket_cliente);
+					mandar_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,socket_cliente);
 
 				}else{
-					mandar_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,cliente->socket_cliente);
+					mandar_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,socket_cliente);
 				}
 
 			}else{
@@ -536,21 +590,30 @@ void confirmar_Pedido(confirmar_pedido* pedido){
 		log_info(logger, "no se pudo encontrar el cliente");
 		sem_post(semLog);
 	}
-
+    close(nuevoSocketComanda);
 	free(respuesta);
 }
 
 // TODO | Ver si esto es cliente
+/*
 void consultar_Pedido(consultar_pedido* pedido){
 	perfil_cliente* cliente;
 	respuesta_consultar_pedido* datosObtenerPedido;
 	obtener_pedido* obtener_Pedido;
 	respuesta_obtener_pedido* respuesta_consulta;
-	int32_t recibidos, recibidosSize = 0, sizeAAllocar, numero_cliente;
+	int32_t recibidos, recibidosSize = 0, sizeAAllocar, numero_cliente, nuevoSocketComanda;
 	codigo_operacion cod_op;
 
 	numero_cliente = buscar_pedido_por_id(pedido->idPedido);
 	cliente = list_get(listaPedidos,numero_cliente);
+
+	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+	if(nuevoSocketComanda < 0){
+		sem_wait(semLog);
+		log_info(logger, "Comanda esta muerta, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
 
 	obtener_Pedido = malloc(sizeof(obtener_pedido));
 	obtener_Pedido->largoNombreRestaurante = strlen(cliente->nombre_resto);
@@ -558,17 +621,19 @@ void consultar_Pedido(consultar_pedido* pedido){
 	strcpy(obtener_Pedido->nombreRestaurante,cliente->nombre_resto);
 	obtener_Pedido->idPedido = cliente->id_global;
 
-	mandar_mensaje(obtener_Pedido,OBTENER_PEDIDO,socket_commanda);
 
-	recibidos = recv(socket_commanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+
+	mandar_mensaje(obtener_Pedido,OBTENER_PEDIDO,nuevoSocketComanda);
+
+	recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 
 	if(recibidos >= 1){
-		recibidosSize = recv(socket_commanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+		recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 		bytesRecibidos(recibidosSize);
 
 		respuesta_consulta = malloc(sizeAAllocar);
 
-		recibir_mensaje(respuesta_consulta,RESPUESTA_OBTENER_PEDIDO,socket_commanda);
+		recibir_mensaje(respuesta_consulta,RESPUESTA_OBTENER_PEDIDO,nuevoSocketComanda);
 
 		char** listaComidas = string_get_string_as_array(respuesta_consulta->comidas);
 		char** listaComidasTotales = string_get_string_as_array(respuesta_consulta->cantTotales);
@@ -613,6 +678,48 @@ void consultar_Pedido(consultar_pedido* pedido){
 
 		mandar_mensaje(datosObtenerPedido,RESPUESTA_CONSULTAR_PEDIDO,cliente->socket_cliente);
 	}
+}*/
+
+
+void consultar_Pedido(consultar_pedido* elPedido, int32_t socket_cliente){
+	perfil_cliente* cliente;
+	respuesta_obtener_pedido* respuesta_obtener;
+	int32_t numero_cliente, nuevoSocketComanda;
+
+	numero_cliente = buscar_pedido_por_id(elPedido->idPedido);
+	cliente = list_get(listaPedidos,numero_cliente);
+
+	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+	if(nuevoSocketComanda < 0){
+		sem_wait(semLog);
+		log_info(logger, "Comanda esta muerta, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
+
+	obtener_pedido* datosPedido = malloc(sizeof(obtener_pedido));
+	datosPedido->idPedido = elPedido->idPedido;
+	datosPedido->largoNombreRestaurante = strlen(cliente->nombre_resto);
+	datosPedido->nombreRestaurante = malloc(strlen(cliente->nombre_resto) +1);
+	strcpy(datosPedido->nombreRestaurante,cliente->nombre_resto);
+
+	respuesta_obtener = malloc(sizeof(respuesta_obtener_pedido));
+
+	mandar_mensaje(datosPedido,OBTENER_PEDIDO,nuevoSocketComanda);
+
+    codigo_operacion codigoRecibido;
+    bytesRecibidos(recv(nuevoSocketComanda, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+
+    printf("El codigo recibido del emisor es: %d", codigoRecibido);
+
+    uint32_t sizePayload;
+    bytesRecibidos(recv(nuevoSocketComanda, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+
+    printf("El size del buffer/payload es: %u", sizePayload);
+
+    recibir_mensaje(respuesta_obtener, RESPUESTA_OBTENER_PEDIDO, nuevoSocketComanda);
+
+    mandar_mensaje(respuesta_obtener, RESPUESTA_CONSULTAR_PEDIDO, socket_cliente);
 }
 
 
@@ -637,6 +744,24 @@ void agregar_restaurante(info_resto* recibidoAgregarRestaurante){
 	}
 }
 
+void registrarHandshake(handshake* recibidoHandshake, int32_t socket_cliente){
+	perfil_cliente* perfil;
+
+	perfil = malloc(sizeof(perfil_cliente));
+	perfil->socket_cliente = socket_cliente;
+	perfil->perfilActivo = 1;
+	perfil->posX = recibidoHandshake->posX;
+	perfil->posY = recibidoHandshake->posY;
+	list_add(listaPedidos,perfil);
+
+	free(recibidoHandshake->id);
+	free(recibidoHandshake);
+
+	sem_wait(semLog);
+	log_info(logger, "perfil creado");
+	sem_post(semLog);
+}
+
 // **************************************FIN MENSAJES**************************************
 
 int32_t crear_id_pedidos(){
@@ -646,17 +771,7 @@ int32_t crear_id_pedidos(){
 	return id_global;
 }
 
-int buscar_pedido_por_id(uint32_t id_pedido){
-	perfil_cliente* cliente;
-	for(int i = 0; i < listaPedidos->elements_count; i++){
-		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
 
-		if(cliente->id_global == id_pedido){
-			return i;
-		}
-	}
-	return -2;
-}
 
 int buscar_pedido_por_id_y_resto(uint32_t id_pedido, info_resto* resto){
 	perfil_cliente* cliente;
@@ -721,7 +836,7 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 	guardar_pedido* estructura_guardar_pedido;
 	confirmar_pedido* estructura_idPedido;
 	respuesta_consultar_platos* estructura_consultar_platos;
-	int32_t recibidos, recibidosSize = 0, sizeAAllocar;
+	int32_t recibidos, recibidosSize = 0, sizeAAllocar = 0, nuevoSocketComanda;
 
 	switch(cod_op){
 	case CREAR_PEDIDO:
@@ -741,6 +856,13 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 		}
 
 		if(estructura_idPedido->idPedido != 0){
+			nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+			if(nuevoSocketComanda < 0){
+				sem_wait(semLog);
+				log_info(logger, "Comanda esta muerta, me muero yo tambien");
+				sem_post(semLog);
+				exit(-2);
+			}
 			estructura_guardar_pedido = malloc(sizeof(guardar_pedido));
 
 			estructura_guardar_pedido->idPedido = cliente->id_global;
@@ -751,15 +873,16 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 			respuesta = malloc(sizeof(respuesta_ok_error));
 			respuesta->respuesta = 0;
 
-			mandar_mensaje(estructura_guardar_pedido,GUARDAR_PEDIDO,socket_commanda);
 
-			recibidos = recv(socket_commanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+			mandar_mensaje(estructura_guardar_pedido,GUARDAR_PEDIDO,nuevoSocketComanda);
+
+			recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 
 			if(recibidos >= 1){
-				recibidosSize = recv(socket_commanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+				recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 				bytesRecibidos(recibidosSize);
 
-				recibir_mensaje(respuesta,RESPUESTA_GUARDAR_PEDIDO,socket_commanda);
+				recibir_mensaje(respuesta,RESPUESTA_GUARDAR_PEDIDO,nuevoSocketComanda);
 			}
 
 			if(respuesta->respuesta == 1){
@@ -776,10 +899,11 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 		}else{
 			respuesta = malloc(sizeof(respuesta_ok_error));
 			respuesta->respuesta = 0;
-			mandar_mensaje(respuesta,CREAR_PEDIDO,cliente->socket_cliente);
+			mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,cliente->socket_cliente);
 			free(respuesta);
 		}
 		close(socketRespuestas);
+		close(nuevoSocketComanda);
 		break;
 
 	case CONSULTAR_PLATOS:
@@ -815,24 +939,7 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 	}
 }
 
-void pedido_entregado(int32_t id_pedido){
-	int numCliente = buscar_pedido_por_id(id_pedido);
-	perfil_cliente* cliente = list_get(listaPedidos,numCliente);
 
-	finalizar_pedido* pedidoFinalizado;
-	pedidoFinalizado = malloc(sizeof(finalizar_pedido));
-	pedidoFinalizado->idPedido = id_pedido;
-	pedidoFinalizado->nombreRestaurante = malloc(strlen(cliente->nombre_resto)+1);
-	strcpy(pedidoFinalizado->nombreRestaurante, cliente->nombre_resto);
-	pedidoFinalizado->largoNombreRestaurante = strlen(cliente->nombre_resto);
-
-	pedido_finalizado* aMandar = malloc(sizeof(pedido_finalizado));
-	aMandar->mensaje = "Pedido Finalizado";
-	aMandar->sizeMensaje = strlen("Pedido Finalizado");
-
-	mandar_mensaje(pedidoFinalizado, FINALIZAR_PEDIDO,socket_commanda);
-	mandar_mensaje(aMandar,FINALIZAR_PEDIDO,cliente->socket_cliente);
-}
 
 //************* FUNCIONES DE SERVER *************
 
@@ -842,6 +949,8 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	a_plato* recibidoAPlato;
 	plato_listo* recibidoPlatoListo ;
 	confirmar_pedido* recibidoConfirmarPedido;
+	consultar_pedido* recibidoConsultarPedido;
+	handshake* recibidoHandshake;
 
 	switch (cod_op) {
 		case CONSULTAR_RESTAURANTES:
@@ -866,7 +975,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		case A_PLATO:
 			recibidoAPlato = malloc(sizeAAllocar);
 			recibir_mensaje(recibidoAPlato,A_PLATO,socket_cliente);
-			aniadir_plato(recibidoAPlato);
+			aniadir_plato(recibidoAPlato, socket_cliente);
 			free(recibidoAPlato);
 			break;
 
@@ -877,17 +986,30 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			free(recibidoPlatoListo); //todo ver si esto no rompe nada
 			break;
 
+		case CONFIRMAR_PEDIDO:
+			recibidoConfirmarPedido = malloc(sizeAAllocar);
+			recibir_mensaje(recibidoConfirmarPedido,CONFIRMAR_PEDIDO,socket_cliente);
+			confirmar_Pedido(recibidoConfirmarPedido, socket_cliente);
+			free(recibidoConfirmarPedido);
+			break;
+
+		case CONSULTAR_PEDIDO:
+            recibidoConsultarPedido = malloc(sizeAAllocar);
+            recibir_mensaje(recibidoConsultarPedido,CONSULTAR_PEDIDO, socket_cliente);
+            consultar_Pedido(recibidoConsultarPedido, socket_cliente);
+            free(recibidoConsultarPedido);
+			break;
+
 		case AGREGAR_RESTAURANTE:
 			recibidoAgregarRestaurante = malloc(sizeAAllocar);
 			recibir_mensaje(recibidoAgregarRestaurante,AGREGAR_RESTAURANTE,socket_cliente);
 			agregar_restaurante(recibidoAgregarRestaurante);
 			break;
 
-		case CONFIRMAR_PEDIDO:
-			recibidoConfirmarPedido = malloc(sizeAAllocar);
-			recibir_mensaje(recibidoConfirmarPedido,CONFIRMAR_PEDIDO,socket_cliente);
-			confirmar_Pedido(recibidoConfirmarPedido);
-			free(recibidoConfirmarPedido);
+		case HANDSHAKE:
+			recibidoHandshake = malloc(sizeAAllocar);
+			recibir_mensaje(recibidoHandshake,HANDSHAKE,socket_cliente);
+			registrarHandshake(recibidoHandshake, socket_cliente);
 			break;
 
 		case DESCONEXION:

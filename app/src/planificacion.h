@@ -33,12 +33,20 @@ t_list* colaReady;
 t_list* colaBlock;
 t_list* pedidosListos;
 
+//***VARIABLES***
+t_list* listaRestos;
+t_list* listaPedidos;
+
 // OTROS
 t_log* logger;
+sem_t* semLog;
+
 
 // VARIABLES DE CONFIG
 int GRADO_MULTIPROCE;
 int RETARDO_CICLO_CPU;
+char* puerto_commanda;
+char* ip_commanda;
 
 // SEMAFOROS
 sem_t* contadorProcesosEnNew;
@@ -106,6 +114,16 @@ typedef enum{
 	EXIT,
 }estado;
 
+typedef struct{
+	int32_t socket_cliente;
+	char* nombre_resto;
+	uint32_t id_global;
+	uint32_t id_pedido_resto;
+	int perfilActivo;
+	int32_t posX;
+	int32_t posY;
+}perfil_cliente;
+
 
 typedef struct{
 	int pedidoID;
@@ -123,6 +141,7 @@ typedef struct{
 	accionBlock accionBlocked;
 	estado proximoEstado;
 	int tiempoEspera;
+	int32_t socketCliente;
 }pcb_pedido;
 
 
@@ -155,6 +174,8 @@ pcb_pedido* obtenerSiguienteHRRN();
 pcb_pedido* obtenerSiguienteSJFSD();
 int codigoDesalojo(pcb_pedido*);
 int sigoEjecutando(pcb_pedido*);
+
+int buscar_pedido_por_id(uint32_t);
 
 
 // SEMAFOROS

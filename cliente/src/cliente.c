@@ -121,16 +121,27 @@ void recibirNotificaciones(int32_t* socketInicial){
 
 			guardar_pedido* notificacionPedidoFinalizado = malloc(sizeAAllocar);
 	        recibir_mensaje(notificacionPedidoFinalizado, FINALIZAR_PEDIDO ,*socketInicial);
+	        respuesta_ok_error* respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
+
+	        if(notificacionPedidoFinalizado->idPedido > 0 && notificacionPedidoFinalizado->largoNombreRestaurante>0){
+	        	respuestaNotificacion->respuesta = 1;
+	        	mandar_mensaje(respuestaNotificacion, RESPUESTA_FINALIZAR_PEDIDO, socketInicial);
+	        	log_info(logger, "El pedido nro <%d> del restaurante <%s> ha arribado.\n", notificacionPedidoFinalizado->idPedido, notificacionPedidoFinalizado->nombreRestaurante);
+	        } else {
+	        	respuestaNotificacion->respuesta = 0;
+	            mandar_mensaje(respuestaNotificacion, RESPUESTA_FINALIZAR_PEDIDO, socketInicial);
+	        }
 
 
-			log_info(logger, "El pedido nro <%d> del restaurante <%s> ha arribado.\n", notificacionPedidoFinalizado->idPedido, notificacionPedidoFinalizado->nombreRestaurante);
 			free(notificacionPedidoFinalizado->nombreRestaurante);
 			free(notificacionPedidoFinalizado);
+			free(respuestaNotificacion);
+
 		}
 
 		else
 		{
-			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
+			printf("Ocurrió un error al intentar recibir la notificacion de finalizacion de un pedido.\n");
 		}
 
 		}
@@ -241,7 +252,7 @@ void obtenerInputConsolaCliente(){
 		{
 			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
 		}
-
+		close(socketCliente);
     	break;
 
     case SELECCIONAR_RESTAURANTE:
