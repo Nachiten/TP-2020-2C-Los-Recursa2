@@ -4,7 +4,8 @@ int main(){
 
 	inicializar_colas();
 	inicializar_semaforos();
-	int32_t id_global = 0;
+	id_global = 0;
+	id_restoDefault = 0;
 
 	//Cargo las configuraciones del .config
 	config = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/app.config");
@@ -59,15 +60,18 @@ int main(){
 	//coneccion a commanda
 	socket_commanda = establecer_conexion(ip_commanda,puerto_commanda);
 	if(socket_commanda<0){
+		sem_wait(semLog);
 		log_info(logger, "Comanda esta muerto, procedo a fallecer");
+		sem_post(semLog);
 		exit(-2);
 	}
 	close(socket_commanda);
 
-	//inicio el server | TODO Se quita esto para testear planificacion
-	//iniciar_server(mi_puerto);
+	pthread_create(&planificacion, NULL,(void*)iniciarPlanificacion, NULL);
+	pthread_detach(planificacion);
 
-	iniciarPlanificacion();
+	//inicio el server
+	iniciar_server(mi_puerto);
 
 	return EXIT_SUCCESS;
 }
@@ -175,6 +179,7 @@ void consultarPlatos(int32_t socket_cliente){
 				strcpy(platosDefault->nombresPlatos, platos_default);
 
 				mandar_mensaje(platosDefault,RESPUESTA_CONSULTAR_PLATOS,socket_cliente);
+				free(platosDefault->nombresPlatos);
 				free(platosDefault);
 			}
 			sem_wait(semLog);
@@ -478,7 +483,6 @@ void plato_Listo(plato_listo* platoListo, int32_t socket_cliente){
 }
 
 void confirmar_Pedido(confirmar_pedido* pedido, int32_t socket_cliente){
-	//todo ver si hay que hacer el obtener pedido
 	int numero_cliente, numero_resto;
 	perfil_cliente* cliente;
 	info_resto* resto;
@@ -893,6 +897,7 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 				respuesta->respuesta = 0;
 				mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,cliente->socket_cliente);
 			}
+			free(estructura_guardar_pedido->nombreRestaurante);
 			free(estructura_guardar_pedido);
 			free(respuesta);
 
@@ -927,6 +932,7 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 			recibir_mensaje(estructura_consultar_platos,RESPUESTA_CONSULTAR_PLATOS,socketRespuestas);
 			mandar_mensaje(estructura_consultar_platos,RESPUESTA_CONSULTAR_PLATOS,cliente->socket_cliente);
 
+			free(estructura_consultar_platos->nombresPlatos);
 			free(estructura_consultar_platos);
 		}
 

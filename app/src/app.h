@@ -26,7 +26,10 @@ int32_t posY_resto;
 
 sem_t* semId;
 int32_t id_global;
+int32_t id_restoDefault;
 int32_t socket_commanda;
+
+pthread_t planificacion;
 
 // ***SETUP***
 void inicializar_colas();
