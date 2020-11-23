@@ -683,10 +683,8 @@ void consultar_Pedido(consultar_pedido* pedido){
 
 void consultar_Pedido(consultar_pedido* elPedido, int32_t socket_cliente){
 	perfil_cliente* cliente;
-	respuesta_consultar_pedido* datosObtenerPedido;
 	respuesta_obtener_pedido* respuesta_obtener;
-	int32_t recibidos, recibidosSize = 0, sizeAAllocar, numero_cliente, nuevoSocketComanda;
-	codigo_operacion cod_op;
+	int32_t numero_cliente, nuevoSocketComanda;
 
 	numero_cliente = buscar_pedido_por_id(elPedido->idPedido);
 	cliente = list_get(listaPedidos,numero_cliente);
@@ -773,17 +771,7 @@ int32_t crear_id_pedidos(){
 	return id_global;
 }
 
-int buscar_pedido_por_id(uint32_t id_pedido){
-	perfil_cliente* cliente;
-	for(int i = 0; i < listaPedidos->elements_count; i++){
-		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
 
-		if(cliente->id_global == id_pedido){
-			return i;
-		}
-	}
-	return -2;
-}
 
 int buscar_pedido_por_id_y_resto(uint32_t id_pedido, info_resto* resto){
 	perfil_cliente* cliente;
@@ -848,7 +836,7 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 	guardar_pedido* estructura_guardar_pedido;
 	confirmar_pedido* estructura_idPedido;
 	respuesta_consultar_platos* estructura_consultar_platos;
-	int32_t recibidos, recibidosSize = 0, sizeAAllocar, nuevoSocketComanda;
+	int32_t recibidos, recibidosSize = 0, sizeAAllocar = 0, nuevoSocketComanda;
 
 	switch(cod_op){
 	case CREAR_PEDIDO:
@@ -987,7 +975,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		case A_PLATO:
 			recibidoAPlato = malloc(sizeAAllocar);
 			recibir_mensaje(recibidoAPlato,A_PLATO,socket_cliente);
-			aniadir_plato(recibidoAPlato);
+			aniadir_plato(recibidoAPlato, socket_cliente);
 			free(recibidoAPlato);
 			break;
 
@@ -1001,14 +989,14 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		case CONFIRMAR_PEDIDO:
 			recibidoConfirmarPedido = malloc(sizeAAllocar);
 			recibir_mensaje(recibidoConfirmarPedido,CONFIRMAR_PEDIDO,socket_cliente);
-			confirmar_Pedido(recibidoConfirmarPedido);
+			confirmar_Pedido(recibidoConfirmarPedido, socket_cliente);
 			free(recibidoConfirmarPedido);
 			break;
 
 		case CONSULTAR_PEDIDO:
             recibidoConsultarPedido = malloc(sizeAAllocar);
             recibir_mensaje(recibidoConsultarPedido,CONSULTAR_PEDIDO, socket_cliente);
-            consultar_Pedido(recibidoConsultarPedido);
+            consultar_Pedido(recibidoConsultarPedido, socket_cliente);
             free(recibidoConsultarPedido);
 			break;
 

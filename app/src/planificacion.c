@@ -192,7 +192,8 @@ int checkearPedidoListo(int idPedido){
 void pedido_entregado(int32_t id_pedido){
 	int numCliente = buscar_pedido_por_id(id_pedido);
 	perfil_cliente* cliente = list_get(listaPedidos,numCliente);
-	int32_t nuevoSocketComanda, exito, sizeAAllocar;
+	int32_t nuevoSocketComanda, sizeAAllocar = 0;
+	uint32_t exito = 0;
 
 	guardar_pedido* pedidoFinalizado;
 	pedidoFinalizado = malloc(sizeof(finalizar_pedido));
@@ -255,6 +256,7 @@ void pedido_entregado(int32_t id_pedido){
 			printf("Ocurrió un error al intentar recibir la respuesta de FINALIZAR Pedido a cliente.\n");
 		}
 
+	 free(respuestaConfirmacionCliente);
 	 free(pedidoFinalizado->nombreRestaurante);
 	 free(pedidoFinalizado);
 
@@ -1010,4 +1012,15 @@ void freeDeArray(char** array){
 	free(array);
 }
 
+int buscar_pedido_por_id(uint32_t id_pedido){
+	perfil_cliente* cliente;
+	for(int i = 0; i < listaPedidos->elements_count; i++){
+		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
+
+		if(cliente->id_global == id_pedido){
+			return i;
+		}
+	}
+	return -2;
+}
 

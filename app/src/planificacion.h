@@ -33,13 +33,20 @@ t_list* colaReady;
 t_list* colaBlock;
 t_list* pedidosListos;
 
+//***VARIABLES***
+t_list* listaRestos;
+t_list* listaPedidos;
+
 // OTROS
 t_log* logger;
 sem_t* semLog;
 
+
 // VARIABLES DE CONFIG
 int GRADO_MULTIPROCE;
 int RETARDO_CICLO_CPU;
+char* puerto_commanda;
+char* ip_commanda;
 
 // SEMAFOROS
 sem_t* contadorProcesosEnNew;
@@ -167,6 +174,8 @@ pcb_pedido* obtenerSiguienteHRRN();
 pcb_pedido* obtenerSiguienteSJFSD();
 int codigoDesalojo(pcb_pedido*);
 int sigoEjecutando(pcb_pedido*);
+
+int buscar_pedido_por_id(uint32_t);
 
 
 // SEMAFOROS

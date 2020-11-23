@@ -14,19 +14,11 @@ typedef struct{
 	int32_t posY;
 }info_resto;
 
-
-//***VARIABLES***
-t_list* listaRestos;
-t_list* listaPedidos;
-
-
 t_config* config;
 
 //***cosas de config**
 char* LOG_PATH;
 char* mi_puerto;
-char* puerto_commanda;
-char* ip_commanda;
 char* platos_default;
 
 int32_t posX_resto;
@@ -54,7 +46,7 @@ void registrarHandshake(handshake*, int32_t);
 // ***MANEJO DE MENSAJES***
 int32_t crear_id_pedidos();
 //void crear_pedido(int32_t);
-int buscar_pedido_por_id(uint32_t);
+//int buscar_pedido_por_id(uint32_t);
 int buscar_pedido_por_id_y_resto(uint32_t, info_resto*);
 int buscar_cliente(int32_t);
 int buscar_resto(char*);
