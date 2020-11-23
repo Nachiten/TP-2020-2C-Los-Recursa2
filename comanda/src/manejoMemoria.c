@@ -32,6 +32,8 @@ void inicializar_tabla_de_paginas(tabla_paginas* laTablaDePaginas)
 	laTablaDePaginas->posicionInicialEnSWAP = -1;
 	laTablaDePaginas->cargadoEnMEMORIA = 0;
 	laTablaDePaginas->numeroDeMarco = -1;
+	laTablaDePaginas->bitDeUso = 0;
+	laTablaDePaginas->bitDeModificacion = 0;
 	laTablaDePaginas->anter_pagina = NULL;
 	laTablaDePaginas->sig_pagina = NULL;
 }
@@ -168,6 +170,8 @@ tabla_paginas* crearPagina(tabla_paginas* tablaDePlatosDelPedido, char* nombrePl
 		nuevoPlato->posicionInicialEnSWAP = -1;
 		nuevoPlato->cargadoEnMEMORIA = 0;
 		nuevoPlato->numeroDeMarco = -1;
+		nuevoPlato->bitDeUso = 0;
+		nuevoPlato->bitDeModificacion = 0;
 
 		//"pego" el nuevo plato al final de la lista de platos
 		auxiliarRecorrer->sig_pagina = nuevoPlato;
@@ -612,6 +616,7 @@ void mover_pagina_a_memoriaPrincipal(tabla_paginas* tablaDePlatosDelPedido, uint
 	asignarNumeroDeVictima(&tablaDePlatosDelPedido->numero_de_victima);
 	tablaDePlatosDelPedido->cargadoEnMEMORIA = 1;
 	tablaDePlatosDelPedido->numeroDeMarco = posicionInicialDeMEMORIA/32;
+	tablaDePlatosDelPedido->bitDeUso = 1;
 	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 }
 
@@ -625,6 +630,9 @@ void actualizar_pagina_en_SWAP (tabla_paginas* laPagina)
 	memcpy(AREA_DE_SWAP + posicionInicialDeSWAP, MEMORIA_PRINCIPAL + posicionInicialDeMEMORIA, 32);
 	sem_post(semaforoTocarMP);
 	sem_post(semaforoTocarSWAP);
+
+	//ahora que quedo actualizada en SWAP, su modificacion vuelve a 0
+	laPagina->bitDeModificacion = 0;
 }
 
 void tomar_datos_de_MP(tabla_paginas* platoDelPedido)
@@ -865,7 +873,7 @@ void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes
 
 		else
 		{
-			puts("Pusieron un algoritmo que nada que ver, me prendo fuego");
+			puts("Pusieron un algoritmo que nada que ver, me prendo fuego!!!");
 			abort();
 		}
 	}
@@ -990,9 +998,7 @@ void aumentarCantidadLista(segmentos* pedido, char* nombrePlato)
 			//aumento en 1 la cantidad preparada
 			tablaDePlatos->cantidadComidaPreparada++;
 
-			//a continuación, guardo sus datos en SWAP/MP
-			agregar_pagina_a_swap(tablaDePlatos, tablaDePlatos->posicionInicialEnSWAP*32);
-
+			//a continuación, guardo sus datos en MP
 			//si la pagina no esta en MP, le busco un lugar
 			sem_wait(semaforoTocarListaEspaciosEnMP);
 			if(tablaDePlatos->cargadoEnMEMORIA == 0)
@@ -1028,7 +1034,7 @@ void aumentarCantidadLista(segmentos* pedido, char* nombrePlato)
 			}
 
 			//una vez tengo un marco listo para poner la Página, pongo los datos en MP
-			mover_pagina_a_memoriaPrincipal(tablaDePlatos, tablaDePlatos->posicionInicialEnSWAP*32, numeroDeMarcoEnMP*32);
+			actualizarPaginaEnMP(tablaDePlatos, numeroDeMarcoEnMP);
 		}
 
 		//avanzo...
@@ -1062,6 +1068,41 @@ void aumentarCantidadLista(segmentos* pedido, char* nombrePlato)
 	//a lo ultimo, vuelvo a censurar todos los datos de los platos del pedido
 	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 	borrar_datos_de_todos_los_platos_del_pedido(pedido);
+	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
+}
+
+void actualizarPaginaEnMP(tabla_paginas* paginaActualizada, uint32_t numeroDeMarco)
+{
+	uint32_t desplazamiento = numeroDeMarco*32;
+
+	sem_wait(semaforoTocarMP);
+
+	//pongo en memoria SWAP la cantidad de platos pedidos
+	memcpy(MEMORIA_PRINCIPAL + desplazamiento, &(paginaActualizada->cantidadPedidaComida), sizeof(paginaActualizada->cantidadPedidaComida));
+	desplazamiento += sizeof(paginaActualizada->cantidadPedidaComida);
+
+	//pongo en memoria SWAP la cantidad de platos preparados
+	memcpy(MEMORIA_PRINCIPAL + desplazamiento, &(paginaActualizada->cantidadComidaPreparada), sizeof(paginaActualizada->cantidadComidaPreparada));
+	desplazamiento += sizeof(paginaActualizada->cantidadComidaPreparada);
+
+	//pongo en memoria SWAP el nombre del plato
+	memcpy(MEMORIA_PRINCIPAL + desplazamiento, paginaActualizada->nombreDeMorfi, strlen(paginaActualizada->nombreDeMorfi)+1);
+	desplazamiento += strlen(paginaActualizada->nombreDeMorfi)+1;
+
+	sem_post(semaforoTocarMP);
+
+	//log obligatorio
+	sem_wait(semaforoLogger);
+	log_info(logger,"Se actualizó una pagina en Memoria Principal, posición inicial del Marco: %p", MEMORIA_PRINCIPAL + numeroDeMarco*32);
+	sem_post(semaforoLogger);
+
+	//actualizamos la pagina
+	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
+	paginaActualizada->cargadoEnMEMORIA = 1;
+	paginaActualizada->numeroDeMarco = numeroDeMarco;
+	paginaActualizada->bitDeUso = 1;
+	paginaActualizada->bitDeModificacion = 1;
+	borrar_datos_del_plato(paginaActualizada); //le borro los datos para que solo existan en MP
 	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 }
 

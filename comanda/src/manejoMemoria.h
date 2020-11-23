@@ -104,6 +104,9 @@ void cambiarEstado(segmentos* pedido, estado_de_pedido estado_a_establecer);
 //dado un segmento y un plato, aumenta en 1 la cantidad de platos listos
 void aumentarCantidadLista(segmentos* pedido, char* nombrePlato);
 
+//actualiza una pagina directamente en MP con los datos nuevos
+void actualizarPaginaEnMP(tabla_paginas* paginaActualizada, uint32_t numeroDeMarco);
+
 //mata el pedido seleccionado de este restaurante
 void matarPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento);
 
