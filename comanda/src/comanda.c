@@ -386,13 +386,13 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	if(tablaDePedidosDelRestaurante == NULL)
         	{
         		puts("El restaurante solicitado no existe.");
-        		resultadoObtenerPedido->comidas = malloc(2);
+        		resultadoObtenerPedido->comidas = malloc(3);
         		strcpy(resultadoObtenerPedido->comidas, "[]");
         		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
-        		resultadoObtenerPedido->cantTotales = malloc(2);
+        		resultadoObtenerPedido->cantTotales = malloc(3);
         		strcpy(resultadoObtenerPedido->cantTotales, "[]");
         		resultadoObtenerPedido->sizeCantTotales = strlen(resultadoObtenerPedido->cantTotales);
-        		resultadoObtenerPedido->cantListas = malloc(2);
+        		resultadoObtenerPedido->cantListas = malloc(3);
         		strcpy(resultadoObtenerPedido->cantListas, "[]");
         		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
         	}
@@ -429,13 +429,13 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         		else
         		{
         			puts("El pedido solicitado no existe.");
-            		resultadoObtenerPedido->comidas = malloc(2);
+            		resultadoObtenerPedido->comidas = malloc(3);
             		strcpy(resultadoObtenerPedido->comidas, "[]");
             		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
-            		resultadoObtenerPedido->cantTotales = malloc(2);
+            		resultadoObtenerPedido->cantTotales = malloc(3);
             		strcpy(resultadoObtenerPedido->cantTotales, "[]");
             		resultadoObtenerPedido->sizeCantTotales = strlen(resultadoObtenerPedido->cantTotales);
-            		resultadoObtenerPedido->cantListas = malloc(2);
+            		resultadoObtenerPedido->cantListas = malloc(3);
             		strcpy(resultadoObtenerPedido->cantListas, "[]");
             		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
         		}
@@ -577,7 +577,6 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 						puts("El plato solicitado no existe en este pedido.");
 						resultado->respuesta = 0;
 					}
-
 				}
 
 				//el pedido no existe

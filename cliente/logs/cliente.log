@@ -542,3 +542,24 @@
 [INFO] 15:08:41:857 Cliente/(7260:7260): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
 [INFO] 15:08:48:657 Cliente/(7262:7262): Conexión establecida con socket de destino.
 [INFO] 15:09:48:192 Cliente/(7262:7272): Conexión establecida con socket de destino.
+[WARNING] 17:22:05:943 Cliente/(9234:9234): Conexión fallida con socket de destino.
+[INFO] 17:22:05:943 Cliente/(9234:9234): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 17:22:57:678 Cliente/(9311:9311): Conexión establecida con socket de destino.
+[INFO] 17:23:05:893 Cliente/(9311:9314): Conexión establecida con socket de destino.
+[INFO] 17:23:09:946 Cliente/(9311:9314): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 17:23:25:93 Cliente/(9311:9332): Conexión establecida con socket de destino.
+[INFO] 17:23:30:726 Cliente/(9311:9334): Conexión establecida con socket de destino.
+[INFO] 17:23:30:741 Cliente/(9311:9334): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [1].
+[INFO] 17:23:38:454 Cliente/(9311:9338): Conexión establecida con socket de destino.
+[INFO] 17:23:45:54 Cliente/(9311:9340): Conexión establecida con socket de destino.
+[INFO] 17:23:45:71 Cliente/(9311:9340): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [2].
+[INFO] 17:23:50:222 Cliente/(9311:9342): Conexión establecida con socket de destino.
+[INFO] 17:23:50:231 Cliente/(9311:9342): El intento de agregar un plato a un pedido fue: exitoso.
+
+[INFO] 17:24:43:192 Cliente/(9355:9355): Conexión establecida con socket de destino.
+[INFO] 17:24:52:255 Cliente/(9355:9357): Conexión establecida con socket de destino.
+[INFO] 17:24:52:265 Cliente/(9355:9357): El intento de agregar un plato a un pedido fue: fallido.
+
+[INFO] 17:25:19:160 Cliente/(9355:9358): Conexión establecida con socket de destino.
+[INFO] 17:27:28:994 Cliente/(9355:9365): Conexión establecida con socket de destino.

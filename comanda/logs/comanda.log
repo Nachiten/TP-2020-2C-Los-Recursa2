@@ -99,3 +99,6 @@
 [INFO] 19:50:31:874 Cliente/(14668:14695): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f640
 [INFO] 19:50:33:336 Cliente/(14668:14698): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f640
 [INFO] 15:11:27:450 Cliente/(7242:7280): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x804f640
+[INFO] 17:23:09:946 Cliente/(9300:9327): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x8050640
+[INFO] 17:23:25:102 Cliente/(9300:9335): Se actualizó una pagina en Memoria Principal, posición inicial del Marco: 0x8050640
+[INFO] 17:23:38:463 Cliente/(9300:9341): Se actualizó una pagina en Memoria Principal, posición inicial del Marco: 0x8050640
