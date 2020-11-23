@@ -16,7 +16,9 @@ void inicializarRestaurante(){
     RETARDO_CICLO_CPU = config_get_int_value(configuracion, "RETARDO_CICLO_CPU");
 
     logger = cargarUnLog(LOG_PATH, "Cliente");
+    sem_wait(semLog);
     log_info(logger, "Obtuve de config el nombre: %s" , nombreRestaurante);
+    sem_post(semLog);
 
     //comunicarme con sindicato -> socket -> mensaje OBTENER_RESTAURANTE
     obtenerMetadataRestaurante();
@@ -47,18 +49,18 @@ void obtenerMetadataRestaurante(){
     free(estructura->nombreRestaurante);
     free(estructura);
 
-    printf("pude mandar la solicitud de metadata a sindic.\n");
+//    printf("pude mandar la solicitud de metadata a sindic.\n");
 
     //recibo el codigo de operacion, ya se que va a ser RESPUESTA_OBTENER_R
     codigo_operacion codigoRecibido;
     bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 
-    printf("El codigo recibido del emisor es: %d", codigoRecibido);
+//   printf("El codigo recibido del emisor es: %d", codigoRecibido);
 
     uint32_t sizePayload;
     bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
 
-    printf("El size del buffer/payload para la metadata es: %u", sizePayload);
+//    printf("El size del buffer/payload para la metadata es: %u", sizePayload);
 
     respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizePayload);
 
@@ -96,6 +98,7 @@ void obtenerMetadataRestaurante(){
     free(estructuraRespuestaObtenerRestaurante->afinidades);
     free(estructuraRespuestaObtenerRestaurante->precioPlatos);
     free(estructuraRespuestaObtenerRestaurante);
+    close(socket_sindicato);
 }
 
 
@@ -172,8 +175,10 @@ void agregarANew(pcb_plato* unPlato)
 	sem_post(mutexNew);
 
 	//LOG DE ENUNCIADO!!!!1!1!
+	sem_wait(semLog);
 	log_info(logger, "[NEW] Entra el nuevo plato < %s >, del pedido < %i >"
 			,unPlato->nombrePlato, unPlato->idPedido);
+	sem_post(semLog);
 
 	//Habilito la señal para el hilo que administra las colas de afinidad lo absorba en la que corresponde
 	sem_post(contadorPlatosEnNew);
@@ -217,11 +222,11 @@ void agregarABlock(pcb_plato* elPlato){
 }
 
 void agregarAExit(pcb_plato* elPlato){
-
+	sem_wait(semLog);
 	//LOG DE ENUNCIADO!!!!1!1!
 	log_info(logger, "[EXIT] Entra el plato < %s >, del pedido < %i > por haber culminado su receta."
 				, elPlato->nombrePlato, elPlato->idPedido);
-
+	sem_post(semLog);
 	//No se si hace falta esto, confirmenme
 	//list_destroy(elPlato->pasosReceta)
 
@@ -276,8 +281,10 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 
 			if(platoAEjecutar == NULL){
 				waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
-				log_trace(logger, "[EXEC-%i] Cocinero desperdicia ciclo porque no hay nadie en ready.",
+				sem_wait(semLog);
+				log_info(logger, "[EXEC-%i] Cocinero desperdicia ciclo porque no hay nadie en ready.",
 						datosCocinero->idHilo);
+				sem_post(semLog);
 				signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
 				continue;
 			}
@@ -474,7 +481,9 @@ void hiloBlockReady(){
 	  int elementosEnBlock = list_size(colaBlock);
 
 	  if(elementosEnBlock == 0){
-	  	log_trace(logger, "[BLOCK] No hay platos en block.");
+		sem_wait(semLog);
+	  	log_info(logger, "[BLOCK] No hay platos en block.");
+	  	sem_post(semLog);
 	  	sem_post(finalizarCicloBlockReady);
         continue;
 	  }
@@ -553,9 +562,11 @@ void hiloEntradaSalida(){
 					list_remove(platosHorneandose, i);
 
 					//LOG DE ENUNCIADO!!!!1!!
+					sem_wait(semLog);
 					log_info(logger, "[ENTRADA/SALIDA] El horneado del plato < %s >, "
 						"del pedido < %i > ha finalizado."
 						,unPlatoHorneandose->nombrePlato, unPlatoHorneandose->idPedido);
+					sem_post(semLog);
 
 					agregarAExit(unPlatoHorneandose);
 				} else {
@@ -563,10 +574,11 @@ void hiloEntradaSalida(){
 					list_remove(platosHorneandose, i);
 
 					//LOG DE ENUNCIADO!!!!1!
+					sem_wait(semLog);
 					log_info(logger, "[ENTRADA/SALIDA] El horneado del plato < %s >, "
 						"del pedido < %i > ha finalizado."
 						,unPlatoHorneandose->nombrePlato, unPlatoHorneandose->idPedido);
-
+					sem_post(semLog);
 					agregarAReady(unPlatoHorneandose);
 				}
 			}
@@ -587,9 +599,11 @@ void hiloEntradaSalida(){
 					//no hay platos para hornear
 				} else {
 				list_add(platosHorneandose, platoAHornear);
+				sem_wait(semLog);
 				//LOG DE ENUNCIADO!!!1!!!1
 				log_info(logger, "[ENTRADA/SALIDA] Entra a hornearse el plato < %s >, del pedido < %i >."
 									, platoAHornear->nombrePlato, platoAHornear->idPedido);
+				sem_post(semLog);
 				}
 			}
 
@@ -693,17 +707,18 @@ void hiloCiclosMaestro(){
 
     while(1){
 
-		log_trace(logger, "[HCM] Habilitando ciclo: %i\n", numCiclo);
-
+    	sem_wait(semLog);
+		log_info(logger, "[HCM] Habilitando ciclo: %i\n", numCiclo);
+        sem_post(semLog);
 		for(i = 0; i < cantCocineros; i++){
 			signalSemaforoHabilitarCicloExec(i);
 		}
 		sem_post(habilitarCicloBlockReady);
         sem_post(habilitarCicloEntradaSalida);
 		sleep(RETARDO_CICLO_CPU);
-
-		log_trace(logger, "[HCM] Finalizando ciclo: %i", numCiclo);
-
+		sem_wait(semLog);
+		log_info(logger, "[HCM] Finalizando ciclo: %i", numCiclo);
+		sem_post(semLog);
 		for(i = 0; i < cantCocineros; i++){
 			waitSemaforoFinalizarCicloExec(i);
 		}
