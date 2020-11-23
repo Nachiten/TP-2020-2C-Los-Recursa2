@@ -36,7 +36,9 @@ int main(){
 	inicializarRestaurante();
 
 	//tendriamo que usar hilo detacheado para esto
-	inicializar_colas();
+	//inicializar_colas();
+	pthread_create(&planificacion, NULL, (void*)inicializar_colas, NULL);
+	pthread_detach(planificacion);
 
 	iniciar_server(puerto_local);
 

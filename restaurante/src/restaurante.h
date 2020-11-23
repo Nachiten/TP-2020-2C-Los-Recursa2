@@ -20,6 +20,7 @@ typedef struct{
 sem_t* semId;
 int32_t id_global;
 t_list* listaPedidos;
+pthread_t planificacion;
 
 //***MENSAJES DE RESTO***
 void consultar_Platos(int32_t);
