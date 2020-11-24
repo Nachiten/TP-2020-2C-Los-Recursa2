@@ -56,7 +56,7 @@ int main(){
 	// Inicializo los semaforos para ciclos de CPU
 	iniciarSemaforosCiclos();
 
-
+/*
 	//conexion a commanda, pero hariamos on demand, chequear despues
 	socket_commanda = establecer_conexion(ip_commanda,puerto_commanda);
 	if(socket_commanda<0){
@@ -66,7 +66,7 @@ int main(){
 		exit(-2);
 	}
 	close(socket_commanda);
-
+*/
 	pthread_create(&planificacion, NULL,(void*)iniciarPlanificacion, NULL);
 	pthread_detach(planificacion);
 
@@ -136,7 +136,8 @@ void consultar_restaurantes(int32_t socket_cliente){
 	mensajeRespuestaConsultarRestaurantes->listaRestaurantes = malloc(strlen(stringCompleto) + 1);
 	strcpy(mensajeRespuestaConsultarRestaurantes->listaRestaurantes,stringCompleto);
 	mensajeRespuestaConsultarRestaurantes->longitudListaRestaurantes = strlen(stringCompleto);
-	mandar_mensaje(mensajeRespuestaConsultarRestaurantes,RESPUESTA_CONSULTAR_R,socket_cliente);
+
+	mandar_mensaje(mensajeRespuestaConsultarRestaurantes, RESPUESTA_CONSULTAR_R ,socket_cliente);
 }
 
 /* si el restaurante seleccionado existe en la lista de restaurantes manda un 1 y selecciona ese

@@ -58,7 +58,7 @@ int main(){
     	sem_post(semLog);
     	exit(0);
     }
-/*
+
     handshake* elHandshake = malloc(sizeof(handshake));
     elHandshake->longitudIDCliente = strlen(idCliente);
     elHandshake->posX = miPosicionX;
@@ -67,37 +67,16 @@ int main(){
     strcpy(elHandshake->id, idCliente);
 
     mandar_mensaje(elHandshake, HANDSHAKE, socketCliente);
+
+/*
+    pthread_create(&hiloNotificaciones, NULL, (void*)recibirNotificaciones, &socketCliente);
+    pthread_detach(hiloNotificaciones);
 */
-
-    //pthread_create(&hiloNotificaciones, NULL, (void*)recibirNotificaciones, &socketCliente);
-    //pthread_detach(hiloNotificaciones);
-    //close(socketCliente);
-
 	while(1)
 	{
-//		printf("Inserte un comando:\n");
-//		//memset(lineaEntera,0,60);
-//		getline(&lineaEntera, &longitud, stdin);
-//
-//		string_trim(&lineaEntera); //ToDo hablar con un ayudante: esto puede que no sea necesario
-//
-//		if(strcmp(lineaEntera, "") == 0)
-//		{
-//			printf("No se ingresó ningun comando.\n");
-//			free(lineaEntera);
-//			continue;
-//		}
-//
-//		auxLinea = malloc(strlen(lineaEntera));
-//		//strncpy(auxLinea,lineaEntera,strlen(lineaEntera));
-//		strcpy(auxLinea,lineaEntera);
-//
-//		//string_trim_right(&auxLinea);
 		sem_wait(comandoParaEjecutar);
 		pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, NULL);
-		//pthread_create(&hiloConsola, NULL,(void*)obtenerInputConsolaCliente, auxLinea);
 		pthread_detach(hiloConsola);
-
 	}
 
 	/*
@@ -203,7 +182,7 @@ void obtenerInputConsolaCliente(){
     /*
     CASES LABURADOS:
 
-    Consultar Restaurantes -> Check and tested
+    Consultar Restaurantes -> Check
     Seleccionar Restaurante -> Check
     Obtener Restaurante -> Check and tested
     Consultar Platos -> Check and tested
