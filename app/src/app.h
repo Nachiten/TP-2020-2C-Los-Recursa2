@@ -37,7 +37,7 @@ void inicializar_semaforos();
 
 // ***MENSAJES DE APP***
 void consultar_restaurantes(int32_t);
-void seleccionarRestaurante(char*, int32_t);
+void seleccionarRestaurante(char*, char*, int32_t);
 void crear_pedido(int32_t);
 void consultarPlatos(int32_t);
 void aniadir_plato(a_plato*, int32_t);
@@ -51,7 +51,7 @@ int32_t crear_id_pedidos();
 //void crear_pedido(int32_t);
 //int buscar_pedido_por_id(uint32_t);
 int buscar_pedido_por_id_y_resto(uint32_t, info_resto*);
-int buscar_cliente(int32_t);
+int buscar_cliente(char*);
 int buscar_resto(char*);
 int buscar_resto_por_socket(int32_t);
 void recibir_respuesta(codigo_operacion, info_resto*, perfil_cliente*);

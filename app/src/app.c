@@ -143,7 +143,7 @@ void consultar_restaurantes(int32_t socket_cliente){
 /* si el restaurante seleccionado existe en la lista de restaurantes manda un 1 y selecciona ese
  * restaurante para el cliente, en caso de no encontrar el nombre manda un 0 en señal de error
 */
-void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
+void seleccionarRestaurante(char* idCliente, char* nombreResto, int32_t socket_cliente){
 	int restoBuscado,numero_cliente;
 	respuesta_ok_error* respuesta;
 	perfil_cliente* perfil;
@@ -152,7 +152,7 @@ void seleccionarRestaurante(char* nombreResto, int32_t socket_cliente){
 	respuesta = malloc(sizeof(respuesta_ok_error));
 
 	if(restoBuscado != -2 || strcmp(nombreResto,"RestoDefault") == 0){
-		numero_cliente = buscar_cliente(socket_cliente);
+		numero_cliente = buscar_cliente(idCliente);
 		perfil = list_get(listaPedidos,numero_cliente);
 		perfil->nombre_resto = malloc(strlen(nombreResto)+1);
 		strcpy(perfil->nombre_resto,nombreResto);
@@ -771,6 +771,8 @@ void registrarHandshake(handshake* recibidoHandshake, int32_t socket_cliente){
 	perfil->perfilActivo = 1;
 	perfil->posX = recibidoHandshake->posX;
 	perfil->posY = recibidoHandshake->posY;
+	perfil->idCliente = malloc(strlen(recibidoHandshake->id)+1);
+	strcpy(perfil->idCliente, recibidoHandshake->id);
 	list_add(listaPedidos,perfil);
 
 	free(recibidoHandshake->id);
@@ -804,12 +806,12 @@ int buscar_pedido_por_id_y_resto(uint32_t id_pedido, info_resto* resto){
 	return -2;
 }
 
-int buscar_cliente(int32_t socket_cliente_buscado){
+int buscar_cliente(char* idClienteBuscado){
 	perfil_cliente* cliente;
 	for(int i = 0; i < listaPedidos->elements_count; i++){
 		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
 
-		if(cliente->socket_cliente == socket_cliente_buscado && cliente->id_pedido_resto == 0){
+		if((strcmp(cliente->idCliente, idClienteBuscado) == 0) && cliente->id_pedido_resto == 0){
 			return i;
 		}
 	}
@@ -981,7 +983,9 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		case SELECCIONAR_RESTAURANTE:
 			recibidoSeleccionarRestaurante = malloc(sizeAAllocar);
 			recibir_mensaje(recibidoSeleccionarRestaurante,SELECCIONAR_RESTAURANTE,socket_cliente);
-			seleccionarRestaurante(recibidoSeleccionarRestaurante->nombreRestaurante,socket_cliente);
+			seleccionarRestaurante(recibidoSeleccionarRestaurante->idCliente,recibidoSeleccionarRestaurante->nombreRestaurante,socket_cliente);
+			free(recibidoSeleccionarRestaurante->idCliente);
+			free(recibidoSeleccionarRestaurante->nombreRestaurante);
 			free(recibidoSeleccionarRestaurante);
 			break;
 

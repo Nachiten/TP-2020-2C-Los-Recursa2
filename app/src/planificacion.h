@@ -117,6 +117,7 @@ typedef enum{
 
 typedef struct{
 	int32_t socket_cliente;
+	char* idCliente;
 	char* nombre_resto;
 	uint32_t id_global;
 	uint32_t id_pedido_resto;

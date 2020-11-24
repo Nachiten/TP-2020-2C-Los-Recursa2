@@ -187,16 +187,16 @@ void obtenerInputConsolaCliente(){
     Obtener Restaurante -> Check and tested
     Consultar Platos -> Check and tested
     Guardar Plato -> Check and tested
-    Aniadir Plato -> Check
-    Plato listo -> Check
+    Aniadir Plato -> Check and tested
+    Plato listo -> Check and tested
     Crear Pedido -> Check
     Guardar Pedido -> Check and tested
     Confirmar Pedido -> Check
-    Consultar Pedido -> Check
-    Obtener Pedido -> Check
-    Finalizar Pedido -> Check
+    Consultar Pedido -> Check and tested
+    Obtener Pedido -> Check and tested
+    Finalizar Pedido -> Check and tested
     Terminar Pedido -> Check
-    Obtener Receta -> Check
+    Obtener Receta -> Check and tested
     */
 
     switch(switcher)
@@ -234,13 +234,13 @@ void obtenerInputConsolaCliente(){
 
     case SELECCIONAR_RESTAURANTE:
 
-    	if(palabrasSeparadas[1] == NULL){
-    		printf("El formato correcto es: SELECCIONAR_RESTAURANTE [nombreRest].\n");
+    	if(palabrasSeparadas[1] == NULL || palabrasSeparadas[2] == NULL){
+    		printf("El formato correcto es: SELECCIONAR_RESTAURANTE [idCliente] [nombreRest].\n");
     		break;
     	}
 
     	strcat(palabrasSeparadas[1],"\0");
-
+    	strcat(palabrasSeparadas[2],"\0");
 
     	estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
 
@@ -248,12 +248,12 @@ void obtenerInputConsolaCliente(){
 		resultado_de_conexion(socketCliente, logger, "destino");
 
 		seleccionar_restaurante* estructuraSeleccRestaur = malloc(sizeof(seleccionar_restaurante));
-		estructuraSeleccRestaur->largoIDCliente = strlen(idCliente);
-		estructuraSeleccRestaur->idCliente = malloc(strlen(idCliente)+1);
+		estructuraSeleccRestaur->largoIDCliente = strlen(palabrasSeparadas[1]);
+		estructuraSeleccRestaur->idCliente = malloc(strlen(palabrasSeparadas[1])+1);
 		strcpy(estructuraSeleccRestaur->idCliente, idCliente);
-		estructuraSeleccRestaur->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
-		estructuraSeleccRestaur->nombreRestaurante = malloc(strlen(palabrasSeparadas[1])+1);
-		strcpy(estructuraSeleccRestaur->nombreRestaurante, palabrasSeparadas[1]);
+		estructuraSeleccRestaur->largoNombreRestaurante = strlen(palabrasSeparadas[2]);
+		estructuraSeleccRestaur->nombreRestaurante = malloc(strlen(palabrasSeparadas[2])+1);
+		strcpy(estructuraSeleccRestaur->nombreRestaurante, palabrasSeparadas[2]);
 
 		mandar_mensaje(estructuraSeleccRestaur, SELECCIONAR_RESTAURANTE, socketCliente);
 
