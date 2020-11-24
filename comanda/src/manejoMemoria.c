@@ -849,6 +849,9 @@ void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes
 				}
 			}
 
+			//ahora que tengo la victima, muevo el puntero adelante hasta el proximo marco
+			punteroClockM = auxiliarMoverme->numeroDeEspacio;
+
 			//en este punto ya tengo la pagina q vamos a volar para SWAP
 			sem_wait(semaforoLogger);
 			log_info(logger,"La víctima seleccionada para el reemplazo se encuentra en el marco: %i", victima->numeroDeMarco);
