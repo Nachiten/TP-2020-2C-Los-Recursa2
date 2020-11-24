@@ -28,7 +28,7 @@ void iniciarPlanificacion(){
 	//sleep(7);
 
     //------------------------------------PRUEBAS-------------------------------------------------------
-
+/*
 	pcb_pedido* unPedido = malloc(sizeof(pcb_pedido));
 	// 7 distancia hacia restaurant
 	unPedido->posRestauranteX = 8;
@@ -59,7 +59,7 @@ void iniciarPlanificacion(){
 	unPedido3->pedidoID = 3;
 
 	agregarANew(unPedido3);
-
+*/
 	pthread_t hiloBlockReady;
 	pthread_create(&hiloBlockReady, NULL, (void*)hiloBlock_Ready, NULL);
 
@@ -81,13 +81,15 @@ void iniciarPlanificacion(){
 		pthread_create(&hiloColaExec, NULL, (void*)hiloExec, numeroHilo);
 	}
 
+	/*
 	sleep(25);
 
 	guardarPedidoListo(1);
 	guardarPedidoListo(2);
-	/*
+
 	guardarPedidoListo(3);
-	guardarPedidoListo(4);*/
+	guardarPedidoListo(4);
+*/
 
 //	pcb_pedido* unPedido2 = malloc(sizeof(pcb_pedido));
 //	unPedido2->posRestauranteX = 3;
@@ -135,7 +137,7 @@ void iniciarPlanificacion(){
 //
 //	guardarPedidoListo(4);
 //	guardarPedidoListo(5);
-
+    sem_post(planificacionInicializada);
 	pthread_join(hiloNewReady, NULL);
 }
 
@@ -188,6 +190,80 @@ int checkearPedidoListo(int idPedido){
 
 	return retorno;
 }
+
+void pedido_entregado(int32_t id_pedido){
+	int numCliente = buscar_pedido_por_id(id_pedido);
+	perfil_cliente* cliente = list_get(listaPedidos,numCliente);
+	int32_t nuevoSocketComanda, sizeAAllocar = 0;
+	uint32_t exito = 0;
+
+	guardar_pedido* pedidoFinalizado;
+	pedidoFinalizado = malloc(sizeof(finalizar_pedido));
+	pedidoFinalizado->idPedido = id_pedido;
+	pedidoFinalizado->nombreRestaurante = malloc(strlen(cliente->nombre_resto)+1);
+	strcpy(pedidoFinalizado->nombreRestaurante, cliente->nombre_resto);
+	pedidoFinalizado->largoNombreRestaurante = strlen(cliente->nombre_resto);
+
+	/* esto no seria necesario, cliente ya sabe desserializar finalizar_pedido
+	pedido_finalizado* aMandar = malloc(sizeof(pedido_finalizado));
+	aMandar->mensaje = "Pedido Finalizado";
+	aMandar->sizeMensaje = strlen("Pedido Finalizado");
+    */
+
+	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+	if(nuevoSocketComanda < 0){
+		sem_wait(semLog);
+		log_info(logger, "Comanda esta muerta, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
+
+	mandar_mensaje(pedidoFinalizado, FINALIZAR_PEDIDO, nuevoSocketComanda);
+
+	respuesta_ok_error* respuestaConfirmacionComanda = malloc(sizeof(respuesta_ok_error));
+	los_recv_repetitivos(nuevoSocketComanda, &exito, &sizeAAllocar);
+
+
+		if(exito == 1)
+		{
+			recibir_mensaje(respuestaConfirmacionComanda,RESPUESTA_FINALIZAR_PEDIDO, nuevoSocketComanda);
+			sem_wait(semLog);
+			log_info(logger, "El intento de confirmar el pedido con comanda fue: %i.",
+					resultadoDeRespuesta(respuestaConfirmacionComanda->respuesta));
+			sem_post(semLog);
+		}
+		else
+		{
+			printf("Ocurrió un error al intentar recibir la respuesta de FINALIZAR Pedido a comanda.\n");
+		}
+
+	close(nuevoSocketComanda);
+	free(respuestaConfirmacionComanda);
+
+	mandar_mensaje(pedidoFinalizado, FINALIZAR_PEDIDO, cliente->socket_cliente);
+
+	respuesta_ok_error* respuestaConfirmacionCliente = malloc(sizeof(respuesta_ok_error));
+	los_recv_repetitivos(nuevoSocketComanda, &exito, &sizeAAllocar);
+
+	    if(exito == 1)
+		{
+			recibir_mensaje(respuestaConfirmacionCliente,RESPUESTA_FINALIZAR_PEDIDO, cliente->socket_cliente);
+			sem_wait(semLog);
+			log_info(logger, "El intento de confirmar el pedido con el cliente fue: %i",
+					resultadoDeRespuesta(respuestaConfirmacionCliente->respuesta));
+			sem_post(semLog);
+		}
+		else
+		{
+			printf("Ocurrió un error al intentar recibir la respuesta de FINALIZAR Pedido a cliente.\n");
+		}
+
+	 free(respuestaConfirmacionCliente);
+	 free(pedidoFinalizado->nombreRestaurante);
+	 free(pedidoFinalizado);
+
+}
+
 
 void moverPedidoDeBlockAReady(int indicePedido){
 	sem_wait(mutexBlock);
@@ -938,4 +1014,15 @@ void freeDeArray(char** array){
 	free(array);
 }
 
+int buscar_pedido_por_id(uint32_t id_pedido){
+	perfil_cliente* cliente;
+	for(int i = 0; i < listaPedidos->elements_count; i++){
+		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
+
+		if(cliente->id_global == id_pedido){
+			return i;
+		}
+	}
+	return -2;
+}
 

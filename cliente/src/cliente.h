@@ -19,6 +19,7 @@ int32_t socketEscucha;
 pthread_t hiloConsola;
 pthread_t hiloNotificaciones;
 sem_t* comandoParaEjecutar;
+sem_t* semLog;
 
 //cosas cargadas del archivo config
 char* LOG_PATH;

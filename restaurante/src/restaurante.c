@@ -27,11 +27,18 @@
 //}t_cola_afinidad
 
 int main(){
+	socket_sindicato = establecer_conexion(ip_sindicato,puerto_sindicato);
+	if(socket_sindicato < 0){
+			log_info(logger, "Sindicato esta muerto, me muero yo tambien");
+	exit(-2);
+	}
 
 	inicializarRestaurante();
-	inicializar_colas();
 
-	socket_sindicato = establecer_conexion(ip_sindicato,puerto_sindicato);
+	//tendriamo que usar hilo detacheado para esto
+	//inicializar_colas();
+	pthread_create(&planificacion, NULL, (void*)inicializar_colas, NULL);
+	pthread_detach(planificacion);
 
 	iniciar_server(puerto_local);
 
@@ -43,25 +50,34 @@ int main(){
 void consultar_Platos(int32_t socket_cliente){
 	respuesta_consultar_platos* platos = malloc(sizeof(respuesta_consultar_platos));
 	consultar_platos* consulta;
+	int32_t nuevoSocketSindicato;
 
 	consulta = malloc(sizeof(consultar_platos));
 	consulta->sizeNombre = strlen(nombreRestaurante);
 	consulta->nombre = malloc(strlen(nombreRestaurante) + 1);
 	strcpy(consulta->nombre, nombreRestaurante);
 
-	mandar_mensaje(consulta,CONSULTAR_PLATOS,socket_sindicato);
+	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
+	if(nuevoSocketSindicato < 0){
+		sem_wait(semLog);
+		log_info(logger, "Sindicato esta muerto, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
+
+	mandar_mensaje(consulta,CONSULTAR_PLATOS, nuevoSocketSindicato);
 
     codigo_operacion codigoRecibido;
     bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 
-    printf("El codigo recibido del emisor es: %d", codigoRecibido);
+//    printf("El codigo recibido del emisor es: %d", codigoRecibido);
 
     uint32_t sizePayload;
-    bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+    bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
 
-    printf("El size del buffer/payload es: %u", sizePayload);
+//    printf("El size del buffer/payload es: %u", sizePayload);
 
-    recibir_mensaje(platos,RESPUESTA_CONSULTAR_PLATOS,socket_sindicato);
+    recibir_mensaje(platos,RESPUESTA_CONSULTAR_PLATOS,nuevoSocketSindicato);
 
     mandar_mensaje(platos,RESPUESTA_CONSULTAR_PLATOS,socket_cliente);
 
@@ -72,11 +88,20 @@ void consultar_Platos(int32_t socket_cliente){
 }
 
 void crear_Pedido(int32_t socket_cliente){
+	int32_t nuevoSocketSindicato;
 	guardar_pedido* pedida_a_guardar;
 	respuesta_crear_pedido* respuesta;
 	Pedido* pedido= malloc(sizeof(Pedido));
 	pedido->socket_cliente = socket_cliente;
 	pedido->numPedido = crear_id_pedidos();
+
+	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
+	if(nuevoSocketSindicato < 0){
+		sem_wait(semLog);
+		log_info(logger, "Sindicato esta muerto, me muero yo tambien");
+		sem_post(semLog);
+	    exit(-2);
+	}
 
 	list_add(listaPedidos,pedido);
 
@@ -86,43 +111,78 @@ void crear_Pedido(int32_t socket_cliente){
 	pedida_a_guardar->nombreRestaurante = malloc(sizeof(strlen(nombreRestaurante) + 1));
 	strcpy(pedida_a_guardar->nombreRestaurante,nombreRestaurante);
 
-	mandar_mensaje(pedida_a_guardar,GUARDAR_PEDIDO,socket_sindicato);
+	mandar_mensaje(pedida_a_guardar, GUARDAR_PEDIDO, nuevoSocketSindicato);
 
 	respuesta = malloc(sizeof(respuesta_crear_pedido));
 	respuesta->idPedido = pedido->numPedido;
 
-	mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socket_cliente);
+	codigo_operacion codigoRecibido;
+    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+
+    uint32_t sizePayload;
+	bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+
+	if(codigoRecibido != 24){
+		printf("problemas al recibir respuesta de guardar pedido en sindic");
+	} else {
+		recibir_mensaje(respuesta, RESPUESTA_GUARDAR_PEDIDO, socket_sindicato);
+
+		mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socket_cliente);
+	}
+	close(nuevoSocketSindicato);
+    free(pedida_a_guardar->nombreRestaurante);
+    free(pedida_a_guardar);
 	free(respuesta);
 }
 
 void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 	respuesta_ok_error* respuesta = malloc(sizeof(respuesta_ok_error));
+	int32_t nuevoSocketSindicato;
 
 	if(buscar_pedido_por_id(recibidoAPlato->idPedido) != -2){
-		mandar_mensaje(recibidoAPlato,GUARDAR_PLATO,socket_sindicato);
+		nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
+		if(nuevoSocketSindicato < 0){
+			sem_wait(semLog);
+			log_info(logger, "Sindicato esta muerto, me muero yo tambien");
+			sem_post(semLog);
+			exit(-2);
+		}
+
+		mandar_mensaje(recibidoAPlato, GUARDAR_PLATO, nuevoSocketSindicato);
 
 		codigo_operacion codigoRecibido;
-	    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+	    bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 
-	    printf("El codigo recibido del emisor es: %d", codigoRecibido);
+//	    printf("El codigo recibido del emisor es: %d", codigoRecibido);
 
 	    uint32_t sizePayload;
-	    bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+	    bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
 
-	    printf("El size del buffer/payload es: %u", sizePayload);
+//	    printf("El size del buffer/payload es: %u", sizePayload);
 
-	    recibir_mensaje(respuesta,RESPUESTA_GUARDAR_PLATO,socket_sindicato);
+	    recibir_mensaje(respuesta,RESPUESTA_GUARDAR_PLATO, nuevoSocketSindicato);
 
 	    mandar_mensaje(respuesta,RESPUESTA_A_PLATO,socket_cliente);
-
+	    close(nuevoSocketSindicato);
 	}else{
 		respuesta->respuesta = 0;
 		mandar_mensaje(respuesta,RESPUESTA_A_PLATO,socket_cliente);
 	}
+
 	free(respuesta);
 }
 
 void confirmar_Pedido(int32_t id, int32_t socket_cliente){
+	int32_t nuevoSocketSindicato;
+
+	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
+	if(nuevoSocketSindicato < 0){
+		sem_wait(semLog);
+		log_info(logger, "Sindicato esta muerto, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
+
 	obtener_pedido* datosPedido = malloc(sizeof(obtener_pedido));
 	datosPedido->idPedido = id;
 	datosPedido->largoNombreRestaurante = strlen(nombreRestaurante);
@@ -132,19 +192,19 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 	respuesta_obtener_pedido* pedido = malloc(sizeof(respuesta_obtener_pedido));
 	int i = 0;
 
-	mandar_mensaje(datosPedido,OBTENER_PEDIDO,socket_sindicato);
+	mandar_mensaje(datosPedido,OBTENER_PEDIDO,nuevoSocketSindicato);
 
     codigo_operacion codigoRecibido;
-    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+    bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 
-    printf("El codigo recibido del emisor es: %d", codigoRecibido);
+//    printf("El codigo recibido del emisor es: %d", codigoRecibido);
 
     uint32_t sizePayload;
-    bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+    bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
 
-    printf("El size del buffer/payload es: %u", sizePayload);
+//    printf("El size del buffer/payload es: %u", sizePayload);
 
-    recibir_mensaje(pedido,RESPUESTA_OBTENER_PEDIDO,socket_sindicato);
+    recibir_mensaje(pedido,RESPUESTA_OBTENER_PEDIDO,nuevoSocketSindicato);
 
 	char** listaComidas = string_get_string_as_array(pedido->comidas);
 	char** listaComidasTotales = string_get_string_as_array(pedido->cantTotales);
@@ -169,8 +229,19 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 	free(pedido->comidas);
 	free(pedido);
 	free(respuestaAMandar);
+	close(nuevoSocketSindicato);
 }
 void consultar_Pedido(int32_t id,int32_t socket_cliente){
+	int32_t nuevoSocketSindicato;
+
+	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
+	if(nuevoSocketSindicato < 0){
+		sem_wait(semLog);
+		log_info(logger, "Sindicato esta muerto, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
+
 	obtener_pedido* datosPedido = malloc(sizeof(obtener_pedido));
 	datosPedido->idPedido = id;
 	datosPedido->largoNombreRestaurante = strlen(nombreRestaurante);
@@ -178,21 +249,20 @@ void consultar_Pedido(int32_t id,int32_t socket_cliente){
 	strcpy(datosPedido->nombreRestaurante,nombreRestaurante);
 
 	respuesta_obtener_pedido* pedido = malloc(sizeof(respuesta_obtener_pedido));
-	int i = 0;
 
-	mandar_mensaje(datosPedido,OBTENER_PEDIDO,socket_sindicato);
+	mandar_mensaje(datosPedido, OBTENER_PEDIDO, nuevoSocketSindicato);
 
     codigo_operacion codigoRecibido;
-    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+    bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 
-    printf("El codigo recibido del emisor es: %d", codigoRecibido);
+//  printf("El codigo recibido del emisor es: %d", codigoRecibido);
 
     uint32_t sizePayload;
-    bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+    bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
 
-    printf("El size del buffer/payload es: %u", sizePayload);
+//  printf("El size del buffer/payload es: %u", sizePayload);
 
-    recibir_mensaje(pedido,RESPUESTA_OBTENER_PEDIDO,socket_sindicato);
+    recibir_mensaje(pedido,RESPUESTA_OBTENER_PEDIDO,nuevoSocketSindicato);
 
     mandar_mensaje(pedido,RESPUESTA_CONSULTAR_PEDIDO,socket_cliente);
 }
@@ -314,6 +384,8 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	a_plato* recibidoAPlato;
 	consultar_pedido* recibidoConsultarPedido;
 	confirmar_pedido* recibidoConfirmarPedido;
+	handshake* recibidohandshake;
+
 	switch(cod_op){
 
 	case CONSULTAR_PLATOS:
@@ -341,6 +413,17 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		break;
 
 	case CONSULTAR_PEDIDO:
+		recibidoConsultarPedido = malloc(sizeAAllocar);
+		recibir_mensaje(recibidoConsultarPedido,CONSULTAR_PEDIDO,socket_cliente);
+		consultar_Pedido(recibidoConsultarPedido->idPedido, socket_cliente);
+		free(recibidoConsultarPedido);
+		break;
+
+	case HANDSHAKE:
+		recibidohandshake = malloc(sizeAAllocar);
+		recibir_mensaje(recibidohandshake,HANDSHAKE,socket_cliente);
+		free(recibidohandshake->id);
+		free(recibidohandshake);
 		break;
 
 	default:

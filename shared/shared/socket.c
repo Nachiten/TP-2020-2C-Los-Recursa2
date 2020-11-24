@@ -135,7 +135,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 
 	switch(tipoMensaje){
 		case CONSULTAR_RESTAURANTES: //este se pasa el mensaje por el culo, solo manda el codigo de operacion
-			paquete->buffer->stream = malloc(1); //malloc flashero para que no rompa despues con el free
+			paquete->buffer->stream = NULL; //malloc flashero para que no rompa despues con el free
 			paquete->buffer->size = 0;
 			size_ya_armado = sizeof(tipoMensaje);
 			break;
@@ -170,7 +170,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			break;
 
 		case CREAR_PEDIDO: //este se pasa el mensaje por el culo, solo manda el codigo de operacion
-			paquete->buffer->stream = malloc(1); //malloc flashero para que no rompa despues con el free, ToDo ver si funciona o rompe
+			paquete->buffer->stream = NULL; //malloc flashero para que no rompa despues con el free, ToDo ver si funciona o rompe
 			paquete->buffer->size = 0;
 			size_ya_armado = sizeof(tipoMensaje);
 			break;

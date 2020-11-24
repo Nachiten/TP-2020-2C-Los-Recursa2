@@ -473,3 +473,18 @@
 
 [INFO] 17:16:49:82 Cliente/(9365:9477): Conexión establecida con socket de destino.
 [INFO] 17:17:18:906 Cliente/(9365:9479): Conexión establecida con socket de destino.
+[INFO] 15:31:25:870 Cliente/(8656:8656): Conexión establecida con socket de destino.
+[INFO] 15:31:36:489 Cliente/(8656:8658): Conexión establecida con socket de destino.
+[INFO] 15:31:36:489 Cliente/(8656:8658): Los restaurantes que se encuentran disponibles son: [RestoDefault]
+[WARNING] 15:36:25:275 Cliente/(8656:8669): Conexión fallida con socket de destino.
+[INFO] 15:36:41:715 Cliente/(8656:8841): Conexión establecida con socket de destino.
+[INFO] 15:37:30:115 Cliente/(8656:8849): Conexión establecida con socket de destino.
+[INFO] 15:38:26:771 Cliente/(8656:8864): Conexión establecida con socket de destino.
+[INFO] 15:38:26:772 Cliente/(8656:8864): Los restaurantes que se encuentran disponibles son: [RestoDefault]
+[INFO] 15:38:50:221 Cliente/(8656:8924): Conexión establecida con socket de destino.
+[INFO] 15:38:50:254 Cliente/(8656:8924): Los restaurantes que se encuentran disponibles son: [RestoDefault]
+[INFO] 15:43:58:671 Cliente/(8656:8950): Conexión establecida con socket de destino.
+[INFO] 15:43:58:703 Cliente/(8656:8950): Los restaurantes que se encuentran disponibles son: [RestoDefault]
+[INFO] 15:44:11:536 Cliente/(8656:9102): Conexión establecida con socket de destino.
+[INFO] 15:44:11:538 Cliente/(8656:9102): Los restaurantes que se encuentran disponibles son: [RestoDefault]
+[INFO] 15:50:18:839 Cliente/(8656:9111): Conexión establecida con socket de destino.
