@@ -204,7 +204,7 @@ void obtenerInputConsolaCliente(){
     /*
     CASES LABURADOS:
 
-    Consultar Restaurantes -> Check
+    Consultar Restaurantes -> Check and tested
     Seleccionar Restaurante -> Check
     Obtener Restaurante -> Check and tested
     Consultar Platos -> Check and tested
@@ -224,7 +224,7 @@ void obtenerInputConsolaCliente(){
     switch(switcher)
     {
 
-	case CONSULTAR_RESTAURANTES:;
+	case CONSULTAR_RESTAURANTES:
 
 	    socketCliente = establecer_conexion(ip_destino, puerto_destino);
 	    resultado_de_conexion(socketCliente, logger, "destino");
@@ -235,26 +235,19 @@ void obtenerInputConsolaCliente(){
 
 		if(exito == 1)
 		{
-			//respuesta_consultar_restaurantes* estructuraRespuestaConsultaRestaurantes = malloc(sizeof(respuesta_consultar_restaurantes));
 			respuesta_consultar_restaurantes* estructuraRespuestaConsultaRestaurantes = malloc(sizeAAllocar);
 
 			recibir_mensaje(estructuraRespuestaConsultaRestaurantes,RESPUESTA_CONSULTAR_R,socketCliente);
 
-			//ToDo hablar con Tomas sobre si esto funcionaria asi o no
-
-
 			palabrasSeparadas = string_split(estructuraRespuestaConsultaRestaurantes->listaRestaurantes, ",");//falta agregar corchetes
-			sem_wait(semLog);
-			log_info(logger, "Los restaurantes que se encuentran disponibles son: ");
-			sem_post(semLog);
-			while(iterador < estructuraRespuestaConsultaRestaurantes->cantRestaurantes)
-			{
-				log_info(logger,"%s",palabrasSeparadas[iterador]);
-			}
+			//sem_wait(semLog);
+			log_info(logger, "Los restaurantes que se encuentran disponibles son: %s" ,
+					estructuraRespuestaConsultaRestaurantes->listaRestaurantes);
+			//sem_post(semLog);
 
+            free(estructuraRespuestaConsultaRestaurantes->listaRestaurantes);
 			free(estructuraRespuestaConsultaRestaurantes);
 		}
-
 		else
 		{
 			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
@@ -847,7 +840,7 @@ void obtenerInputConsolaCliente(){
         	respuesta_obtener_receta* estructuraRespuestaObtenerReceta = malloc(sizeAAllocar);
 			recibir_mensaje(estructuraRespuestaObtenerReceta, RESPUESTA_OBTENER_RECETA ,socketCliente);
 			sem_wait(semLog);
-			log_info(logger, "Los pasos para cocinar el plato < %s > son: %s, con sus tiempos:%s", mensajeObtenerReceta->nombreReceta, estructuraRespuestaObtenerReceta->pasos, estructuraRespuestaObtenerReceta->tiempoPasos);
+			log_info(logger, "Los pasos para cocinar el plato < %s > son: %s, con sus tiempos: %s", mensajeObtenerReceta->nombreReceta, estructuraRespuestaObtenerReceta->pasos, estructuraRespuestaObtenerReceta->tiempoPasos);
 			sem_post(semLog);
 			free(estructuraRespuestaObtenerReceta->pasos);
 			free(estructuraRespuestaObtenerReceta->tiempoPasos);

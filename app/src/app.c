@@ -93,7 +93,7 @@ void inicializar_semaforos(){
 
 //manda un array con los nombres de todos los restaurantes conectados o restoDefault si no hay ninguno
 void consultar_restaurantes(int32_t socket_cliente){
-
+	respuesta_consultar_restaurantes* mensajeRespuestaConsultarRestaurantes;
 	char* stringCompleto;
 	char* stringNuevoParaAgregar;
 	char* stringInicial = "[";
@@ -109,7 +109,7 @@ void consultar_restaurantes(int32_t socket_cliente){
 
 	}
 	else{
-		stringCompleto  = string_new();
+		stringCompleto = string_new();
 		string_append(&stringCompleto, stringInicial);
 
 		for(int i = 0; i < listaRestos->elements_count; i++){
@@ -122,7 +122,19 @@ void consultar_restaurantes(int32_t socket_cliente){
 		}
 	}
 	string_append(&stringCompleto, stringFinal);// agregas un ] al final
-	mandar_mensaje(stringCompleto,RESPUESTA_CONSULTAR_R,socket_cliente);
+	mensajeRespuestaConsultarRestaurantes = malloc(sizeof(respuesta_consultar_restaurantes));
+
+	if(listaRestos->elements_count == 0){
+		mensajeRespuestaConsultarRestaurantes->cantRestaurantes = 1;
+
+	}else{
+		mensajeRespuestaConsultarRestaurantes->cantRestaurantes = listaRestos->elements_count;
+	}
+
+	mensajeRespuestaConsultarRestaurantes->listaRestaurantes = malloc(strlen(stringCompleto) + 1);
+	strcpy(mensajeRespuestaConsultarRestaurantes->listaRestaurantes,stringCompleto);
+	mensajeRespuestaConsultarRestaurantes->longitudListaRestaurantes = strlen(stringCompleto);
+	mandar_mensaje(mensajeRespuestaConsultarRestaurantes,RESPUESTA_CONSULTAR_R,socket_cliente);
 }
 
 /* si el restaurante seleccionado existe en la lista de restaurantes manda un 1 y selecciona ese
