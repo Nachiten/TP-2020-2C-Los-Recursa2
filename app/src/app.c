@@ -57,7 +57,7 @@ int main(){
 	iniciarSemaforosCiclos();
 
 
-	//coneccion a commanda
+	//conexion a commanda, pero hariamos on demand, chequear despues
 	socket_commanda = establecer_conexion(ip_commanda,puerto_commanda);
 	if(socket_commanda<0){
 		sem_wait(semLog);
@@ -70,6 +70,7 @@ int main(){
 	pthread_create(&planificacion, NULL,(void*)iniciarPlanificacion, NULL);
 	pthread_detach(planificacion);
 
+	sem_wait(planificacionInicializada);
 	//inicio el server
 	iniciar_server(mi_puerto);
 
@@ -84,9 +85,10 @@ void inicializar_colas(){
 void inicializar_semaforos(){
 	semId = malloc(sizeof(sem_t));
 	semLog = malloc(sizeof(sem_t));
-
+    planificacionInicializada = malloc(sizeof(sem_t));
 	sem_init(semId, 0, 1);
 	sem_init(semLog, 0, 1);
+	sem_init(planificacionInicializada, 0, 1);
 }
 
 // *********************************FIN SETUP*********************************************

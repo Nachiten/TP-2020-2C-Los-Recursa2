@@ -49,6 +49,7 @@ char* puerto_commanda;
 char* ip_commanda;
 
 // SEMAFOROS
+sem_t* planificacionInicializada;
 sem_t* contadorProcesosEnNew;
 sem_t* mutexNew;
 sem_t* mutexReady;

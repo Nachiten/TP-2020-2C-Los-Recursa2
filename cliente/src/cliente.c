@@ -162,7 +162,6 @@ void obtenerInputConsolaCliente(){
 	uint32_t switcher;
 	respuesta_ok_error* estructuraRespuesta;
     int32_t socketCliente;
-	int32_t iterador = 0;
 	int32_t sizeAAllocar = 0;
 	uint32_t exito = 0;
 	size_t longitud = 0;

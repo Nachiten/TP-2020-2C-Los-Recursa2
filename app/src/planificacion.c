@@ -28,7 +28,7 @@ void iniciarPlanificacion(){
 	//sleep(7);
 
     //------------------------------------PRUEBAS-------------------------------------------------------
-
+/*
 	pcb_pedido* unPedido = malloc(sizeof(pcb_pedido));
 	// 7 distancia hacia restaurant
 	unPedido->posRestauranteX = 8;
@@ -59,7 +59,7 @@ void iniciarPlanificacion(){
 	unPedido3->pedidoID = 3;
 
 	agregarANew(unPedido3);
-
+*/
 	pthread_t hiloBlockReady;
 	pthread_create(&hiloBlockReady, NULL, (void*)hiloBlock_Ready, NULL);
 
@@ -81,13 +81,15 @@ void iniciarPlanificacion(){
 		pthread_create(&hiloColaExec, NULL, (void*)hiloExec, numeroHilo);
 	}
 
+	/*
 	sleep(25);
 
 	guardarPedidoListo(1);
 	guardarPedidoListo(2);
-	/*
+
 	guardarPedidoListo(3);
-	guardarPedidoListo(4);*/
+	guardarPedidoListo(4);
+*/
 
 //	pcb_pedido* unPedido2 = malloc(sizeof(pcb_pedido));
 //	unPedido2->posRestauranteX = 3;
@@ -135,7 +137,7 @@ void iniciarPlanificacion(){
 //
 //	guardarPedidoListo(4);
 //	guardarPedidoListo(5);
-
+    sem_post(planificacionInicializada);
 	pthread_join(hiloNewReady, NULL);
 }
 
