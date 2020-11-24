@@ -117,7 +117,7 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 		ultimoSegmento->sig_segmento = nuevoSegmento; //lo unimos al final de la tabla
 
 		nuevoSegmento->id_Pedido = idDelPedido;
-		tablaDePedidos->estado = PENDIENTE;
+		nuevoSegmento->estado = PENDIENTE;
 		nuevoSegmento->anter_segmento = ultimoSegmento;
 		nuevoSegmento->sig_segmento = NULL;
 		nuevoSegmento->numero_de_segmento = ultimoSegmento->numero_de_segmento + 1;
@@ -768,9 +768,7 @@ void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes
 		}
 
 		//marcamos el marco como libre para que lo puedan usar
-		sem_wait(semaforoTocarListaEspaciosEnMP);
 		marcarEspacioComoLibre(lista_de_marcos_en_MP, victima->numeroDeMarco);
-		sem_post(semaforoTocarListaEspaciosEnMP);
 
 		//actualizamos el dato de la pagina (que ya no esta en MP)
 		victima->cargadoEnMEMORIA = 0;
@@ -793,32 +791,33 @@ void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes
 			//mientras que no encuentre una victima...
 			while(victimaEncontrada == 0)
 			{
-				//si puntero pasa por posición original, cambia comportamiento de algoritmo
-				if(punteroClockM == posicionInicial)
-				{
-					if(numeroDeIteracion == 0 || numeroDeIteracion == 2)
-					{
-						bitDeUsoBuscado = 0;
-						bitDeModificacionBuscado = 0;
-
-						flagAlterarBit = 0;
-					}
-
-					if(numeroDeIteracion == 1 || numeroDeIteracion == 3)
-					{
-						bitDeUsoBuscado = 0;
-						bitDeModificacionBuscado = 1;
-
-						flagAlterarBit = 1;
-					}
-
-					numeroDeIteracion++;
-				}
-
 				//solo me interesa si esta en uso
 				if(auxiliarMoverme->espacioOcupado == 1)
 				{
 					punteroClockM = auxiliarMoverme->numeroDeEspacio;
+
+					//si puntero pasa por posición original, cambia comportamiento de algoritmo
+					if(punteroClockM == posicionInicial)
+					{
+						if(numeroDeIteracion == 0 || numeroDeIteracion == 2)
+						{
+							bitDeUsoBuscado = 0;
+							bitDeModificacionBuscado = 0;
+
+							flagAlterarBit = 0;
+						}
+
+						if(numeroDeIteracion == 1 || numeroDeIteracion == 3)
+						{
+							bitDeUsoBuscado = 0;
+							bitDeModificacionBuscado = 1;
+
+							flagAlterarBit = 1;
+						}
+
+						numeroDeIteracion++;
+					}
+
 					//tengo un marco ocupado, me busco la pagina que está en este marco
 					paginaEnMarco = buscarPaginaAsociadaAlMarco(lasListasDePedidosDeRestaurantes, auxiliarMoverme->numeroDeEspacio);
 
@@ -862,9 +861,7 @@ void algoritmo_de_reemplazo(char* ALGOR_REEMPLAZO, tablas_segmentos_restaurantes
 			}
 
 			//marcamos el marco como libre para que lo puedan usar
-			sem_wait(semaforoTocarListaEspaciosEnMP);
 			marcarEspacioComoLibre(lista_de_marcos_en_MP, victima->numeroDeMarco);
-			sem_post(semaforoTocarListaEspaciosEnMP);
 
 			//actualizamos el dato de la pagina (que ya no esta en MP)
 			victima->cargadoEnMEMORIA = 0;
@@ -1164,6 +1161,10 @@ void matarPlatos(segmentos* segmentoSeleccionado)
 			sem_wait(semaforoTocarListaEspaciosEnMP);
 			marcarEspacioComoLibre(lista_de_espacios_en_MP, tablaDePlatos->numeroDeMarco);
 			sem_post(semaforoTocarListaEspaciosEnMP);
+
+			sem_wait(semaforoLogger);
+			log_info(logger, "El marco de Memoria Principal %i ahora está libre: su Página fue eliminada. Inicio del marco: %p.", tablaDePlatos->numeroDeMarco, MEMORIA_PRINCIPAL + (tablaDePlatos->numeroDeMarco*32));
+			sem_post(semaforoLogger);
 		}
 
 		//si esta cargada en SWAP, mato las de SWAP

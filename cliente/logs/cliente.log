@@ -563,3 +563,130 @@
 
 [INFO] 17:25:19:160 Cliente/(9355:9358): Conexión establecida con socket de destino.
 [INFO] 17:27:28:994 Cliente/(9355:9365): Conexión establecida con socket de destino.
+[INFO] 19:35:30:577 Cliente/(4884:4884): Conexión establecida con socket de destino.
+[INFO] 19:35:56:151 Cliente/(4884:4911): Conexión establecida con socket de destino.
+[INFO] 19:35:56:154 Cliente/(4884:4913): Conexión establecida con socket de destino.
+[INFO] 19:35:56:154 Cliente/(4884:4911): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:35:56:164 Cliente/(4884:4915): Conexión establecida con socket de destino.
+[INFO] 19:35:56:164 Cliente/(4884:4913): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:35:56:167 Cliente/(4884:4917): Conexión establecida con socket de destino.
+[INFO] 19:35:56:168 Cliente/(4884:4915): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:35:56:169 Cliente/(4884:4919): Conexión establecida con socket de destino.
+[INFO] 19:35:56:179 Cliente/(4884:4917): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:35:56:184 Cliente/(4884:4921): Conexión establecida con socket de destino.
+[INFO] 19:35:56:185 Cliente/(4884:4923): Conexión establecida con socket de destino.
+[INFO] 19:35:56:196 Cliente/(4884:4925): Conexión establecida con socket de destino.
+[INFO] 19:35:56:201 Cliente/(4884:4927): Conexión establecida con socket de destino.
+[INFO] 19:35:56:211 Cliente/(4884:4929): Conexión establecida con socket de destino.
+[INFO] 19:35:56:219 Cliente/(4884:4931): Conexión establecida con socket de destino.
+[INFO] 19:35:56:227 Cliente/(4884:4933): Conexión establecida con socket de destino.
+[INFO] 19:35:56:236 Cliente/(4884:4935): Conexión establecida con socket de destino.
+[INFO] 19:35:56:238 Cliente/(4884:4937): Conexión establecida con socket de destino.
+[INFO] 19:35:56:240 Cliente/(4884:4939): Conexión establecida con socket de destino.
+[INFO] 19:35:56:244 Cliente/(4884:4941): Conexión establecida con socket de destino.
+[INFO] 19:35:56:247 Cliente/(4884:4943): Conexión establecida con socket de destino.
+[INFO] 19:35:56:262 Cliente/(4884:4945): Conexión establecida con socket de destino.
+[INFO] 19:35:56:272 Cliente/(4884:4947): Conexión establecida con socket de destino.
+[INFO] 19:35:56:276 Cliente/(4884:4949): Conexión establecida con socket de destino.
+[INFO] 19:35:56:286 Cliente/(4884:4951): Conexión establecida con socket de destino.
+[INFO] 19:35:56:301 Cliente/(4884:4953): Conexión establecida con socket de destino.
+[INFO] 19:35:56:303 Cliente/(4884:4955): Conexión establecida con socket de destino.
+[INFO] 19:35:56:308 Cliente/(4884:4957): Conexión establecida con socket de destino.
+[INFO] 19:35:56:310 Cliente/(4884:4959): Conexión establecida con socket de destino.
+[INFO] 19:35:56:326 Cliente/(4884:4961): Conexión establecida con socket de destino.
+[INFO] 19:35:56:330 Cliente/(4884:4963): Conexión establecida con socket de destino.
+[INFO] 19:35:56:331 Cliente/(4884:4965): Conexión establecida con socket de destino.
+[INFO] 19:35:56:332 Cliente/(4884:4967): Conexión establecida con socket de destino.
+[INFO] 19:35:56:335 Cliente/(4884:4969): Conexión establecida con socket de destino.
+[INFO] 19:35:56:339 Cliente/(4884:4971): Conexión establecida con socket de destino.
+[INFO] 19:35:56:341 Cliente/(4884:4973): Conexión establecida con socket de destino.
+[INFO] 19:35:56:343 Cliente/(4884:4975): Conexión establecida con socket de destino.
+[INFO] 19:35:56:347 Cliente/(4884:4977): Conexión establecida con socket de destino.
+[INFO] 19:35:56:357 Cliente/(4884:4979): Conexión establecida con socket de destino.
+[INFO] 19:35:56:358 Cliente/(4884:4981): Conexión establecida con socket de destino.
+[INFO] 19:35:56:363 Cliente/(4884:4983): Conexión establecida con socket de destino.
+[INFO] 19:35:56:364 Cliente/(4884:4985): Conexión establecida con socket de destino.
+[INFO] 19:35:56:366 Cliente/(4884:4987): Conexión establecida con socket de destino.
+[INFO] 19:35:56:370 Cliente/(4884:4989): Conexión establecida con socket de destino.
+[INFO] 19:35:56:371 Cliente/(4884:4991): Conexión establecida con socket de destino.
+[INFO] 19:35:56:375 Cliente/(4884:4993): Conexión establecida con socket de destino.
+[INFO] 19:35:56:379 Cliente/(4884:4995): Conexión establecida con socket de destino.
+[INFO] 19:35:56:386 Cliente/(4884:4997): Conexión establecida con socket de destino.
+[INFO] 19:35:56:388 Cliente/(4884:4999): Conexión establecida con socket de destino.
+[INFO] 19:35:56:391 Cliente/(4884:5001): Conexión establecida con socket de destino.
+[INFO] 19:35:56:395 Cliente/(4884:5003): Conexión establecida con socket de destino.
+[INFO] 19:35:56:398 Cliente/(4884:5005): Conexión establecida con socket de destino.
+[INFO] 19:37:04:150 Cliente/(4884:5007): Conexión establecida con socket de destino.
+[INFO] 19:43:20:534 Cliente/(5123:5123): Conexión establecida con socket de destino.
+[INFO] 19:45:07:215 Cliente/(5123:5151): Conexión establecida con socket de destino.
+[INFO] 19:45:07:222 Cliente/(5123:5151): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:45:46:294 Cliente/(5123:5153): Conexión establecida con socket de destino.
+[INFO] 19:45:46:315 Cliente/(5123:5153): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:46:37:846 Cliente/(5123:5161): Conexión establecida con socket de destino.
+[INFO] 19:46:37:862 Cliente/(5123:5161): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:47:17:327 Cliente/(5123:5166): Conexión establecida con socket de destino.
+[INFO] 19:47:17:343 Cliente/(5123:5166): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 19:48:07:968 Cliente/(5123:5189): Conexión establecida con socket de destino.
+[INFO] 20:04:43:357 Cliente/(5499:5499): Conexión establecida con socket de destino.
+[INFO] 20:05:02:243 Cliente/(5499:5507): Conexión establecida con socket de destino.
+[INFO] 20:05:02:253 Cliente/(5499:5507): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:05:05:394 Cliente/(5499:5512): Conexión establecida con socket de destino.
+[INFO] 20:05:05:411 Cliente/(5499:5512): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:05:08:995 Cliente/(5499:5514): Conexión establecida con socket de destino.
+[INFO] 20:05:09:12 Cliente/(5499:5514): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:05:13:291 Cliente/(5499:5516): Conexión establecida con socket de destino.
+[INFO] 20:05:13:320 Cliente/(5499:5516): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:08:15:443 Cliente/(5499:5520): Conexión establecida con socket de destino.
+[INFO] 20:15:16:36 Cliente/(5499:5796): Conexión establecida con socket de destino.
+[INFO] 20:15:16:43 Cliente/(5499:5796): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:15:19:61 Cliente/(5499:5803): Conexión establecida con socket de destino.
+[INFO] 20:15:19:82 Cliente/(5499:5803): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:15:21:716 Cliente/(5499:5805): Conexión establecida con socket de destino.
+[INFO] 20:15:21:732 Cliente/(5499:5805): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:15:24:436 Cliente/(5499:5807): Conexión establecida con socket de destino.
+[INFO] 20:15:24:443 Cliente/(5499:5807): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:15:30:536 Cliente/(5499:5811): Conexión establecida con socket de destino.
+[INFO] 20:22:14:301 Cliente/(5499:6033): Conexión establecida con socket de destino.
+[INFO] 20:22:14:323 Cliente/(5499:6033): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:22:17:487 Cliente/(5499:6035): Conexión establecida con socket de destino.
+[INFO] 20:22:17:505 Cliente/(5499:6035): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:22:20:172 Cliente/(5499:6037): Conexión establecida con socket de destino.
+[INFO] 20:22:20:191 Cliente/(5499:6037): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:22:23:356 Cliente/(5499:6039): Conexión establecida con socket de destino.
+[INFO] 20:22:23:367 Cliente/(5499:6039): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:22:29:511 Cliente/(5499:6043): Conexión establecida con socket de destino.
+[INFO] 20:27:16:617 Cliente/(5499:6201): Conexión establecida con socket de destino.
+[INFO] 20:27:16:625 Cliente/(5499:6201): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:27:20:85 Cliente/(5499:6203): Conexión establecida con socket de destino.
+[INFO] 20:27:20:106 Cliente/(5499:6203): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:27:23:401 Cliente/(5499:6205): Conexión establecida con socket de destino.
+[INFO] 20:27:23:407 Cliente/(5499:6205): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:27:26:633 Cliente/(5499:6207): Conexión establecida con socket de destino.
+[INFO] 20:27:26:640 Cliente/(5499:6207): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:27:36:133 Cliente/(5499:6211): Conexión establecida con socket de destino.
+[INFO] 20:33:05:489 Cliente/(5499:6211): El intento de guardar un pedido fue: exitoso.
+
