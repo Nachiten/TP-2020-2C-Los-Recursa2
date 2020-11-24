@@ -1048,7 +1048,7 @@ void serve_client(int32_t* socket)
 {
 	while(1){
 		int32_t sizeAAllocar = 0;
-		codigo_operacion cod_op;
+		codigo_operacion cod_op = 0;
 		int32_t recibidosSize = 0;
 
 		int32_t recibidos = recv(*socket, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
@@ -1057,10 +1057,8 @@ void serve_client(int32_t* socket)
 		if(cod_op == 1)
 		{
 			process_request(cod_op, *socket, sizeAAllocar);
-		}
+		}else{
 
-		else
-		{
 			if(recibidos >= 1)
 			{
 				recibidosSize = recv(*socket, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
@@ -1069,8 +1067,6 @@ void serve_client(int32_t* socket)
 
 				process_request(cod_op, *socket, sizeAAllocar);
 			}
-
-
 			else
 			{
 				pthread_exit(NULL);
@@ -1080,6 +1076,7 @@ void serve_client(int32_t* socket)
 		recibidosSize = 0;
 		recibidos = 0;
 	}
+	close(socket);
 }
 
 void esperar_cliente(int32_t socket_servidor)
