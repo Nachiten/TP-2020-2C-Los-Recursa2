@@ -30,25 +30,35 @@ t_list* listaSemRestaurant;
 t_list* listaSemPedido;
 t_list* listaSemReceta;
 
-void abrirArchivo1();
-void abrirArchivo2();
-void abrirArchivo3();
+//void abrirArchivo1();
+//void abrirArchivo2();
+//void abrirArchivo3();
+
+// Creacion semaforos
 void crearSemaforoRestaurant(char*);
 void crearSemaforoPedido(char*, int);
-void crearSemaforoReceta(char* nombreReceta);
-void waitSemaforoRestaurant(char*);
-void signalSemaforoRestaurant(char*);
-void waitSemaforoPedido(char*, int);
-void signalSemaforoPedido(char*, int);
-void waitSemaforoReceta(char* nombreReceta);
-void signalSemaforoReceta(char* nombreReceta);
+void crearSemaforoReceta(char*);
 
+// Waits y signals
+void waitSemaforoRestaurant(char*);
+void waitSemaforoPedido(char*, int);
+void waitSemaforoReceta(char*);
+void signalSemaforoRestaurant(char*);
+void signalSemaforoPedido(char*, int);
+void signalSemaforoReceta(char*);
+
+// Funciones auxiliares
 void crearSemaforosArchivosExistentes();
 void crearSemaforosRestaurantesExistentes();
 void crearSemaforosRecetasExistentes();
 void crearSemaforosPedidosExistentes();
-void crearSemaforosPedidosRestaurant(char* nombreRestaurant);
-t_list* escanearCarpetasExistentes(char* path);
+void crearSemaforosPedidosRestaurant(char*);
+t_list* escanearCarpetasExistentes(char*);
+
+// Prints
+void printearSemaforosRestaurantes();
+void printearSemaforosRecetas();
+void printearSemaforosPedidos();
 
 
 #endif /* SRC_SEMAFOROS_H_ */

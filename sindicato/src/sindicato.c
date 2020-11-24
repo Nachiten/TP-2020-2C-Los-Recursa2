@@ -1410,44 +1410,25 @@ int main(){
 	}
 
     // Testing | Printear semaforos
-//  printearSemaforosRestaurantes();
-//  printearSemaforosPedidos();
-//  printearSemaforosRecetas();
+//	printearSemaforosRestaurantes();
+//	printearSemaforosPedidos();
+//	printearSemaforosRecetas();
 
 	// ---- A partir de aca el FS ya existe ----
 
-//	obtenerRestaurante("ElDestino");
+	// Testing (debe ir comentado)
+	//guardarPedido("Bataglia",5, 1);
+	//guardarPedido("Bataglia",42, 1);
 
-	// Testing semaforos
-//	char* restaurant1 = "ElDestino";
-//	crearSemaforoRestaurant(restaurant1);
-//	pthread_t hilo1;
-//	pthread_t hilo2;
-//	pthread_t hilo3;
-//	pthread_create(&hilo1, NULL, (void*)abrirArchivo1, NULL);
-//	pthread_create(&hilo2, NULL, (void*)abrirArchivo2, NULL);
-//	pthread_create(&hilo3, NULL, (void*)abrirArchivo3, NULL);
-//	pthread_join(hilo1, NULL);
-//	pthread_join(hilo2, NULL);
-//	pthread_join(hilo3, NULL);
-
-
+	// --- Hilo para leer el input de la consola ---
 	pthread_t hiloConsola;
-	// Hilo para leer el input de la consola
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
     pthread_detach(hiloConsola);
 
-    obtenerRestaurante("PanaderiaJorge", 1);
-    obtenerRestaurante("Bataglia", 1);
-
-    sleep(5);
-
-    obtenerRestaurante("Hola", 1);
-
-    // Iniciar servidor para recibir mensajes
+    // --- Iniciar servidor para recibir mensajes ---
     iniciar_server(PUERTO_ESCUCHA);
 
-//  pthread_join(hiloConsola, NULL);
+    // --- Nunca llega a ejecutar aca ---
 
 	// Liberaciones finales (a las que nunca se llega)
 	config_destroy(config);

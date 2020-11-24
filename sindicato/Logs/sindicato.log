@@ -34,3 +34,29 @@
 [INFO] 18:39:18:568 SINDICATO/(20045:20045): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=5 | posX=0 | posY=0 | cantHornos=3 | afinidades=[Milanesa] | platos=[Alfajor,Torta,Pastafrola] | precioPlatos=[20,30,40]
 [INFO] 18:39:18:569 SINDICATO/(20045:20045): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=5 | posX=15 | posY=12 | cantHornos=5 | afinidades=[Torta] | platos=[Chivito,Pizza,Sorrentinos] | precioPlatos=[10,5,10]
 [INFO] 18:39:23:569 SINDICATO/(20045:20045): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=0 | posX=0 | posY=0 | cantHornos=0 | afinidades=[] | platos=[] | precioPlatos=[]
+[INFO] 18:27:10:958 SINDICATO/(7082:7088): Se le asignan los bloques 7 a Torta
+[INFO] 18:27:10:973 SINDICATO/(7082:7088): Se creo una nueva receta llamada Torta
+[INFO] 18:27:15:981 SINDICATO/(7082:7088): Se le asignan los bloques 8 a Empanada
+[INFO] 18:27:15:984 SINDICATO/(7082:7088): Se creo una nueva receta llamada Empanada
+[INFO] 18:30:18:741 SINDICATO/(7885:7885): Se le asignan los bloques 9,10,11 a Pedido1 de PanaderiaJorge
+[INFO] 18:30:18:755 SINDICATO/(7885:7885): Se creo un nuevo pedido llamado Pedido1 de PanaderiaJorge
+[INFO] 18:30:18:755 SINDICATO/(7885:7885): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 18:30:36:175 SINDICATO/(7937:7937): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: FAIL
+[INFO] 18:30:47:302 SINDICATO/(4407:4407): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: FAIL
+[INFO] 18:30:56:874 SINDICATO/(4444:4444): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: FAIL
+[INFO] 18:34:01:486 SINDICATO/(13490:13490): Se le asignan los bloques 12,13,14 a Pedido2 de PanaderiaJorge
+[INFO] 18:34:01:511 SINDICATO/(13490:13490): Se creo un nuevo pedido llamado Pedido2 de PanaderiaJorge
+[INFO] 18:34:01:511 SINDICATO/(13490:13490): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 18:34:01:512 SINDICATO/(13490:13490): Se le asignan los bloques 15,16,17 a Pedido3 de PanaderiaJorge
+[INFO] 18:34:01:526 SINDICATO/(13490:13490): Se creo un nuevo pedido llamado Pedido3 de PanaderiaJorge
+[INFO] 18:34:01:526 SINDICATO/(13490:13490): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 18:34:15:602 SINDICATO/(13546:13546): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: FAIL
+[INFO] 18:34:15:602 SINDICATO/(13546:13546): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: FAIL
+[INFO] 18:41:32:65 SINDICATO/(14659:14659): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: FAIL
+[INFO] 18:41:32:65 SINDICATO/(14659:14659): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: FAIL
+[INFO] 18:42:05:320 SINDICATO/(14779:14779): Se le asignan los bloques 18,19,20 a Pedido5 de Bataglia
+[INFO] 18:42:05:334 SINDICATO/(14779:14779): Se creo un nuevo pedido llamado Pedido5 de Bataglia
+[INFO] 18:42:05:335 SINDICATO/(14779:14779): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 18:42:05:338 SINDICATO/(14779:14779): Se le asignan los bloques 21,22,23 a Pedido42 de Bataglia
+[INFO] 18:42:05:349 SINDICATO/(14779:14779): Se creo un nuevo pedido llamado Pedido42 de Bataglia
+[INFO] 18:42:05:349 SINDICATO/(14779:14779): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
