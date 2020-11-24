@@ -98,4 +98,7 @@ uint32_t verificarEstado(segmentos* pedido, estado_de_pedido estado_a_comparar);
 //dado un segmento y un estado, asigna ese estado al PEDIDO
 void cambiarEstado(segmentos* pedido, estado_de_pedido estado_a_establecer);
 
+//dado un segmento y un plato, aumenta en 1 la cantidad de platos listos
+void aumentarCantidadLista(segmentos* pedido, char* nombrePlato);
+
 #endif /* SRC_MANEJOMEMORIA_H_ */
