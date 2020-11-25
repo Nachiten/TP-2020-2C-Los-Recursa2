@@ -690,3 +690,265 @@
 [INFO] 20:27:36:133 Cliente/(5499:6211): Conexión establecida con socket de destino.
 [INFO] 20:33:05:489 Cliente/(5499:6211): El intento de guardar un pedido fue: exitoso.
 
+[INFO] 20:45:04:764 Cliente/(6706:6706): Conexión establecida con socket de destino.
+[INFO] 20:45:15:999 Cliente/(6706:6709): Conexión establecida con socket de destino.
+[INFO] 20:45:15:0 Cliente/(6706:6709): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:45:18:773 Cliente/(6706:6711): Conexión establecida con socket de destino.
+[INFO] 20:45:18:776 Cliente/(6706:6711): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:45:24:550 Cliente/(6706:6713): Conexión establecida con socket de destino.
+[INFO] 20:45:24:566 Cliente/(6706:6713): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:45:27:533 Cliente/(6706:6715): Conexión establecida con socket de destino.
+[INFO] 20:45:27:535 Cliente/(6706:6715): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:45:39:46 Cliente/(6706:6719): Conexión establecida con socket de destino.
+[INFO] 20:45:39:48 Cliente/(6706:6719): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:48:15:727 Cliente/(6706:6721): Conexión establecida con socket de destino.
+[INFO] 20:48:15:729 Cliente/(6706:6721): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:48:51:663 Cliente/(6706:6738): Conexión establecida con socket de destino.
+[INFO] 20:50:57:512 Cliente/(6706:6751): Conexión establecida con socket de destino.
+[INFO] 20:58:34:790 Cliente/(6801:6801): Conexión establecida con socket de destino.
+[INFO] 20:59:32:200 Cliente/(6801:6827): Conexión establecida con socket de destino.
+[INFO] 20:59:32:204 Cliente/(6801:6827): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:59:32:204 Cliente/(6801:6829): Conexión establecida con socket de destino.
+[INFO] 20:59:32:212 Cliente/(6801:6831): Conexión establecida con socket de destino.
+[INFO] 20:59:32:215 Cliente/(6801:6833): Conexión establecida con socket de destino.
+[INFO] 20:59:32:219 Cliente/(6801:6829): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:59:32:219 Cliente/(6801:6831): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:59:32:220 Cliente/(6801:6835): Conexión establecida con socket de destino.
+[INFO] 20:59:32:221 Cliente/(6801:6833): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:59:32:223 Cliente/(6801:6837): Conexión establecida con socket de destino.
+[INFO] 20:59:32:224 Cliente/(6801:6835): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:59:32:227 Cliente/(6801:6837): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [1]. Cantidad ya cocinada: [0].
+[INFO] 20:59:32:227 Cliente/(6801:6839): Conexión establecida con socket de destino.
+[INFO] 20:59:32:230 Cliente/(6801:6841): Conexión establecida con socket de destino.
+[INFO] 20:59:32:231 Cliente/(6801:6839): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:59:32:236 Cliente/(6801:6841): Obtuve del pedido 2 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [0].
+[INFO] 20:59:32:236 Cliente/(6801:6843): Conexión establecida con socket de destino.
+[INFO] 20:59:32:240 Cliente/(6801:6843): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:59:32:240 Cliente/(6801:6845): Conexión establecida con socket de destino.
+[INFO] 20:59:32:242 Cliente/(6801:6845): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:59:32:246 Cliente/(6801:6847): Conexión establecida con socket de destino.
+[INFO] 20:59:32:248 Cliente/(6801:6849): Conexión establecida con socket de destino.
+[INFO] 20:59:32:250 Cliente/(6801:6847): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 20:59:32:257 Cliente/(6801:6851): Conexión establecida con socket de destino.
+[INFO] 20:59:32:257 Cliente/(6801:6849): Obtuve del pedido 3 la/s siguientes comida/s: [AsadoConFritas,AsadoConFritas]. Su/s cantidad/es pedida/s: [1,1]. Cantidad ya cocinada: [0,0].
+[INFO] 20:59:32:260 Cliente/(6801:6853): Conexión establecida con socket de destino.
+[INFO] 20:59:32:261 Cliente/(6801:6855): Conexión establecida con socket de destino.
+[INFO] 20:59:32:265 Cliente/(6801:6857): Conexión establecida con socket de destino.
+[INFO] 20:59:32:284 Cliente/(6801:6859): Conexión establecida con socket de destino.
+[INFO] 20:59:32:286 Cliente/(6801:6861): Conexión establecida con socket de destino.
+[INFO] 20:59:32:289 Cliente/(6801:6863): Conexión establecida con socket de destino.
+[INFO] 20:59:32:294 Cliente/(6801:6865): Conexión establecida con socket de destino.
+[INFO] 20:59:32:296 Cliente/(6801:6867): Conexión establecida con socket de destino.
+[INFO] 20:59:32:310 Cliente/(6801:6869): Conexión establecida con socket de destino.
+[INFO] 20:59:32:316 Cliente/(6801:6871): Conexión establecida con socket de destino.
+[INFO] 20:59:32:320 Cliente/(6801:6873): Conexión establecida con socket de destino.
+[INFO] 20:59:32:322 Cliente/(6801:6875): Conexión establecida con socket de destino.
+[INFO] 20:59:32:328 Cliente/(6801:6877): Conexión establecida con socket de destino.
+[INFO] 20:59:32:333 Cliente/(6801:6879): Conexión establecida con socket de destino.
+[INFO] 20:59:32:352 Cliente/(6801:6881): Conexión establecida con socket de destino.
+[INFO] 20:59:32:353 Cliente/(6801:6883): Conexión establecida con socket de destino.
+[INFO] 20:59:32:358 Cliente/(6801:6885): Conexión establecida con socket de destino.
+[INFO] 20:59:32:360 Cliente/(6801:6887): Conexión establecida con socket de destino.
+[INFO] 20:59:32:362 Cliente/(6801:6889): Conexión establecida con socket de destino.
+[INFO] 20:59:32:377 Cliente/(6801:6891): Conexión establecida con socket de destino.
+[INFO] 20:59:32:379 Cliente/(6801:6893): Conexión establecida con socket de destino.
+[INFO] 20:59:32:384 Cliente/(6801:6895): Conexión establecida con socket de destino.
+[INFO] 20:59:32:386 Cliente/(6801:6897): Conexión establecida con socket de destino.
+[INFO] 20:59:32:393 Cliente/(6801:6899): Conexión establecida con socket de destino.
+[INFO] 20:59:32:400 Cliente/(6801:6901): Conexión establecida con socket de destino.
+[INFO] 20:59:32:403 Cliente/(6801:6903): Conexión establecida con socket de destino.
+[INFO] 20:59:32:411 Cliente/(6801:6905): Conexión establecida con socket de destino.
+[INFO] 20:59:32:416 Cliente/(6801:6907): Conexión establecida con socket de destino.
+[INFO] 20:59:32:420 Cliente/(6801:6909): Conexión establecida con socket de destino.
+[INFO] 20:59:32:422 Cliente/(6801:6911): Conexión establecida con socket de destino.
+[INFO] 20:59:32:426 Cliente/(6801:6911): El intento de agregar un plato a un pedido fue: exitoso.
+
+[INFO] 20:59:32:426 Cliente/(6801:6913): Conexión establecida con socket de destino.
+[INFO] 20:59:32:431 Cliente/(6801:6913): El intento de agregar un plato a un pedido fue: fallido.
+
+[INFO] 20:59:32:435 Cliente/(6801:6915): Conexión establecida con socket de destino.
+[INFO] 20:59:32:443 Cliente/(6801:6915): El intento de agregar un plato a un pedido fue: fallido.
+
+[INFO] 20:59:32:443 Cliente/(6801:6917): Conexión establecida con socket de destino.
+[INFO] 20:59:32:444 Cliente/(6801:6917): El intento de agregar un plato a un pedido fue: fallido.
+
+[INFO] 20:59:32:445 Cliente/(6801:6919): Conexión establecida con socket de destino.
+[INFO] 20:59:32:451 Cliente/(6801:6919): El intento de agregar un plato a un pedido fue: fallido.
+
+[INFO] 20:59:32:451 Cliente/(6801:6921): Conexión establecida con socket de destino.
+[INFO] 20:59:32:453 Cliente/(6801:6921): El intento de agregar un plato a un pedido fue: fallido.
+
+[INFO] 21:00:41:573 Cliente/(6801:6923): Conexión establecida con socket de destino.
+[INFO] 21:00:41:582 Cliente/(6801:6923): El intento de agregar un plato a un pedido fue: fallido.
+
+[INFO] 21:01:54:182 Cliente/(6971:6971): Conexión establecida con socket de destino.
+[INFO] 21:02:36:75 Cliente/(6971:6986): Conexión establecida con socket de destino.
+[INFO] 21:02:36:80 Cliente/(6971:6988): Conexión establecida con socket de destino.
+[INFO] 21:02:36:84 Cliente/(6971:6986): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:02:36:86 Cliente/(6971:6988): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:02:36:86 Cliente/(6971:6990): Conexión establecida con socket de destino.
+[INFO] 21:02:36:90 Cliente/(6971:6990): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:02:36:95 Cliente/(6971:6992): Conexión establecida con socket de destino.
+[INFO] 21:02:36:97 Cliente/(6971:6992): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:02:36:932 Cliente/(6971:6994): Conexión establecida con socket de destino.
+[INFO] 21:02:36:938 Cliente/(6971:6994): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:03:37:412 Cliente/(6971:6996): Conexión establecida con socket de destino.
+[INFO] 21:03:37:414 Cliente/(6971:6996): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [1]. Cantidad ya cocinada: [0].
+[INFO] 21:03:46:12 Cliente/(6971:7002): Conexión establecida con socket de destino.
+[INFO] 21:03:46:20 Cliente/(6971:7002): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:03:54:116 Cliente/(6971:7004): Conexión establecida con socket de destino.
+[INFO] 21:03:54:119 Cliente/(6971:7004): Obtuve del pedido 2 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [0].
+[INFO] 21:04:00:380 Cliente/(6971:7013): Conexión establecida con socket de destino.
+[INFO] 21:04:00:382 Cliente/(6971:7013): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:04:09:476 Cliente/(6971:7015): Conexión establecida con socket de destino.
+[INFO] 21:04:09:480 Cliente/(6971:7015): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:04:15:316 Cliente/(6971:7017): Conexión establecida con socket de destino.
+[INFO] 21:04:15:319 Cliente/(6971:7017): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:04:24:740 Cliente/(6971:7019): Conexión establecida con socket de destino.
+[INFO] 21:04:24:742 Cliente/(6971:7019): Obtuve del pedido 3 la/s siguientes comida/s: [AsadoConFritas,AsadoConFritas]. Su/s cantidad/es pedida/s: [1,1]. Cantidad ya cocinada: [0,0].
+[INFO] 21:05:44:752 Cliente/(6971:7021): Conexión establecida con socket de destino.
+[INFO] 21:19:53:948 Cliente/(6971:7792): Conexión establecida con socket de destino.
+[INFO] 21:19:53:957 Cliente/(6971:7792): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:19:57:725 Cliente/(6971:7794): Conexión establecida con socket de destino.
+[INFO] 21:19:57:735 Cliente/(6971:7794): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [1]. Cantidad ya cocinada: [0].
+[INFO] 21:20:02:253 Cliente/(6971:7798): Conexión establecida con socket de destino.
+[INFO] 21:20:02:260 Cliente/(6971:7798): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:20:09:132 Cliente/(6971:7800): Conexión establecida con socket de destino.
+[INFO] 21:20:09:133 Cliente/(6971:7800): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [0].
+[INFO] 21:20:51:301 Cliente/(6971:7805): Conexión establecida con socket de destino.
+[INFO] 21:20:51:303 Cliente/(6971:7805): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:20:55:166 Cliente/(6971:7807): Conexión establecida con socket de destino.
+[INFO] 21:20:55:172 Cliente/(6971:7807): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:20:57:916 Cliente/(6971:7811): Conexión establecida con socket de destino.
+[INFO] 21:20:57:919 Cliente/(6971:7811): Obtuve del pedido 3 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [0].
+[WARNING] 21:21:11:537 Cliente/(7819:7819): Conexión fallida con socket de destino.
+[INFO] 21:21:11:537 Cliente/(7819:7819): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 21:21:16:613 Cliente/(7831:7831): Conexión establecida con socket de destino.
+[INFO] 21:21:48:635 Cliente/(7831:7850): Conexión establecida con socket de destino.
+[INFO] 21:21:48:637 Cliente/(7831:7850): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:21:48:638 Cliente/(7831:7852): Conexión establecida con socket de destino.
+[INFO] 21:21:48:648 Cliente/(7831:7852): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:21:48:649 Cliente/(7831:7854): Conexión establecida con socket de destino.
+[INFO] 21:21:48:651 Cliente/(7831:7854): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:21:48:651 Cliente/(7831:7856): Conexión establecida con socket de destino.
+[INFO] 21:21:48:654 Cliente/(7831:7856): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:21:48:654 Cliente/(7831:7858): Conexión establecida con socket de destino.
+[INFO] 21:21:48:663 Cliente/(7831:7860): Conexión establecida con socket de destino.
+[INFO] 21:21:48:665 Cliente/(7831:7858): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:21:48:668 Cliente/(7831:7860): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [1]. Cantidad ya cocinada: [0].
+[INFO] 21:21:48:668 Cliente/(7831:7862): Conexión establecida con socket de destino.
+[INFO] 21:21:48:670 Cliente/(7831:7864): Conexión establecida con socket de destino.
+[INFO] 21:21:48:672 Cliente/(7831:7862): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:21:48:676 Cliente/(7831:7866): Conexión establecida con socket de destino.
+[INFO] 21:21:48:678 Cliente/(7831:7864): Obtuve del pedido 2 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [0].
+[INFO] 21:21:48:684 Cliente/(7831:7868): Conexión establecida con socket de destino.
+[INFO] 21:21:48:685 Cliente/(7831:7866): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:21:48:694 Cliente/(7831:7870): Conexión establecida con socket de destino.
+[INFO] 21:21:48:697 Cliente/(7831:7868): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:21:48:699 Cliente/(7831:7870): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:21:50:334 Cliente/(7831:7872): Conexión establecida con socket de destino.
+[INFO] 21:21:50:336 Cliente/(7831:7872): Obtuve del pedido 3 la/s siguientes comida/s: [AsadoConFritas,AsadoConFritas]. Su/s cantidad/es pedida/s: [1,1]. Cantidad ya cocinada: [0,0].
+[INFO] 21:22:56:120 Cliente/(7972:7972): Conexión establecida con socket de destino.
+[INFO] 21:23:01:189 Cliente/(7972:7988): Conexión establecida con socket de destino.
+[INFO] 21:23:01:200 Cliente/(7972:7990): Conexión establecida con socket de destino.
+[INFO] 21:23:01:204 Cliente/(7972:7992): Conexión establecida con socket de destino.
+[INFO] 21:23:01:210 Cliente/(7972:7993): Conexión establecida con socket de destino.
+[INFO] 21:23:01:216 Cliente/(7972:7994): Conexión establecida con socket de destino.
+[INFO] 21:23:01:219 Cliente/(7972:7995): Conexión establecida con socket de destino.
+[INFO] 21:23:01:224 Cliente/(7972:7996): Conexión establecida con socket de destino.
+[INFO] 21:23:01:224 Cliente/(7972:7997): Conexión establecida con socket de destino.
+[INFO] 21:23:01:227 Cliente/(7972:7998): Conexión establecida con socket de destino.
+[INFO] 21:23:06:964 Cliente/(7972:7988): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:23:06:983 Cliente/(7972:7990): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:23:06:987 Cliente/(7972:7992): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:23:06:990 Cliente/(7972:7993): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:23:14:641 Cliente/(7972:7994): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:23:14:642 Cliente/(7972:7995): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [1]. Cantidad ya cocinada: [0].
+[INFO] 21:23:14:658 Cliente/(7972:7996): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:23:14:662 Cliente/(7972:7997): Obtuve del pedido 2 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [0].
+[INFO] 21:23:14:680 Cliente/(7972:7998): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:23:24:367 Cliente/(7972:7999): Conexión establecida con socket de destino.
+[INFO] 21:23:24:373 Cliente/(7972:7999): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:23:40:71 Cliente/(7972:8018): Conexión establecida con socket de destino.
+[INFO] 21:26:40:824 Cliente/(7972:8018): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:26:46:531 Cliente/(7972:8021): Conexión establecida con socket de destino.
+[INFO] 21:28:53:879 Cliente/(8184:8184): Conexión establecida con socket de destino.
+[INFO] 21:29:01:595 Cliente/(8184:8201): Conexión establecida con socket de destino.
+[INFO] 21:29:01:598 Cliente/(8184:8203): Conexión establecida con socket de destino.
+[INFO] 21:29:01:600 Cliente/(8184:8201): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:29:01:607 Cliente/(8184:8205): Conexión establecida con socket de destino.
+[INFO] 21:29:01:608 Cliente/(8184:8203): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:29:01:614 Cliente/(8184:8207): Conexión establecida con socket de destino.
+[INFO] 21:29:01:615 Cliente/(8184:8205): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:29:01:623 Cliente/(8184:8209): Conexión establecida con socket de destino.
+[INFO] 21:29:01:624 Cliente/(8184:8207): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:29:01:627 Cliente/(8184:8211): Conexión establecida con socket de destino.
+[INFO] 21:29:01:628 Cliente/(8184:8209): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:29:01:643 Cliente/(8184:8213): Conexión establecida con socket de destino.
+[INFO] 21:29:01:643 Cliente/(8184:8211): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [1]. Cantidad ya cocinada: [0].
+[INFO] 21:29:01:649 Cliente/(8184:8215): Conexión establecida con socket de destino.
+[INFO] 21:29:01:655 Cliente/(8184:8213): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:29:01:658 Cliente/(8184:8217): Conexión establecida con socket de destino.
+[INFO] 21:29:01:658 Cliente/(8184:8215): Obtuve del pedido 2 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [0].
+[INFO] 21:29:01:662 Cliente/(8184:8217): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:29:02:760 Cliente/(8184:8219): Conexión establecida con socket de destino.
+[INFO] 21:29:02:765 Cliente/(8184:8219): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:29:08:510 Cliente/(8184:8221): Conexión establecida con socket de destino.
+[INFO] 21:29:08:517 Cliente/(8184:8221): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 21:29:11:776 Cliente/(8184:8223): Conexión establecida con socket de destino.
+[INFO] 21:29:11:786 Cliente/(8184:8223): Obtuve del pedido 3 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es pedida/s: [2]. Cantidad ya cocinada: [0].

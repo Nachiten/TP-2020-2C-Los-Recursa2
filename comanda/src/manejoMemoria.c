@@ -665,7 +665,7 @@ void tomar_datos_de_MP(tabla_paginas* platoDelPedido)
 
 void tomar_datos_de_SWAP(tabla_paginas* platoDelPedido)
 {
-	uint32_t desplazamiento = platoDelPedido->posicionInicialEnSWAP * 32;
+	uint32_t desplazamiento = platoDelPedido->posicionInicialEnSWAP;
 
 	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 

@@ -683,7 +683,7 @@ void inicializarSemaforos() //Todo matar semaforos?
 	sem_init(semaforoTocarListaEspaciosEnSWAP, 0, 1);
 	sem_init(semaforoTocarListaEspaciosEnMP, 0, 1);
 	sem_init(semaforoAlgoritmoReemplazo, 0, 1);
-	sem_init(semaforoTocarMP, 0, 1);//ToDo revisar todos los lugares donde deberian estar estos 2 semaforos!!!
+	sem_init(semaforoTocarMP, 0, 1);
 	sem_init(semaforoTocarSWAP, 0, 1);
 }
 
