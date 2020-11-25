@@ -17,11 +17,10 @@ typedef struct{
 
 
 //***VARIABLES***
-int32_t socket_sindicato;
 sem_t* semId;
-sem_t* semLog;
 int32_t id_global;
 t_list* listaPedidos;
+pthread_t planificacion;
 
 //***MENSAJES DE RESTO***
 void consultar_Platos(int32_t);

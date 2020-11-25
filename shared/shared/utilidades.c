@@ -79,12 +79,12 @@ char* resultadoDeRespuesta(uint32_t resultado)
 {
 	if(resultado == 1)
 	{
-		return "exitoso";
+		return "Exitoso";
 	}
 
 	else
 	{
-		return "fallido";
+		return "Fallido";
 	}
 }
 

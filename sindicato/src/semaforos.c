@@ -13,48 +13,48 @@
  * Semaforos de recetas
  */
 
-// Testing semaforos
-void abrirArchivo1(){
-
-	waitSemaforoRestaurant("ElDestino");
-
-	printf("Hilo 1 abrio el archivo restaurant\n");
-
-	printf("SLEEP 5 SEGUNDOS HILO 1\n");
-	sleep(5);
-
-	signalSemaforoRestaurant("ElDestino");
-
-	printf("Hilo 1 cerro el archivo restaurant\n");
-}
-
-void abrirArchivo2(){
-
-	waitSemaforoRestaurant("ElDestino");
-
-	printf("Hilo 2 abrio el archivo restaurant\n");
-
-	printf("SLEEP 5 SEGUNDOS HILO 1\n");
-	sleep(5);
-
-	signalSemaforoRestaurant("ElDestino");
-
-	printf("Hilo 2 cerro el archivo restaurant\n");
-}
-
-void abrirArchivo3(){
-
-	waitSemaforoRestaurant("ElDestino");
-
-	printf("Hilo 3 abrio el archivo restaurant\n");
-
-	printf("SLEEP 5 SEGUNDOS HILO 1\n");
-	sleep(5);
-
-	signalSemaforoRestaurant("ElDestino");
-
-	printf("Hilo 3 cerro el archivo restaurant\n");
-}
+//// Testing semaforos
+//void abrirArchivo1(){
+//
+//	waitSemaforoRestaurant("ElDestino");
+//
+//	printf("Hilo 1 abrio el archivo restaurant\n");
+//
+//	printf("SLEEP 5 SEGUNDOS HILO 1\n");
+//	sleep(5);
+//
+//	signalSemaforoRestaurant("ElDestino");
+//
+//	printf("Hilo 1 cerro el archivo restaurant\n");
+//}
+//
+//void abrirArchivo2(){
+//
+//	waitSemaforoRestaurant("ElDestino");
+//
+//	printf("Hilo 2 abrio el archivo restaurant\n");
+//
+//	printf("SLEEP 5 SEGUNDOS HILO 1\n");
+//	sleep(5);
+//
+//	signalSemaforoRestaurant("ElDestino");
+//
+//	printf("Hilo 2 cerro el archivo restaurant\n");
+//}
+//
+//void abrirArchivo3(){
+//
+//	waitSemaforoRestaurant("ElDestino");
+//
+//	printf("Hilo 3 abrio el archivo restaurant\n");
+//
+//	printf("SLEEP 5 SEGUNDOS HILO 1\n");
+//	sleep(5);
+//
+//	signalSemaforoRestaurant("ElDestino");
+//
+//	printf("Hilo 3 cerro el archivo restaurant\n");
+//}
 
 void crearSemaforoRestaurant(char* nombreRestaurant){
 	semRestaurant* semaforoRestaurant = malloc(sizeof(semRestaurant));
@@ -63,7 +63,8 @@ void crearSemaforoRestaurant(char* nombreRestaurant){
 
 	sem_init(semaforoNuevo, 0, 1);
 
-	semaforoRestaurant->nombreRestaurant = nombreRestaurant;
+	semaforoRestaurant->nombreRestaurant = malloc(strlen(nombreRestaurant) + 1);
+	strcpy(semaforoRestaurant->nombreRestaurant, nombreRestaurant);
 	semaforoRestaurant->semaforo = semaforoNuevo;
 
 	list_add(listaSemRestaurant, semaforoRestaurant);
@@ -76,9 +77,10 @@ void crearSemaforoPedido(char* nombreRestaurant, int numPedido){
 
 	sem_init(semaforoNuevo, 0, 1);
 
-	semaforoPedido->nombreRestaurant = nombreRestaurant;
-	semaforoPedido->numPedido = numPedido;
+	semaforoPedido->nombreRestaurant = malloc(strlen(nombreRestaurant) + 1);
+	strcpy(semaforoPedido->nombreRestaurant, nombreRestaurant);
 	semaforoPedido->semaforo = semaforoNuevo;
+	semaforoPedido->numPedido = numPedido;
 
 	list_add(listaSemPedido, semaforoPedido);
 }
@@ -90,10 +92,8 @@ void crearSemaforoReceta(char* nombreReceta){
 
 	sem_init(semaforoNuevo, 0, 1);
 
-	char* nombreRecetaCopia = malloc(strlen(nombreReceta) + 1);
-	strcpy(nombreRecetaCopia, nombreReceta);
-
-	semaforoReceta->nombreReceta = nombreRecetaCopia;
+	semaforoReceta->nombreReceta = malloc(strlen(nombreReceta) + 1);
+	strcpy(semaforoReceta->nombreReceta, nombreReceta);
 	semaforoReceta->semaforo = semaforoNuevo;
 
 	list_add(listaSemReceta, semaforoReceta);
@@ -112,7 +112,7 @@ void waitSemaforoRestaurant(char* nombreRestaurant){
 			return;
 		}
 	}
-	printf("No se encontro el semaforo restaurant deseado\n");
+	printf("ERROR | No se encontro el semaforo restaurant deseado\n");
 }
 
 void signalSemaforoRestaurant(char* nombreRestaurant){
@@ -128,7 +128,7 @@ void signalSemaforoRestaurant(char* nombreRestaurant){
 			return;
 		}
 	}
-	printf("No se encontro el semaforo restaurant deseado\n");
+	printf("ERROR | No se encontro el semaforo restaurant deseado\n");
 }
 
 void waitSemaforoPedido(char* nombreRestaurant, int numPedido){
@@ -145,7 +145,7 @@ void waitSemaforoPedido(char* nombreRestaurant, int numPedido){
 			return;
 		}
 	}
-	printf("No se encontro el semaforo pedido deseado\n");
+	printf("ERROR | No se encontro el semaforo pedido deseado\n");
 }
 
 void signalSemaforoPedido(char* nombreRestaurant, int numPedido){
@@ -162,7 +162,7 @@ void signalSemaforoPedido(char* nombreRestaurant, int numPedido){
 			return;
 		}
 	}
-	printf("No se encontro el semaforo pedido deseado\n");
+	printf("ERROR | No se encontro el semaforo pedido deseado\n");
 }
 
 void waitSemaforoReceta(char* nombreReceta){
@@ -178,7 +178,7 @@ void waitSemaforoReceta(char* nombreReceta){
 			return;
 		}
 	}
-	printf("No se encontro el semaforo receta deseado\n");
+	printf("ERROR | No se encontro el semaforo receta deseado\n");
 }
 
 void signalSemaforoReceta(char* nombreReceta){
@@ -194,7 +194,7 @@ void signalSemaforoReceta(char* nombreReceta){
 			return;
 		}
 	}
-	printf("No se encontro el semaforo receta deseado\n");
+	printf("ERROR | No se encontro el semaforo receta deseado\n");
 }
 
 void crearSemaforosArchivosExistentes(){
@@ -230,8 +230,9 @@ void printearSemaforosPedidos(){
 
 		semPedido* unPedido = list_get(listaSemPedido, i);
 
-		printf("Numero pedido: %i\n", unPedido->numPedido);
-		printf("Nombre restaurant de pedido: %s\n", unPedido->nombreRestaurant);
+		printf("Restaurant: %s | ", unPedido->nombreRestaurant);
+		printf("Pedido: %i\n", unPedido->numPedido);
+
 	}
 }
 

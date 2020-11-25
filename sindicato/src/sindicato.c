@@ -1178,25 +1178,21 @@ int existePedido(char* nombreRestaurante, int IDPedido){
 }
 
 char* generarStringPedidoDefault(){
+//	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
+//					"LISTA_PLATOS=[platoPrueba1,platoPrueba2,esUnaPrueba]\n"
+//					"CANTIDAD_PLATOS=[10000,20000,30000]\n"
+//					"CANTIDAD_LISTA=[10000,20000,30000]\n"
+//					"PRECIO_TOTAL=0\n";
+
+	// VERSION CORRECTA
 	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
-					"LISTA_PLATOS=[aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbb,ccccccccccccccc]\n"
-					"CANTIDAD_PLATOS=[10000,20000,30000]\n"
-					"CANTIDAD_LISTA=[10000,20000,30000]\n"
-					"PRECIO_TOTAL=0\n";
+				"LISTA_PLATOS=[]\n"
+				"CANTIDAD_PLATOS=[]\n"
+				"CANTIDAD_LISTA=[]\n"
+				"PRECIO_TOTAL=0\n";
 
 	printf("TamanioEnBytes: %i", strlen(stringPedidoDefault));
 
-	// Mide 92
-	// Neccesito 88
-
-	// 30 + 30 = 60
-
-	// VERSION CORRECTA
-//	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
-//				"LISTA_PLATOS=[]\n"
-//				"CANTIDAD_PLATOS=[]\n"
-//				"CANTIDAD_LISTA=[]\n"
-//				"PRECIO_TOTAL=0\n";
 
 	char* pedidoDefault = malloc(strlen(stringPedidoDefault) + 1);
 
@@ -1410,37 +1406,25 @@ int main(){
 	}
 
     // Testing | Printear semaforos
-//  printearSemaforosRestaurantes();
-//  printearSemaforosPedidos();
-//  printearSemaforosRecetas();
+//	printearSemaforosRestaurantes();
+//	printearSemaforosPedidos();
+//	printearSemaforosRecetas();
 
 	// ---- A partir de aca el FS ya existe ----
 
-//	obtenerRestaurante("ElDestino");
+	// Testing (debe ir comentado)
+	//guardarPedido("Bataglia",5, 1);
+	//guardarPedido("Bataglia",42, 1);
 
-	// Testing semaforos
-//	char* restaurant1 = "ElDestino";
-//	crearSemaforoRestaurant(restaurant1);
-//	pthread_t hilo1;
-//	pthread_t hilo2;
-//	pthread_t hilo3;
-//	pthread_create(&hilo1, NULL, (void*)abrirArchivo1, NULL);
-//	pthread_create(&hilo2, NULL, (void*)abrirArchivo2, NULL);
-//	pthread_create(&hilo3, NULL, (void*)abrirArchivo3, NULL);
-//	pthread_join(hilo1, NULL);
-//	pthread_join(hilo2, NULL);
-//	pthread_join(hilo3, NULL);
-
-
+	// --- Hilo para leer el input de la consola ---
 	pthread_t hiloConsola;
-	// Hilo para leer el input de la consola
     pthread_create(&hiloConsola, NULL, (void*)obtenerInputConsola, NULL);
     pthread_detach(hiloConsola);
 
-    // Iniciar servidor para recibir mensajes
+    // --- Iniciar servidor para recibir mensajes ---
     iniciar_server(PUERTO_ESCUCHA);
 
-//  pthread_join(hiloConsola, NULL);
+    // --- Nunca llega a ejecutar aca ---
 
 	// Liberaciones finales (a las que nunca se llega)
 	config_destroy(config);

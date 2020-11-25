@@ -473,3 +473,72 @@
 
 [INFO] 17:16:49:82 Cliente/(9365:9477): Conexión establecida con socket de destino.
 [INFO] 17:17:18:906 Cliente/(9365:9479): Conexión establecida con socket de destino.
+[INFO] 15:31:25:870 Cliente/(8656:8656): Conexión establecida con socket de destino.
+[INFO] 15:31:36:489 Cliente/(8656:8658): Conexión establecida con socket de destino.
+[INFO] 15:31:36:489 Cliente/(8656:8658): Los restaurantes que se encuentran disponibles son: [RestoDefault]
+[WARNING] 15:36:25:275 Cliente/(8656:8669): Conexión fallida con socket de destino.
+[INFO] 15:36:41:715 Cliente/(8656:8841): Conexión establecida con socket de destino.
+[INFO] 15:37:30:115 Cliente/(8656:8849): Conexión establecida con socket de destino.
+[INFO] 15:38:26:771 Cliente/(8656:8864): Conexión establecida con socket de destino.
+[INFO] 15:38:26:772 Cliente/(8656:8864): Los restaurantes que se encuentran disponibles son: [RestoDefault]
+[INFO] 15:38:50:221 Cliente/(8656:8924): Conexión establecida con socket de destino.
+[INFO] 15:38:50:254 Cliente/(8656:8924): Los restaurantes que se encuentran disponibles son: [RestoDefault]
+[INFO] 15:43:58:671 Cliente/(8656:8950): Conexión establecida con socket de destino.
+[INFO] 15:43:58:703 Cliente/(8656:8950): Los restaurantes que se encuentran disponibles son: [RestoDefault]
+[INFO] 15:44:11:536 Cliente/(8656:9102): Conexión establecida con socket de destino.
+[INFO] 15:44:11:538 Cliente/(8656:9102): Los restaurantes que se encuentran disponibles son: [RestoDefault]
+[INFO] 15:50:18:839 Cliente/(8656:9111): Conexión establecida con socket de destino.
+[INFO] 23:11:48:407 Cliente/(7906:7906): Conexión establecida con socket de destino.
+[INFO] 23:12:02:754 Cliente/(7906:7908): Conexión establecida con socket de destino.
+[INFO] 23:12:02:755 Cliente/(7906:7908): Los platos del restaurante < Panaderia > consultado son: []
+
+[INFO] 23:12:27:97 Cliente/(7906:7909): Conexión establecida con socket de destino.
+[INFO] 23:12:27:101 Cliente/(7906:7909): Los platos del restaurante < PanaderiaJorge > consultado son: [Alfajor,Torta,Pastafrola]
+
+[INFO] 23:18:57:860 Cliente/(8060:8060): Conexión establecida con socket de destino.
+[INFO] 23:19:03:321 Cliente/(8060:8062): Conexión establecida con socket de destino.
+[INFO] 23:22:03:643 Cliente/(8060:8063): Conexión establecida con socket de destino.
+[INFO] 23:31:11:313 Cliente/(8462:8462): Conexión establecida con socket de destino.
+[INFO] 23:31:16:683 Cliente/(8462:8464): Conexión establecida con socket de destino.
+[INFO] 23:35:19:972 Cliente/(8803:8803): Conexión establecida con socket de destino.
+[INFO] 23:35:29:428 Cliente/(8803:8805): Conexión establecida con socket de destino.
+[INFO] 23:40:44:928 Cliente/(8803:8805): Los pasos para cocinar el plato < Torta > son: [Cortar,Rellenar,Glasear], con sus tiempos: [10,15,20]
+[INFO] 23:41:53:942 Cliente/(8803:8969): Conexión establecida con socket de destino.
+[INFO] 23:41:53:942 Cliente/(8803:8969): Los pasos para cocinar el plato < Torta > son: [Cortar,Rellenar,Glasear], con sus tiempos: [10,15,20]
+[INFO] 23:42:07:859 Cliente/(8803:8970): Conexión establecida con socket de destino.
+[INFO] 23:42:07:860 Cliente/(8803:8970): Los pasos para cocinar el plato < Torta > son: [Cortar,Rellenar,Glasear], con sus tiempos: [10,15,20]
+[INFO] 23:42:36:296 Cliente/(8803:8982): Conexión establecida con socket de destino.
+[INFO] 23:44:01:727 Cliente/(9146:9146): Conexión establecida con socket de destino.
+[INFO] 23:44:08:883 Cliente/(9146:9148): Conexión establecida con socket de destino.
+[INFO] 23:44:08:885 Cliente/(9146:9148): Los pasos para cocinar el plato < Torta > son: [Cortar,Rellenar,Glasear], con sus tiempos: [10,15,20]
+[INFO] 23:44:14:423 Cliente/(9146:9152): Conexión establecida con socket de destino.
+[INFO] 23:44:14:424 Cliente/(9146:9152): Los pasos para cocinar el plato < Torta > son: [Cortar,Rellenar,Glasear], con sus tiempos: [10,15,20]
+[INFO] 23:44:19:533 Cliente/(9146:9154): Conexión establecida con socket de destino.
+[INFO] 23:44:19:534 Cliente/(9146:9154): Los pasos para cocinar el plato < P > son: [], con sus tiempos: []
+[WARNING] 00:02:38:853 Cliente/(9535:9535): Conexión fallida con socket de destino.
+[INFO] 00:02:38:853 Cliente/(9535:9535): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 00:02:51:700 Cliente/(9539:9539): Conexión establecida con socket de destino.
+[INFO] 00:03:32:493 Cliente/(9539:9541): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 00:03:56:605 Cliente/(9539:9546): El intento de guardar un pedido fue: fallido.
+
+[INFO] 00:04:09:798 Cliente/(9539:9553): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 00:05:04:188 Cliente/(9583:9583): Conexión establecida con socket de destino.
+[INFO] 00:05:13:546 Cliente/(9583:9585): El intento de guardar un pedido fue: fallido.
+
+[INFO] 00:05:22:105 Cliente/(9583:9588): El intento de guardar un pedido fue: fallido.
+
+[INFO] 00:05:31:192 Cliente/(9583:9591): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 00:07:27:847 Cliente/(9583:9593): Conexión establecida con socket de destino.
+[INFO] 00:07:27:852 Cliente/(9583:9593): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 00:09:44:3 Cliente/(9583:9614): Conexión establecida con socket de destino.
+[INFO] 00:09:44:4 Cliente/(9583:9614): Obtuve del pedido 2 la/s siguientes comida/s: [aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbb,ccccccccccccccc,Torta]. Su/s cantidad/es: [10000,20000,30000,5]. Cantidad ya cocinada: [10000,20000,30000,0]
+[INFO] 00:10:22:854 Cliente/(9583:9647): Conexión establecida con socket de destino.
+[INFO] 00:10:22:855 Cliente/(9583:9647): Obtuve del pedido 1 la/s siguientes comida/s: [aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbb,ccccccccccccccc]. Su/s cantidad/es: [10000,20000,30000]. Cantidad ya cocinada: [10000,20000,30000]
+[INFO] 00:11:31:581 Cliente/(9583:9651): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 00:11:44:422 Cliente/(9583:9666): Conexión establecida con socket de destino.
+[INFO] 00:11:44:423 Cliente/(9583:9666): Obtuve del pedido 5 la/s siguientes comida/s: [aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbb,ccccccccccccccc]. Su/s cantidad/es: [10000,20000,30000]. Cantidad ya cocinada: [10000,20000,30000]

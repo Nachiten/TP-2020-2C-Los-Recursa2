@@ -13,12 +13,12 @@
 
 // Mensajes de socket
 void consultarPlatos(char*, uint32_t);
-void confirmarPedido(char*, int);
+void confirmarPedido(char*, int, uint32_t);
 void obtenerPedido(char*, int, uint32_t);
 void obtenerRestaurante(char*, uint32_t);
-void guardarPedido(char*, int);
+void guardarPedido(char*, int, uint32_t);
 void guardarPlato(char*, int, char*, int, uint32_t);
-void terminarPedido(char*, int);
+void terminarPedido(char*, int, uint32_t);
 void platoListo(char*, int, char*, uint32_t);
 void obtenerReceta(char*, uint32_t);
 
@@ -34,5 +34,12 @@ respuesta_obtener_pedido* generarRtaObtenerPedidoDefault();
 void freeRtaObtenerPedido(respuesta_obtener_pedido* rta);
 void freeRtaObtenerReceta(respuesta_obtener_receta* rta);
 void freeRtaObtenerRestaurante(respuesta_obtener_restaurante* rta);
+
+// Logs
+void loguearRtaObtenerPedido(respuesta_obtener_pedido* rta);
+void loguearRtaObtenerReceta(respuesta_obtener_receta* rta);
+void loguearRtaObtenerRestaurante(respuesta_obtener_restaurante* rta);
+void loguearRtaConsultarPlatos(respuesta_consultar_platos* rta);
+
 
 #endif /* SRC_MENSAJES_H_ */

@@ -33,6 +33,7 @@
 //cosas cargadas del archivo config
 t_config* configuracion;
 t_log* logger;
+int32_t socket_sindicato;
 char* LOG_PATH;
 char* puerto_local;
 char* ip_sindicato;
@@ -61,6 +62,7 @@ t_list* listaDeColasReady;
 t_queue* colaParaHornear;
 t_list* platosHorneandose;
 
+sem_t* semLog;
 sem_t* mutexNew;
 sem_t* mutexListaReady;
 sem_t* mutexBlock;
