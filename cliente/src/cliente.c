@@ -1,6 +1,18 @@
 #include "cliente.h"
 
-int main(){
+int main(int cantArg, char* argumentos[]){
+
+
+	char* pathConfig;
+
+	// Si no hay ningun parametro del path de config genero valor default
+	if (cantArg < 2){
+		printf("El path de la config no está especificado, tomando valor default.\nValor default: /home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/cliente.config\n");
+		pathConfig = "/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/cliente.config";
+	// Si hay un parametro asumo que es el path de la config y lo uso
+	} else {
+		pathConfig = argumentos[1];
+	}
 
 	//PIDCliente = getpid();
 	socketEscucha = 0;
@@ -12,7 +24,13 @@ int main(){
 	//ip_app = malloc(15);
 
 	//Cargo las configuraciones del .config
-	config = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/cliente.config");
+	config = leerConfiguracion(pathConfig);
+
+	if (config == NULL){
+		printf("ERROR | El path de la config especificado no es valido.\n");
+		exit(2);
+	}
+
 	idCliente = config_get_string_value(config, "ID_CLIENTE");
 	LOG_PATH = config_get_string_value(config,"LOG_FILE_PATH"); //cargo el path del archivo log
 	ip_destino = config_get_string_value(config,"IP_DESTINO");
