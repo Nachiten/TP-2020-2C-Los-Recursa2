@@ -138,8 +138,10 @@ void crear_Pedido(int32_t socket_cliente){
 void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 	respuesta_ok_error* respuesta = malloc(sizeof(respuesta_ok_error));
 	int32_t nuevoSocketSindicato;
+	guardar_plato* pasamanosGuardarPlato;
 
 	if(buscar_pedido_por_id(recibidoAPlato->idPedido) != -2){
+
 		nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
 		if(nuevoSocketSindicato < 0){
 			sem_wait(semLog);
@@ -147,8 +149,17 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 			sem_post(semLog);
 			exit(-2);
 		}
+		pasamanosGuardarPlato = malloc(sizeof(guardar_plato));
+		pasamanosGuardarPlato->nombrePlato = malloc(strlen(recibidoAPlato->nombrePlato)+1);
+		pasamanosGuardarPlato->largoNombrePlato = strlen(recibidoAPlato->nombrePlato);
+		pasamanosGuardarPlato->nombreRestaurante = malloc(strlen(nombreRestaurante)+1);
+	    pasamanosGuardarPlato->largoNombreRestaurante = strlen(nombreRestaurante);
+		strcpy(pasamanosGuardarPlato->nombrePlato, recibidoAPlato->nombrePlato);
+		strcpy(pasamanosGuardarPlato->nombreRestaurante, nombreRestaurante);
+		pasamanosGuardarPlato->idPedido = recibidoAPlato->idPedido;
+		pasamanosGuardarPlato->cantidadPlatos = 1;
 
-		mandar_mensaje(recibidoAPlato, GUARDAR_PLATO, nuevoSocketSindicato);
+		mandar_mensaje(pasamanosGuardarPlato, GUARDAR_PLATO, nuevoSocketSindicato);
 
 		codigo_operacion codigoRecibido;
 	    bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
@@ -168,7 +179,9 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 		respuesta->respuesta = 0;
 		mandar_mensaje(respuesta,RESPUESTA_A_PLATO,socket_cliente);
 	}
-
+    free(pasamanosGuardarPlato->nombrePlato);
+    free(pasamanosGuardarPlato->nombreRestaurante);
+    free(pasamanosGuardarPlato);
 	free(respuesta);
 }
 

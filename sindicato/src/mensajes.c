@@ -18,12 +18,10 @@
  * Obtener pedido | [Rtas Terminadas] pedido default terminado
  * Plato listo | [Rtas Terminadas] Terminado de codear respuestas booleanas
  * Guardar plato | [Rtas Terminadas] Se envian rtas booleanas
- *
- *
- * Consultar platos - Interno listo, falta envio de mensaje
- * Guardar pedido - Interno listo, falta envio mensaje
- * Confirmar pedido - Interno listo, falta envio mensaje
- * Terminar pedido - Interno listo, falta envio de mensaje
+ * Consultar platos | [Rtas Terminadas] Se envian cadena de platos vacia
+ * Guardar pedido | [Rtas Terminadas] Se envian respuesta OK/FAIL segun corresponde
+ * Confirmar pedido | [Rtas Terminadas] Se envian respuesta OK/FAIL segun corresponde
+ * Terminar pedido | [Rtas Terminadas] Se envian respuesta OK/FAIL segun corresponde
  *
  */
 
@@ -336,7 +334,6 @@ void consultarPlatos(char* nombreRestaurant, uint32_t socket_cliente){
 
 	printearRespuestaConsultarPlatos(respuestaPlatos);
 
-	// TODO | Enviar respuesta
 	mandar_mensaje(respuestaPlatos, RESPUESTA_CONSULTAR_PLATOS, socket_cliente);
 
 	freeDeArray(datosSeparados);
@@ -346,17 +343,17 @@ void consultarPlatos(char* nombreRestaurant, uint32_t socket_cliente){
 	free(respuestaPlatos);
 }
 
-void terminarPedido(char* nombreRestaurant, int IDPedido){
+void terminarPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente){
 
 	if ( !existeRestaurant(nombreRestaurant) ){
 		printf("ERROR | No existe el restaurant buscado.\n");
-		// TODO | Retornar fail
+		enviarRespuestaBooleana(socketCliente, RESPUESTA_TERMINAR_PEDIDO, FAIL);
 		return;
 	}
 
 	if( !existePedido(nombreRestaurant, IDPedido) ){
 		printf("ERROR | No existe el pedido solicitado.\n");
-		// TODO | Retornar fail
+		enviarRespuestaBooleana(socketCliente, RESPUESTA_TERMINAR_PEDIDO, FAIL);
 		return;
 	}
 
@@ -367,7 +364,7 @@ void terminarPedido(char* nombreRestaurant, int IDPedido){
 	if(!pedidoEstaEnEstado("Confirmado", datosPedido)){
 		printf("ERROR | No esta en estado pendiente.\n");
 		signalSemaforoPedido(nombreRestaurant, IDPedido);
-		// TODO | Retornar fail
+		enviarRespuestaBooleana(socketCliente, RESPUESTA_TERMINAR_PEDIDO, FAIL);
 		return;
 	}
 
@@ -411,7 +408,7 @@ void terminarPedido(char* nombreRestaurant, int IDPedido){
 
 	signalSemaforoPedido(nombreRestaurant, IDPedido);
 
-	// TODO | Retornar OK
+	enviarRespuestaBooleana(socketCliente, RESPUESTA_TERMINAR_PEDIDO, OK);
 
 	free(datosPedido);
 	free(nuevosDatosPedido);
@@ -422,17 +419,17 @@ void terminarPedido(char* nombreRestaurant, int IDPedido){
 
 }
 
-void confirmarPedido(char* nombreRestaurant, int IDPedido){
+void confirmarPedido(char* nombreRestaurant, int IDPedido, uint32_t socket_cliente){
 
 	if ( !existeRestaurant(nombreRestaurant) ){
 		printf("ERROR | No existe el restaurant buscado.\n");
-		// TODO | Retornar fail
+		enviarRespuestaBooleana(socket_cliente, RESPUESTA_CONFIRMAR_PEDIDO, FAIL);
 		return;
 	}
 
 	if( !existePedido(nombreRestaurant, IDPedido) ){
 		printf("ERROR | No existe el pedido solicitado.\n");
-		// TODO | Retornar fail
+		enviarRespuestaBooleana(socket_cliente, RESPUESTA_CONFIRMAR_PEDIDO, FAIL);
 		return;
 	}
 
@@ -443,7 +440,7 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 	if(!pedidoEstaEnEstado("Pendiente", datosPedido)){
 		printf("ERROR | No esta en estado pendiente.\n");
 		signalSemaforoPedido(nombreRestaurant, IDPedido);
-		// TODO | Retornar fail
+		enviarRespuestaBooleana(socket_cliente, RESPUESTA_CONFIRMAR_PEDIDO, FAIL);
 		return;
 	}
 
@@ -487,7 +484,7 @@ void confirmarPedido(char* nombreRestaurant, int IDPedido){
 
 	signalSemaforoPedido(nombreRestaurant, IDPedido);
 
-	// TODO | Retornar OK
+	enviarRespuestaBooleana(socket_cliente, RESPUESTA_CONFIRMAR_PEDIDO, OK);
 
 	free(datosPedido);
 	free(nuevosDatosPedido);
@@ -722,16 +719,16 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 }
 
 // Generar un nuevo pedido vacio en el restaurante
-void guardarPedido(char* nombreRestaurante, int IDPedido){
+void guardarPedido(char* nombreRestaurante, int IDPedido, int32_t socket_cliente){
 	if (!existeRestaurant(nombreRestaurante)){
 		printf("ERROR | No existe el restaurant solicitado.\n");
-		// TODO | Se debe enviar un mensaje con respuesta negativa (Fail)
+		enviarRespuestaBooleana(socket_cliente, RESPUESTA_GUARDAR_PEDIDO, FAIL);
 		return;
 	}
 
 	if (existePedido(nombreRestaurante, IDPedido)){
 		printf("ERROR | Ya existe el pedido con ID solicitado.\n");
-		// TODO | Se debe enviar un mensaje con respuesta negativa (Fail)
+		enviarRespuestaBooleana(socket_cliente, RESPUESTA_GUARDAR_PEDIDO, FAIL);
 		return;
 	}
 
@@ -763,7 +760,7 @@ void guardarPedido(char* nombreRestaurante, int IDPedido){
 
 	crearSemaforoPedido(nombreRestaurante, IDPedido);
 
-	// TODO | Se debe dar la respuesta afirmativa
+	enviarRespuestaBooleana(socket_cliente, RESPUESTA_GUARDAR_PEDIDO, OK);
 
 	free(pathCarpetaRestaurant);
 	free(numeroPedidoString);
