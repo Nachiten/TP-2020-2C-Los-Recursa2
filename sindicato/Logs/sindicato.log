@@ -74,3 +74,23 @@
 [INFO] 23:44:08:884 SINDICATO/(9144:9153): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos=[Cortar,Rellenar,Glasear] | tiempoPasos=[10,15,20]
 [INFO] 23:44:14:424 SINDICATO/(9144:9155): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos=[Cortar,Rellenar,Glasear] | tiempoPasos=[10,15,20]
 [INFO] 23:44:19:533 SINDICATO/(9144:9157): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos=[] | tiempoPasos=[]
+[INFO] 00:03:32:492 SINDICATO/(9537:9547): Se le asignan los bloques 5,6,7 a Pedido1 de PanaderiaJorge
+[INFO] 00:03:32:493 SINDICATO/(9537:9547): Se creo un nuevo pedido llamado Pedido1 de PanaderiaJorge
+[INFO] 00:03:32:493 SINDICATO/(9537:9547): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 00:03:56:605 SINDICATO/(9537:9554): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: FAIL
+[INFO] 00:04:09:797 SINDICATO/(9537:9558): Se le asignan los bloques 8,9,10 a Pedido2 de PanaderiaJorge
+[INFO] 00:04:09:797 SINDICATO/(9537:9558): Se creo un nuevo pedido llamado Pedido2 de PanaderiaJorge
+[INFO] 00:04:09:798 SINDICATO/(9537:9558): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 00:05:13:546 SINDICATO/(9581:9589): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: FAIL
+[INFO] 00:05:22:104 SINDICATO/(9581:9592): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: FAIL
+[INFO] 00:05:31:191 SINDICATO/(9581:9594): Se le asignan los bloques 11,12,13 a Pedido3 de PanaderiaJorge
+[INFO] 00:05:31:191 SINDICATO/(9581:9594): Se creo un nuevo pedido llamado Pedido3 de PanaderiaJorge
+[INFO] 00:05:31:192 SINDICATO/(9581:9594): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 00:07:27:851 SINDICATO/(9581:9615): Se le asignan los bloques 14 a Pedido2 de PanaderiaJorge
+[INFO] 00:07:27:852 SINDICATO/(9581:9615): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 00:09:44:4 SINDICATO/(9581:9648): [EnvioMSG] RTA_OBTENER_PEDIDO con valores: comidas=[aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbb,ccccccccccccccc,Torta] | cantTotales=[10000,20000,30000,5] | cantListas=[10000,20000,30000,0]
+[INFO] 00:10:22:855 SINDICATO/(9581:9652): [EnvioMSG] RTA_OBTENER_PEDIDO con valores: comidas=[aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbb,ccccccccccccccc] | cantTotales=[10000,20000,30000] | cantListas=[10000,20000,30000]
+[INFO] 00:11:31:580 SINDICATO/(9581:9667): Se le asignan los bloques 15,16,17 a Pedido5 de PanaderiaJorge
+[INFO] 00:11:31:580 SINDICATO/(9581:9667): Se creo un nuevo pedido llamado Pedido5 de PanaderiaJorge
+[INFO] 00:11:31:580 SINDICATO/(9581:9667): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 00:11:44:423 SINDICATO/(9581:9669): [EnvioMSG] RTA_OBTENER_PEDIDO con valores: comidas=[aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbb,ccccccccccccccc] | cantTotales=[10000,20000,30000] | cantListas=[10000,20000,30000]

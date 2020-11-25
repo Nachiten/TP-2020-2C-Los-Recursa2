@@ -515,3 +515,30 @@
 [INFO] 23:44:14:424 Cliente/(9146:9152): Los pasos para cocinar el plato < Torta > son: [Cortar,Rellenar,Glasear], con sus tiempos: [10,15,20]
 [INFO] 23:44:19:533 Cliente/(9146:9154): Conexión establecida con socket de destino.
 [INFO] 23:44:19:534 Cliente/(9146:9154): Los pasos para cocinar el plato < P > son: [], con sus tiempos: []
+[WARNING] 00:02:38:853 Cliente/(9535:9535): Conexión fallida con socket de destino.
+[INFO] 00:02:38:853 Cliente/(9535:9535): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 00:02:51:700 Cliente/(9539:9539): Conexión establecida con socket de destino.
+[INFO] 00:03:32:493 Cliente/(9539:9541): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 00:03:56:605 Cliente/(9539:9546): El intento de guardar un pedido fue: fallido.
+
+[INFO] 00:04:09:798 Cliente/(9539:9553): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 00:05:04:188 Cliente/(9583:9583): Conexión establecida con socket de destino.
+[INFO] 00:05:13:546 Cliente/(9583:9585): El intento de guardar un pedido fue: fallido.
+
+[INFO] 00:05:22:105 Cliente/(9583:9588): El intento de guardar un pedido fue: fallido.
+
+[INFO] 00:05:31:192 Cliente/(9583:9591): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 00:07:27:847 Cliente/(9583:9593): Conexión establecida con socket de destino.
+[INFO] 00:07:27:852 Cliente/(9583:9593): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 00:09:44:3 Cliente/(9583:9614): Conexión establecida con socket de destino.
+[INFO] 00:09:44:4 Cliente/(9583:9614): Obtuve del pedido 2 la/s siguientes comida/s: [aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbb,ccccccccccccccc,Torta]. Su/s cantidad/es: [10000,20000,30000,5]. Cantidad ya cocinada: [10000,20000,30000,0]
+[INFO] 00:10:22:854 Cliente/(9583:9647): Conexión establecida con socket de destino.
+[INFO] 00:10:22:855 Cliente/(9583:9647): Obtuve del pedido 1 la/s siguientes comida/s: [aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbb,ccccccccccccccc]. Su/s cantidad/es: [10000,20000,30000]. Cantidad ya cocinada: [10000,20000,30000]
+[INFO] 00:11:31:581 Cliente/(9583:9651): El intento de guardar un pedido fue: exitoso.
+
+[INFO] 00:11:44:422 Cliente/(9583:9666): Conexión establecida con socket de destino.
+[INFO] 00:11:44:423 Cliente/(9583:9666): Obtuve del pedido 5 la/s siguientes comida/s: [aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbb,ccccccccccccccc]. Su/s cantidad/es: [10000,20000,30000]. Cantidad ya cocinada: [10000,20000,30000]

@@ -405,7 +405,7 @@ void obtenerInputConsolaCliente(){
 		{
 			recibir_mensaje(estructuraRespuesta,RESPUESTA_GUARDAR_PLATO,socketCliente);
 			sem_wait(semLog);
-			log_info(logger, "El intento de guardar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+			log_info(logger, "El intento de guardar un plato en un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
 			sem_post(semLog);
 		}
 

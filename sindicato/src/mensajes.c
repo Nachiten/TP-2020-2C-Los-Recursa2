@@ -23,15 +23,16 @@
  * Confirmar pedido | [Rtas Terminadas] Se envian respuesta OK/FAIL segun corresponde
  * Terminar pedido | [Rtas Terminadas] Se envian respuesta OK/FAIL segun corresponde
 
- * Obtener restaurante - Logs hechos
- * Obtener receta - Logs hechos
- * Obtener pedido - Logs hechos
- * Plato listo - Logs hechos
- * Guardar plato - Logs hechos
- * Guardar pedido - Logs hechos
- * Confirmar pedido - Logs hechos
- * Terminar pedido - Logs hechos
- * Consultar platos - Logs hechos
+ * Obtener restaurante - Logs hechos -> Tested
+ * Consultar platos - Logs hechos -> Tested
+ * Obtener receta - Logs hechos -> Tested
+ * Guardar pedido - Logs hechos -> Hay que revisar
+ * Guardar plato - Logs hechos -> Hay que revisar
+ * Obtener pedido - Logs hechos -> Hay que revisar
+ * Plato listo - Logs hechos ->
+ * Confirmar pedido - Logs hechos ->
+ * Terminar pedido - Logs hechos ->
+
  *
  */
 
