@@ -84,6 +84,18 @@ uint32_t valor_para_switch_case(char* input) {
 		switcher = FINALIZAR_PEDIDO;
 	}
 
+	//TERMINAR_PEDIDO [idPEDIDO] [nombreRESTAURANTE]
+	if (strcmp(input,"TERMINAR_PEDIDO") == 0)
+	{
+		switcher = TERMINAR_PEDIDO;
+	}
+
+	//OBTENER_RECETA [nombreRECETA]
+	if (strcmp(input,"OBTENER_RECETA") == 0)
+	{
+		switcher = OBTENER_RECETA;
+	}
+
 	return switcher;
 }
 

@@ -263,7 +263,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			break;
 
 		case RESPUESTA_CONSULTAR_PEDIDO:
-
+            size_ya_armado = serializar_paquete_respuesta_consultar_pedido(paquete, mensaje);
 			break;
 
 		case RESPUESTA_OBTENER_PEDIDO:
@@ -281,7 +281,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 			break;
 
 		case RESPUESTA_OBTENER_RECETA:
-
+            size_ya_armado = serializar_paquete_respuesta_obtener_receta(paquete, mensaje);
 			break;
 
 		default:
@@ -1149,22 +1149,22 @@ uint32_t serializar_paquete_respuesta_obtener_receta(t_paquete* paquete, respues
 	memcpy(streamAuxiliar + desplazamiento, &(estructura->sizePasos), sizeof(estructura->sizePasos));
 	desplazamiento += sizeof(estructura->sizePasos);
 
-	memcpy(streamAuxiliar + desplazamiento, estructura->pasos, estructura->sizePasos);
-	desplazamiento += estructura->sizePasos;
+	memcpy(streamAuxiliar + desplazamiento, estructura->pasos, estructura->sizePasos+1);
+	desplazamiento += estructura->sizePasos+1;
 
 	memcpy(streamAuxiliar + desplazamiento, &(estructura->sizeTiempoPasos), sizeof(estructura->sizeTiempoPasos));
 	desplazamiento += sizeof(estructura->sizePasos);
 
-	memcpy(streamAuxiliar + desplazamiento, estructura->tiempoPasos, estructura->sizeTiempoPasos);
-	desplazamiento += estructura->sizeTiempoPasos;
+	memcpy(streamAuxiliar + desplazamiento, estructura->tiempoPasos, estructura->sizeTiempoPasos+1);
+	desplazamiento += estructura->sizeTiempoPasos+1;
 
 
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
 	pesoDeElementosAEnviar = sizeof(estructura->sizePasos)
 			               + sizeof(estructura->sizeTiempoPasos)
-						   + estructura->sizePasos
-						   + estructura->sizeTiempoPasos;
+						   + estructura->sizePasos+1
+						   + estructura->sizeTiempoPasos+1;
 
 
 			if(desplazamiento != pesoDeElementosAEnviar)

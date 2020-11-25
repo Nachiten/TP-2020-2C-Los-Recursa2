@@ -141,10 +141,11 @@ void obtenerReceta(char* nombreReceta, uint32_t socketCliente){
 		miRespuesta->tiempoPasos = malloc(strlen(arrayVacio) + 1);
 		strcpy(miRespuesta->tiempoPasos, arrayVacio);
 
-		freeRtaObtenerReceta(miRespuesta);
+
 
 		loguearRtaObtenerReceta(miRespuesta);
 		mandar_mensaje(miRespuesta, RESPUESTA_OBTENER_RECETA, socketCliente);
+		freeRtaObtenerReceta(miRespuesta);
 
 		return;
 	}
@@ -163,23 +164,22 @@ void obtenerReceta(char* nombreReceta, uint32_t socketCliente){
 	char* pasos = lineaPasos[1];
 	char* tiemposPasos = lineaTiempoPasos[1];
 
-	respuesta_obtener_receta* miRespuesta = malloc(sizeof(respuesta_obtener_receta));
+	respuesta_obtener_receta* recetaBuscada = malloc(sizeof(respuesta_obtener_receta));
 
-	miRespuesta->sizePasos = strlen(pasos);
-	miRespuesta->pasos = malloc(strlen(pasos) + 1);
-	strcpy(miRespuesta->pasos, pasos);
+	recetaBuscada->sizePasos = strlen(pasos);
+	recetaBuscada->pasos = malloc(strlen(pasos) + 1);
+	strcpy(recetaBuscada->pasos, pasos);
 
-	miRespuesta->sizeTiempoPasos = strlen(tiemposPasos);
-	miRespuesta->tiempoPasos = malloc(strlen(tiemposPasos) + 1);
-	strcpy(miRespuesta->tiempoPasos, tiemposPasos);
+	recetaBuscada->sizeTiempoPasos = strlen(tiemposPasos);
+	recetaBuscada->tiempoPasos = malloc(strlen(tiemposPasos) + 1);
+	strcpy(recetaBuscada->tiempoPasos, tiemposPasos);
 
 	//printearRespuestaObtenerReceta(miRespuesta);
 
-	freeRtaObtenerReceta(miRespuesta);
+	loguearRtaObtenerReceta(recetaBuscada);
+	mandar_mensaje(recetaBuscada, RESPUESTA_OBTENER_RECETA, socketCliente);
 
-	loguearRtaObtenerReceta(miRespuesta);
-	mandar_mensaje(miRespuesta, RESPUESTA_OBTENER_RECETA, socketCliente);
-
+	freeRtaObtenerReceta(recetaBuscada);
 	free(datosReceta);
 	freeDeArray(datosSeparados);
 	freeDeArray(lineaPasos);

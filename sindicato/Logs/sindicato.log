@@ -60,3 +60,17 @@
 [INFO] 18:42:05:338 SINDICATO/(14779:14779): Se le asignan los bloques 21,22,23 a Pedido42 de Bataglia
 [INFO] 18:42:05:349 SINDICATO/(14779:14779): Se creo un nuevo pedido llamado Pedido42 de Bataglia
 [INFO] 18:42:05:349 SINDICATO/(14779:14779): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 23:12:02:755 SINDICATO/(7892:7910): [EnvioMSG] RTA_CONSULTAR_PLATOS con valores: nombresPlatos=[]
+[INFO] 23:12:27:101 SINDICATO/(7892:7915): [EnvioMSG] RTA_CONSULTAR_PLATOS con valores: nombresPlatos=[Alfajor,Torta,Pastafrola]
+[INFO] 23:14:39:248 SINDICATO/(7892:7893): Se le asignan los bloques 4 a Torta
+[INFO] 23:14:39:248 SINDICATO/(7892:7893): Se creo una nueva receta llamada Torta
+[INFO] 23:19:03:321 SINDICATO/(7892:8064): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos= | tiempoPasos=
+[INFO] 23:22:03:644 SINDICATO/(8171:8185): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos=[Cortar,Rellenar,Glasear] | tiempoPasos=[10,15,20]
+[INFO] 23:31:16:683 SINDICATO/(8460:8467): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos=[Cortar,Rellenar,Glasear] | tiempoPasos=[10,15,20]
+[INFO] 23:35:29:441 SINDICATO/(8785:8807): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos=[Cortar,Rellenar,Glasear] | tiempoPasos=[10,15,20]
+[INFO] 23:41:53:942 SINDICATO/(8967:8971): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos=[Cortar,Rellenar,Glasear] | tiempoPasos=[10,15,20]
+[INFO] 23:42:07:859 SINDICATO/(8967:8975): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos=[Cortar,Rellenar,Glasear] | tiempoPasos=[10,15,20]
+[INFO] 23:42:36:297 SINDICATO/(8967:8984): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos= | tiempoPasos=
+[INFO] 23:44:08:884 SINDICATO/(9144:9153): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos=[Cortar,Rellenar,Glasear] | tiempoPasos=[10,15,20]
+[INFO] 23:44:14:424 SINDICATO/(9144:9155): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos=[Cortar,Rellenar,Glasear] | tiempoPasos=[10,15,20]
+[INFO] 23:44:19:533 SINDICATO/(9144:9157): [EnvioMSG] RTA_OBTENER_RECETA con valores: pasos=[] | tiempoPasos=[]

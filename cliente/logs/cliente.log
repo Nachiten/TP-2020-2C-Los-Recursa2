@@ -488,3 +488,30 @@
 [INFO] 15:44:11:536 Cliente/(8656:9102): Conexión establecida con socket de destino.
 [INFO] 15:44:11:538 Cliente/(8656:9102): Los restaurantes que se encuentran disponibles son: [RestoDefault]
 [INFO] 15:50:18:839 Cliente/(8656:9111): Conexión establecida con socket de destino.
+[INFO] 23:11:48:407 Cliente/(7906:7906): Conexión establecida con socket de destino.
+[INFO] 23:12:02:754 Cliente/(7906:7908): Conexión establecida con socket de destino.
+[INFO] 23:12:02:755 Cliente/(7906:7908): Los platos del restaurante < Panaderia > consultado son: []
+
+[INFO] 23:12:27:97 Cliente/(7906:7909): Conexión establecida con socket de destino.
+[INFO] 23:12:27:101 Cliente/(7906:7909): Los platos del restaurante < PanaderiaJorge > consultado son: [Alfajor,Torta,Pastafrola]
+
+[INFO] 23:18:57:860 Cliente/(8060:8060): Conexión establecida con socket de destino.
+[INFO] 23:19:03:321 Cliente/(8060:8062): Conexión establecida con socket de destino.
+[INFO] 23:22:03:643 Cliente/(8060:8063): Conexión establecida con socket de destino.
+[INFO] 23:31:11:313 Cliente/(8462:8462): Conexión establecida con socket de destino.
+[INFO] 23:31:16:683 Cliente/(8462:8464): Conexión establecida con socket de destino.
+[INFO] 23:35:19:972 Cliente/(8803:8803): Conexión establecida con socket de destino.
+[INFO] 23:35:29:428 Cliente/(8803:8805): Conexión establecida con socket de destino.
+[INFO] 23:40:44:928 Cliente/(8803:8805): Los pasos para cocinar el plato < Torta > son: [Cortar,Rellenar,Glasear], con sus tiempos: [10,15,20]
+[INFO] 23:41:53:942 Cliente/(8803:8969): Conexión establecida con socket de destino.
+[INFO] 23:41:53:942 Cliente/(8803:8969): Los pasos para cocinar el plato < Torta > son: [Cortar,Rellenar,Glasear], con sus tiempos: [10,15,20]
+[INFO] 23:42:07:859 Cliente/(8803:8970): Conexión establecida con socket de destino.
+[INFO] 23:42:07:860 Cliente/(8803:8970): Los pasos para cocinar el plato < Torta > son: [Cortar,Rellenar,Glasear], con sus tiempos: [10,15,20]
+[INFO] 23:42:36:296 Cliente/(8803:8982): Conexión establecida con socket de destino.
+[INFO] 23:44:01:727 Cliente/(9146:9146): Conexión establecida con socket de destino.
+[INFO] 23:44:08:883 Cliente/(9146:9148): Conexión establecida con socket de destino.
+[INFO] 23:44:08:885 Cliente/(9146:9148): Los pasos para cocinar el plato < Torta > son: [Cortar,Rellenar,Glasear], con sus tiempos: [10,15,20]
+[INFO] 23:44:14:423 Cliente/(9146:9152): Conexión establecida con socket de destino.
+[INFO] 23:44:14:424 Cliente/(9146:9152): Los pasos para cocinar el plato < Torta > son: [Cortar,Rellenar,Glasear], con sus tiempos: [10,15,20]
+[INFO] 23:44:19:533 Cliente/(9146:9154): Conexión establecida con socket de destino.
+[INFO] 23:44:19:534 Cliente/(9146:9154): Los pasos para cocinar el plato < P > son: [], con sus tiempos: []
