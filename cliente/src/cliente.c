@@ -252,13 +252,12 @@ void obtenerInputConsolaCliente(){
 
     case SELECCIONAR_RESTAURANTE:
 
-    	if(palabrasSeparadas[1] == NULL || palabrasSeparadas[2] == NULL){
-    		printf("El formato correcto es: SELECCIONAR_RESTAURANTE [idCliente] [nombreRest].\n");
+    	if(palabrasSeparadas[1] == NULL){
+    		printf("El formato correcto es: SELECCIONAR_RESTAURANTE [nombreRest].\n");
     		break;
     	}
 
     	strcat(palabrasSeparadas[1],"\0");
-    	strcat(palabrasSeparadas[2],"\0");
 
     	estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
 
@@ -266,12 +265,12 @@ void obtenerInputConsolaCliente(){
 		resultado_de_conexion(socketCliente, logger, "destino");
 
 		seleccionar_restaurante* estructuraSeleccRestaur = malloc(sizeof(seleccionar_restaurante));
-		estructuraSeleccRestaur->largoIDCliente = strlen(palabrasSeparadas[1]);
-		estructuraSeleccRestaur->idCliente = malloc(strlen(palabrasSeparadas[1])+1);
+		estructuraSeleccRestaur->largoIDCliente = strlen(idCliente);
+		estructuraSeleccRestaur->idCliente = malloc(strlen(idCliente)+1);
 		strcpy(estructuraSeleccRestaur->idCliente, idCliente);
-		estructuraSeleccRestaur->largoNombreRestaurante = strlen(palabrasSeparadas[2]);
-		estructuraSeleccRestaur->nombreRestaurante = malloc(strlen(palabrasSeparadas[2])+1);
-		strcpy(estructuraSeleccRestaur->nombreRestaurante, palabrasSeparadas[2]);
+		estructuraSeleccRestaur->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
+		estructuraSeleccRestaur->nombreRestaurante = malloc(strlen(palabrasSeparadas[1])+1);
+		strcpy(estructuraSeleccRestaur->nombreRestaurante, palabrasSeparadas[1]);
 
 		mandar_mensaje(estructuraSeleccRestaur, SELECCIONAR_RESTAURANTE, socketCliente);
 

@@ -91,7 +91,23 @@ void inicializar_semaforos(){
 	sem_init(planificacionInicializada, 0, 1);
 }
 
-// *********************************FIN SETUP*********************************************
+// *********************************FIN SETUP******************************************************
+
+//-------------------------------PRUEBAS DE MENSAJES-----------------------------------------------
+
+/*
+ *
+ * CONSULTAR RESTAURANTES - Tested
+ * SELECCIONAR RESTAURANTES -
+ * CONSULTAR PLATOS -
+ * CREAR PEDIDO -
+ * ANIADIR PLATO -
+ * PLATO LISTO -
+ * CONFIRMAR PEDIDO -
+ * CONSULTAR PEDIDO -
+ *
+ */
+
 
 //manda un array con los nombres de todos los restaurantes conectados o restoDefault si no hay ninguno
 void consultar_restaurantes(int32_t socket_cliente){
@@ -1050,7 +1066,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 
 void serve_client(int32_t* socket)
 {
-	while(1){
+	//while(1){
 		int32_t sizeAAllocar = 0;
 		codigo_operacion cod_op = 0;
 		int32_t recibidosSize = 0;
@@ -1079,8 +1095,8 @@ void serve_client(int32_t* socket)
 
 		recibidosSize = 0;
 		recibidos = 0;
-	}
-	close(socket);
+	//}
+	//close(socket);
 }
 
 void esperar_cliente(int32_t socket_servidor)
