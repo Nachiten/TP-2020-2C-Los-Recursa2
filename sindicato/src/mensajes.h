@@ -35,4 +35,11 @@ void freeRtaObtenerPedido(respuesta_obtener_pedido* rta);
 void freeRtaObtenerReceta(respuesta_obtener_receta* rta);
 void freeRtaObtenerRestaurante(respuesta_obtener_restaurante* rta);
 
+// Logs
+void loguearRtaObtenerPedido(respuesta_obtener_pedido* rta);
+void loguearRtaObtenerReceta(respuesta_obtener_receta* rta);
+void loguearRtaObtenerRestaurante(respuesta_obtener_restaurante* rta);
+void loguearRtaConsultarPlatos(respuesta_consultar_platos* rta);
+
+
 #endif /* SRC_MENSAJES_H_ */
