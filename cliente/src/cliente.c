@@ -392,7 +392,7 @@ void obtenerInputConsolaCliente(){
 
 	case GUARDAR_PLATO:
 
-		if(palabrasSeparadas[1] == NULL || palabrasSeparadas[2] == NULL || palabrasSeparadas[3] == NULL ){
+		if(palabrasSeparadas[1] == NULL || palabrasSeparadas[2] == NULL || palabrasSeparadas[3] == NULL || palabrasSeparadas[4] == NULL){
 		    printf("El formato correcto es: GUARDAR_PLATO [nombreRest] [idPedido] [nombrePlato] [cantidadPlato].\n");
 		    break;
 		}

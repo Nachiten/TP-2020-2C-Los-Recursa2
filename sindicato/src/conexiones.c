@@ -133,7 +133,8 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 
 void serve_client(int32_t* socketCliente)
 {
-	while(1){
+	//while(1){
+
 		int32_t sizeAAllocar;
 		codigo_operacion cod_op;
 		int32_t recibidosSize = 0;
@@ -158,7 +159,8 @@ void serve_client(int32_t* socketCliente)
 		recibidosSize = 0;
 		recibidos = 0;
 		free(socketCliente);
-	}
+
+	//}
 }
 
 void esperar_cliente(int32_t socket_servidor)
