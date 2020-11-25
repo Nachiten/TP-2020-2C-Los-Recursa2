@@ -1178,25 +1178,21 @@ int existePedido(char* nombreRestaurante, int IDPedido){
 }
 
 char* generarStringPedidoDefault(){
+//	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
+//					"LISTA_PLATOS=[platoPrueba1,platoPrueba2,esUnaPrueba]\n"
+//					"CANTIDAD_PLATOS=[10000,20000,30000]\n"
+//					"CANTIDAD_LISTA=[10000,20000,30000]\n"
+//					"PRECIO_TOTAL=0\n";
+
+	// VERSION CORRECTA
 	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
-					"LISTA_PLATOS=[aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbb,ccccccccccccccc]\n"
-					"CANTIDAD_PLATOS=[10000,20000,30000]\n"
-					"CANTIDAD_LISTA=[10000,20000,30000]\n"
-					"PRECIO_TOTAL=0\n";
+				"LISTA_PLATOS=[]\n"
+				"CANTIDAD_PLATOS=[]\n"
+				"CANTIDAD_LISTA=[]\n"
+				"PRECIO_TOTAL=0\n";
 
 	printf("TamanioEnBytes: %i", strlen(stringPedidoDefault));
 
-	// Mide 92
-	// Neccesito 88
-
-	// 30 + 30 = 60
-
-	// VERSION CORRECTA
-//	char* stringPedidoDefault = "ESTADO_PEDIDO=Pendiente\n"
-//				"LISTA_PLATOS=[]\n"
-//				"CANTIDAD_PLATOS=[]\n"
-//				"CANTIDAD_LISTA=[]\n"
-//				"PRECIO_TOTAL=0\n";
 
 	char* pedidoDefault = malloc(strlen(stringPedidoDefault) + 1);
 
