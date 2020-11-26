@@ -53,8 +53,8 @@ int32_t crear_id_pedidos();
 int buscar_pedido_por_id_y_resto(uint32_t, info_resto*);
 int buscar_cliente(char*);
 int buscar_resto(char*);
-int buscar_resto_por_socket(int32_t);
-void recibir_respuesta(codigo_operacion, info_resto*, perfil_cliente*);
+int buscar_cliente_por_socket(int32_t);
+void recibir_respuesta(codigo_operacion, info_resto*, perfil_cliente*, int32_t);
 void pedido_entregado(int32_t id_pedido);
 
 // ***SERVIDOR***
