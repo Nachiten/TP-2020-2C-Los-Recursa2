@@ -1100,6 +1100,7 @@ void actualizarPaginaEnMP(tabla_paginas* paginaActualizada, uint32_t numeroDeMar
 	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 	paginaActualizada->cargadoEnMEMORIA = 1;
 	paginaActualizada->numeroDeMarco = numeroDeMarco;
+	asignarNumeroDeVictima(&paginaActualizada->numero_de_victima);
 	paginaActualizada->bitDeUso = 1;
 	paginaActualizada->bitDeModificacion = 1;
 	borrar_datos_del_plato(paginaActualizada); //le borro los datos para que solo existan en MP
