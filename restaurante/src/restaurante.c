@@ -54,8 +54,11 @@ void consultar_Platos(int32_t socket_cliente){
 
 	consulta = malloc(sizeof(consultar_platos));
 	consulta->sizeNombre = strlen(nombreRestaurante);
-	consulta->nombre = malloc(strlen(nombreRestaurante) + 1);
-	strcpy(consulta->nombre, nombreRestaurante);
+	consulta->sizeId = strlen(nombreRestaurante);
+	consulta->nombreResto = malloc(strlen(nombreRestaurante)+1);
+	consulta->id = malloc(strlen(nombreRestaurante)+1);
+	strcpy(consulta->id, nombreRestaurante);
+	strcpy(consulta->nombreResto, nombreRestaurante);
 
 	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
 	if(nuevoSocketSindicato < 0){
@@ -81,17 +84,17 @@ void consultar_Platos(int32_t socket_cliente){
 
     mandar_mensaje(platos,RESPUESTA_CONSULTAR_PLATOS,socket_cliente);
 
-    free(consulta->nombre);
+    free(consulta->nombreResto);
     free(consulta);
     free(platos->nombresPlatos);
     free(platos);
 }
 
-void crear_Pedido(int32_t socket_cliente){
+void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato;
 	guardar_pedido* pedida_a_guardar;
 	respuesta_crear_pedido* respuesta;
-	Pedido* pedido= malloc(sizeof(Pedido));
+	Pedido* pedido = malloc(sizeof(Pedido));
 	pedido->socket_cliente = socket_cliente;
 	pedido->numPedido = crear_id_pedidos();
 
@@ -397,7 +400,8 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	a_plato* recibidoAPlato;
 	consultar_pedido* recibidoConsultarPedido;
 	confirmar_pedido* recibidoConfirmarPedido;
-	handshake* recibidohandshake;
+	crear_pedido* recibidoCrearPedido;
+	handshake* recibidoHandshake;
 
 	switch(cod_op){
 
@@ -406,7 +410,11 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		break;
 
 	case CREAR_PEDIDO:
+		recibidoCrearPedido = malloc(sizeAAllocar);
+		recibir_mensaje(recibidoCrearPedido,CREAR_PEDIDO,socket_cliente);
 		crear_Pedido(socket_cliente);
+		free(recibidoCrearPedido->id);
+		free(recibidoCrearPedido);
 		break;
 
 	case A_PLATO:
@@ -433,10 +441,10 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		break;
 
 	case HANDSHAKE:
-		recibidohandshake = malloc(sizeAAllocar);
-		recibir_mensaje(recibidohandshake,HANDSHAKE,socket_cliente);
-		free(recibidohandshake->id);
-		free(recibidohandshake);
+		recibidoHandshake = malloc(sizeAAllocar);
+		recibir_mensaje(recibidoHandshake,HANDSHAKE,socket_cliente);
+		free(recibidoHandshake->id);
+		free(recibidoHandshake);
 		break;
 
 	default:

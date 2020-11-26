@@ -24,7 +24,7 @@ pthread_t planificacion;
 
 //***MENSAJES DE RESTO***
 void consultar_Platos(int32_t);
-void crear_Pedido(int32_t);
+void crear_Pedido(crear_pedido*, int32_t);
 void aniadir_plato(a_plato*,int32_t);
 void confirmar_Pedido(int32_t, int32_t);
 
