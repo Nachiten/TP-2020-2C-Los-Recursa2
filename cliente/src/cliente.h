@@ -35,7 +35,7 @@ uint32_t miPosicionY;
 int32_t socketDelHandshake;
 
 //obtiene el comando que quiere ejecutar el usuario
-void obtenerInputConsolaCliente(int32_t*);
+void obtenerInputConsolaCliente();
 //void recibirNotificaciones(int32_t* elSocketInicial);
 
 

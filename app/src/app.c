@@ -184,13 +184,13 @@ void seleccionarRestaurante(char* idCliente, char* nombreResto, int32_t socket_c
 	free(respuesta);
 }
 
-void consultarPlatos(int32_t socket_cliente){
+void consultarPlatos(consultar_platos* mensaje, int32_t socket_cliente){
 	int numero_cliente, numero_resto;
 	perfil_cliente* cliente;
 	info_resto* resto;
 	respuesta_consultar_platos* platosDefault;
 
-	numero_cliente = buscar_cliente_por_socket(socket_cliente);
+	numero_cliente = buscar_cliente(mensaje->id);
 
 	if(numero_cliente != -2){
 		cliente = list_get(listaPedidos,numero_cliente);// busca el perfil del cliente en la lista de pedidos
@@ -225,7 +225,7 @@ void consultarPlatos(int32_t socket_cliente){
 	}
 }
 
-void crear_pedido(int32_t socket_cliente){
+void crear_Pedido(crear_pedido* mensaje, int32_t socket_cliente){
 	int numero_resto, numero_cliente;
 	perfil_cliente* cliente;
 	info_resto* resto;
@@ -234,7 +234,7 @@ void crear_pedido(int32_t socket_cliente){
 	int32_t recibidos, recibidosSize = 0, sizeAAllocar, nuevoSocketComanda;
 	codigo_operacion cod_op;
 
-	numero_cliente = buscar_cliente(socket_cliente);
+	numero_cliente = buscar_cliente(mensaje->id);
 
 	if(numero_cliente != -2){
 		cliente = list_get(listaPedidos,numero_cliente);// busca el perfil del cliente en la lista de pedidos
@@ -406,7 +406,8 @@ void plato_Listo(plato_listo* platoListo, int32_t socket_cliente){
 	info_resto* resto;
 	perfil_cliente* cliente;
 
-	int numResto = buscar_resto_por_socket(socket_cliente), numCliente;
+	int numResto = buscar_resto(platoListo->nombreRestaurante);
+	int	numCliente;
 
 	if(numResto != -2){
 		resto = list_get(listaRestos,numResto);
@@ -791,6 +792,7 @@ void registrarHandshake(handshake* recibidoHandshake, int32_t socket_cliente){
 	perfil->posX = recibidoHandshake->posX;
 	perfil->posY = recibidoHandshake->posY;
 	perfil->idCliente = malloc(strlen(recibidoHandshake->id)+1);
+	perfil->id_pedido_resto = 0;
 	strcpy(perfil->idCliente, recibidoHandshake->id);
 	list_add(listaPedidos,perfil);
 
@@ -1014,6 +1016,8 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	confirmar_pedido* recibidoConfirmarPedido;
 	consultar_pedido* recibidoConsultarPedido;
 	handshake* recibidoHandshake;
+	consultar_platos* recibidoConsultarPlatos;
+	crear_pedido* recibidoCrearPedido;
 
 	switch (cod_op) {
 		case CONSULTAR_RESTAURANTES:
@@ -1030,11 +1034,20 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			break;
 
 		case CONSULTAR_PLATOS:
-			consultarPlatos(socket_cliente);
+			recibidoConsultarPlatos = malloc(sizeAAllocar);
+			recibir_mensaje(recibidoConsultarPlatos,CONSULTAR_PLATOS,socket_cliente);
+			consultarPlatos(recibidoConsultarPlatos,socket_cliente);
+			free(recibidoConsultarPlatos->id);
+			free(recibidoConsultarPlatos->nombreResto);
+			free(recibidoConsultarPlatos);
 			break;
 
 		case CREAR_PEDIDO:
-			crear_pedido(socket_cliente);
+			recibidoCrearPedido = malloc(sizeAAllocar);
+			recibir_mensaje(recibidoCrearPedido,CREAR_PEDIDO,socket_cliente);
+			crear_Pedido(recibidoCrearPedido,socket_cliente);
+			free(recibidoCrearPedido->id);
+			free(recibidoCrearPedido);
 			break;
 
 		case A_PLATO:

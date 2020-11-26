@@ -37,6 +37,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 //estas funciones las necesita serializar_paquete para saber que empaqueta
 uint32_t serializar_paquete_seleccionar_restaurante(t_paquete* paquete, seleccionar_restaurante* estructura);
 uint32_t serializar_paquete_obtener_restaurante(t_paquete* paquete, obtener_restaurante* estructura);
+uint32_t serializar_paquete_consultar_platos(t_paquete* paquete, consultar_platos* estructura);
 uint32_t serializar_paquete_guardar_plato(t_paquete* paquete, guardar_plato* estructura);
 uint32_t serializar_paquete_aniadir_plato(t_paquete* paquete, a_plato* estructura);
 uint32_t serializar_paquete_plato_listo(t_paquete* paquete, plato_listo* estructura);
@@ -51,6 +52,7 @@ uint32_t serializar_paquete_respuesta_consultar_pedido(t_paquete* paquete, respu
 uint32_t serializar_paquete_respuesta_obtener_pedido(t_paquete* paquete, respuesta_obtener_pedido* estructura);
 uint32_t serializar_paquete_respuesta_obtener_receta(t_paquete* paquete, respuesta_obtener_receta* estructura);
 uint32_t serializar_paquete_ok_fail(t_paquete* paquete, respuesta_ok_error* estructura);
+uint32_t serializar_paquete_crear_pedido(t_paquete* paquete, crear_pedido* estructura);
 
 //FUNCIONES DESSERIALIZAR
 //void desserializar_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t socket_cliente); //esto vuela a la mierda a menos que se decida lo contrario
@@ -72,4 +74,5 @@ void desserializar_respuesta_consultar_pedido(respuesta_consultar_pedido* estruc
 void desserializar_respuesta_obtener_pedido(respuesta_obtener_pedido* estructura, int32_t socket_cliente);
 void desserializar_respuesta_obtener_receta(respuesta_obtener_receta* estructura, int32_t socket_cliente);
 void desserializar_ok_fail(respuesta_ok_error* estructura, int32_t socket_cliente);
+void desserializar_consultar_platos(consultar_platos* estructura, int32_t socket_cliente);
 #endif /* SHARED_SOCKET_H_ */

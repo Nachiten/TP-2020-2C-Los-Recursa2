@@ -38,8 +38,8 @@ void inicializar_semaforos();
 // ***MENSAJES DE APP***
 void consultar_restaurantes(int32_t);
 void seleccionarRestaurante(char*, char*, int32_t);
-void crear_pedido(int32_t);
-void consultarPlatos(int32_t);
+void crear_Pedido(crear_pedido*, int32_t);
+void consultarPlatos(consultar_platos*,int32_t);
 void aniadir_plato(a_plato*, int32_t);
 void plato_Listo(plato_listo*, int32_t);
 void confirmar_Pedido(confirmar_pedido*, int32_t);

@@ -341,25 +341,28 @@ void obtenerInputConsolaCliente(){
 
 		strcat(palabrasSeparadas[1],"\0");
 
-		//socketCliente = establecer_conexion(ip_destino, puerto_destino);
-		//resultado_de_conexion(socketCliente, logger, "destino");
+		socketCliente = establecer_conexion(ip_destino, puerto_destino);
+		resultado_de_conexion(socketCliente, logger, "destino");
 
-		obtener_restaurante* estructuraAEnviar = malloc(sizeof(uint32_t) + strlen(palabrasSeparadas[1]));
-		estructuraAEnviar->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
-		estructuraAEnviar->nombreRestaurante = malloc(estructuraAEnviar->largoNombreRestaurante+1);
-		strcpy(estructuraAEnviar->nombreRestaurante, palabrasSeparadas[1]);
+		consultar_platos* estructuraAEnviar = malloc(sizeof(uint32_t) + strlen(palabrasSeparadas[1]));
+		estructuraAEnviar->sizeNombre = strlen(palabrasSeparadas[1]);
+		estructuraAEnviar->nombreResto = malloc(estructuraAEnviar->sizeNombre+1);
+		strcpy(estructuraAEnviar->nombreResto, palabrasSeparadas[1]);
+		estructuraAEnviar->sizeId = strlen(idCliente);
+		estructuraAEnviar->id = malloc(estructuraAEnviar->sizeId+1);
+		strcpy(estructuraAEnviar->id, idCliente);
 
 		//emision del mensaje para pedir la info, CONSULTAR_PLATOS [nombreR], algunos receptores usaran el [nombreR], otros no
-		mandar_mensaje(estructuraAEnviar, CONSULTAR_PLATOS, socketDelHandshake);
+		mandar_mensaje(estructuraAEnviar, CONSULTAR_PLATOS, socketCliente);
 
 	    los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
 
 	    if(exito == 1)
 	    		{
 		respuesta_consultar_platos* estructuraRespuestaConsultarPlatos = malloc(sizeAAllocar);
-		recibir_mensaje(estructuraRespuestaConsultarPlatos, RESPUESTA_CONSULTAR_PLATOS, socketDelHandshake);
+		recibir_mensaje(estructuraRespuestaConsultarPlatos, RESPUESTA_CONSULTAR_PLATOS, socketCliente);
 		sem_wait(semLog);
-		log_info(logger, "Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreRestaurante, estructuraRespuestaConsultarPlatos->nombresPlatos);
+		log_info(logger, "Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreResto, estructuraRespuestaConsultarPlatos->nombresPlatos);
 		sem_post(semLog);
 		//printf("Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreRestaurante, estructuraRespuestaConsultarPlatos->nombresPlatos);
 
@@ -372,9 +375,10 @@ void obtenerInputConsolaCliente(){
 
 		}
 
-        free(estructuraAEnviar->nombreRestaurante);
+        free(estructuraAEnviar->nombreResto);
+        free(estructuraAEnviar->id);
 		free(estructuraAEnviar);
-		//close(socketCliente);
+		close(socketCliente);
 		break;
 
 	case GUARDAR_PLATO:
@@ -508,16 +512,21 @@ void obtenerInputConsolaCliente(){
 
 	case CREAR_PEDIDO:
 
-		//socketCliente = establecer_conexion(ip_destino , puerto_destino);
+		socketCliente = establecer_conexion(ip_destino , puerto_destino);
 
-		mandar_mensaje("vacio",CREAR_PEDIDO, socketDelHandshake);
+		crear_pedido* mensajeCrearPedido = malloc(sizeof(crear_pedido));
+		mensajeCrearPedido->sizeId = strlen(idCliente);
+		mensajeCrearPedido->id = malloc(mensajeCrearPedido->sizeId+1);
+		strcpy(mensajeCrearPedido->id,idCliente);
 
-		los_recv_repetitivos(socketDelHandshake, &exito, &sizeAAllocar);
+		mandar_mensaje(mensajeCrearPedido,CREAR_PEDIDO, socketCliente);
+
+		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
 		if(exito == 1)
 		{
 			respuesta_crear_pedido* estructuraRespuestaCrearPedido = malloc(sizeAAllocar);
 
-			recibir_mensaje(estructuraRespuestaCrearPedido,RESPUESTA_CREAR_PEDIDO,socketDelHandshake);
+			recibir_mensaje(estructuraRespuestaCrearPedido,RESPUESTA_CREAR_PEDIDO,socketCliente);
 
 			if(estructuraRespuestaCrearPedido->idPedido < 0){
 				printf("Hubo un error al intentar crear tu pedido, compruebe que haya seleccionado un restaurante.\n");
@@ -536,6 +545,10 @@ void obtenerInputConsolaCliente(){
 		{
 			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
 		}
+
+		free(mensajeCrearPedido->id);
+		free(mensajeCrearPedido);
+		close(socketCliente);
 
 		break;
 
