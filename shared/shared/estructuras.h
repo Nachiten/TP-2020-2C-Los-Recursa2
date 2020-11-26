@@ -216,7 +216,14 @@ typedef struct{
 
 typedef struct{
 	uint32_t sizeNombre;
-	char* nombre;
+	char* nombreResto;
+	uint32_t sizeId;
+	char* id;
 }consultar_platos;
+
+typedef struct{
+	uint32_t sizeId;
+	char* id;
+}crear_pedido;
 
 #endif /* SHARED_ESTRUCTURAS_H_ */

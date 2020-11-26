@@ -32,9 +32,11 @@ char* idCliente;
 uint32_t miPosicionX;
 uint32_t miPosicionY;
 
+int32_t socketDelHandshake;
+
 //obtiene el comando que quiere ejecutar el usuario
 void obtenerInputConsolaCliente();
-void recibirNotificaciones(int32_t* elSocketInicial);
+//void recibirNotificaciones(int32_t* elSocketInicial);
 
 
 
