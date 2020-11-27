@@ -598,83 +598,103 @@ void obtenerInputConsolaCliente(){
 		close(socketCliente); //siempre cerrar socket cuando se termina de usar
      	break;
 
+     	//ToDo testear esto!!!
     case CONFIRMAR_PEDIDO:
 
     	if(palabrasSeparadas[1] == NULL || palabrasSeparadas[2] == NULL){
 			printf("El formato correcto es: CONFIRMAR_PEDIDO [nombreRest] [idPedido].\n");
 			break;
     	}
-
     	strcat(palabrasSeparadas[1],"\0"); //IMPORTANTISIMO
 
 		estructuraRespuesta = malloc(sizeof(respuesta_ok_error));
+		plato_listo* recibirPlatoListoExclusivo;
+		finalizar_pedido* recibirFinalizarPedidoExclusivo;
+		codigo_operacion cod_op_exclusivo = PLATO_LISTO;
+		confirmar_pedido* elMensajeConfirmarPedido = malloc(sizeof(guardar_pedido));
 
+		//establezco la conexion para empezar a mandar
 		socketCliente = establecer_conexion(ip_destino , puerto_destino);
 
-		guardar_pedido* elMensajeConfirmarPedido = malloc(sizeof(guardar_pedido));
+		//cargo los datos de la confirmacion
 		elMensajeConfirmarPedido->idPedido = atoi(palabrasSeparadas[2]);
 		elMensajeConfirmarPedido->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
 		elMensajeConfirmarPedido->nombreRestaurante = malloc(elMensajeConfirmarPedido->largoNombreRestaurante+1);
 		strcpy(elMensajeConfirmarPedido->nombreRestaurante, palabrasSeparadas[1]);
 
+		//mando el mensaje de confirmar pedido
 		mandar_mensaje(elMensajeConfirmarPedido, CONFIRMAR_PEDIDO, socketCliente);
 
+		//y espero su respuesta para ponerme a esperar los PLATO LISTO y FINALIZAR PEDIDO
 		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
 
+		//me llego una respuesta de confirmar pedido
 		if(exito == 1)
 		{
 			recibir_mensaje(estructuraRespuesta,RESPUESTA_CONFIRMAR_PEDIDO,socketCliente);
 
-			if(estructuraRespuesta->respuesta == 1){
-				sem_wait(semLog);
-				log_info(logger, "El intento de confirmar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
-				sem_post(semLog);
-				//si entre aca, es porque el pedido que confirme con exito en este mismo hilo-comando, ha de recibir una notificacion extra
-				//cuando haya llegado a mi posicion
-				los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
-				if(exito == 1){
+			sem_wait(semLog);
+			log_info(logger, "El intento de confirmar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+			sem_post(semLog);
 
-					guardar_pedido* notificacionPedidoFinalizado = malloc(sizeAAllocar);
-					recibir_mensaje(notificacionPedidoFinalizado, FINALIZAR_PEDIDO , socketCliente);
-					respuesta_ok_error* respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
-
-					if(notificacionPedidoFinalizado->idPedido > 0 && notificacionPedidoFinalizado->largoNombreRestaurante>0){
-						respuestaNotificacion->respuesta = 1;
-						mandar_mensaje(respuestaNotificacion, RESPUESTA_FINALIZAR_PEDIDO, socketCliente);
-						sem_wait(semLog);
-						log_info(logger, "El pedido nro <%d> del restaurante <%s> ha arribado.\n", notificacionPedidoFinalizado->idPedido, notificacionPedidoFinalizado->nombreRestaurante);
-						sem_post(semLog);
-					} else {
-						respuestaNotificacion->respuesta = 0;
-						mandar_mensaje(respuestaNotificacion, RESPUESTA_FINALIZAR_PEDIDO, socketCliente);
-					}
-					free(notificacionPedidoFinalizado->nombreRestaurante);
-					free(notificacionPedidoFinalizado);
-					free(respuestaNotificacion);
-
-				}
-				else
+			//se confirmó el pedido, asi que a esperar todos los avisos de cosas listas
+			if(estructuraRespuesta->respuesta == 1)
+			{
+				//a continuacion, el bucle de los PLATO LISTO
+				los_recv_repetitivos_VERSIONESPECIAL(socketCliente, &exito, &sizeAAllocar, &cod_op_exclusivo);
+				while(cod_op_exclusivo != FINALIZAR_PEDIDO)
 				{
-					printf("Ocurrió un error al intentar recibir la notificacion de finalizacion de un pedido.\n");
+					if(exito == 1)
+					{
+						if(cod_op_exclusivo == PLATO_LISTO)
+						{
+							recibirPlatoListoExclusivo = malloc(sizeof(sizeAAllocar));
+							recibir_mensaje(recibirPlatoListoExclusivo, PLATO_LISTO , socketCliente);
+
+							sem_wait(semLog);
+							log_info(logger, "Esta listo el plato <%s> del restaurante <%s> (Pedido %u).\n", recibirPlatoListoExclusivo->nombrePlato, recibirPlatoListoExclusivo->nombreRestaurante, recibirPlatoListoExclusivo->idPedido);
+							sem_post(semLog);
+
+							//aviso que me llego el plato listo
+							estructuraRespuesta->respuesta = 1;
+							mandar_mensaje(estructuraRespuesta, RESPUESTA_PLATO_LISTO, socketCliente);
+
+							free(recibirPlatoListoExclusivo->nombrePlato);
+							free(recibirPlatoListoExclusivo->nombreRestaurante);
+							free(recibirPlatoListoExclusivo);
+						}
+					}
+					//y sigo recibiendo
+					los_recv_repetitivos_VERSIONESPECIAL(socketCliente, &exito, &sizeAAllocar, &cod_op_exclusivo);
 				}
 
-				}else{
+				//me llego un FINALIZAR_PEDIDO por fin
+				recibirFinalizarPedidoExclusivo= malloc(sizeof(sizeAAllocar));
+
+				recibir_mensaje(recibirFinalizarPedidoExclusivo, FINALIZAR_PEDIDO, socketCliente);
+
 				sem_wait(semLog);
-				log_info(logger, "El intento de confirmar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+				log_info(logger, "Esta Finalizado el Pedido %u del restaurante <%s>.\n", recibirFinalizarPedidoExclusivo->nombreRestaurante, recibirFinalizarPedidoExclusivo->idPedido);
 				sem_post(semLog);
+
+				estructuraRespuesta->respuesta = 1;
+				mandar_mensaje(estructuraRespuesta, RESPUESTA_FINALIZAR_PEDIDO, socketCliente);
+
+				free(recibirFinalizarPedidoExclusivo->nombreRestaurante);
+				free(recibirFinalizarPedidoExclusivo);
 			}
 		}
 
+		//a la mierda tod0, ni me aceptaron el confirmar pedido
 		else
 		{
-			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
+			puts("Falló la recepción de la respuesta de confirmar pedido.");
 		}
 
 		free(elMensajeConfirmarPedido->nombreRestaurante); //porfa no olvidarse de este free, tambien es importante, no solo liberar la estructura, sino nos va a caber
 		free(elMensajeConfirmarPedido);
 		free(estructuraRespuesta);
 		close(socketCliente); //siempre cerrar socket cuando se termina de usar
-
     	break;
 
 
@@ -891,7 +911,7 @@ void obtenerInputConsolaCliente(){
     	break;
 
 
-    case DESCONEXION:
+    case DESCONEXION:socketCliente
 
     	break;
 
