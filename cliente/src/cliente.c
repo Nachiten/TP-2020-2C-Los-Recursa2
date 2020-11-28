@@ -528,8 +528,8 @@ void obtenerInputConsolaCliente(){
 
 			recibir_mensaje(estructuraRespuestaCrearPedido,RESPUESTA_CREAR_PEDIDO,socketCliente);
 
-			if(estructuraRespuestaCrearPedido->idPedido < 0){
-				printf("Hubo un error al intentar crear tu pedido, compruebe que haya seleccionado un restaurante.\n");
+			if(estructuraRespuestaCrearPedido->idPedido == 0){
+				printf("Hubo un error al intentar crear tu pedido.\n");
 			}
 			else
 			{

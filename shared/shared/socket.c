@@ -862,7 +862,7 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 
     //reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
 	t_buffer* buffer = malloc(sizeof(t_buffer));
-	buffer->size = sizeof(uint32_t)*7
+	buffer->size = sizeof(uint32_t)*8
 				 + strlen(estructura->afinidades)+1
 	             + strlen(estructura->platos)+1
 	             + strlen(estructura->precioPlatos)+1;

@@ -5,3 +5,68 @@
 [INFO] 16:21:29:92 SINDICATO/(11557:11569): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=0 | posX=0 | posY=0 | cantHornos=0 | afinidades=[] | platos=[] | precioPlatos=[] | cantPedidos=0
 [INFO] 16:24:48:568 SINDICATO/(11690:11781): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=0 | posX=0 | posY=0 | cantHornos=0 | afinidades=[] | platos=[] | precioPlatos=[] | cantPedidos=0
 [INFO] 16:26:43:54 SINDICATO/(11690:11887): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=0 | posX=0 | posY=0 | cantHornos=0 | afinidades=[] | platos=[] | precioPlatos=[] | cantPedidos=0
+[INFO] 16:31:35:892 SINDICATO/(11928:11929): Se le asignan los bloques 8,9,10 a ElParrillon
+[INFO] 16:31:35:893 SINDICATO/(11928:11929): Se creo un nuevo restaurant llamado ElParrillon
+[INFO] 16:31:42:96 SINDICATO/(11928:11929): Se le asignan los bloques 11 a AsadoJugoso
+[INFO] 16:31:42:96 SINDICATO/(11928:11929): Se creo una nueva receta llamada AsadoJugoso
+[INFO] 16:31:42:97 SINDICATO/(11928:11929): Se le asignan los bloques 12 a AsadoSeco
+[INFO] 16:31:42:98 SINDICATO/(11928:11929): Se creo una nueva receta llamada AsadoSeco
+[INFO] 16:31:42:99 SINDICATO/(11928:11929): Se le asignan los bloques 13 a Choripan
+[INFO] 16:31:42:103 SINDICATO/(11928:11929): Se creo una nueva receta llamada Choripan
+[INFO] 16:31:42:743 SINDICATO/(11928:11929): Se le asignan los bloques 14 a TortillaDePapa
+[INFO] 16:31:42:744 SINDICATO/(11928:11929): Se creo una nueva receta llamada TortillaDePapa
+[INFO] 16:32:02:179 SINDICATO/(11928:11985): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=2 | posX=5 | posY=5 | cantHornos=1 | afinidades=[AsadoJugoso] | platos=[AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa] | precioPlatos=[180,200,100,150] | cantPedidos=0
+[INFO] 16:36:57:808 SINDICATO/(12121:12136): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=2 | posX=5 | posY=5 | cantHornos=1 | afinidades=[AsadoJugoso] | platos=[AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa] | precioPlatos=[180,200,100,150] | cantPedidos=0
+[INFO] 16:38:12:41 SINDICATO/(12267:12278): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=2 | posX=5 | posY=5 | cantHornos=1 | afinidades=[AsadoJugoso] | platos=[AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa] | precioPlatos=[180,200,100,150] | cantPedidos=0
+[INFO] 16:43:49:515 SINDICATO/(12488:12500): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=2 | posX=5 | posY=5 | cantHornos=1 | afinidades=[AsadoJugoso] | platos=[AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa] | precioPlatos=[180,200,100,150] | cantPedidos=0
+[INFO] 16:45:56:912 SINDICATO/(12561:12643): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=2 | posX=5 | posY=5 | cantHornos=1 | afinidades=[AsadoJugoso] | platos=[AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa] | precioPlatos=[180,200,100,150] | cantPedidos=0
+[INFO] 16:47:53:386 SINDICATO/(12561:12697): [EnvioMSG] RTA_CONSULTAR_PLATOS con valores: nombresPlatos=[AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa]
+[INFO] 16:48:35:44 SINDICATO/(12561:12709): Se le asignan los bloques 15,16 a Pedido1 de ElParrillon
+[INFO] 16:48:35:47 SINDICATO/(12561:12709): Se creo un nuevo pedido llamado Pedido1 de ElParrillon
+[INFO] 16:48:35:47 SINDICATO/(12561:12709): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 16:48:43:928 SINDICATO/(12561:12712): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 16:48:48:992 SINDICATO/(12561:12715): Se le asignan los bloques 17,18 a Pedido2 de ElParrillon
+[INFO] 16:48:48:998 SINDICATO/(12561:12715): Se creo un nuevo pedido llamado Pedido2 de ElParrillon
+[INFO] 16:48:48:998 SINDICATO/(12561:12715): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 16:48:57:523 SINDICATO/(12561:12718): Se le asignan los bloques 19,20 a Pedido3 de ElParrillon
+[INFO] 16:48:57:526 SINDICATO/(12561:12718): Se creo un nuevo pedido llamado Pedido3 de ElParrillon
+[INFO] 16:48:57:528 SINDICATO/(12561:12718): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 16:49:16:348 SINDICATO/(12561:12722): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 16:49:19:719 SINDICATO/(12561:12727): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 16:53:03:403 SINDICATO/(12773:12805): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=2 | posX=5 | posY=5 | cantHornos=1 | afinidades=[AsadoJugoso] | platos=[AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa] | precioPlatos=[180,200,100,150] | cantPedidos=3
+[INFO] 16:55:14:275 SINDICATO/(12773:12819): Se le asignan los bloques 21,22 a Pedido4 de ElParrillon
+[INFO] 16:55:14:295 SINDICATO/(12773:12819): Se creo un nuevo pedido llamado Pedido4 de ElParrillon
+[INFO] 16:55:14:296 SINDICATO/(12773:12819): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 17:03:45:291 SINDICATO/(13066:13105): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=2 | posX=5 | posY=5 | cantHornos=1 | afinidades=[AsadoJugoso] | platos=[AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa] | precioPlatos=[180,200,100,150] | cantPedidos=4
+[INFO] 17:04:21:236 SINDICATO/(13066:13125): [EnvioMSG] RTA_CONSULTAR_PLATOS con valores: nombresPlatos=[AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa]
+[INFO] 17:04:44:143 SINDICATO/(13066:13129): Se le asignan los bloques 23,24 a Pedido5 de ElParrillon
+[INFO] 17:04:44:158 SINDICATO/(13066:13129): Se creo un nuevo pedido llamado Pedido5 de ElParrillon
+[INFO] 17:04:44:159 SINDICATO/(13066:13129): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 17:05:12:863 SINDICATO/(13066:13139): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 17:08:57:740 SINDICATO/(13163:13164): Se le asignan los bloques 1,2,3 a ElParrillon
+[INFO] 17:08:57:741 SINDICATO/(13163:13164): Se creo un nuevo restaurant llamado ElParrillon
+[INFO] 17:08:57:742 SINDICATO/(13163:13164): Se le asignan los bloques 4 a AsadoJugoso
+[INFO] 17:08:57:742 SINDICATO/(13163:13164): Se creo una nueva receta llamada AsadoJugoso
+[INFO] 17:08:57:745 SINDICATO/(13163:13164): Se le asignan los bloques 5 a AsadoSeco
+[INFO] 17:08:57:745 SINDICATO/(13163:13164): Se creo una nueva receta llamada AsadoSeco
+[INFO] 17:08:57:747 SINDICATO/(13163:13164): Se le asignan los bloques 6 a Choripan
+[INFO] 17:08:57:749 SINDICATO/(13163:13164): Se creo una nueva receta llamada Choripan
+[INFO] 17:08:58:211 SINDICATO/(13163:13164): Se le asignan los bloques 7 a TortillaDePapa
+[INFO] 17:08:58:212 SINDICATO/(13163:13164): Se creo una nueva receta llamada TortillaDePapa
+[INFO] 17:09:02:929 SINDICATO/(13163:13167): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=2 | posX=5 | posY=5 | cantHornos=1 | afinidades=[AsadoJugoso] | platos=[AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa] | precioPlatos=[180,200,100,150] | cantPedidos=0
+[INFO] 17:09:12:141 SINDICATO/(13163:13174): [EnvioMSG] RTA_CONSULTAR_PLATOS con valores: nombresPlatos=[AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa]
+[INFO] 17:09:17:328 SINDICATO/(13163:13177): Se le asignan los bloques 8,9 a Pedido1 de ElParrillon
+[INFO] 17:09:17:331 SINDICATO/(13163:13177): Se creo un nuevo pedido llamado Pedido1 de ElParrillon
+[INFO] 17:09:17:334 SINDICATO/(13163:13177): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 17:09:17:788 SINDICATO/(13163:13180): Se le asignan los bloques 10,11 a Pedido2 de ElParrillon
+[INFO] 17:09:17:789 SINDICATO/(13163:13180): Se creo un nuevo pedido llamado Pedido2 de ElParrillon
+[INFO] 17:09:17:790 SINDICATO/(13163:13180): [EnvioMSG] RTA_GUARDAR_PEDIDO | Valor: OK
+[INFO] 17:09:22:796 SINDICATO/(13163:13187): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 17:09:22:797 SINDICATO/(13163:13190): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 17:09:22:809 SINDICATO/(13163:13193): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 17:09:22:823 SINDICATO/(13163:13196): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 17:09:22:825 SINDICATO/(13163:13199): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 17:09:22:827 SINDICATO/(13163:13202): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 17:09:22:831 SINDICATO/(13163:13203): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 17:09:22:973 SINDICATO/(13163:13206): [EnvioMSG] RTA_GUARDAR_PLATO | Valor: OK
+[INFO] 17:12:32:491 SINDICATO/(13163:13236): [EnvioMSG] RTA_OBTENER_PEDIDO con valores: comidas=[AsadoJugoso,Choripan] | cantTotales=[1,2] | cantListas=[0,0]

@@ -83,6 +83,7 @@ void consultar_Platos(int32_t socket_cliente){
 void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato;
 	guardar_pedido* pedida_a_guardar;
+	respuesta_ok_error* resultado_guardar_pedido;
 	respuesta_crear_pedido* respuesta;
 	Pedido* pedido = malloc(sizeof(Pedido));
 	pedido->socket_cliente = socket_cliente;
@@ -120,9 +121,20 @@ void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	if(codigoRecibido != 24){
 		printf("problemas al recibir respuesta de guardar pedido en sindic");
 	} else {
-		recibir_mensaje(respuesta, RESPUESTA_GUARDAR_PEDIDO, nuevoSocketSindicato);
+		resultado_guardar_pedido = malloc(sizeof(respuesta_ok_error));
+		recibir_mensaje(resultado_guardar_pedido, RESPUESTA_GUARDAR_PEDIDO, nuevoSocketSindicato);
 
-		mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socket_cliente);
+		if(resultado_guardar_pedido->respuesta == 1)
+		{
+			mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socket_cliente);
+		}
+
+		else
+		{
+			respuesta->idPedido = 0;
+			mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socket_cliente);
+		}
+		free(resultado_guardar_pedido);
 	}
 	close(nuevoSocketSindicato);
     free(pedida_a_guardar->nombreRestaurante);
