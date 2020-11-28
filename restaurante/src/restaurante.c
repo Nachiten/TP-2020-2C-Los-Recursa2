@@ -16,8 +16,8 @@ int main(int cantArg, char* argumentos[]){
 
 	// Si no hay ningun parametro del path de config genero valor default
 	if (cantArg < 2){
-		printf("El path de la config no está especificado, tomando valor default.\nValor default: /home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/restaurante.config\n");
-		pathConfig = "/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/restaurante.config";
+		printf("El path de la config no está especificado, tomando valor default.\nValor default: /home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/restaurante1.config\n");
+		pathConfig = "/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/restaurante1.config";
 	// Si hay un parametro asumo que es el path de la config y lo uso
 	} else {
 		pathConfig = argumentos[1];
@@ -386,7 +386,7 @@ void inicializar_semaforos(){
 
 void inicializar_colas(){
 	listaPedidos = list_create(); //inicializo la lista de pedidos
-
+    inicializar_semaforos();
 	crearColasPlanificacion();
 	//crearHornos();
 	iniciarSemaforosPlanificacion();
