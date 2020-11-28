@@ -911,7 +911,7 @@ void obtenerInputConsolaCliente(){
     	break;
 
 
-    case DESCONEXION:socketCliente
+    case DESCONEXION:
 
     	break;
 
