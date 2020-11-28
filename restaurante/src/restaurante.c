@@ -10,14 +10,20 @@
 #include <stdio.h>
 #include "restaurante.h"
 
-int main(){
-	socket_sindicato = establecer_conexion(ip_sindicato,puerto_sindicato);
-	if(socket_sindicato < 0){
-			log_info(logger, "Sindicato esta muerto, me muero yo tambien");
-	exit(-2);
+int main(int cantArg, char* argumentos[]){
+
+	char* pathConfig;
+
+	// Si no hay ningun parametro del path de config genero valor default
+	if (cantArg < 2){
+		printf("El path de la config no está especificado, tomando valor default.\nValor default: /home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/restaurante.config\n");
+		pathConfig = "/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/restaurante.config";
+	// Si hay un parametro asumo que es el path de la config y lo uso
+	} else {
+		pathConfig = argumentos[1];
 	}
 
-	inicializarRestaurante();
+	inicializarRestaurante(pathConfig);
 
 	//tendriamo que usar hilo detacheado para esto
 	//inicializar_colas();
@@ -90,7 +96,9 @@ void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	    exit(-2);
 	}
 
+	sem_wait(semListaPedidos);
 	list_add(listaPedidos,pedido);
+	sem_post(semListaPedidos);
 
 	pedida_a_guardar = malloc(sizeof(guardar_pedido));
 	pedida_a_guardar->idPedido = pedido->numPedido;
@@ -104,15 +112,15 @@ void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	respuesta->idPedido = pedido->numPedido;
 
 	codigo_operacion codigoRecibido;
-    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+    bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 
     uint32_t sizePayload;
-	bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+	bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
 
 	if(codigoRecibido != 24){
 		printf("problemas al recibir respuesta de guardar pedido en sindic");
 	} else {
-		recibir_mensaje(respuesta, RESPUESTA_GUARDAR_PEDIDO, socket_sindicato);
+		recibir_mensaje(respuesta, RESPUESTA_GUARDAR_PEDIDO, nuevoSocketSindicato);
 
 		mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socket_cliente);
 	}
@@ -363,9 +371,11 @@ int preparar_pcb_plato(char* nombreComida, char* cantComida){
 void inicializar_semaforos(){
 	semId = malloc(sizeof(sem_t));
 	semLog = malloc(sizeof(sem_t));
+	semListaPedidos = malloc(sizeof(sem_t));
 
 	sem_init(semId, 0, 1);
 	sem_init(semLog, 0, 1);
+	sem_init(semListaPedidos);
 }
 
 void inicializar_colas(){
@@ -382,7 +392,9 @@ int32_t crear_id_pedidos(){
 int buscar_pedido_por_id(uint32_t id_pedido){
 	Pedido* pedido;
 	for(int i = 0; i < listaPedidos->elements_count; i++){
+		sem_wait(semListaPedidos);
 		pedido = list_get(listaPedidos,i);// conseguis el perfil del cliente
+		sem_post(semListaPedidos);
 
 		if(pedido->numPedido == id_pedido){
 			return i;

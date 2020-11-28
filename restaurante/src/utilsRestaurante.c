@@ -1,9 +1,16 @@
 #include "utilsRestaurante.h"
 
 
-void inicializarRestaurante(){
+void inicializarRestaurante(char* elPathDeLaConfig){
 
-	configuracion = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/restaurante.config");
+	socket_sindicato = establecer_conexion(ip_sindicato,puerto_sindicato);
+	if(socket_sindicato < 0){
+			log_info(logger, "Sindicato esta muerto, me muero yo tambien");
+	exit(-2);
+	}
+
+
+	configuracion = leerConfiguracion(elPathDeLaConfig);
     LOG_PATH = config_get_string_value(configuracion,"LOG_FILE_PATH"); //cargo el path del archivo log
 	ip_sindicato = config_get_string_value(configuracion,"IP_SINDICATO");
 	puerto_sindicato = config_get_string_value(configuracion,"PUERTO_SINDICATO");
@@ -254,7 +261,9 @@ void agregarAExit(pcb_plato* elPlato){
 		exit(-2);
 	}
 
+	sem_wait(semListaPedidos);
 	elPedidoAsociado = list_get(listaPedidos,indiceDelPedidoAsociado);
+	sem_post(semListaPedidos);
 
     mandar_mensaje(notificacionPlatoListoAMandar, PLATO_LISTO, elPedidoAsociado->socket_cliente);
 
@@ -280,11 +289,11 @@ void agregarAExit(pcb_plato* elPlato){
     los_recv_repetitivos(nuevoSocketSindicato, &exito, &sizeAAllocar);
     if(exito == 1){
 
-        	respuesta_ok_error* respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
-        	recibir_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO, nuevoSocketSindicato);
+		respuesta_ok_error* respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
+		recibir_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO, nuevoSocketSindicato);
 
-        	free(respuestaNotificacion);
-        }
+		free(respuestaNotificacion);
+	}
 
 	//No se si hace falta esto, confirmenme
 	//list_destroy(elPlato->pasosReceta)

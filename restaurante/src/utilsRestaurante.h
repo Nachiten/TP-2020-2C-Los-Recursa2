@@ -64,6 +64,7 @@ t_list* platosHorneandose;
 t_list* listaPedidos;
 
 sem_t* semLog;
+sem_t* semListaPedidos;
 sem_t* mutexNew;
 sem_t* mutexListaReady;
 sem_t* mutexBlock;
@@ -78,8 +79,6 @@ sem_t* habilitarCicloBlockReady;
 sem_t* finalizarCicloBlockReady;
 sem_t* habilitarCicloEntradaSalida;
 sem_t* finalizarCicloEntradaSalida;
-
-
 
 /*
 typedef enum{
@@ -147,7 +146,7 @@ typedef struct{
 	char* afinidad;
 }credencialesCocinero;
 
-void inicializarRestaurante();
+void inicializarRestaurante(char*);
 void obtenerMetadataRestaurante();
 void crearColasPlanificacion();
 void crearHilosPlanificacion();
