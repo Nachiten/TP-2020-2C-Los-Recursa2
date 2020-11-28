@@ -60,6 +60,7 @@ uint32_t serializar_paquete_crear_pedido(t_paquete* paquete, crear_pedido* estru
 //estas funciones las necesita desserializar para saber como manejar la info que le llega
 void desserializar_seleccionar_restaurante(seleccionar_restaurante* estructura, int32_t socket_cliente);
 void desserializar_obtener_restaurante(obtener_restaurante* estructura, int32_t socket_cliente);
+void desserializar_crear_pedido(crear_pedido* estructura, int32_t socket_cliente);
 void desserializar_guardar_plato(guardar_plato* estructura, int32_t socket_cliente);
 void desserializar_aniadir_plato(a_plato* estructura, int32_t socket_cliente);
 void desserializar_plato_listo(plato_listo* estructura, int32_t socket_cliente);

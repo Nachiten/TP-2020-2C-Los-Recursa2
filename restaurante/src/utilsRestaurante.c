@@ -60,6 +60,9 @@ void obtenerMetadataRestaurante(){
 		miPosicionX = estructuraRespuestaObtenerRestaurante->posX;
 		miPosicionY = estructuraRespuestaObtenerRestaurante->posY;
 		cantHornos = estructuraRespuestaObtenerRestaurante->cantHornos;
+		sem_wait(semId);
+		id_global = estructuraRespuestaObtenerRestaurante->cantPedidos;
+		sem_post(semId);
 		cantCocineros = estructuraRespuestaObtenerRestaurante->cantidadCocineros;
 
 		//rescato las variables char* en punteros globales aparte para reutilizarlas en los mensajes futuros que tenga q contestar

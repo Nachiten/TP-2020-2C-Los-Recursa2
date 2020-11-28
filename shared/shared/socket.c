@@ -884,7 +884,9 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 	memcpy(streamAuxiliar + desplazamiento, &(estructura->cantHornos), sizeof(estructura->cantHornos));
 	desplazamiento += sizeof(estructura->cantHornos);
 
-
+	//paso la cant de pedidos ya existentes
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->cantPedidos), sizeof(estructura->cantPedidos));
+	desplazamiento += sizeof(estructura->cantPedidos);
 
 	//paso la longitud del char* afinidades (de cocineros)
 	memcpy(streamAuxiliar + desplazamiento, &(estructura->longitudAfinidades), sizeof(estructura->longitudAfinidades));
@@ -915,6 +917,7 @@ uint32_t serializar_paquete_respuesta_obtener_restaurante(t_paquete* paquete, re
 						   + sizeof(estructura->posX)
 						   + sizeof(estructura->posX)
 						   + sizeof(estructura->cantHornos)
+						   + sizeof(estructura->cantPedidos)
 						   + sizeof(estructura->longitudAfinidades)
 						   + estructura->longitudAfinidades+1
 						   + sizeof(estructura->longitudPlatos)
@@ -1678,6 +1681,9 @@ void desserializar_respuesta_obtener_restaurante(respuesta_obtener_restaurante* 
 
 	//obtengo la cantidad de hornos
 	bytesRecibidos(recv(socket_cliente, &(estructura->cantHornos), sizeof(estructura->cantHornos), MSG_WAITALL));
+
+	//recibo la cantidad de pedidos ya existentes
+	bytesRecibidos(recv(socket_cliente, &(estructura->cantPedidos), sizeof(estructura->cantPedidos), MSG_WAITALL));
 
 	//recibo la longitud del char* afinidades
 	bytesRecibidos(recv(socket_cliente, &(estructura->longitudAfinidades), sizeof(estructura->longitudAfinidades), MSG_WAITALL));
