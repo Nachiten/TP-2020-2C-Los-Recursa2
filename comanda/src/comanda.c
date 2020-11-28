@@ -194,7 +194,7 @@ void escuchar_mensajes(int32_t* socket_conexion_establecida)
 	}
 }
 
-void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t socket)
+void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_socket)
 {
 	guardar_pedido* recibidoGuardarPedido;
 	guardar_plato* recibidoGuardarPlato;
@@ -202,6 +202,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 	confirmar_pedido* recibidoConfirmarPedido;
 	plato_listo* recibidoPlatoListo;
 	finalizar_pedido* recibidoFinalizarPedido;
+	handshake* recibidoHandshake;
 
 	respuesta_ok_error* resultado;
 	respuesta_obtener_pedido* resultadoObtenerPedido;
@@ -217,7 +218,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
     {
         case GUARDAR_PEDIDO:
         	recibidoGuardarPedido = malloc(sizeAAllocar);
-        	recibir_mensaje(recibidoGuardarPedido, cod_op, socket);
+        	recibir_mensaje(recibidoGuardarPedido, cod_op, el_socket);
 
         	resultado = malloc(sizeof(respuesta_ok_error));
 
@@ -245,7 +246,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 				resultado->respuesta = 1;
         	}
 
-        	mandar_mensaje(resultado,RESPUESTA_GUARDAR_PEDIDO,socket);
+        	mandar_mensaje(resultado,RESPUESTA_GUARDAR_PEDIDO,el_socket);
 
         	free(recibidoGuardarPedido->nombreRestaurante);
 			free(recibidoGuardarPedido);
@@ -254,7 +255,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
         case GUARDAR_PLATO:
         	recibidoGuardarPlato = malloc(sizeAAllocar);
-        	recibir_mensaje(recibidoGuardarPlato, cod_op, socket);
+        	recibir_mensaje(recibidoGuardarPlato, cod_op, el_socket);
 
         	resultado = malloc(sizeof(respuesta_ok_error));
 
@@ -361,7 +362,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         		}
         	}
 
-        	mandar_mensaje(resultado,RESPUESTA_GUARDAR_PLATO,socket);
+        	mandar_mensaje(resultado,RESPUESTA_GUARDAR_PLATO,el_socket);
 
         	free(resultado);
         	free(recibidoGuardarPlato->nombreRestaurante);
@@ -371,7 +372,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
         case OBTENER_PEDIDO:
         	recibidoObtenerPedido = malloc(sizeAAllocar);
-        	recibir_mensaje(recibidoObtenerPedido, cod_op, socket);
+        	recibir_mensaje(recibidoObtenerPedido, cod_op, el_socket);
 
         	resultadoObtenerPedido = malloc(sizeof(respuesta_obtener_pedido));
 
@@ -442,7 +443,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	}
 
         	//por ultimo, mando el mensaje con los datos que correspondan
-        	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,socket);
+        	mandar_mensaje(resultadoObtenerPedido,RESPUESTA_OBTENER_PEDIDO,el_socket);
 
         	free(resultadoObtenerPedido->comidas);
         	free(resultadoObtenerPedido->cantTotales);
@@ -453,7 +454,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
         case CONFIRMAR_PEDIDO:
         	recibidoConfirmarPedido = malloc(sizeAAllocar);
-        	recibir_mensaje(recibidoConfirmarPedido, cod_op, socket);
+        	recibir_mensaje(recibidoConfirmarPedido, cod_op, el_socket);
 
         	resultado = malloc(sizeof(respuesta_ok_error));
 
@@ -510,7 +511,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 			}
 
 			//mando el resultado de lo que consultaron
-			mandar_mensaje(resultado,RESPUESTA_CONFIRMAR_PEDIDO,socket);
+			mandar_mensaje(resultado,RESPUESTA_CONFIRMAR_PEDIDO,el_socket);
 
         	free(resultado);
         	free(recibidoConfirmarPedido->nombreRestaurante);
@@ -519,7 +520,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
         case PLATO_LISTO:
         	recibidoPlatoListo = malloc(sizeAAllocar);
-			recibir_mensaje(recibidoPlatoListo, cod_op, socket);
+			recibir_mensaje(recibidoPlatoListo, cod_op, el_socket);
 
 			resultado = malloc(sizeof(respuesta_ok_error));
 
@@ -588,7 +589,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 			}
 
 			//mando el resultado de lo que consultaron
-			mandar_mensaje(resultado,RESPUESTA_CONFIRMAR_PEDIDO,socket);
+			mandar_mensaje(resultado,RESPUESTA_CONFIRMAR_PEDIDO,el_socket);
 
 			free(resultado);
 			free(recibidoPlatoListo->nombreRestaurante);
@@ -598,7 +599,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 
         case FINALIZAR_PEDIDO:
         	recibidoFinalizarPedido = malloc(sizeAAllocar);
-        	recibir_mensaje(recibidoFinalizarPedido, cod_op, socket);
+        	recibir_mensaje(recibidoFinalizarPedido, cod_op, el_socket);
 
         	resultado = malloc(sizeof(respuesta_ok_error));
 
@@ -642,7 +643,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
 			}
 
 			//mando el resultado de lo que consultaron
-			mandar_mensaje(resultado,RESPUESTA_CONFIRMAR_PEDIDO,socket);
+			mandar_mensaje(resultado,RESPUESTA_CONFIRMAR_PEDIDO,el_socket);
 
 			free(resultado);
 			free(recibidoFinalizarPedido->nombreRestaurante);
@@ -654,8 +655,12 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	break;
 
         case HANDSHAKE:
+        	recibidoHandshake = malloc(sizeAAllocar);
+			recibir_mensaje(recibidoHandshake,HANDSHAKE,el_socket);
+			free(recibidoHandshake->id);
+			free(recibidoHandshake);
+
         	puts("Se recibió un HANDSHAKE, que fue exitosamente ignorado.");
-        	close(socket);
         	break;
 
         default:
