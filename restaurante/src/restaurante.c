@@ -61,7 +61,7 @@ void consultar_Platos(int32_t socket_cliente){
 	mandar_mensaje(consulta,CONSULTAR_PLATOS, nuevoSocketSindicato);
 
     codigo_operacion codigoRecibido;
-    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+    bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 
 //    printf("El codigo recibido del emisor es: %d", codigoRecibido);
 

@@ -292,7 +292,7 @@ void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int c
 	free(nuevosDatos);
 }
 
-void consultarPlatos(char* nombreRestaurant, uint32_t socket_cliente){
+void consultarPlatos_sindicato(char* nombreRestaurant, uint32_t socket_cliente){
 
 	if ( !existeRestaurant(nombreRestaurant) ){
 		printf("ERROR | No existe el restaurant buscado.\n");
@@ -439,7 +439,7 @@ void terminarPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente
 }
 
 
-void confirmarPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente){
+void confirmarPedido_sindicato(char* nombreRestaurant, int IDPedido, uint32_t socketCliente){
 
 	if ( !existeRestaurant(nombreRestaurant) ){
 		printf("ERROR | No existe el restaurant buscado.\n");
@@ -636,7 +636,7 @@ void freeRtaObtenerRestaurante(respuesta_obtener_restaurante* rta){
 
 
 // Obtiene todos los datos de un restaurant
-void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
+void obtenerRestaurante_sindicato(char* nombreRestaurante, uint32_t socket_cliente){
 	if ( !existeRestaurant(nombreRestaurante)){
 		printf("ERROR | No existe el restaurant buscado.\n");
 
@@ -746,7 +746,7 @@ void obtenerRestaurante(char* nombreRestaurante, uint32_t socket_cliente){
 }
 
 // Generar un nuevo pedido vacio en el restaurante
-void guardarPedido(char* nombreRestaurante, int IDPedido, uint32_t socketCliente){
+void guardarPedido_sindicato(char* nombreRestaurante, int IDPedido, uint32_t socketCliente){
 	if (!existeRestaurant(nombreRestaurante)){
 		printf("ERROR | No existe el restaurant solicitado.\n");
 		// Se envia respuesta fail

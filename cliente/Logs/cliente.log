@@ -5,3 +5,30 @@
 [INFO] 12:43:35:152 Cliente/(6183:6190): Conexión establecida con socket de destino.
 [INFO] 12:53:56:800 Cliente/(6183:6211): Conexión establecida con socket de destino.
 [INFO] 12:54:57:892 Cliente/(6183:6448): Conexión establecida con socket de destino.
+[INFO] 12:56:26:555 Cliente/(6563:6563): Conexión establecida con socket de destino.
+[INFO] 12:57:25:590 Cliente/(6563:6565): Conexión establecida con socket de destino.
+[INFO] 13:05:26:415 Cliente/(6821:6821): Conexión establecida con socket de destino.
+[INFO] 13:05:39:602 Cliente/(6821:6823): Conexión establecida con socket de destino.
+[INFO] 13:11:48:591 Cliente/(6821:6824): Conexión establecida con socket de destino.
+[INFO] 13:12:50:495 Cliente/(6821:7026): Conexión establecida con socket de destino.
+[INFO] 13:15:24:913 Cliente/(7177:7177): Conexión establecida con socket de destino.
+[INFO] 13:15:36:142 Cliente/(7177:7179): Conexión establecida con socket de destino.
+[INFO] 13:17:47:354 Cliente/(7177:7186): Conexión establecida con socket de destino.
+[INFO] 13:18:03:547 Cliente/(7177:7212): Conexión establecida con socket de destino.
+[INFO] 13:20:40:685 Cliente/(7373:7373): Conexión establecida con socket de destino.
+[INFO] 13:20:46:611 Cliente/(7373:7375): Conexión establecida con socket de destino.
+[INFO] 13:22:29:686 Cliente/(7373:7376): Conexión establecida con socket de destino.
+[INFO] 13:25:00:441 Cliente/(7373:7475): Conexión establecida con socket de destino.
+[INFO] 13:36:35:196 Cliente/(7373:7539): Conexión establecida con socket de destino.
+[INFO] 13:47:44:707 Cliente/(8180:8180): Conexión establecida con socket de destino.
+[INFO] 13:47:55:881 Cliente/(8180:8182): Conexión establecida con socket de destino.
+[INFO] 13:50:16:180 Cliente/(8260:8260): Conexión establecida con socket de destino.
+[INFO] 13:50:44:997 Cliente/(8260:8262): Conexión establecida con socket de destino.
+[WARNING] 13:52:00:305 Cliente/(8307:8307): Conexión fallida con socket de destino.
+[INFO] 13:52:00:305 Cliente/(8307:8307): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 13:52:55:507 Cliente/(8387:8387): Conexión establecida con socket de destino.
+[INFO] 13:53:10:365 Cliente/(8400:8400): Conexión establecida con socket de destino.
+[INFO] 13:53:15:385 Cliente/(8400:8402): Conexión establecida con socket de destino.
+[INFO] 13:56:35:419 Cliente/(8400:8406): Conexión establecida con socket de destino.
+[INFO] 13:57:29:780 Cliente/(8400:8406): Los platos del restaurante < ChurrasicPark > consultado son: [Milanesa,Empanada,Ensalada]
+

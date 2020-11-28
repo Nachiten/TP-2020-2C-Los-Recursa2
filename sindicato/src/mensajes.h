@@ -12,11 +12,11 @@
 #include "estructuras.h"
 
 // Mensajes de socket
-void consultarPlatos(char*, uint32_t);
-void confirmarPedido(char*, int, uint32_t);
+void consultarPlatos_sindicato(char*, uint32_t);
+void confirmarPedido_sindicato(char*, int, uint32_t);
 void obtenerPedido(char*, int, uint32_t);
-void obtenerRestaurante(char*, uint32_t);
-void guardarPedido(char*, int, uint32_t);
+void obtenerRestaurante_sindicato(char*, uint32_t);
+void guardarPedido_sindicato(char*, int, uint32_t);
 void guardarPlato(char*, int, char*, int, uint32_t);
 void terminarPedido(char*, int, uint32_t);
 void platoListo(char*, int, char*, uint32_t);
