@@ -222,22 +222,79 @@ void agregarABlock(pcb_plato* elPlato){
 }
 
 void agregarAExit(pcb_plato* elPlato){
+	 plato_listo* notificacionPlatoListoAMandar;
+     Pedido* elPedidoAsociado;
+     uint32_t exito;
+     int32_t sizeAAllocar, nuevoSocketSindicato, indiceDelPedidoAsociado;
+
 	sem_wait(semLog);
 	//LOG DE ENUNCIADO!!!!1!1!
 	log_info(logger, "[EXIT] Entra el plato < %s >, del pedido < %i > por haber culminado su receta."
 				, elPlato->nombrePlato, elPlato->idPedido);
 	sem_post(semLog);
-	//No se si hace falta esto, confirmenme
-	//list_destroy(elPlato->pasosReceta)
 
-	//se libera memoria ocupada por donPlato
-	free(elPlato->nombrePlato);
-	free(elPlato);
 
 
 	//se envia un mensaje a sindicato para q actualice el estado del pedido,
 	//con el id del mismo y mi restaurante, aparentemente tambien al modulo que lo solicito el pedido
 	//Se enviaria PLATO_LISTO, ver con nico despues los detalles
+	notificacionPlatoListoAMandar = malloc(sizeof(plato_listo));
+	notificacionPlatoListoAMandar->idPedido = elPlato->idPedido;
+	notificacionPlatoListoAMandar->largoNombrePlato = strlen(elPlato->nombrePlato);
+	notificacionPlatoListoAMandar->largoNombreRestaurante = strlen(nombreRestaurante);
+	notificacionPlatoListoAMandar->nombrePlato = malloc(notificacionPlatoListoAMandar->largoNombrePlato+1);
+	notificacionPlatoListoAMandar->nombreRestaurante = malloc(notificacionPlatoListoAMandar->largoNombreRestaurante+1);
+	strcpy(notificacionPlatoListoAMandar->nombrePlato, elPlato->nombrePlato);
+	strcpy(notificacionPlatoListoAMandar->nombreRestaurante, nombreRestaurante);
+
+	indiceDelPedidoAsociado = buscar_pedido_por_id(elPlato->idPedido);
+
+	if(indiceDelPedidoAsociado == -2){
+		puts("Estas al horno");
+		exit(-2);
+	}
+
+	elPedidoAsociado = list_get(listaPedidos,indiceDelPedidoAsociado);
+
+    mandar_mensaje(notificacionPlatoListoAMandar, PLATO_LISTO, elPedidoAsociado->socket_cliente);
+
+    los_recv_repetitivos(elPedidoAsociado->socket_cliente, &exito, &sizeAAllocar);
+    if(exito == 1){
+
+    	respuesta_ok_error* respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
+    	recibir_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO, elPedidoAsociado->socket_cliente);
+
+    	free(respuestaNotificacion);
+    }
+
+    nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
+	if(nuevoSocketSindicato < 0){
+		sem_wait(semLog);
+		log_info(logger, "Sindicato esta muerto, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
+
+    mandar_mensaje(notificacionPlatoListoAMandar, PLATO_LISTO, nuevoSocketSindicato);
+
+    los_recv_repetitivos(nuevoSocketSindicato, &exito, &sizeAAllocar);
+    if(exito == 1){
+
+        	respuesta_ok_error* respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
+        	recibir_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO, nuevoSocketSindicato);
+
+        	free(respuestaNotificacion);
+        }
+
+	//No se si hace falta esto, confirmenme
+	//list_destroy(elPlato->pasosReceta)
+	//se libera memoria ocupada por donPlato
+	free(elPlato->nombrePlato);
+	free(elPlato);
+	//se libera la memoria ocupada por donNotificacionDePlatoListo
+	free(notificacionPlatoListoAMandar->nombrePlato);
+	free(notificacionPlatoListoAMandar->nombreRestaurante);
+	free(notificacionPlatoListoAMandar);
 
 }
 

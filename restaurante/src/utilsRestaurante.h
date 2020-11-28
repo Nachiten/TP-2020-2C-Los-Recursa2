@@ -61,6 +61,7 @@ t_list* colaBlock;
 t_list* listaDeColasReady;
 t_queue* colaParaHornear;
 t_list* platosHorneandose;
+t_list* listaPedidos;
 
 sem_t* semLog;
 sem_t* mutexNew;
@@ -96,6 +97,11 @@ typedef enum{
 	RR,
 }t_algoritmoplanif;
 */
+
+typedef struct{
+	int32_t numPedido;
+	int32_t socket_cliente;
+}Pedido;
 
 typedef enum{
 	REPOSAR = 1,
@@ -156,6 +162,10 @@ void agregarAReady(pcb_plato*);
 void agregarABlock(pcb_plato*);
 void agregarAExit(pcb_plato*);
 pcb_plato* obtenerSiguienteDeReady();
+
+//me la robe de resto.h
+int buscar_pedido_por_id(uint32_t);
+
 void iniciarSemaforosPlanificacion();
 void iniciarSemaforosCiclos();
 void hiloCiclosMaestro();

@@ -10,22 +10,6 @@
 #include <stdio.h>
 #include "restaurante.h"
 
-// t_list lista_cola_afinidades = [t_cola_afinidad, t_cola__afinidad2]
-// t_list cocineros = [t_cocinero_1, t_cocinero_2, t_cocinero3]
-// t_list hornos = [t_horno]
-// t_queue cola_horno = [t_plato]
-// t_list milanesa
-// t_list sandwich
-
-
-
-//{
-// t_list* cola
-//char* afinidad
-
-
-//}t_cola_afinidad
-
 int main(){
 	socket_sindicato = establecer_conexion(ip_sindicato,puerto_sindicato);
 	if(socket_sindicato < 0){
@@ -190,6 +174,7 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 
 void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato;
+	Pedido* elPedidoQueFueConfirmado;
 
 	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
 	if(nuevoSocketSindicato < 0){
@@ -231,6 +216,11 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 		if(respuesta == 0){
 			break;
 		}
+	}
+
+	if(respuesta == 1){
+		elPedidoQueFueConfirmado = buscar_pedido_por_id(id);
+		elPedidoQueFueConfirmado->socket_cliente = socket_cliente;
 	}
 
 	respuesta_ok_error* respuestaAMandar = malloc(sizeof(respuesta_ok_error));
@@ -287,22 +277,28 @@ void consultar_Pedido(int32_t id,int32_t socket_cliente){
 int preparar_pcb_plato(char* nombreComida, char* cantComida){
 	int i = 0;
 
+	int32_t nuevoSocketSindicato;
 	obtener_receta* receta_a_buscar = malloc(sizeof(obtener_receta));
 	receta_a_buscar->largoNombreReceta = strlen(nombreComida);
 	receta_a_buscar->nombreReceta = malloc(strlen(nombreComida) +1);
 	strcpy(receta_a_buscar->nombreReceta,nombreComida);
 
-	mandar_mensaje(receta_a_buscar,OBTENER_RECETA,socket_sindicato);
+
+	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
+	if(nuevoSocketSindicato < 0){
+		sem_wait(semLog);
+		log_info(logger, "Sindicato esta muerto, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
+
+	mandar_mensaje(receta_a_buscar,OBTENER_RECETA,nuevoSocketSindicato);
 
     codigo_operacion codigoRecibido;
-    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
-
-    printf("El codigo recibido del emisor es: %d", codigoRecibido);
+    bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 
     uint32_t sizePayload;
     bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
-
-    printf("El size del buffer/payload es: %u", sizePayload);
 
     respuesta_obtener_receta* receta_obtenida = malloc(sizeof(respuesta_obtener_receta));
 
@@ -341,12 +337,26 @@ int preparar_pcb_plato(char* nombreComida, char* cantComida){
     	}
     	freeDeArray(listaPasos);
     	freeDeArray(listaDuracion);
+    	free(receta_a_buscar->nombreReceta);
+		free(receta_a_buscar);
+		free(receta_obtenida->pasos);
+		free(receta_obtenida->tiempoPasos);
+		free(receta_obtenida);
 
     	return 1;
 
+
     }else{
+    	free(receta_a_buscar->nombreReceta);
+		free(receta_a_buscar);
+		free(receta_obtenida->pasos);
+		free(receta_obtenida->tiempoPasos);
+		free(receta_obtenida);
+
     	return 0;
     }
+
+
 
 }
 
@@ -412,7 +422,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	case CREAR_PEDIDO:
 		recibidoCrearPedido = malloc(sizeAAllocar);
 		recibir_mensaje(recibidoCrearPedido,CREAR_PEDIDO,socket_cliente);
-		crear_Pedido(socket_cliente);
+		crear_Pedido(recibidoCrearPedido, socket_cliente);
 		free(recibidoCrearPedido->id);
 		free(recibidoCrearPedido);
 		break;

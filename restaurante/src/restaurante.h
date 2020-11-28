@@ -10,16 +10,10 @@
 
 #include "utilsRestaurante.h"
 //***STRUCTS***
-typedef struct{
-	int32_t numPedido;
-	int32_t socket_cliente;
-}Pedido;
-
 
 //***VARIABLES***
 sem_t* semId;
 int32_t id_global;
-t_list* listaPedidos;
 pthread_t planificacion;
 
 //***MENSAJES DE RESTO***
@@ -33,7 +27,7 @@ void inicializar_colas();
 int32_t crear_id_pedidos();
 int preparar_pcb_plato(char* , char*);
 void freeDeArray(char**);
-int buscar_pedido_por_id(uint32_t);
+
 
 //***FUNCIONES DEL SERVER***
 void process_request(codigo_operacion, int32_t, uint32_t);
