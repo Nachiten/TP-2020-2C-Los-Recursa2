@@ -30,6 +30,10 @@ t_list* listaSemRestaurant;
 t_list* listaSemPedido;
 t_list* listaSemReceta;
 
+sem_t* mutexListaSemRest;
+sem_t* mutexListaSemPedido;
+sem_t* mutexListaSemReceta;
+
 //void abrirArchivo1();
 //void abrirArchivo2();
 //void abrirArchivo3();

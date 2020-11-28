@@ -1372,6 +1372,17 @@ int main(){
 	listaSemRestaurant = list_create();
 	listaSemReceta = list_create();
 
+	// Mutex para tocar las listas de semaforos
+	mutexListaSemRest = malloc(sizeof(sem_t));
+	sem_init(mutexListaSemRest, 0, 1);
+
+	mutexListaSemPedido = malloc(sizeof(sem_t));
+	sem_init(mutexListaSemPedido, 0, 1);
+
+	mutexListaSemReceta = malloc(sizeof(sem_t));
+	sem_init(mutexListaSemReceta, 0, 1);
+
+
 	char* PUNTO_MONTAJE;
 	// Leer la config
 	t_config* config = leerConfig(&PUNTO_MONTAJE);
@@ -1406,9 +1417,9 @@ int main(){
 	}
 
     // Testing | Printear semaforos
-//	printearSemaforosRestaurantes();
-//	printearSemaforosPedidos();
-//	printearSemaforosRecetas();
+	//printearSemaforosRestaurantes();
+	//printearSemaforosPedidos();
+	//printearSemaforosRecetas();
 
 	// ---- A partir de aca el FS ya existe ----
 
