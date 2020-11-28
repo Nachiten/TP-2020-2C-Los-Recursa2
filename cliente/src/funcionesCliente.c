@@ -37,7 +37,7 @@ uint32_t valor_para_switch_case(char* input) {
 	}
 
 	//AGREGAR_PLATO [idPEDIDO] [nombreRESTAURANTE] [nombrePLATO] [cantidadPLATO]
-	if (strcmp(input,"AGREGAR_PLATO") == 0)
+	if (strcmp(input,"ANIADIR_PLATO") == 0)
 	{
 		switcher = A_PLATO;
 	}

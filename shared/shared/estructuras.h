@@ -160,6 +160,7 @@ typedef struct{
 	uint32_t posX;
 	uint32_t posY;
 	uint32_t cantHornos;
+	uint32_t cantPedidos;
 
 	uint32_t longitudAfinidades;
 	char* afinidades;

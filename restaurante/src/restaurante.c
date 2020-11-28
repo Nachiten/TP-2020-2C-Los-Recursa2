@@ -135,9 +135,10 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato;
 	guardar_plato* pasamanosGuardarPlato;
 
-	sem_wait(semListaPedidos);
+	//sem_wait(semListaPedidos);
 	if(buscar_pedido_por_id(recibidoAPlato->idPedido) != -2){
 
+		printf("Encontre el pedido buscado.\n");
 		nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
 		if(nuevoSocketSindicato < 0){
 			sem_wait(semLog);
@@ -171,14 +172,16 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 
 	    mandar_mensaje(respuesta,RESPUESTA_A_PLATO,socket_cliente);
 	    close(nuevoSocketSindicato);
+
+	    free(pasamanosGuardarPlato->nombrePlato);
+	    free(pasamanosGuardarPlato->nombreRestaurante);
+	    free(pasamanosGuardarPlato);
+
 	}else{
 		respuesta->respuesta = 0;
 		mandar_mensaje(respuesta,RESPUESTA_A_PLATO,socket_cliente);
 	}
-	sem_post(semListaPedidos);
-    free(pasamanosGuardarPlato->nombrePlato);
-    free(pasamanosGuardarPlato->nombreRestaurante);
-    free(pasamanosGuardarPlato);
+	//sem_post(semListaPedidos);
 	free(respuesta);
 }
 

@@ -457,7 +457,7 @@ void obtenerInputConsolaCliente(){
 		{
 			recibir_mensaje(estructuraRespuesta,RESPUESTA_A_PLATO,socketCliente);
 			sem_wait(semLog);
-			log_info(logger, "El intento de agregar un plato a un pedido fue: %d.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+			log_info(logger, "El intento de agregar un plato a un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
 			sem_post(semLog);
 		} else {
 			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
