@@ -30,6 +30,10 @@
 #include<pthread.h>
 #include<math.h>
 
+//me traje de restaurante.h
+sem_t* semId;
+int32_t id_global;
+
 //cosas cargadas del archivo config
 t_config* configuracion;
 t_log* logger;

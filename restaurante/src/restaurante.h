@@ -12,8 +12,6 @@
 //***STRUCTS***
 
 //***VARIABLES***
-sem_t* semId;
-int32_t id_global;
 pthread_t planificacion;
 
 //***MENSAJES DE RESTO***
