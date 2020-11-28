@@ -634,6 +634,18 @@ void freeRtaObtenerRestaurante(respuesta_obtener_restaurante* rta){
 }
 
 
+int calcularCantidadPedidos(char* nombreRestaurante){
+
+	int cantidadPedidos = 0;
+
+	int i = 1;
+	while( existePedido(nombreRestaurante, i) ){
+		i++;
+		cantidadPedidos++;
+	}
+
+	return cantidadPedidos;
+}
 
 // Obtiene todos los datos de un restaurant
 void obtenerRestaurante_sindicato(char* nombreRestaurante, uint32_t socket_cliente){
@@ -650,6 +662,7 @@ void obtenerRestaurante_sindicato(char* nombreRestaurante, uint32_t socket_clien
 		respuestaMensaje->cantHornos = 0;
 		respuestaMensaje->posX = 0;
 		respuestaMensaje->posY = 0;
+		respuestaMensaje->cantPedidos = 0;
 
 		respuestaMensaje->longitudAfinidades = strlen(arrayVacio);
 		respuestaMensaje->afinidades = malloc(strlen(arrayVacio)+1);
@@ -723,6 +736,9 @@ void obtenerRestaurante_sindicato(char* nombreRestaurante, uint32_t socket_clien
 	respuestaMensaje->longitudPrecioPlatos = strlen(lineaPrecioPlatosSeparada[1]);
 	respuestaMensaje->precioPlatos = malloc(strlen(lineaPrecioPlatosSeparada[1])+1);
 	strcpy(respuestaMensaje->precioPlatos, lineaPrecioPlatosSeparada[1]);
+
+	respuestaMensaje->cantPedidos = calcularCantidadPedidos(nombreRestaurante);
+	printf("La cantidad de pedidos es %i\n", respuestaMensaje->cantPedidos);
 
 	//printearRespuestaObtenerRestaurante(respuestaMensaje);
 
@@ -874,9 +890,9 @@ void loguearRtaObtenerReceta(respuesta_obtener_receta* rta){
 
 void loguearRtaObtenerRestaurante(respuesta_obtener_restaurante* rta){
 	log_info(logger, "[EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=%i | posX=%i | posY=%i "
-			"| cantHornos=%i | afinidades=%s | platos=%s | precioPlatos=%s",
+			"| cantHornos=%i | afinidades=%s | platos=%s | precioPlatos=%s | cantPedidos=%i",
 			rta->cantidadCocineros, rta->posX, rta->posY,
-			rta->cantHornos, rta->afinidades, rta->platos, rta->precioPlatos);
+			rta->cantHornos, rta->afinidades, rta->platos, rta->precioPlatos, rta->cantPedidos);
 }
 
 void loguearRtaConsultarPlatos(respuesta_consultar_platos* rta){
