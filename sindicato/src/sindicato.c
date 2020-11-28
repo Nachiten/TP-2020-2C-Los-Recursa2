@@ -477,7 +477,7 @@ t_config* leerConfig(char** PUNTO_MONTAJE){
 	t_config* config = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/sindicato.config");
 
 	if (config == NULL){
-		printf("No se pudo leer la config!!");
+		printf("No se pudo leer la config!!\n");
 		exit(1);
 	}
 
@@ -1389,6 +1389,11 @@ int main(){
 
 	// Crear logger
 	logger = cargarUnLog("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/sindicato/Logs/sindicato.log", "SINDICATO");
+
+	if (logger == NULL){
+		printf("No pude leer el log.\n");
+		exit(3);
+	}
 
 	// Crear carpetas del FS
 	// {puntoMontaje}/Metadata

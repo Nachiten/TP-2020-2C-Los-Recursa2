@@ -3,12 +3,6 @@
 
 void inicializarRestaurante(char* elPathDeLaConfig){
 
-	socket_sindicato = establecer_conexion(ip_sindicato,puerto_sindicato);
-	if(socket_sindicato < 0){
-			log_info(logger, "Sindicato esta muerto, me muero yo tambien");
-	exit(-2);
-	}
-
 
 	configuracion = leerConfiguracion(elPathDeLaConfig);
     LOG_PATH = config_get_string_value(configuracion,"LOG_FILE_PATH"); //cargo el path del archivo log
@@ -22,10 +16,9 @@ void inicializarRestaurante(char* elPathDeLaConfig){
     algoritmoElegido = config_get_string_value(configuracion, "ALGORITMO_PLANIFICACION");
     RETARDO_CICLO_CPU = config_get_int_value(configuracion, "RETARDO_CICLO_CPU");
 
-    logger = cargarUnLog(LOG_PATH, "Cliente");
-    sem_wait(semLog);
+    logger = cargarUnLog(LOG_PATH, "Restaurante");
+
     log_info(logger, "Obtuve de config el nombre: %s" , nombreRestaurante);
-    sem_post(semLog);
 
     //comunicarme con sindicato -> socket -> mensaje OBTENER_RESTAURANTE
     obtenerMetadataRestaurante();
@@ -34,10 +27,16 @@ void inicializarRestaurante(char* elPathDeLaConfig){
 
 
 void obtenerMetadataRestaurante(){
+    uint32_t exito;
+    int32_t sizeAAllocar, nuevoSocketSindicato;
+
 
 	//me trato de conectar con sindicato que deberia estar levantado esperando que le vaya a pedir la info
-	socket_sindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
-    resultado_de_conexion(socket_sindicato, logger, "destino");
+	nuevoSocketSindicato = establecer_conexion(ip_sindicato,puerto_sindicato);
+	if(socket_sindicato < 0){
+		log_info(logger, "Sindicato esta muerto, me muero yo tambien");
+	    exit(-2);
+	}
 
     obtener_restaurante* estructura = malloc(sizeof(obtener_restaurante));
     estructura->largoNombreRestaurante = strlen(nombreRestaurante);
@@ -45,60 +44,50 @@ void obtenerMetadataRestaurante(){
     strcpy(estructura->nombreRestaurante, nombreRestaurante);
 
     //emision del mensaje para pedir la info, OBTENER_RESTAURANTE [nombreR]
-    mandar_mensaje(estructura, OBTENER_RESTAURANTE, socket_sindicato);
+    mandar_mensaje(estructura, OBTENER_RESTAURANTE, nuevoSocketSindicato);
 
     free(estructura->nombreRestaurante);
     free(estructura);
 
-//    printf("pude mandar la solicitud de metadata a sindic.\n");
+    los_recv_repetitivos(nuevoSocketSindicato, &exito, &sizeAAllocar);
+    if(exito == 1){
+    	respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizeAAllocar);
+    	//recepcion del choclo divino
+    	recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_REST, nuevoSocketSindicato);
+    	//printf("pude recibir toda la de metadata de sindic.\n");
 
-    //recibo el codigo de operacion, ya se que va a ser RESPUESTA_OBTENER_R
-    codigo_operacion codigoRecibido;
-    bytesRecibidos(recv(socket_sindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+		//trabajo interno con la metadata recibida
+		miPosicionX = estructuraRespuestaObtenerRestaurante->posX;
+		miPosicionY = estructuraRespuestaObtenerRestaurante->posY;
+		cantHornos = estructuraRespuestaObtenerRestaurante->cantHornos;
+		cantCocineros = estructuraRespuestaObtenerRestaurante->cantidadCocineros;
 
-//   printf("El codigo recibido del emisor es: %d", codigoRecibido);
+		//rescato las variables char* en punteros globales aparte para reutilizarlas en los mensajes futuros que tenga q contestar
+		platos = malloc(estructuraRespuestaObtenerRestaurante->longitudPlatos+1);
+		strcpy(platos, estructuraRespuestaObtenerRestaurante->platos);
 
-    uint32_t sizePayload;
-    bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+		afinidades = malloc(estructuraRespuestaObtenerRestaurante->longitudAfinidades+1);
+		strcpy(afinidades, estructuraRespuestaObtenerRestaurante->afinidades);
 
-//    printf("El size del buffer/payload para la metadata es: %u", sizePayload);
+		listaPlatos = string_get_string_as_array(platos);
+		listaAfinidades = string_get_string_as_array(afinidades);
 
-    respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizePayload);
+		// SI > 0 => True, si = 0 => false
+		if (cantidadDeElementosEnArray(listaPlatos)){
+			printf("Hay platos.\n");
+		} else {
+			printf("No hay platos (no hay restaurant).\n");
+			exit(-2);
+		}
 
-   //recepcion del choclo divino
-    recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_REST, socket_sindicato);
+		free(estructuraRespuestaObtenerRestaurante->platos);
+		free(estructuraRespuestaObtenerRestaurante->afinidades);
+		free(estructuraRespuestaObtenerRestaurante->precioPlatos);
+		free(estructuraRespuestaObtenerRestaurante);
 
-    printf("pude recibir toda la de metadata de sindic.\n");
-
-
-    // SI > 0 => True, si = 0 => false
-    if (cantidadDeElementosEnArray(listaPlatos)){
-    	printf("Hay platos\n");
-    } else {
-    	printf("No hay platos (no hay restaurant)\n");
-    	exit(-2);
+    }else{
+    	puts("Hubo un problemita al recibir la metadata de sindicatox.\n");
     }
-
-    //trabajo interno con la metadata recibida
-    miPosicionX = estructuraRespuestaObtenerRestaurante->posX;
-    miPosicionY = estructuraRespuestaObtenerRestaurante->posY;
-    cantHornos = estructuraRespuestaObtenerRestaurante->cantHornos;
-    cantCocineros = estructuraRespuestaObtenerRestaurante->cantidadCocineros;
-
-    //rescato las variables char* en punteros globales aparte para reutilizarlas en los mensajes futuros que tenga q contestar
-    platos = malloc(estructuraRespuestaObtenerRestaurante->longitudPlatos+1);
-    strcpy(platos, estructuraRespuestaObtenerRestaurante->platos);
-
-    afinidades = malloc(estructuraRespuestaObtenerRestaurante->longitudAfinidades+1);
-    strcpy(afinidades, estructuraRespuestaObtenerRestaurante->afinidades);
-
-    listaPlatos = string_get_string_as_array(platos);
-    listaAfinidades = string_get_string_as_array(afinidades);
-
-    free(estructuraRespuestaObtenerRestaurante->platos);
-    free(estructuraRespuestaObtenerRestaurante->afinidades);
-    free(estructuraRespuestaObtenerRestaurante->precioPlatos);
-    free(estructuraRespuestaObtenerRestaurante);
     close(socket_sindicato);
 }
 
