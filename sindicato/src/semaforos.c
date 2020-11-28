@@ -67,7 +67,9 @@ void crearSemaforoRestaurant(char* nombreRestaurant){
 	strcpy(semaforoRestaurant->nombreRestaurant, nombreRestaurant);
 	semaforoRestaurant->semaforo = semaforoNuevo;
 
+	sem_wait(mutexListaSemRest);
 	list_add(listaSemRestaurant, semaforoRestaurant);
+	sem_post(mutexListaSemRest);
 }
 
 void crearSemaforoPedido(char* nombreRestaurant, int numPedido){
@@ -82,7 +84,9 @@ void crearSemaforoPedido(char* nombreRestaurant, int numPedido){
 	semaforoPedido->semaforo = semaforoNuevo;
 	semaforoPedido->numPedido = numPedido;
 
+	sem_wait(mutexListaSemPedido);
 	list_add(listaSemPedido, semaforoPedido);
+	sem_post(mutexListaSemPedido);
 }
 
 void crearSemaforoReceta(char* nombreReceta){
@@ -96,44 +100,53 @@ void crearSemaforoReceta(char* nombreReceta){
 	strcpy(semaforoReceta->nombreReceta, nombreReceta);
 	semaforoReceta->semaforo = semaforoNuevo;
 
+	sem_wait(mutexListaSemReceta);
 	list_add(listaSemReceta, semaforoReceta);
+	sem_post(mutexListaSemReceta);
 }
 
 void waitSemaforoRestaurant(char* nombreRestaurant){
 	int i;
 
+	sem_wait(mutexListaSemRest);
 	for ( i = 0; i< list_size(listaSemRestaurant); i++){
 		semRestaurant* semaforoActual = list_get(listaSemRestaurant, i);
 
 		if (strcmp(nombreRestaurant, semaforoActual->nombreRestaurant) == 0){
 
 			sem_wait(semaforoActual->semaforo);
+			sem_post(mutexListaSemRest);
 			//printf("WAIT | %s\n", pokemon);
 			return;
 		}
 	}
+	sem_post(mutexListaSemRest);
 	printf("ERROR | No se encontro el semaforo restaurant deseado\n");
 }
 
 void signalSemaforoRestaurant(char* nombreRestaurant){
 	int i;
 
+	sem_wait(mutexListaSemRest);
 	for ( i = 0; i< list_size(listaSemRestaurant); i++){
 		semRestaurant* semaforoActual = list_get(listaSemRestaurant, i);
 
 		if (strcmp(nombreRestaurant, semaforoActual->nombreRestaurant) == 0){
 
+			sem_post(mutexListaSemRest);
 			sem_post(semaforoActual->semaforo);
 			//printf("SIGNAL | %s\n", pokemon);
 			return;
 		}
 	}
+	sem_post(mutexListaSemRest);
 	printf("ERROR | No se encontro el semaforo restaurant deseado\n");
 }
 
 void waitSemaforoPedido(char* nombreRestaurant, int numPedido){
 	int i;
 
+	sem_wait(mutexListaSemPedido);
 	for ( i = 0; i< list_size(listaSemPedido); i++){
 		semPedido* semaforoActual = list_get(listaSemPedido, i);
 
@@ -141,16 +154,19 @@ void waitSemaforoPedido(char* nombreRestaurant, int numPedido){
 				&& numPedido == semaforoActual->numPedido){
 
 			sem_wait(semaforoActual->semaforo);
+			sem_post(mutexListaSemPedido);
 			//printf("WAIT | %s\n", pokemon);
 			return;
 		}
 	}
+	sem_post(mutexListaSemPedido);
 	printf("ERROR | No se encontro el semaforo pedido deseado\n");
 }
 
 void signalSemaforoPedido(char* nombreRestaurant, int numPedido){
 	int i;
 
+	sem_wait(mutexListaSemPedido);
 	for ( i = 0; i< list_size(listaSemPedido); i++){
 		semPedido* semaforoActual = list_get(listaSemPedido, i);
 
@@ -158,42 +174,50 @@ void signalSemaforoPedido(char* nombreRestaurant, int numPedido){
 				&& numPedido == semaforoActual->numPedido){
 
 			sem_post(semaforoActual->semaforo);
+			sem_post(mutexListaSemPedido);
 			//printf("WAIT | %s\n", pokemon);
 			return;
 		}
 	}
+	sem_post(mutexListaSemPedido);
 	printf("ERROR | No se encontro el semaforo pedido deseado\n");
 }
 
 void waitSemaforoReceta(char* nombreReceta){
 	int i;
 
+	sem_wait(mutexListaSemReceta);
 	for ( i = 0; i< list_size(listaSemReceta); i++){
 		semReceta* semaforoActual = list_get(listaSemReceta, i);
 
 		if (strcmp(nombreReceta, semaforoActual->nombreReceta) == 0){
 
 			sem_wait(semaforoActual->semaforo);
+			sem_post(mutexListaSemReceta);
 			//printf("WAIT | %s\n", pokemon);
 			return;
 		}
 	}
+	sem_post(mutexListaSemReceta);
 	printf("ERROR | No se encontro el semaforo receta deseado\n");
 }
 
 void signalSemaforoReceta(char* nombreReceta){
 	int i;
 
+	sem_wait(mutexListaSemReceta);
 	for ( i = 0; i< list_size(listaSemReceta); i++){
 		semReceta* semaforoActual = list_get(listaSemReceta, i);
 
 		if (strcmp(nombreReceta, semaforoActual->nombreReceta) == 0){
 
 			sem_post(semaforoActual->semaforo);
+			sem_post(mutexListaSemReceta);
 			//printf("SIGNAL | %s\n", pokemon);
 			return;
 		}
 	}
+	sem_post(mutexListaSemReceta);
 	printf("ERROR | No se encontro el semaforo receta deseado\n");
 }
 
