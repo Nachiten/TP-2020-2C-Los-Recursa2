@@ -30,12 +30,6 @@ void inicializarRestaurante(char* elPathDeLaConfig){
     //comunicarme con sindicato -> socket -> mensaje OBTENER_RESTAURANTE
     obtenerMetadataRestaurante();
 
-    crearColasPlanificacion();
-    //crearHornos();
-    iniciarSemaforosPlanificacion();
-    iniciarSemaforosCiclos();
-    crearHilosPlanificacion();
-
 }
 
 

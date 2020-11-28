@@ -135,6 +135,7 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato;
 	guardar_plato* pasamanosGuardarPlato;
 
+	sem_wait(semListaPedidos);
 	if(buscar_pedido_por_id(recibidoAPlato->idPedido) != -2){
 
 		nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
@@ -174,6 +175,7 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 		respuesta->respuesta = 0;
 		mandar_mensaje(respuesta,RESPUESTA_A_PLATO,socket_cliente);
 	}
+	sem_post(semListaPedidos);
     free(pasamanosGuardarPlato->nombrePlato);
     free(pasamanosGuardarPlato->nombreRestaurante);
     free(pasamanosGuardarPlato);
@@ -183,6 +185,7 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato;
 	Pedido* elPedidoQueFueConfirmado;
+	int32_t indiceDelPedidoQueFueConfirmado;
 
 	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
 	if(nuevoSocketSindicato < 0){
@@ -227,8 +230,11 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 	}
 
 	if(respuesta == 1){
-		elPedidoQueFueConfirmado = buscar_pedido_por_id(id);
+		indiceDelPedidoQueFueConfirmado = buscar_pedido_por_id(id);
+		sem_wait(semListaPedidos);
+		elPedidoQueFueConfirmado = list_get(listaPedidos, indiceDelPedidoQueFueConfirmado);
 		elPedidoQueFueConfirmado->socket_cliente = socket_cliente;
+		sem_post(semListaPedidos);
 	}
 
 	respuesta_ok_error* respuestaAMandar = malloc(sizeof(respuesta_ok_error));
@@ -375,11 +381,17 @@ void inicializar_semaforos(){
 
 	sem_init(semId, 0, 1);
 	sem_init(semLog, 0, 1);
-	sem_init(semListaPedidos);
+	sem_init(semListaPedidos, 0, 1);
 }
 
 void inicializar_colas(){
 	listaPedidos = list_create(); //inicializo la lista de pedidos
+
+	crearColasPlanificacion();
+	//crearHornos();
+	iniciarSemaforosPlanificacion();
+	iniciarSemaforosCiclos();
+	crearHilosPlanificacion();
 }
 
 int32_t crear_id_pedidos(){
@@ -391,16 +403,19 @@ int32_t crear_id_pedidos(){
 
 int buscar_pedido_por_id(uint32_t id_pedido){
 	Pedido* pedido;
+	int retorno = -2;
+	sem_wait(semListaPedidos);
 	for(int i = 0; i < listaPedidos->elements_count; i++){
-		sem_wait(semListaPedidos);
+
 		pedido = list_get(listaPedidos,i);// conseguis el perfil del cliente
-		sem_post(semListaPedidos);
 
 		if(pedido->numPedido == id_pedido){
-			return i;
+
+			retorno = i;
 		}
 	}
-	return -2;
+	sem_post(semListaPedidos);
+	return retorno;
 }
 
 // Hacer free de un array con cosas
