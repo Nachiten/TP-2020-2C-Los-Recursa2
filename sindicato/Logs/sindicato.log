@@ -2,3 +2,14 @@
 [INFO] 00:12:08:226 SINDICATO/(11684:11685): Se creo un nuevo restaurant llamado ChurrasikPark
 [INFO] 00:12:18:197 SINDICATO/(11684:11685): Se le asignan los bloques 4,5 a Milanesa
 [INFO] 00:12:18:198 SINDICATO/(11684:11685): Se creo una nueva receta llamada Milanesa
+[INFO] 12:29:48:328 SINDICATO/(5264:5268): Se le asignan los bloques 1,2,3 a ChurrasikPark
+[INFO] 12:29:48:329 SINDICATO/(5264:5268): Se creo un nuevo restaurant llamado ChurrasikPark
+[INFO] 12:30:22:804 SINDICATO/(5264:5268): Se le asignan los bloques 4,5 a Milanesa
+[INFO] 12:30:22:805 SINDICATO/(5264:5268): Se creo una nueva receta llamada Milanesa
+[INFO] 12:30:33:530 SINDICATO/(5264:5268): Se le asignan los bloques 6 a Empanada
+[INFO] 12:30:33:531 SINDICATO/(5264:5268): Se creo una nueva receta llamada Empanada
+[INFO] 12:31:13:228 SINDICATO/(5264:5268): Se le asignan los bloques 7 a Ensalada
+[INFO] 12:31:13:229 SINDICATO/(5264:5268): Se creo una nueva receta llamada Ensalada
+[INFO] 12:42:28:167 SINDICATO/(6126:6173): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=5 | posX=20 | posY=8 | cantHornos=2 | afinidades=[Milanesa] | platos=[Milanesa,Empanada,Ensalada] | precioPlatos=[200,50,150]
+[INFO] 12:53:47:887 SINDICATO/(6126:6446): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=5 | posX=20 | posY=8 | cantHornos=2 | afinidades=[Milanesa] | platos=[Milanesa,Empanada,Ensalada] | precioPlatos=[200,50,150]
+[INFO] 12:54:43:53 SINDICATO/(6126:6489): [EnvioMSG] RTA_OBTENER_REST con valores: cantCocineros=5 | posX=20 | posY=8 | cantHornos=2 | afinidades=[Milanesa] | platos=[Milanesa,Empanada,Ensalada] | precioPlatos=[200,50,150]

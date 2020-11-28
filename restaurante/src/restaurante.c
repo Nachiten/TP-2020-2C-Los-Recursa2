@@ -499,15 +499,39 @@ void serve_client(int32_t* socket)
 		int32_t recibidos = recv(*socket, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 		bytesRecibidos(recibidos);
 
-		if(recibidos >= 1)
+		if(cod_op != CONSULTAR_RESTAURANTES)
 		{
-			recibidosSize = recv(*socket, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
-			bytesRecibidos(recibidosSize);
-			printf("Tamaño de lo que sigue en el buffer: %u.\n", sizeAAllocar);
+			//si se cayo la conexion, basicamente no hacemos hada
+			if(recibidos < 1)
+			{
+				cod_op = 0;
+				sizeAAllocar = 0;
+			}
 
+			//si la conexion NO se cayo, intento recibir lo que sigue
+			else
+			{
+				//recibo tamaño de lo que sigue
+				recibidosSize = recv(*socket, &sizeAAllocar, sizeof(int32_t), MSG_WAITALL);
+				bytesRecibidos(recibidosSize);
+
+				//si se cayo la conexion, no se hace nada con esto
+				if(recibidosSize < 1)
+				{
+					cod_op = 0;
+					sizeAAllocar = 0;
+				}
+
+			}
+
+			if(cod_op != 0)
+			{
+				printf("Tamaño de lo que sigue en el buffer: %u.\n", sizeAAllocar);
+			}
+
+			//mando lo que me llego para que lo procesen
 			process_request(cod_op, *socket, sizeAAllocar);
 		}
-
 
 		else
 		{

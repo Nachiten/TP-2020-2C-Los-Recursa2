@@ -658,7 +658,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t soc
         	close(socket);
         	break;
 
-        default://no deberia pasar nunca por aca, solo esta para que desaparezca el warning
+        default:
         	puts("El mensaje mala leche fue recibido y felizmente ignorado.");
         	break;
     }
