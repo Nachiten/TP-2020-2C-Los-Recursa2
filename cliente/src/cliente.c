@@ -708,7 +708,7 @@ void obtenerInputConsolaCliente(){
     	socketCliente = establecer_conexion(ip_destino , puerto_destino);
     	resultado_de_conexion(socketCliente, logger, "destino");
 
-    	respuesta_crear_pedido* estructuraConsultarPedido = malloc(sizeof(uint32_t));
+    	consultar_pedido* estructuraConsultarPedido = malloc(sizeof(uint32_t));
     	estructuraConsultarPedido->idPedido = atoi(palabrasSeparadas[1]);
 
     	mandar_mensaje(estructuraConsultarPedido, CONSULTAR_PEDIDO, socketCliente);
@@ -721,7 +721,7 @@ void obtenerInputConsolaCliente(){
     		sem_wait(semLog);
     		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nRepartidor: %s\nEstado: %d\nComidas: %s"
     			,estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante
-				,estructuraRespuestaConsultarPedido->repartidor, estructuraRespuestaConsultarPedido->estado
+				,estructuraRespuestaConsultarPedido->estado
 				,estructuraRespuestaConsultarPedido->comidas);
     		sem_post(semLog);
     		free(estructuraRespuestaConsultarPedido->nombreRestaurante);
@@ -748,7 +748,7 @@ void obtenerInputConsolaCliente(){
     	socketCliente = establecer_conexion(ip_destino , puerto_destino);
 		resultado_de_conexion(socketCliente, logger, "destino");
 
-		obtener_pedido* mensajeObtenerPedido = malloc(sizeof(obtener_pedido));
+		guardar_pedido* mensajeObtenerPedido = malloc(sizeof(obtener_pedido));
 		mensajeObtenerPedido->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
 		mensajeObtenerPedido->nombreRestaurante = malloc(mensajeObtenerPedido->largoNombreRestaurante + 1);
 		strcpy(mensajeObtenerPedido->nombreRestaurante, palabrasSeparadas[1]);

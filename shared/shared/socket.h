@@ -42,6 +42,7 @@ uint32_t serializar_paquete_guardar_plato(t_paquete* paquete, guardar_plato* est
 uint32_t serializar_paquete_aniadir_plato(t_paquete* paquete, a_plato* estructura);
 uint32_t serializar_paquete_plato_listo(t_paquete* paquete, plato_listo* estructura);
 uint32_t serializar_paquete_guardar_pedido(t_paquete* paquete, guardar_pedido* estructura);
+uint32_t serializar_paquete_consultar_pedido(t_paquete* paquete, consultar_pedido* estructura);
 uint32_t serializar_paquete_obtener_receta(t_paquete* paquete, obtener_receta* estructura);
 uint32_t serializar_paquete_handshake(t_paquete* paquete, handshake* estructura);
 uint32_t serializar_paquete_respuesta_consultar_restaurantes(t_paquete* paquete, respuesta_consultar_restaurantes* estructura);
@@ -65,6 +66,7 @@ void desserializar_guardar_plato(guardar_plato* estructura, int32_t socket_clien
 void desserializar_aniadir_plato(a_plato* estructura, int32_t socket_cliente);
 void desserializar_plato_listo(plato_listo* estructura, int32_t socket_cliente);
 void desserializar_guardar_pedido(guardar_pedido* estructura, int32_t socket_cliente);
+void desserializar_consultar_pedido(consultar_pedido* estructura, int32_t socket_cliente);
 void desserializar_obtener_receta(obtener_receta* estructura, int32_t socket_cliente);
 void desserializar_handshake(handshake* estructura, int32_t socket_cliente);
 void desserializar_respuesta_consultar_restaurantes(respuesta_consultar_restaurantes* estructura, int32_t socket_cliente);
