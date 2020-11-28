@@ -634,15 +634,38 @@ void freeRtaObtenerRestaurante(respuesta_obtener_restaurante* rta){
 }
 
 
-int calcularCantidadPedidos(char* nombreRestaurante){
+int calcularCantidadPedidos(char* nombreRestaurant){
 
-	int cantidadPedidos = 0;
+    int cantidadPedidos = 0;
 
-	int i = 1;
-	while( existePedido(nombreRestaurante, i) ){
-		i++;
+	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
+
+	struct dirent *archivoLeido;
+
+	// Retorna un puntero al directorio | {puntoMontaje}/Files
+	DIR *dr = opendir(pathCarpetaRestaurant);
+
+	if (dr == NULL)
+	{
+		printf("No se pudo abrir el directorio actual" );
+	}
+
+	while ((archivoLeido = readdir(dr)) != NULL)
+	{
+		// Nombre del archivo leido dentro del directorio
+		char* punteroANombre = archivoLeido->d_name;
+
+		// Si el archivo es . .. o Info.AFIP es ignorado
+		if (strcmp(punteroANombre, ".") == 0 || strcmp(punteroANombre, "..") == 0 || strcmp(punteroANombre, "Info.AFIP") == 0){
+			continue;
+		}
+
+		// Si el nombre de archivo es un pedido entonces lo sumo
 		cantidadPedidos++;
 	}
+
+	closedir(dr);
+	free(pathCarpetaRestaurant);
 
 	return cantidadPedidos;
 }
@@ -738,7 +761,7 @@ void obtenerRestaurante_sindicato(char* nombreRestaurante, uint32_t socket_clien
 	strcpy(respuestaMensaje->precioPlatos, lineaPrecioPlatosSeparada[1]);
 
 	respuestaMensaje->cantPedidos = calcularCantidadPedidos(nombreRestaurante);
-	printf("La cantidad de pedidos es %i\n", respuestaMensaje->cantPedidos);
+	//printf("La cantidad de pedidos es %i\n", respuestaMensaje->cantPedidos);
 
 	//printearRespuestaObtenerRestaurante(respuestaMensaje);
 
