@@ -28,6 +28,7 @@ void inicializar_tabla_de_paginas(tabla_paginas* laTablaDePaginas)
 	laTablaDePaginas->cantidadPedidaComida = 0;
 	laTablaDePaginas->cantidadComidaPreparada = 0;
 	laTablaDePaginas->nombreDeMorfi = malloc(24); //harcodeado 24 para cumplir con enunciado
+	laTablaDePaginas->largoPostaDeMorfi = 0;
 	laTablaDePaginas->cargadoEnSWAP = 0;
 	laTablaDePaginas->posicionInicialEnSWAP = -1;
 	laTablaDePaginas->cargadoEnMEMORIA = 0;
@@ -541,7 +542,7 @@ tabla_paginas* agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidos
 			{
 				encontrado = 1;
 				//sumo la cantidad de platos nueva que llego
-				tablaDePlatos->cantidadPedidaComida += cantidadPlatos;
+				tablaDePlatos->cantidadPedidaComida += cantidadPlatos; //ToDo ver si hay que poner bit de modificacion en 1
 			}
 
 			//no es el que busco
