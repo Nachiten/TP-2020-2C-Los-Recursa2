@@ -299,7 +299,7 @@ void consultar_Pedido(int32_t id, int32_t socket_cliente){
 
     recibir_mensaje(pedidoObtenido, RESPUESTA_OBTENER_PEDIDO, nuevoSocketSindicato);
 
-    respuesta_consultar_pedido pedidoConsultado = malloc(sizeof(respuesta_consultar_pedido));
+    respuesta_consultar_pedido* pedidoConsultado = malloc(sizeof(respuesta_consultar_pedido));
 
     //si quisieramos validar el estado para ver si le contestamos al cliente una excepcion, aca iria un if
     pedidoConsultado->estado = pedidoObtenido->estado;
