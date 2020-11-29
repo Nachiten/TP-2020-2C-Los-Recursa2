@@ -26,8 +26,8 @@ uint32_t valor_para_switch_case(char* input);
 int cantidadDeElementosEnArray(char** array);
 void freeDeArray(char** array);
 
-//muestra x pantalla los datos del pedido y su estado
-void mostrar_el_estado_del_pedido(guardar_pedido* mensajeObtenerPedido, respuesta_obtener_pedido* respuestaObtenerPedido, t_log* logger, sem_t* semLog);
-
+//muestran x pantalla los datos del pedido y su estado
+void mostrar_el_estado_del_pedido_obtener_pedido(guardar_pedido* mensajeObtenerPedido, respuesta_obtener_pedido* respuestaObtenerPedido, t_log* logger, sem_t* semLog);
+void mostrar_el_estado_del_pedido_consultar_pedido(consultar_pedido* estructuraConsultarPedido, respuesta_consultar_pedido* estructuraRespuestaConsultarPedido, t_log* logger, sem_t* semLog);
 
 #endif /* SRC_FUNCIONESCLIENTE_H_ */

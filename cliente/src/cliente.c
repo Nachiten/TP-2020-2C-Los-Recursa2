@@ -719,15 +719,21 @@ void obtenerInputConsolaCliente(){
     	los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
     	if(exito == 1)
     	{
-
     		respuesta_consultar_pedido* estructuraRespuestaConsultarPedido = malloc(sizeAAllocar);
     		recibir_mensaje(estructuraRespuestaConsultarPedido, RESPUESTA_CONSULTAR_PEDIDO, socketCliente);
+
+    		//re piola
+    		mostrar_el_estado_del_pedido_consultar_pedido(estructuraConsultarPedido, estructuraRespuestaConsultarPedido, logger, semLog);
+
+			/*
     		sem_wait(semLog);
     		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nRepartidor: %s\nEstado: %d\nComidas: %s"
     			,estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante
 				,estructuraRespuestaConsultarPedido->estado
 				,estructuraRespuestaConsultarPedido->comidas);
     		sem_post(semLog);
+    		*/
+
     		free(estructuraRespuestaConsultarPedido->nombreRestaurante);
     		free(estructuraRespuestaConsultarPedido->comidas);
     		free(estructuraRespuestaConsultarPedido->cantTotales);
@@ -767,7 +773,7 @@ void obtenerInputConsolaCliente(){
 				recibir_mensaje(respuestaObtenerPedido, RESPUESTA_OBTENER_PEDIDO ,socketCliente);
 
 				//re piola
-				mostrar_el_estado_del_pedido(mensajeObtenerPedido, respuestaObtenerPedido, logger, semLog);
+				mostrar_el_estado_del_pedido_obtener_pedido(mensajeObtenerPedido, respuestaObtenerPedido, logger, semLog);
 
 				free(respuestaObtenerPedido->comidas);
 				free(respuestaObtenerPedido->cantTotales);
