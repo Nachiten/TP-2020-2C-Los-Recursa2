@@ -5,6 +5,7 @@
 #include "shared/cargador.h"
 #include "shared/utilidades.h"
 #include "shared/socket.h"
+#include <semaphore.h>
 
 char* ipConexion;
 char* puerto_local;
@@ -25,7 +26,8 @@ uint32_t valor_para_switch_case(char* input);
 int cantidadDeElementosEnArray(char** array);
 void freeDeArray(char** array);
 
-
+//muestra x pantalla los datos del pedido y su estado
+void mostrar_el_estado_del_pedido(guardar_pedido* mensajeObtenerPedido, respuesta_obtener_pedido* respuestaObtenerPedido, t_log* logger, sem_t* semLog);
 
 
 #endif /* SRC_FUNCIONESCLIENTE_H_ */

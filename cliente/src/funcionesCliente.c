@@ -121,3 +121,35 @@ void freeDeArray(char** array){
 	free(array);
 }
 
+void mostrar_el_estado_del_pedido(guardar_pedido* mensajeObtenerPedido, respuesta_obtener_pedido* respuestaObtenerPedido, t_log* logger, sem_t* semLog)
+{
+	if(respuestaObtenerPedido->estado == 0 )
+	{
+		printf("No existe el pedido %u del restaurante %s.\n",mensajeObtenerPedido->idPedido, mensajeObtenerPedido->nombreRestaurante);
+	}
+
+	if(respuestaObtenerPedido->estado == 1 )
+	{
+		sem_wait(semLog);
+		log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es: %s. Cantidad ya cocinada: %s. Se encuentra en estado %s."
+		,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas, "PENDIENTE");
+		sem_post(semLog);
+	}
+
+	if(respuestaObtenerPedido->estado == 2)
+	{
+		sem_wait(semLog);
+		log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es: %s. Cantidad ya cocinada: %s. Se encuentra en estado %s."
+		,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas, "CONFIRMADO");
+		sem_post(semLog);
+	}
+
+	if(respuestaObtenerPedido->estado == 3)
+	{
+		sem_wait(semLog);
+		log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es: %s. Cantidad ya cocinada: %s. Se encuentra en estado %s."
+		,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas, "TERMINADO");
+		sem_post(semLog);
+	}
+}
+

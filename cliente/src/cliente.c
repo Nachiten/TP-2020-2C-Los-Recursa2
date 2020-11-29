@@ -752,7 +752,7 @@ void obtenerInputConsolaCliente(){
     	socketCliente = establecer_conexion(ip_destino , puerto_destino);
 		resultado_de_conexion(socketCliente, logger, "destino");
 
-		guardar_pedido* mensajeObtenerPedido = malloc(sizeof(obtener_pedido));
+		guardar_pedido* mensajeObtenerPedido = malloc(sizeof(guardar_pedido));
 		mensajeObtenerPedido->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
 		mensajeObtenerPedido->nombreRestaurante = malloc(mensajeObtenerPedido->largoNombreRestaurante + 1);
 		strcpy(mensajeObtenerPedido->nombreRestaurante, palabrasSeparadas[1]);
@@ -766,36 +766,8 @@ void obtenerInputConsolaCliente(){
 				respuesta_obtener_pedido* respuestaObtenerPedido = malloc(sizeAAllocar);
 				recibir_mensaje(respuestaObtenerPedido, RESPUESTA_OBTENER_PEDIDO ,socketCliente);
 
-				if(respuestaObtenerPedido->estado == 0 )
-				{
-					printf("No existe el pedido %u del restaurante %s.\n",mensajeObtenerPedido->idPedido, mensajeObtenerPedido->nombreRestaurante);
-				}
-
-				if(respuestaObtenerPedido->estado == 1 )
-				{
-					sem_wait(semLog);
-					log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es: %s. Cantidad ya cocinada: %s. Se encuentra en estado %s."
-					,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas, "PENDIENTE");
-					sem_post(semLog);
-				}
-
-				if(respuestaObtenerPedido->estado == 2)
-				{
-					sem_wait(semLog);
-					log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es: %s. Cantidad ya cocinada: %s. Se encuentra en estado %s."
-					,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas, "CONFIRMADO");
-					sem_post(semLog);
-					//esta 2 veces x q el log info no muestra x pantalla
-				}
-
-				if(respuestaObtenerPedido->estado == 3)
-				{
-					sem_wait(semLog);
-					log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es: %s. Cantidad ya cocinada: %s. Se encuentra en estado %s."
-					,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas, "TERMINADO");
-					sem_post(semLog);
-					//esta 2 veces x q el log info no muestra x pantalla
-				}
+				//re piola
+				mostrar_el_estado_del_pedido(mensajeObtenerPedido, respuestaObtenerPedido, logger, semLog);
 
 				free(respuestaObtenerPedido->comidas);
 				free(respuestaObtenerPedido->cantTotales);

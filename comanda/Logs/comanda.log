@@ -11,3 +11,7 @@
 [INFO] 15:26:29:63 Cliente/(7356:7376): Se actualizó una pagina en Memoria Principal, posición inicial del Marco: 0x83bb640
 [INFO] 15:26:29:777 Cliente/(7356:7378): Se actualizó una pagina en Memoria Principal, posición inicial del Marco: 0x83bb640
 [INFO] 15:26:37:704 Cliente/(7356:7383): El marco de Memoria Principal 0 ahora está libre: su Página fue eliminada. Inicio del marco: 0x83bb640.
+[INFO] 15:42:11:668 Cliente/(8826:8992): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x9415640
+[INFO] 15:42:37:450 Cliente/(8826:9003): Se actualizó una pagina en Memoria Principal, posición inicial del Marco: 0x9415640
+[INFO] 15:42:38:623 Cliente/(8826:9005): Se actualizó una pagina en Memoria Principal, posición inicial del Marco: 0x9415640
+[INFO] 15:42:45:628 Cliente/(8826:9011): El marco de Memoria Principal 0 ahora está libre: su Página fue eliminada. Inicio del marco: 0x9415640.

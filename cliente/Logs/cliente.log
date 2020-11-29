@@ -161,3 +161,31 @@ LOG_FIL�]. Su/s cantidad/es: [1861926912]. Cantidad ya cocinada: [1861927095]. S
 [INFO] 15:26:37:703 Cliente/(7362:7380): Conexión establecida con socket de destino.
 [INFO] 15:26:37:705 Cliente/(7362:7380): El intento de Finalizar un Pedido fue: Exitoso.
 
+[WARNING] 15:41:41:379 Cliente/(8977:8977): Conexión fallida con socket de destino.
+[INFO] 15:41:41:380 Cliente/(8977:8977): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 15:41:56:301 Cliente/(8981:8981): Conexión establecida con socket de destino.
+[INFO] 15:42:07:918 Cliente/(8981:8983): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 15:42:11:667 Cliente/(8981:8984): Conexión establecida con socket de destino.
+[INFO] 15:42:11:668 Cliente/(8981:8984): El intento de guardar un plato en un pedido fue: Exitoso.
+
+[INFO] 15:42:15:143 Cliente/(8981:8991): Conexión establecida con socket de destino.
+[INFO] 15:42:15:147 Cliente/(8981:8991): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]. Se encuentra en estado PENDIENTE.
+[INFO] 15:42:23:716 Cliente/(8981:8993): Conexión establecida con socket de destino.
+[INFO] 15:42:23:721 Cliente/(8981:8993): La respuesta a notificar el plato listo fue: Fallido.
+
+[INFO] 15:42:27:657 Cliente/(8981:8995): El intento de confirmar un pedido fue: Exitoso.
+
+[INFO] 15:42:31:125 Cliente/(8981:8997): Conexión establecida con socket de destino.
+[INFO] 15:42:31:137 Cliente/(8981:8997): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]. Se encuentra en estado CONFIRMADO.
+[INFO] 15:42:37:445 Cliente/(8981:8999): Conexión establecida con socket de destino.
+[INFO] 15:42:37:451 Cliente/(8981:8999): La respuesta a notificar el plato listo fue: Exitoso.
+
+[INFO] 15:42:38:619 Cliente/(8981:9002): Conexión establecida con socket de destino.
+[INFO] 15:42:38:623 Cliente/(8981:9002): La respuesta a notificar el plato listo fue: Exitoso.
+
+[INFO] 15:42:41:708 Cliente/(8981:9004): Conexión establecida con socket de destino.
+[INFO] 15:42:41:711 Cliente/(8981:9004): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [2]. Se encuentra en estado TERMINADO.
+[INFO] 15:42:45:627 Cliente/(8981:9008): Conexión establecida con socket de destino.
+[INFO] 15:42:45:629 Cliente/(8981:9008): El intento de Finalizar un Pedido fue: Exitoso.
+
