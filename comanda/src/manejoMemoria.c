@@ -945,6 +945,8 @@ void preparar_datos_de_platos_con_formato_de_obtener_pedido(segmentos* tablaDePe
 	strcat(cantidadesPreparadasComidas, "]");
 
 	//cargo los datos en la estructura que voy a mandar
+	resultadoObtenerPedido->estado = tablaDePedidos->estado;
+
 	resultadoObtenerPedido->sizeComidas = strlen(nombresComidas);
 	resultadoObtenerPedido->comidas = malloc(resultadoObtenerPedido->sizeComidas + 1);
 	strcpy(resultadoObtenerPedido->comidas, nombresComidas);

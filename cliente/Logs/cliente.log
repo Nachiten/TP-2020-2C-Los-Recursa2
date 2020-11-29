@@ -63,3 +63,101 @@
 [INFO] 17:09:22:974 Cliente/(13169:13200): El intento de agregar un plato a un pedido fue: Exitoso.
 
 [INFO] 17:12:32:483 Cliente/(13169:13204): Conexi贸n establecida con socket de destino.
+[INFO] 14:38:48:443 Cliente/(6067:6067): Conexi贸n establecida con socket de destino.
+[INFO] 14:39:13:287 Cliente/(6067:6069): El intento de guardar un pedido fue: Fallido.
+
+[INFO] 14:39:13:287 Cliente/(6067:6077): Conexi贸n establecida con socket de destino.
+[INFO] 14:39:13:290 Cliente/(6067:6077): El intento de guardar un plato en un pedido fue: Fallido.
+
+[INFO] 14:39:13:466 Cliente/(6067:6081): Conexi贸n establecida con socket de destino.
+[INFO] 14:39:38:591 Cliente/(6067:6084): El intento de guardar un pedido fue: Fallido.
+
+[INFO] 14:39:49:171 Cliente/(6067:6101): El intento de guardar un pedido fue: Fallido.
+
+[INFO] 14:40:14:179 Cliente/(6067:6103): El intento de guardar un pedido fue: Fallido.
+
+[INFO] 14:40:59:883 Cliente/(6067:6120): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 14:42:50:627 Cliente/(6067:6130): Conexi贸n establecida con socket de destino.
+[INFO] 14:42:50:628 Cliente/(6067:6130): El intento de guardar un plato en un pedido fue: Exitoso.
+
+[INFO] 14:43:31:451 Cliente/(6067:6157): Conexi贸n establecida con socket de destino.
+[INFO] 14:43:31:453 Cliente/(6067:6157): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]
+[INFO] 14:53:42:314 Cliente/(6505:6505): Conexi贸n establecida con socket de destino.
+[INFO] 14:53:50:770 Cliente/(6505:6507): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 14:54:01:376 Cliente/(6505:6513): Conexi贸n establecida con socket de destino.
+[INFO] 14:54:01:378 Cliente/(6505:6513): Obtuve del pedido 1 la/s siguientes comida/s: [防FA	繤A	CK_MEJ
+
+LOG_FIL榏. Su/s cantidad/es: [1861926912]. Cantidad ya cocinada: [1861927095]. Se encuentra en estado PENDIENTE.
+[INFO] 14:54:48:48 Cliente/(6505:6520): Conexi贸n establecida con socket de destino.
+[INFO] 14:54:48:50 Cliente/(6505:6520): El intento de guardar un plato en un pedido fue: Exitoso.
+
+[INFO] 14:54:52:465 Cliente/(6505:6535): Conexi贸n establecida con socket de destino.
+[INFO] 14:54:52:466 Cliente/(6505:6535): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es: [1]. Cantidad ya cocinada: [0]. Se encuentra en estado PENDIENTE.
+[INFO] 14:55:03:665 Cliente/(6505:6537): El intento de confirmar un pedido fue: Fallido.
+
+[INFO] 14:55:35:338 Cliente/(6505:6539): El intento de confirmar un pedido fue: Exitoso.
+
+[INFO] 14:55:44:689 Cliente/(6505:6548): Conexi贸n establecida con socket de destino.
+[INFO] 14:58:15:463 Cliente/(6621:6621): Conexi贸n establecida con socket de destino.
+[INFO] 14:58:21:812 Cliente/(6621:6623): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 14:58:28:881 Cliente/(6621:6629): Conexi贸n establecida con socket de destino.
+[INFO] 15:04:20:469 Cliente/(6727:6727): Conexi贸n establecida con socket de destino.
+[INFO] 15:04:22:234 Cliente/(6727:6729): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 15:04:26:355 Cliente/(6727:6730): Conexi贸n establecida con socket de destino.
+[INFO] 15:04:26:376 Cliente/(6727:6730): El intento de guardar un plato en un pedido fue: Exitoso.
+
+[INFO] 15:04:31:171 Cliente/(6727:6732): Conexi贸n establecida con socket de destino.
+[INFO] 15:05:59:512 Cliente/(6727:6732): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]. Se encuentra en estado PENDIENTE.
+[INFO] 15:07:03:817 Cliente/(6727:6734): El intento de confirmar un pedido fue: Exitoso.
+
+[INFO] 15:07:11:646 Cliente/(6727:6794): Conexi贸n establecida con socket de destino.
+[INFO] 15:08:01:834 Cliente/(6727:6794): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]. Se encuentra en estado CONFIRMADO.
+[INFO] 15:08:50:927 Cliente/(6727:6830): Conexi贸n establecida con socket de destino.
+[INFO] 15:10:09:499 Cliente/(6727:6830): La respuesta a notificar el plato listo fue: Exitoso.
+
+[INFO] 15:10:33:592 Cliente/(6727:6874): Conexi贸n establecida con socket de destino.
+[INFO] 15:10:41:255 Cliente/(6727:6874): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [1]. Se encuentra en estado CONFIRMADO.
+[INFO] 15:10:57:698 Cliente/(6727:6890): Conexi贸n establecida con socket de destino.
+[INFO] 15:10:57:719 Cliente/(6727:6890): La respuesta a notificar el plato listo fue: Exitoso.
+
+[INFO] 15:11:01:312 Cliente/(6727:6909): Conexi贸n establecida con socket de destino.
+[INFO] 15:11:01:323 Cliente/(6727:6909): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [2]. Se encuentra en estado TERMINADO.
+[INFO] 15:11:07:120 Cliente/(6727:6911): Conexi贸n establecida con socket de destino.
+[INFO] 15:11:07:136 Cliente/(6727:6911): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 15:11:27:17 Cliente/(6727:6913): Conexi贸n establecida con socket de destino.
+[INFO] 15:24:47:479 Cliente/(7324:7324): Conexi贸n establecida con socket de destino.
+[INFO] 15:24:50:455 Cliente/(7324:7326): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 15:24:53:965 Cliente/(7324:7327): Conexi贸n establecida con socket de destino.
+[INFO] 15:24:53:967 Cliente/(7324:7327): El intento de guardar un plato en un pedido fue: Exitoso.
+
+[INFO] 15:24:56:671 Cliente/(7324:7329): El intento de confirmar un pedido fue: Fallido.
+
+[INFO] 15:25:55:161 Cliente/(7362:7362): Conexi贸n establecida con socket de destino.
+[INFO] 15:26:00:400 Cliente/(7362:7364): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 15:26:05:143 Cliente/(7362:7365): Conexi贸n establecida con socket de destino.
+[INFO] 15:26:05:144 Cliente/(7362:7365): El intento de guardar un plato en un pedido fue: Exitoso.
+
+[INFO] 15:26:10:559 Cliente/(7362:7367): Conexi贸n establecida con socket de destino.
+[INFO] 15:26:10:560 Cliente/(7362:7367): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]. Se encuentra en estado PENDIENTE.
+[INFO] 15:26:16:848 Cliente/(7362:7369): El intento de confirmar un pedido fue: Exitoso.
+
+[INFO] 15:26:20:559 Cliente/(7362:7371): Conexi贸n establecida con socket de destino.
+[INFO] 15:26:20:560 Cliente/(7362:7371): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]. Se encuentra en estado CONFIRMADO.
+[INFO] 15:26:29:63 Cliente/(7362:7373): Conexi贸n establecida con socket de destino.
+[INFO] 15:26:29:63 Cliente/(7362:7373): La respuesta a notificar el plato listo fue: Exitoso.
+
+[INFO] 15:26:29:775 Cliente/(7362:7375): Conexi贸n establecida con socket de destino.
+[INFO] 15:26:29:777 Cliente/(7362:7375): La respuesta a notificar el plato listo fue: Exitoso.
+
+[INFO] 15:26:33:471 Cliente/(7362:7379): Conexi贸n establecida con socket de destino.
+[INFO] 15:26:33:472 Cliente/(7362:7379): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [2]. Se encuentra en estado TERMINADO.
+[INFO] 15:26:37:703 Cliente/(7362:7380): Conexi贸n establecida con socket de destino.
+[INFO] 15:26:37:705 Cliente/(7362:7380): El intento de Finalizar un Pedido fue: Exitoso.
+

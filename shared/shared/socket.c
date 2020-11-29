@@ -1087,7 +1087,8 @@ uint32_t serializar_paquete_respuesta_consultar_pedido(t_paquete* paquete, respu
 
 	//reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
 	t_buffer* buffer = malloc(sizeof(t_buffer));
-	buffer->size = sizeof(uint32_t)*5
+	buffer->size = sizeof(uint32_t)*4
+				 + sizeof(estructura->estado)
 				 + estructura->largoNombreRestaurante+1
 				 + estructura->sizeComidas+1
 				 + estructura->sizeCantTotales+1
@@ -1161,7 +1162,8 @@ uint32_t serializar_paquete_respuesta_obtener_pedido(t_paquete* paquete, respues
 
 	//reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
 	t_buffer* buffer = malloc(sizeof(t_buffer));
-	buffer->size = sizeof(uint32_t)*4
+	buffer->size = sizeof(uint32_t)*3
+				 + sizeof(estructura->estado)
 				 + estructura->sizeComidas+1
 				 + estructura->sizeCantTotales+1
 				 + estructura->sizeCantListas+1;
@@ -1778,6 +1780,8 @@ void desserializar_respuesta_consultar_pedido(respuesta_consultar_pedido* estruc
 	estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
 	bytesRecibidos(recv(socket_cliente, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1,  MSG_WAITALL));
 
+	bytesRecibidos(recv(socket_cliente, &(estructura->estado), sizeof(estructura->estado),  MSG_WAITALL));
+
 	bytesRecibidos(recv(socket_cliente, &(estructura->sizeComidas), sizeof(estructura->sizeComidas),  MSG_WAITALL));
 	estructura->comidas = malloc(estructura->sizeComidas+1);
 	bytesRecibidos(recv(socket_cliente, estructura->comidas, estructura->sizeComidas+1,  MSG_WAITALL));
@@ -1793,6 +1797,8 @@ void desserializar_respuesta_consultar_pedido(respuesta_consultar_pedido* estruc
 }
 
 void desserializar_respuesta_obtener_pedido(respuesta_obtener_pedido* estructura, int32_t socket_cliente){
+
+	bytesRecibidos(recv(socket_cliente, &(estructura->estado), sizeof(estructura->estado),  MSG_WAITALL));
 
 	bytesRecibidos(recv(socket_cliente, &(estructura->sizeComidas), sizeof(estructura->sizeComidas),  MSG_WAITALL));
 

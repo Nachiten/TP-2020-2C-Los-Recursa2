@@ -387,6 +387,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
         	if(tablaDePedidosDelRestaurante == NULL)
         	{
         		puts("El restaurante solicitado no existe.");
+        		resultadoObtenerPedido->estado = NADA_CARGADO;
         		resultadoObtenerPedido->comidas = malloc(3);
         		strcpy(resultadoObtenerPedido->comidas, "[]");
         		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
@@ -430,6 +431,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
         		else
         		{
         			puts("El pedido solicitado no existe.");
+        			resultadoObtenerPedido->estado = NADA_CARGADO;
             		resultadoObtenerPedido->comidas = malloc(3);
             		strcpy(resultadoObtenerPedido->comidas, "[]");
             		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);

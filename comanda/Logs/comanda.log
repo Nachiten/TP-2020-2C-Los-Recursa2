@@ -1,0 +1,13 @@
+[INFO] 14:42:50:628 Cliente/(6115:6158): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x80cf640
+[INFO] 14:54:01:376 Cliente/(6500:6521): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x9414640
+[INFO] 14:54:48:50 Cliente/(6500:6536): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x9414640
+[INFO] 14:58:56:943 Cliente/(6612:6632): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x8050640
+[INFO] 15:04:26:376 Cliente/(6716:6733): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x8050640
+[INFO] 15:08:50:932 Cliente/(6716:6875): Se actualizó una pagina en Memoria Principal, posición inicial del Marco: 0x8050640
+[INFO] 15:10:57:718 Cliente/(6716:6910): Se actualizó una pagina en Memoria Principal, posición inicial del Marco: 0x8050640
+[INFO] 15:11:07:136 Cliente/(6716:6914): El marco de Memoria Principal 0 ahora está libre: su Página fue eliminada. Inicio del marco: 0x8050640.
+[INFO] 15:24:53:967 Cliente/(7316:7330): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x8ef6640
+[INFO] 15:26:05:144 Cliente/(7356:7368): Se agregó una nueva pagina a Memoria Principal, posición inicial del Marco: 0x83bb640
+[INFO] 15:26:29:63 Cliente/(7356:7376): Se actualizó una pagina en Memoria Principal, posición inicial del Marco: 0x83bb640
+[INFO] 15:26:29:777 Cliente/(7356:7378): Se actualizó una pagina en Memoria Principal, posición inicial del Marco: 0x83bb640
+[INFO] 15:26:37:704 Cliente/(7356:7383): El marco de Memoria Principal 0 ahora está libre: su Página fue eliminada. Inicio del marco: 0x83bb640.
