@@ -422,19 +422,19 @@ uint32_t serializar_paquete_consultar_platos(t_paquete* paquete, consultar_plato
 	void* streamAuxiliar = malloc(buffer->size);
 
 	//meto el largo del nombre del Restaurante
-	memcpy(streamAuxiliar, &(estructura->sizeNombre), sizeof(estructura->sizeNombre));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->sizeNombre), sizeof(estructura->sizeNombre));
 	desplazamiento += sizeof(estructura->sizeNombre);
 
 	//meto el nombre del restaurante
 	//memcpy(paquete->buffer->stream + desplazamiento, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1);
-	memcpy(streamAuxiliar + desplazamiento, estructura->nombreResto, strlen(estructura->nombreResto)+1);
-	desplazamiento += strlen(estructura->nombreResto)+1;
+	memcpy(streamAuxiliar + desplazamiento, estructura->nombreResto, estructura->sizeNombre+1);
+	desplazamiento += estructura->sizeNombre+1;
 
-	memcpy(streamAuxiliar, &(estructura->sizeId), sizeof(estructura->sizeId));
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->sizeId), sizeof(estructura->sizeId));
 	desplazamiento += sizeof(estructura->sizeId);
 
-	memcpy(streamAuxiliar + desplazamiento, estructura->id, strlen(estructura->id)+1);
-	desplazamiento += strlen(estructura->id)+1;
+	memcpy(streamAuxiliar + desplazamiento, estructura->id, estructura->sizeId+1);
+	desplazamiento += estructura->sizeId+1;
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
 	pesoDeElementosAEnviar = sizeof(estructura->sizeNombre) + estructura->sizeNombre+1 + sizeof(estructura->sizeId) + estructura->sizeId+1;
@@ -1564,7 +1564,6 @@ void desserializar_consultar_platos(consultar_platos* estructura, int32_t socket
 
 	//preparo un espacio de memoria del tamaño del nombre para poder guardarlo
 	estructura->nombreResto = malloc(estructura->sizeNombre+1);
-
 	//saco el nombre del restaurante en si
 	bytesRecibidos(recv(socket_cliente, estructura->nombreResto, estructura->sizeNombre+1, MSG_WAITALL));
 
