@@ -549,6 +549,25 @@ respuesta_obtener_pedido* generarRtaObtenerPedidoDefault(){
 	return rta;
 }
 
+int estadoPedidoDeStringAInt(char* estadoPedidoString){
+
+	int retorno = 0;
+
+//	0 = Sin datos
+//	1 = Pendiente
+//	2 = Confirmado
+//	3 = Terminado
+
+	if (strcmp(estadoPedidoString, "Pendiente") == 0){
+		retorno = 1;
+	} else if (strcmp(estadoPedidoString, "Confirmado") == 0){
+		retorno = 2;
+	} else if (strcmp(estadoPedidoString, "Terminado") == 0){
+		retorno = 3;
+	}
+
+	return retorno;
+}
 
 void obtenerPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente){
 	if ( !existeRestaurant(nombreRestaurant)){
@@ -588,16 +607,21 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente)
 	 */
 
 	// Separo la linea con = | Linea : PLATOS=[platoA,platoB,platoC]
+	char** lineaEstadoPedido = string_split(datosSeparados[0], "=");
 	char** lineaNombresPlatos = string_split(datosSeparados[1], "=");
 	char** lineaCantidadesTotales = string_split(datosSeparados[2], "=");
 	char** lineaCantidadesListas = string_split(datosSeparados[3], "=");
 
+	char* estadoPedidoString = lineaEstadoPedido[1];
 	char* nombresPlatos = lineaNombresPlatos[1];
 	char* cantidadesTotales = lineaCantidadesTotales[1];
 	char* cantidadesListas = lineaCantidadesListas[1];
 
+	int estadoPedido = estadoPedidoDeStringAInt(estadoPedidoString);
+
 	respuesta_obtener_pedido* respuestaPedido = malloc(sizeof(respuesta_obtener_pedido));
 
+	respuestaPedido->estado = estadoPedido;
 	respuestaPedido->sizeComidas = strlen(nombresPlatos);
 	respuestaPedido->comidas = malloc(strlen(nombresPlatos) + 1);
 	strcpy(respuestaPedido->comidas, nombresPlatos);
@@ -902,8 +926,8 @@ void enviarRespuestaBooleana(uint32_t socketCliente, codigo_operacion codOp, res
 
 
 void loguearRtaObtenerPedido(respuesta_obtener_pedido* rta){
-	log_info(logger, "[EnvioMSG] RTA_OBTENER_PEDIDO con valores: comidas=%s | cantTotales=%s | cantListas=%s",
-			rta->comidas, rta->cantTotales, rta->cantListas);
+	log_info(logger, "[EnvioMSG] RTA_OBTENER_PEDIDO con valores: estado=%s | comidas=%s | cantTotales=%s | cantListas=%s",
+			rta->estado , rta->comidas, rta->cantTotales, rta->cantListas);
 }
 
 void loguearRtaObtenerReceta(respuesta_obtener_receta* rta){
