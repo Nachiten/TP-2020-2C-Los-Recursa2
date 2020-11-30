@@ -39,6 +39,8 @@ int main(int cantArg, char* argumentos[]){
 	miPosicionX = config_get_int_value(config, "POSICION_X");
 	miPosicionY = config_get_int_value(config, "POSICION_Y");
 
+	strcat(idCliente,"\0");
+
 	//Dejo cargado un logger para loguear los eventos.
 	logger = cargarUnLogDeCliente(LOG_PATH, "Cliente");
 
@@ -344,7 +346,7 @@ void obtenerInputConsolaCliente(){
 		socketCliente = establecer_conexion(ip_destino, puerto_destino);
 		resultado_de_conexion(socketCliente, logger, "destino");
 
-		consultar_platos* estructuraAEnviar = malloc(sizeof(uint32_t) + strlen(palabrasSeparadas[1]));
+		consultar_platos* estructuraAEnviar = malloc(sizeof(consultar_platos));
 		estructuraAEnviar->sizeNombre = strlen(palabrasSeparadas[1]);
 		estructuraAEnviar->nombreResto = malloc(estructuraAEnviar->sizeNombre+1);
 		strcpy(estructuraAEnviar->nombreResto, palabrasSeparadas[1]);
@@ -358,13 +360,12 @@ void obtenerInputConsolaCliente(){
 	    los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
 
 	    if(exito == 1)
-	    		{
+	    {
 		respuesta_consultar_platos* estructuraRespuestaConsultarPlatos = malloc(sizeAAllocar);
 		recibir_mensaje(estructuraRespuestaConsultarPlatos, RESPUESTA_CONSULTAR_PLATOS, socketCliente);
-		sem_wait(semLog);
+		//sem_wait(semLog);
 		log_info(logger, "Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreResto, estructuraRespuestaConsultarPlatos->nombresPlatos);
-		sem_post(semLog);
-		//printf("Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreRestaurante, estructuraRespuestaConsultarPlatos->nombresPlatos);
+		//sem_post(semLog);
 
 		free(estructuraRespuestaConsultarPlatos->nombresPlatos);
 		free(estructuraRespuestaConsultarPlatos);
