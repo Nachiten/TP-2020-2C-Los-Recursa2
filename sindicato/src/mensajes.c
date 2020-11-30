@@ -377,7 +377,7 @@ void terminarPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente
 	char* datosPedido = leerDatosPedido(nombreRestaurant, IDPedido);
 
 	if(!pedidoEstaEnEstado("Confirmado", datosPedido)){
-		printf("ERROR | No está en estado pendiente.\n");
+		printf("ERROR | No está en estado confirmado.\n");
 		signalSemaforoPedido(nombreRestaurant, IDPedido);
 		free(datosPedido);
 		log_info(logger, "[EnvioMSG] RTA_TERMINAR_PEDIDO | Valor: FAIL");

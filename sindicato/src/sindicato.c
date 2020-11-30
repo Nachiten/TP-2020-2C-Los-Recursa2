@@ -1429,8 +1429,13 @@ int main(){
 	// ---- A partir de aca el FS ya existe ----
 
 	// Testing (debe ir comentado)
-	//guardarPedido("Bataglia",5, 1);
-	//guardarPedido("Bataglia",42, 1);
+	//guardarPedido_sindicato("ElParrillon", 3, 1);
+	//confirmarPedido_sindicato("ElParrillon",2,1);
+	//terminarPedido("ElParrillon",3,1);
+
+	//obtenerPedido("ElParrillon",1, 1);
+	//obtenerPedido("ElParrillon",2, 1);
+	//obtenerPedido("ElParrillon",3, 1);
 
 	// --- Hilo para leer el input de la consola ---
 	pthread_t hiloConsola;
