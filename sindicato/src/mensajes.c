@@ -7,21 +7,19 @@
 
 #include "mensajes.h"
 
-// ---- MENSAJES POR SOCKET ----
+
 
 /*
- * Mensajes Terminados:
- *
- * Corregidos Problemas:
- * Obtener restaurante | [Rtas Terminadas] Restaurante vacio
- * Obtener receta | [Rtas Terminadas] Se envia la receta vacia o llena
- * Obtener pedido | [Rtas Terminadas] pedido default terminado
- * Plato listo | [Rtas Terminadas] Terminado de codear respuestas booleanas
- * Guardar plato | [Rtas Terminadas] Se envian rtas booleanas
- * Consultar platos | [Rtas Terminadas] Se envian cadena de platos vacia
- * Guardar pedido | [Rtas Terminadas] Se envian respuesta OK/FAIL segun corresponde
- * Confirmar pedido | [Rtas Terminadas] Se envian respuesta OK/FAIL segun corresponde
- * Terminar pedido | [Rtas Terminadas] Se envian respuesta OK/FAIL segun corresponde
+ * Mensajes:
+ * Obtener restaurante
+ * Obtener receta
+ * Obtener pedido
+ * Plato listo
+ * Guardar plato
+ * Consultar platos
+ * Guardar pedido
+ * Confirmar pedido
+ * Terminar pedido
 
  * Obtener restaurante - Logs hechos -> Tested
  * Consultar platos - Logs hechos -> Tested
@@ -35,6 +33,8 @@
 
  *
  */
+
+// ---- MENSAJES POR SOCKET ----
 
 void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_t socketCliente){
 	if ( !existeRestaurant(nombreRestaurant) ){
@@ -90,6 +90,8 @@ void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_
 	// Pido mas bloques y los agrego en listaBloques si son necesarios
 	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
 
+	free(nombreParaLog);
+
 	// Separar los datos en una lista
 	t_list* listaDatosSeparados = separarStringEnBloques(datosNuevos, cantidadBloquesNecesarios);
 
@@ -116,14 +118,6 @@ void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_
 	free(pathAPedido);
 
 }
-
-void freeRtaObtenerReceta(respuesta_obtener_receta* rta){
-	free(rta->pasos);
-	free(rta->tiempoPasos);
-	free(rta);
-}
-
-
 
 void obtenerReceta(char* nombreReceta, uint32_t socketCliente){
 
@@ -264,6 +258,8 @@ void guardarPlato(char* nombreRestaurant, int IDPedido, char* nombrePlato, int c
 
 	// Pido mas bloques y los agrego en listaBloques si son necesarios
 	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
+
+	free(nombreParaLog);
 
 	// Separar los datos en una lista
 	t_list* listaDatosSeparados = separarStringEnBloques(nuevosDatos, cantidadBloquesNecesarios);
@@ -410,6 +406,8 @@ void terminarPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente
 	// Pido mas bloques y los agrego en listaBloques si son necesarios
 	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
 
+	free(nombreParaLog);
+
 	// Separar los datos en una lista
 	t_list* listaDatosSeparados = separarStringEnBloques(nuevosDatosPedido, cantidadBloquesNecesarios);
 
@@ -493,6 +491,8 @@ void confirmarPedido_sindicato(char* nombreRestaurant, int IDPedido, uint32_t so
 	// Pido mas bloques y los agrego en listaBloques si son necesarios
 	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
 
+	free(nombreParaLog);
+
 	// Separar los datos en una lista
 	t_list* listaDatosSeparados = separarStringEnBloques(nuevosDatosPedido, cantidadBloquesNecesarios);
 
@@ -519,54 +519,6 @@ void confirmarPedido_sindicato(char* nombreRestaurant, int IDPedido, uint32_t so
 	free(pathCarpetaRestaurant);
 	free(pathAPedido);
 
-}
-
-void freeRtaObtenerPedido(respuesta_obtener_pedido* rta){
-	free(rta->comidas);
-	free(rta->cantTotales);
-	free(rta->cantListas);
-	free(rta);
-}
-
-respuesta_obtener_pedido* generarRtaObtenerPedidoDefault(){
-	respuesta_obtener_pedido* rta = malloc(sizeof(respuesta_obtener_pedido));
-
-	char* arrayVacio = "[]";
-
-	rta->sizeCantListas = 0;
-	rta->sizeCantTotales = 0;
-	rta->sizeComidas = 0;
-
-	rta->cantListas = malloc(strlen(arrayVacio) + 1);
-	strcpy(rta->cantListas, arrayVacio);
-
-	rta->cantTotales = malloc(strlen(arrayVacio) + 1);
-	strcpy(rta->cantTotales, arrayVacio);
-
-	rta->comidas = malloc(strlen(arrayVacio) + 1);
-	strcpy(rta->comidas, arrayVacio);
-
-	return rta;
-}
-
-int estadoPedidoDeStringAInt(char* estadoPedidoString){
-
-	int retorno = 0;
-
-//	0 = Sin datos
-//	1 = Pendiente
-//	2 = Confirmado
-//	3 = Terminado
-
-	if (strcmp(estadoPedidoString, "Pendiente") == 0){
-		retorno = 1;
-	} else if (strcmp(estadoPedidoString, "Confirmado") == 0){
-		retorno = 2;
-	} else if (strcmp(estadoPedidoString, "Terminado") == 0){
-		retorno = 3;
-	}
-
-	return retorno;
 }
 
 void obtenerPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente){
@@ -645,53 +597,10 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente)
 	free(datosPedido);
 
 	freeDeArray(datosSeparados);
+	freeDeArray(lineaEstadoPedido);
 	freeDeArray(lineaNombresPlatos);
 	freeDeArray(lineaCantidadesTotales);
 	freeDeArray(lineaCantidadesListas);
-}
-
-void freeRtaObtenerRestaurante(respuesta_obtener_restaurante* rta){
-	free(rta->precioPlatos);
-	free(rta->platos);
-	free(rta->afinidades);
-	free(rta);
-}
-
-
-int calcularCantidadPedidos(char* nombreRestaurant){
-
-    int cantidadPedidos = 0;
-
-	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
-
-	struct dirent *archivoLeido;
-
-	// Retorna un puntero al directorio | {puntoMontaje}/Files
-	DIR *dr = opendir(pathCarpetaRestaurant);
-
-	if (dr == NULL)
-	{
-		printf("No se pudo abrir el directorio actual" );
-	}
-
-	while ((archivoLeido = readdir(dr)) != NULL)
-	{
-		// Nombre del archivo leido dentro del directorio
-		char* punteroANombre = archivoLeido->d_name;
-
-		// Si el archivo es . .. o Info.AFIP es ignorado
-		if (strcmp(punteroANombre, ".") == 0 || strcmp(punteroANombre, "..") == 0 || strcmp(punteroANombre, "Info.AFIP") == 0){
-			continue;
-		}
-
-		// Si el nombre de archivo es un pedido entonces lo sumo
-		cantidadPedidos++;
-	}
-
-	closedir(dr);
-	free(pathCarpetaRestaurant);
-
-	return cantidadPedidos;
 }
 
 // Obtiene todos los datos de un restaurant
@@ -924,10 +833,11 @@ void enviarRespuestaBooleana(uint32_t socketCliente, codigo_operacion codOp, res
 	free(rta);
 }
 
+// --- LOGS ---
 
 void loguearRtaObtenerPedido(respuesta_obtener_pedido* rta){
 	log_info(logger, "[EnvioMSG] RTA_OBTENER_PEDIDO con valores: estado=%s | comidas=%s | cantTotales=%s | cantListas=%s",
-			rta->estado , rta->comidas, rta->cantTotales, rta->cantListas);
+			estadoAString(rta->estado) , rta->comidas, rta->cantTotales, rta->cantListas);
 }
 
 void loguearRtaObtenerReceta(respuesta_obtener_receta* rta){
@@ -944,4 +854,122 @@ void loguearRtaObtenerRestaurante(respuesta_obtener_restaurante* rta){
 
 void loguearRtaConsultarPlatos(respuesta_consultar_platos* rta){
 	log_info(logger, "[EnvioMSG] RTA_CONSULTAR_PLATOS con valores: nombresPlatos=%s", rta->nombresPlatos);
+}
+
+// --- FREES ---
+
+void freeRtaObtenerReceta(respuesta_obtener_receta* rta){
+	free(rta->pasos);
+	free(rta->tiempoPasos);
+	free(rta);
+}
+
+void freeRtaObtenerPedido(respuesta_obtener_pedido* rta){
+	free(rta->comidas);
+	free(rta->cantTotales);
+	free(rta->cantListas);
+	free(rta);
+}
+
+void freeRtaObtenerRestaurante(respuesta_obtener_restaurante* rta){
+	free(rta->precioPlatos);
+	free(rta->platos);
+	free(rta->afinidades);
+	free(rta);
+}
+
+// --- FUNCIONES AUXILIARES
+
+respuesta_obtener_pedido* generarRtaObtenerPedidoDefault(){
+	respuesta_obtener_pedido* rta = malloc(sizeof(respuesta_obtener_pedido));
+
+	char* arrayVacio = "[]";
+
+	rta->sizeCantListas = 0;
+	rta->sizeCantTotales = 0;
+	rta->sizeComidas = 0;
+
+	rta->cantListas = malloc(strlen(arrayVacio) + 1);
+	strcpy(rta->cantListas, arrayVacio);
+
+	rta->cantTotales = malloc(strlen(arrayVacio) + 1);
+	strcpy(rta->cantTotales, arrayVacio);
+
+	rta->comidas = malloc(strlen(arrayVacio) + 1);
+	strcpy(rta->comidas, arrayVacio);
+
+	return rta;
+}
+
+int calcularCantidadPedidos(char* nombreRestaurant){
+
+    int cantidadPedidos = 0;
+
+	char* pathCarpetaRestaurant = generarPathCarpetaRestaurant(nombreRestaurant);
+
+	struct dirent *archivoLeido;
+
+	// Retorna un puntero al directorio | {puntoMontaje}/Files
+	DIR *dr = opendir(pathCarpetaRestaurant);
+
+	if (dr == NULL)
+	{
+		printf("No se pudo abrir el directorio actual" );
+	}
+
+	while ((archivoLeido = readdir(dr)) != NULL)
+	{
+		// Nombre del archivo leido dentro del directorio
+		char* punteroANombre = archivoLeido->d_name;
+
+		// Si el archivo es . .. o Info.AFIP es ignorado
+		if (strcmp(punteroANombre, ".") == 0 || strcmp(punteroANombre, "..") == 0 || strcmp(punteroANombre, "Info.AFIP") == 0){
+			continue;
+		}
+
+		// Si el nombre de archivo es un pedido entonces lo sumo
+		cantidadPedidos++;
+	}
+
+	closedir(dr);
+	free(pathCarpetaRestaurant);
+
+	return cantidadPedidos;
+}
+
+char* estadoAString(estado_de_pedido estado){
+
+	char* retorno;
+
+	switch(estado){
+		case PENDIENTE:
+			retorno = "Pendiente";
+		break;
+		case CONFIRMADO:
+			retorno = "Confirmado";
+		break;
+		case TERMINADO:
+			retorno = "Terminado";
+		break;
+		default:
+			retorno = "Ninguno";
+		break;
+	}
+
+	return retorno;
+}
+
+int estadoPedidoDeStringAInt(char* estadoPedidoString){
+
+	int retorno = NADA_CARGADO;
+
+	if (strcmp(estadoPedidoString, "Pendiente") == 0){
+		retorno = PENDIENTE;
+	} else if (strcmp(estadoPedidoString, "Confirmado") == 0){
+		retorno = CONFIRMADO;
+	} else if (strcmp(estadoPedidoString, "Terminado") == 0){
+		retorno = TERMINADO;
+	}
+
+	return retorno;
 }

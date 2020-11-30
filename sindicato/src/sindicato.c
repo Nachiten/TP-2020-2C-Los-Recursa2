@@ -1007,6 +1007,7 @@ t_list* leerListaBloquesAsignados(int sizeBytes, int bloqueInicial){
 
 		// Estoy leyendo el ultimo bloque
 		if (i == cantidadBloquesALeer - 1){
+			free(pathSiguienteBloque);
 		// No es el ultimo bloque
 		} else {
 
@@ -1429,13 +1430,15 @@ int main(){
 	// ---- A partir de aca el FS ya existe ----
 
 	// Testing (debe ir comentado)
-	//guardarPedido_sindicato("ElParrillon", 3, 1);
-	//confirmarPedido_sindicato("ElParrillon",2,1);
-	//terminarPedido("ElParrillon",3,1);
 
-	//obtenerPedido("ElParrillon",1, 1);
-	//obtenerPedido("ElParrillon",2, 1);
-	//obtenerPedido("ElParrillon",3, 1);
+//	int numeroPedido = 9;
+//
+//	guardarPedido_sindicato("ElParrillon", numeroPedido, 1);
+//	confirmarPedido_sindicato("ElParrillon",numeroPedido,1);
+//	terminarPedido("ElParrillon", numeroPedido, 1);
+//
+//	obtenerPedido("ElParrillon", numeroPedido,1);
+//	obtenerPedido("ElParrillon", numeroPedido, 1);
 
 	// --- Hilo para leer el input de la consola ---
 	pthread_t hiloConsola;
