@@ -612,7 +612,7 @@ void obtenerInputConsolaCliente(){
 		plato_listo* recibirPlatoListoExclusivo;
 		finalizar_pedido* recibirFinalizarPedidoExclusivo;
 		codigo_operacion cod_op_exclusivo = PLATO_LISTO;
-		confirmar_pedido* elMensajeConfirmarPedido = malloc(sizeof(guardar_pedido));
+		guardar_pedido* elMensajeConfirmarPedido = malloc(sizeof(guardar_pedido));
 
 		//establezco la conexion para empezar a mandar
 		socketCliente = establecer_conexion(ip_destino , puerto_destino);
