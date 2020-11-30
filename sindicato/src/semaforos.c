@@ -338,11 +338,7 @@ void crearSemaforosPedidosRestaurant(char* nombreRestaurant){
 
 		int numeroPedido = atoi(numeroPedidoString);
 
-		char* nombreRestaurantCopia = malloc(strlen(nombreRestaurant) + 1);
-
-		strcpy(nombreRestaurantCopia, nombreRestaurant);
-
-		crearSemaforoPedido(nombreRestaurantCopia, numeroPedido);
+		crearSemaforoPedido(nombreRestaurant, numeroPedido);
 
 		freeDeArray(archivoSeparado);
 		free(numeroPedidoString);
