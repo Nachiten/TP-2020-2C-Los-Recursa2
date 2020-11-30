@@ -121,3 +121,64 @@ void freeDeArray(char** array){
 	free(array);
 }
 
+void mostrar_el_estado_del_pedido_obtener_pedido(guardar_pedido* mensajeObtenerPedido, respuesta_obtener_pedido* respuestaObtenerPedido, t_log* logger, sem_t* semLog)
+{
+	if(respuestaObtenerPedido->estado == 0)
+	{
+		printf("No existe el pedido %u del restaurante %s.\n",mensajeObtenerPedido->idPedido, mensajeObtenerPedido->nombreRestaurante);
+	}
+
+	if(respuestaObtenerPedido->estado == 1)
+	{
+		sem_wait(semLog);
+		log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es: %s. Cantidad ya cocinada: %s. Se encuentra en estado %s."
+		,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas, "PENDIENTE");
+		sem_post(semLog);
+	}
+
+	if(respuestaObtenerPedido->estado == 2)
+	{
+		sem_wait(semLog);
+		log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es: %s. Cantidad ya cocinada: %s. Se encuentra en estado %s."
+		,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas, "CONFIRMADO");
+		sem_post(semLog);
+	}
+
+	if(respuestaObtenerPedido->estado == 3)
+	{
+		sem_wait(semLog);
+		log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es: %s. Cantidad ya cocinada: %s. Se encuentra en estado %s."
+		,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas, "TERMINADO");
+		sem_post(semLog);
+	}
+}
+
+void mostrar_el_estado_del_pedido_consultar_pedido(consultar_pedido* estructuraConsultarPedido, respuesta_consultar_pedido* estructuraRespuestaConsultarPedido, t_log* logger, sem_t* semLog)
+{
+	if(estructuraRespuestaConsultarPedido->estado == 0)
+	{
+		printf("No existe el pedido %u del restaurante %s.\n",estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante);
+	}
+
+	if(estructuraRespuestaConsultarPedido->estado == 1)
+	{
+		sem_wait(semLog);
+		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nRepartidor: %s\nSu estado: %s\nComidas: %s", estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante, "PENDIENTE" ,estructuraRespuestaConsultarPedido->comidas);
+		sem_post(semLog);
+	}
+
+	if(estructuraRespuestaConsultarPedido->estado == 2)
+	{
+		sem_wait(semLog);
+		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nRepartidor: %s\nSu estado: %s\nComidas: %s", estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante, "CONFIRMADO" ,estructuraRespuestaConsultarPedido->comidas);
+		sem_post(semLog);
+	}
+
+	if(estructuraRespuestaConsultarPedido->estado == 3)
+	{
+		sem_wait(semLog);
+		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nRepartidor: %s\nSu estado: %s\nComidas: %s", estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante, "TERMINADO" ,estructuraRespuestaConsultarPedido->comidas);
+		sem_post(semLog);
+	}
+
+}

@@ -1,0 +1,191 @@
+[INFO] 16:46:45:694 Cliente/(12675:12675): Conexión establecida con socket de destino.
+[INFO] 16:47:43:923 Cliente/(12675:12677): Conexión establecida con socket de destino.
+[INFO] 16:47:53:387 Cliente/(12675:12677): Los platos del restaurante < ElParrillon > consultado son: [AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa]
+
+[INFO] 16:48:03:907 Cliente/(12675:12688): Conexión establecida con socket de destino.
+[INFO] 16:48:03:914 Cliente/(12675:12688): El intento de agregar un plato a un pedido fue: Fallido.
+
+[INFO] 16:48:35:48 Cliente/(12675:12699): La creacion del pedido fue atendida, y su codigo corresponde a: 1
+[INFO] 16:48:43:908 Cliente/(12675:12707): Conexión establecida con socket de destino.
+[INFO] 16:48:43:930 Cliente/(12675:12707): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 16:48:49:6 Cliente/(12675:12710): La creacion del pedido fue atendida, y su codigo corresponde a: 1
+[INFO] 16:48:57:529 Cliente/(12675:12713): La creacion del pedido fue atendida, y su codigo corresponde a: 1
+[INFO] 16:49:16:331 Cliente/(12675:12716): Conexión establecida con socket de destino.
+[INFO] 16:49:16:355 Cliente/(12675:12716): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 16:49:19:699 Cliente/(12675:12720): Conexión establecida con socket de destino.
+[INFO] 16:49:19:723 Cliente/(12675:12720): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 16:49:21:988 Cliente/(12675:12725): Conexión establecida con socket de destino.
+[INFO] 16:49:22:12 Cliente/(12675:12725): El intento de agregar un plato a un pedido fue: Fallido.
+
+[INFO] 16:53:07:975 Cliente/(12808:12808): Conexión establecida con socket de destino.
+[INFO] 17:04:13:975 Cliente/(13118:13118): Conexión establecida con socket de destino.
+[INFO] 17:04:21:219 Cliente/(13118:13120): Conexión establecida con socket de destino.
+[INFO] 17:04:21:242 Cliente/(13118:13120): Los platos del restaurante < ElParrillon > consultado son: [AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa]
+
+[INFO] 17:04:45:476 Cliente/(13118:13123): La creacion del pedido fue atendida, y su codigo corresponde a: 5
+[INFO] 17:05:03:56 Cliente/(13118:13126): Conexión establecida con socket de destino.
+[INFO] 17:05:03:73 Cliente/(13118:13126): El intento de agregar un plato a un pedido fue: Fallido.
+
+[INFO] 17:05:12:840 Cliente/(13118:13135): Conexión establecida con socket de destino.
+[INFO] 17:05:12:867 Cliente/(13118:13135): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 17:09:08:389 Cliente/(13169:13169): Conexión establecida con socket de destino.
+[INFO] 17:09:12:132 Cliente/(13169:13171): Conexión establecida con socket de destino.
+[INFO] 17:09:12:142 Cliente/(13169:13171): Los platos del restaurante < ElParrillon > consultado son: [AsadoJugoso,AsadoSeco,Choripan,TortillaDePapa]
+
+[INFO] 17:09:17:335 Cliente/(13169:13172): La creacion del pedido fue atendida, y su codigo corresponde a: 1
+[INFO] 17:09:17:797 Cliente/(13169:13175): La creacion del pedido fue atendida, y su codigo corresponde a: 2
+[INFO] 17:09:22:771 Cliente/(13169:13178): Conexión establecida con socket de destino.
+[INFO] 17:09:22:780 Cliente/(13169:13183): Conexión establecida con socket de destino.
+[INFO] 17:09:22:786 Cliente/(13169:13185): Conexión establecida con socket de destino.
+[INFO] 17:09:22:795 Cliente/(13169:13188): Conexión establecida con socket de destino.
+[INFO] 17:09:22:798 Cliente/(13169:13191): Conexión establecida con socket de destino.
+[INFO] 17:09:22:806 Cliente/(13169:13183): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 17:09:22:815 Cliente/(13169:13194): Conexión establecida con socket de destino.
+[INFO] 17:09:22:821 Cliente/(13169:13178): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 17:09:22:823 Cliente/(13169:13197): Conexión establecida con socket de destino.
+[INFO] 17:09:22:824 Cliente/(13169:13188): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 17:09:22:826 Cliente/(13169:13185): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 17:09:22:829 Cliente/(13169:13194): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 17:09:22:829 Cliente/(13169:13191): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 17:09:22:834 Cliente/(13169:13197): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 17:09:22:956 Cliente/(13169:13200): Conexión establecida con socket de destino.
+[INFO] 17:09:22:974 Cliente/(13169:13200): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 17:12:32:483 Cliente/(13169:13204): Conexión establecida con socket de destino.
+[INFO] 14:38:48:443 Cliente/(6067:6067): Conexión establecida con socket de destino.
+[INFO] 14:39:13:287 Cliente/(6067:6069): El intento de guardar un pedido fue: Fallido.
+
+[INFO] 14:39:13:287 Cliente/(6067:6077): Conexión establecida con socket de destino.
+[INFO] 14:39:13:290 Cliente/(6067:6077): El intento de guardar un plato en un pedido fue: Fallido.
+
+[INFO] 14:39:13:466 Cliente/(6067:6081): Conexión establecida con socket de destino.
+[INFO] 14:39:38:591 Cliente/(6067:6084): El intento de guardar un pedido fue: Fallido.
+
+[INFO] 14:39:49:171 Cliente/(6067:6101): El intento de guardar un pedido fue: Fallido.
+
+[INFO] 14:40:14:179 Cliente/(6067:6103): El intento de guardar un pedido fue: Fallido.
+
+[INFO] 14:40:59:883 Cliente/(6067:6120): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 14:42:50:627 Cliente/(6067:6130): Conexión establecida con socket de destino.
+[INFO] 14:42:50:628 Cliente/(6067:6130): El intento de guardar un plato en un pedido fue: Exitoso.
+
+[INFO] 14:43:31:451 Cliente/(6067:6157): Conexión establecida con socket de destino.
+[INFO] 14:43:31:453 Cliente/(6067:6157): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]
+[INFO] 14:53:42:314 Cliente/(6505:6505): Conexión establecida con socket de destino.
+[INFO] 14:53:50:770 Cliente/(6505:6507): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 14:54:01:376 Cliente/(6505:6513): Conexión establecida con socket de destino.
+[INFO] 14:54:01:378 Cliente/(6505:6513): Obtuve del pedido 1 la/s siguientes comida/s: [��FA	�FA	CK_MEJ
+
+LOG_FIL�]. Su/s cantidad/es: [1861926912]. Cantidad ya cocinada: [1861927095]. Se encuentra en estado PENDIENTE.
+[INFO] 14:54:48:48 Cliente/(6505:6520): Conexión establecida con socket de destino.
+[INFO] 14:54:48:50 Cliente/(6505:6520): El intento de guardar un plato en un pedido fue: Exitoso.
+
+[INFO] 14:54:52:465 Cliente/(6505:6535): Conexión establecida con socket de destino.
+[INFO] 14:54:52:466 Cliente/(6505:6535): Obtuve del pedido 1 la/s siguientes comida/s: [AsadoConFritas]. Su/s cantidad/es: [1]. Cantidad ya cocinada: [0]. Se encuentra en estado PENDIENTE.
+[INFO] 14:55:03:665 Cliente/(6505:6537): El intento de confirmar un pedido fue: Fallido.
+
+[INFO] 14:55:35:338 Cliente/(6505:6539): El intento de confirmar un pedido fue: Exitoso.
+
+[INFO] 14:55:44:689 Cliente/(6505:6548): Conexión establecida con socket de destino.
+[INFO] 14:58:15:463 Cliente/(6621:6621): Conexión establecida con socket de destino.
+[INFO] 14:58:21:812 Cliente/(6621:6623): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 14:58:28:881 Cliente/(6621:6629): Conexión establecida con socket de destino.
+[INFO] 15:04:20:469 Cliente/(6727:6727): Conexión establecida con socket de destino.
+[INFO] 15:04:22:234 Cliente/(6727:6729): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 15:04:26:355 Cliente/(6727:6730): Conexión establecida con socket de destino.
+[INFO] 15:04:26:376 Cliente/(6727:6730): El intento de guardar un plato en un pedido fue: Exitoso.
+
+[INFO] 15:04:31:171 Cliente/(6727:6732): Conexión establecida con socket de destino.
+[INFO] 15:05:59:512 Cliente/(6727:6732): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]. Se encuentra en estado PENDIENTE.
+[INFO] 15:07:03:817 Cliente/(6727:6734): El intento de confirmar un pedido fue: Exitoso.
+
+[INFO] 15:07:11:646 Cliente/(6727:6794): Conexión establecida con socket de destino.
+[INFO] 15:08:01:834 Cliente/(6727:6794): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]. Se encuentra en estado CONFIRMADO.
+[INFO] 15:08:50:927 Cliente/(6727:6830): Conexión establecida con socket de destino.
+[INFO] 15:10:09:499 Cliente/(6727:6830): La respuesta a notificar el plato listo fue: Exitoso.
+
+[INFO] 15:10:33:592 Cliente/(6727:6874): Conexión establecida con socket de destino.
+[INFO] 15:10:41:255 Cliente/(6727:6874): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [1]. Se encuentra en estado CONFIRMADO.
+[INFO] 15:10:57:698 Cliente/(6727:6890): Conexión establecida con socket de destino.
+[INFO] 15:10:57:719 Cliente/(6727:6890): La respuesta a notificar el plato listo fue: Exitoso.
+
+[INFO] 15:11:01:312 Cliente/(6727:6909): Conexión establecida con socket de destino.
+[INFO] 15:11:01:323 Cliente/(6727:6909): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [2]. Se encuentra en estado TERMINADO.
+[INFO] 15:11:07:120 Cliente/(6727:6911): Conexión establecida con socket de destino.
+[INFO] 15:11:07:136 Cliente/(6727:6911): El intento de agregar un plato a un pedido fue: Exitoso.
+
+[INFO] 15:11:27:17 Cliente/(6727:6913): Conexión establecida con socket de destino.
+[INFO] 15:24:47:479 Cliente/(7324:7324): Conexión establecida con socket de destino.
+[INFO] 15:24:50:455 Cliente/(7324:7326): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 15:24:53:965 Cliente/(7324:7327): Conexión establecida con socket de destino.
+[INFO] 15:24:53:967 Cliente/(7324:7327): El intento de guardar un plato en un pedido fue: Exitoso.
+
+[INFO] 15:24:56:671 Cliente/(7324:7329): El intento de confirmar un pedido fue: Fallido.
+
+[INFO] 15:25:55:161 Cliente/(7362:7362): Conexión establecida con socket de destino.
+[INFO] 15:26:00:400 Cliente/(7362:7364): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 15:26:05:143 Cliente/(7362:7365): Conexión establecida con socket de destino.
+[INFO] 15:26:05:144 Cliente/(7362:7365): El intento de guardar un plato en un pedido fue: Exitoso.
+
+[INFO] 15:26:10:559 Cliente/(7362:7367): Conexión establecida con socket de destino.
+[INFO] 15:26:10:560 Cliente/(7362:7367): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]. Se encuentra en estado PENDIENTE.
+[INFO] 15:26:16:848 Cliente/(7362:7369): El intento de confirmar un pedido fue: Exitoso.
+
+[INFO] 15:26:20:559 Cliente/(7362:7371): Conexión establecida con socket de destino.
+[INFO] 15:26:20:560 Cliente/(7362:7371): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]. Se encuentra en estado CONFIRMADO.
+[INFO] 15:26:29:63 Cliente/(7362:7373): Conexión establecida con socket de destino.
+[INFO] 15:26:29:63 Cliente/(7362:7373): La respuesta a notificar el plato listo fue: Exitoso.
+
+[INFO] 15:26:29:775 Cliente/(7362:7375): Conexión establecida con socket de destino.
+[INFO] 15:26:29:777 Cliente/(7362:7375): La respuesta a notificar el plato listo fue: Exitoso.
+
+[INFO] 15:26:33:471 Cliente/(7362:7379): Conexión establecida con socket de destino.
+[INFO] 15:26:33:472 Cliente/(7362:7379): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [2]. Se encuentra en estado TERMINADO.
+[INFO] 15:26:37:703 Cliente/(7362:7380): Conexión establecida con socket de destino.
+[INFO] 15:26:37:705 Cliente/(7362:7380): El intento de Finalizar un Pedido fue: Exitoso.
+
+[WARNING] 15:41:41:379 Cliente/(8977:8977): Conexión fallida con socket de destino.
+[INFO] 15:41:41:380 Cliente/(8977:8977): El servidor destino al que me intento conectar no esta vivo, procedo a fallecer.
+[INFO] 15:41:56:301 Cliente/(8981:8981): Conexión establecida con socket de destino.
+[INFO] 15:42:07:918 Cliente/(8981:8983): El intento de guardar un pedido fue: Exitoso.
+
+[INFO] 15:42:11:667 Cliente/(8981:8984): Conexión establecida con socket de destino.
+[INFO] 15:42:11:668 Cliente/(8981:8984): El intento de guardar un plato en un pedido fue: Exitoso.
+
+[INFO] 15:42:15:143 Cliente/(8981:8991): Conexión establecida con socket de destino.
+[INFO] 15:42:15:147 Cliente/(8981:8991): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]. Se encuentra en estado PENDIENTE.
+[INFO] 15:42:23:716 Cliente/(8981:8993): Conexión establecida con socket de destino.
+[INFO] 15:42:23:721 Cliente/(8981:8993): La respuesta a notificar el plato listo fue: Fallido.
+
+[INFO] 15:42:27:657 Cliente/(8981:8995): El intento de confirmar un pedido fue: Exitoso.
+
+[INFO] 15:42:31:125 Cliente/(8981:8997): Conexión establecida con socket de destino.
+[INFO] 15:42:31:137 Cliente/(8981:8997): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [0]. Se encuentra en estado CONFIRMADO.
+[INFO] 15:42:37:445 Cliente/(8981:8999): Conexión establecida con socket de destino.
+[INFO] 15:42:37:451 Cliente/(8981:8999): La respuesta a notificar el plato listo fue: Exitoso.
+
+[INFO] 15:42:38:619 Cliente/(8981:9002): Conexión establecida con socket de destino.
+[INFO] 15:42:38:623 Cliente/(8981:9002): La respuesta a notificar el plato listo fue: Exitoso.
+
+[INFO] 15:42:41:708 Cliente/(8981:9004): Conexión establecida con socket de destino.
+[INFO] 15:42:41:711 Cliente/(8981:9004): Obtuve del pedido 1 la/s siguientes comida/s: [Milangas]. Su/s cantidad/es: [2]. Cantidad ya cocinada: [2]. Se encuentra en estado TERMINADO.
+[INFO] 15:42:45:627 Cliente/(8981:9008): Conexión establecida con socket de destino.
+[INFO] 15:42:45:629 Cliente/(8981:9008): El intento de Finalizar un Pedido fue: Exitoso.
+

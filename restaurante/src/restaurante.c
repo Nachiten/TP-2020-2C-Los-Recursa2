@@ -83,6 +83,7 @@ void consultar_Platos(int32_t socket_cliente){
 void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato;
 	guardar_pedido* pedida_a_guardar;
+	respuesta_ok_error* resultado_guardar_pedido;
 	respuesta_crear_pedido* respuesta;
 	Pedido* pedido = malloc(sizeof(Pedido));
 	pedido->socket_cliente = socket_cliente;
@@ -120,9 +121,20 @@ void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	if(codigoRecibido != 24){
 		printf("problemas al recibir respuesta de guardar pedido en sindic");
 	} else {
-		recibir_mensaje(respuesta, RESPUESTA_GUARDAR_PEDIDO, nuevoSocketSindicato);
+		resultado_guardar_pedido = malloc(sizeof(respuesta_ok_error));
+		recibir_mensaje(resultado_guardar_pedido, RESPUESTA_GUARDAR_PEDIDO, nuevoSocketSindicato);
 
-		mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socket_cliente);
+		if(resultado_guardar_pedido->respuesta == 1)
+		{
+			mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socket_cliente);
+		}
+
+		else
+		{
+			respuesta->idPedido = 0;
+			mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socket_cliente);
+		}
+		free(resultado_guardar_pedido);
 	}
 	close(nuevoSocketSindicato);
     free(pedida_a_guardar->nombreRestaurante);
@@ -254,7 +266,7 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 	free(respuestaAMandar);
 	close(nuevoSocketSindicato);
 }
-void consultar_Pedido(int32_t id,int32_t socket_cliente){
+void consultar_Pedido(int32_t id, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato;
 
 	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
@@ -265,13 +277,11 @@ void consultar_Pedido(int32_t id,int32_t socket_cliente){
 		exit(-2);
 	}
 
-	obtener_pedido* datosPedido = malloc(sizeof(obtener_pedido));
+	guardar_pedido* datosPedido = malloc(sizeof(guardar_pedido));
 	datosPedido->idPedido = id;
 	datosPedido->largoNombreRestaurante = strlen(nombreRestaurante);
 	datosPedido->nombreRestaurante = malloc(strlen(nombreRestaurante) +1);
 	strcpy(datosPedido->nombreRestaurante,nombreRestaurante);
-
-	respuesta_obtener_pedido* pedido = malloc(sizeof(respuesta_obtener_pedido));
 
 	mandar_mensaje(datosPedido, OBTENER_PEDIDO, nuevoSocketSindicato);
 
@@ -285,9 +295,39 @@ void consultar_Pedido(int32_t id,int32_t socket_cliente){
 
 //  printf("El size del buffer/payload es: %u", sizePayload);
 
-    recibir_mensaje(pedido,RESPUESTA_OBTENER_PEDIDO,nuevoSocketSindicato);
+    respuesta_obtener_pedido* pedidoObtenido = malloc(sizeof(respuesta_obtener_pedido));
 
-    mandar_mensaje(pedido,RESPUESTA_CONSULTAR_PEDIDO,socket_cliente);
+    recibir_mensaje(pedidoObtenido, RESPUESTA_OBTENER_PEDIDO, nuevoSocketSindicato);
+
+    respuesta_consultar_pedido* pedidoConsultado = malloc(sizeof(respuesta_consultar_pedido));
+
+    //si quisieramos validar el estado para ver si le contestamos al cliente una excepcion, aca iria un if
+    pedidoConsultado->estado = pedidoObtenido->estado;
+
+    pedidoConsultado->nombreRestaurante = malloc(strlen(nombreRestaurante)+1);
+    strcpy(pedidoConsultado->nombreRestaurante, nombreRestaurante);
+
+    pedidoConsultado->sizeComidas = pedidoObtenido->sizeComidas;
+    pedidoConsultado->sizeCantListas = pedidoObtenido->sizeCantListas;
+    pedidoConsultado->sizeCantTotales = pedidoObtenido->sizeCantTotales;
+    pedidoConsultado->comidas = malloc(pedidoConsultado->sizeComidas+1);
+    pedidoConsultado->cantListas = malloc(pedidoConsultado->sizeCantListas+1);
+    pedidoConsultado->cantTotales = malloc(pedidoConsultado->sizeCantTotales+1);
+    strcpy(pedidoConsultado->comidas, pedidoObtenido->comidas);
+    strcpy(pedidoConsultado->cantListas, pedidoObtenido->cantListas);
+    strcpy(pedidoConsultado->cantTotales, pedidoObtenido->cantTotales);
+
+    mandar_mensaje(pedidoConsultado, RESPUESTA_CONSULTAR_PEDIDO, socket_cliente);
+
+    free(pedidoObtenido->comidas);
+    free(pedidoObtenido->cantListas);
+    free(pedidoObtenido->cantTotales);
+    free(pedidoObtenido);
+    free(pedidoConsultado->nombreRestaurante);
+    free(pedidoConsultado->comidas);
+    free(pedidoConsultado->cantListas);
+    free(pedidoConsultado->cantTotales);
+    free(pedidoConsultado);
 }
 
 //*******************FUNCIONES DE RESTO*******************

@@ -2,14 +2,7 @@
 #define SRC_ESTRUCTURASCOMANDA_H_
 
 #include<stdint.h> //WTF?!?!?!?
-
-typedef enum
-{
-	NADA_CARGADO = 0,
-	PENDIENTE,
-	CONFIRMADO,
-	TERMINADO
-}estado_de_pedido;
+#include"shared/estructuras.h"
 
 typedef struct tabla_paginas
 {

@@ -65,7 +65,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 		break;
 
 		case OBTENER_PEDIDO:;
-            obtener_pedido* estructuraMensajeObtenerP = malloc(sizeof(obtener_pedido));
+            guardar_pedido* estructuraMensajeObtenerP = malloc(sizeof(guardar_pedido));
             recibir_mensaje(estructuraMensajeObtenerP, OBTENER_PEDIDO, *socket_cliente);
 
             obtenerPedido(estructuraMensajeObtenerP->nombreRestaurante, estructuraMensajeObtenerP->idPedido, *socket_cliente);

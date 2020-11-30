@@ -50,6 +50,14 @@ typedef enum
 	DESCONEXION = 0
 }codigo_operacion;
 
+typedef enum
+{
+	NADA_CARGADO = 0,
+	PENDIENTE,
+	CONFIRMADO,
+	TERMINADO
+}estado_de_pedido;
+
 typedef struct
 {
 	uint32_t size;
@@ -114,7 +122,6 @@ typedef struct{
 	char* nombrePlato;
 }plato_listo;
 
-//Solo con el ID del pedido funcaba bien esto? Sospechoso ahora que lo analizo releyendo el enunciado
 typedef struct{
 	uint32_t idPedido;
 }consultar_pedido;
@@ -184,8 +191,7 @@ typedef struct{
 typedef struct{
 	uint32_t largoNombreRestaurante;
 	char* nombreRestaurante;
-	uint32_t repartidor;
-	uint32_t estado;
+	estado_de_pedido estado;
 	uint32_t sizeComidas;
 	char* comidas;
 	uint32_t sizeCantTotales;
@@ -195,6 +201,7 @@ typedef struct{
 }respuesta_consultar_pedido;
 
 typedef struct{
+	estado_de_pedido estado;
 	uint32_t sizeComidas;
 	char* comidas;
 	uint32_t sizeCantTotales;

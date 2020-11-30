@@ -528,8 +528,8 @@ void obtenerInputConsolaCliente(){
 
 			recibir_mensaje(estructuraRespuestaCrearPedido,RESPUESTA_CREAR_PEDIDO,socketCliente);
 
-			if(estructuraRespuestaCrearPedido->idPedido < 0){
-				printf("Hubo un error al intentar crear tu pedido, compruebe que haya seleccionado un restaurante.\n");
+			if(estructuraRespuestaCrearPedido->idPedido == 0){
+				printf("Hubo un error al intentar crear tu pedido.\n");
 			}
 			else
 			{
@@ -637,51 +637,55 @@ void obtenerInputConsolaCliente(){
 			log_info(logger, "El intento de confirmar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
 			sem_post(semLog);
 
-			//se confirmó el pedido, asi que a esperar todos los avisos de cosas listas
-			if(estructuraRespuesta->respuesta == 1)
+			//mientras que no sea el flujo directo a CoMAnda, me pongo a esperar todos los mensajes
+			if(strcmp(puerto_destino, "5002") != 0)
 			{
-				//a continuacion, el bucle de los PLATO LISTO
-				los_recv_repetitivos_VERSIONESPECIAL(socketCliente, &exito, &sizeAAllocar, &cod_op_exclusivo);
-				while(cod_op_exclusivo != FINALIZAR_PEDIDO)
+				//se confirmó el pedido, asi que a esperar todos los avisos de cosas listas
+				if(estructuraRespuesta->respuesta == 1)
 				{
-					if(exito == 1)
-					{
-						if(cod_op_exclusivo == PLATO_LISTO)
-						{
-							recibirPlatoListoExclusivo = malloc(sizeof(sizeAAllocar));
-							recibir_mensaje(recibirPlatoListoExclusivo, PLATO_LISTO , socketCliente);
-
-							sem_wait(semLog);
-							log_info(logger, "Esta listo el plato <%s> del restaurante <%s> (Pedido %u).\n", recibirPlatoListoExclusivo->nombrePlato, recibirPlatoListoExclusivo->nombreRestaurante, recibirPlatoListoExclusivo->idPedido);
-							sem_post(semLog);
-
-							//aviso que me llego el plato listo
-							estructuraRespuesta->respuesta = 1;
-							mandar_mensaje(estructuraRespuesta, RESPUESTA_PLATO_LISTO, socketCliente);
-
-							free(recibirPlatoListoExclusivo->nombrePlato);
-							free(recibirPlatoListoExclusivo->nombreRestaurante);
-							free(recibirPlatoListoExclusivo);
-						}
-					}
-					//y sigo recibiendo
+					//a continuacion, el bucle de los PLATO LISTO
 					los_recv_repetitivos_VERSIONESPECIAL(socketCliente, &exito, &sizeAAllocar, &cod_op_exclusivo);
+					while(cod_op_exclusivo != FINALIZAR_PEDIDO)
+					{
+						if(exito == 1)
+						{
+							if(cod_op_exclusivo == PLATO_LISTO)
+							{
+								recibirPlatoListoExclusivo = malloc(sizeof(sizeAAllocar));
+								recibir_mensaje(recibirPlatoListoExclusivo, PLATO_LISTO , socketCliente);
+
+								sem_wait(semLog);
+								log_info(logger, "Esta listo el plato <%s> del restaurante <%s> (Pedido %u).\n", recibirPlatoListoExclusivo->nombrePlato, recibirPlatoListoExclusivo->nombreRestaurante, recibirPlatoListoExclusivo->idPedido);
+								sem_post(semLog);
+
+								//aviso que me llego el plato listo
+								estructuraRespuesta->respuesta = 1;
+								mandar_mensaje(estructuraRespuesta, RESPUESTA_PLATO_LISTO, socketCliente);
+
+								free(recibirPlatoListoExclusivo->nombrePlato);
+								free(recibirPlatoListoExclusivo->nombreRestaurante);
+								free(recibirPlatoListoExclusivo);
+							}
+						}
+						//y sigo recibiendo
+						los_recv_repetitivos_VERSIONESPECIAL(socketCliente, &exito, &sizeAAllocar, &cod_op_exclusivo);
+					}
+
+					//me llego un FINALIZAR_PEDIDO por fin
+					recibirFinalizarPedidoExclusivo= malloc(sizeof(sizeAAllocar));
+
+					recibir_mensaje(recibirFinalizarPedidoExclusivo, FINALIZAR_PEDIDO, socketCliente);
+
+					sem_wait(semLog);
+					log_info(logger, "Esta Finalizado el Pedido %u del restaurante <%s>.\n", recibirFinalizarPedidoExclusivo->nombreRestaurante, recibirFinalizarPedidoExclusivo->idPedido);
+					sem_post(semLog);
+
+					estructuraRespuesta->respuesta = 1;
+					mandar_mensaje(estructuraRespuesta, RESPUESTA_FINALIZAR_PEDIDO, socketCliente);
+
+					free(recibirFinalizarPedidoExclusivo->nombreRestaurante);
+					free(recibirFinalizarPedidoExclusivo);
 				}
-
-				//me llego un FINALIZAR_PEDIDO por fin
-				recibirFinalizarPedidoExclusivo= malloc(sizeof(sizeAAllocar));
-
-				recibir_mensaje(recibirFinalizarPedidoExclusivo, FINALIZAR_PEDIDO, socketCliente);
-
-				sem_wait(semLog);
-				log_info(logger, "Esta Finalizado el Pedido %u del restaurante <%s>.\n", recibirFinalizarPedidoExclusivo->nombreRestaurante, recibirFinalizarPedidoExclusivo->idPedido);
-				sem_post(semLog);
-
-				estructuraRespuesta->respuesta = 1;
-				mandar_mensaje(estructuraRespuesta, RESPUESTA_FINALIZAR_PEDIDO, socketCliente);
-
-				free(recibirFinalizarPedidoExclusivo->nombreRestaurante);
-				free(recibirFinalizarPedidoExclusivo);
 			}
 		}
 
@@ -708,22 +712,28 @@ void obtenerInputConsolaCliente(){
     	socketCliente = establecer_conexion(ip_destino , puerto_destino);
     	resultado_de_conexion(socketCliente, logger, "destino");
 
-    	respuesta_crear_pedido* estructuraConsultarPedido = malloc(sizeof(uint32_t));
+    	consultar_pedido* estructuraConsultarPedido = malloc(sizeof(uint32_t));
     	estructuraConsultarPedido->idPedido = atoi(palabrasSeparadas[1]);
 
     	mandar_mensaje(estructuraConsultarPedido, CONSULTAR_PEDIDO, socketCliente);
     	los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
     	if(exito == 1)
     	{
-
     		respuesta_consultar_pedido* estructuraRespuestaConsultarPedido = malloc(sizeAAllocar);
     		recibir_mensaje(estructuraRespuestaConsultarPedido, RESPUESTA_CONSULTAR_PEDIDO, socketCliente);
+
+    		//re piola
+    		mostrar_el_estado_del_pedido_consultar_pedido(estructuraConsultarPedido, estructuraRespuestaConsultarPedido, logger, semLog);
+
+			/*
     		sem_wait(semLog);
     		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nRepartidor: %s\nEstado: %d\nComidas: %s"
     			,estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante
-				,estructuraRespuestaConsultarPedido->repartidor, estructuraRespuestaConsultarPedido->estado
+				,estructuraRespuestaConsultarPedido->estado
 				,estructuraRespuestaConsultarPedido->comidas);
     		sem_post(semLog);
+    		*/
+
     		free(estructuraRespuestaConsultarPedido->nombreRestaurante);
     		free(estructuraRespuestaConsultarPedido->comidas);
     		free(estructuraRespuestaConsultarPedido->cantTotales);
@@ -748,7 +758,7 @@ void obtenerInputConsolaCliente(){
     	socketCliente = establecer_conexion(ip_destino , puerto_destino);
 		resultado_de_conexion(socketCliente, logger, "destino");
 
-		obtener_pedido* mensajeObtenerPedido = malloc(sizeof(obtener_pedido));
+		guardar_pedido* mensajeObtenerPedido = malloc(sizeof(guardar_pedido));
 		mensajeObtenerPedido->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
 		mensajeObtenerPedido->nombreRestaurante = malloc(mensajeObtenerPedido->largoNombreRestaurante + 1);
 		strcpy(mensajeObtenerPedido->nombreRestaurante, palabrasSeparadas[1]);
@@ -762,20 +772,8 @@ void obtenerInputConsolaCliente(){
 				respuesta_obtener_pedido* respuestaObtenerPedido = malloc(sizeAAllocar);
 				recibir_mensaje(respuestaObtenerPedido, RESPUESTA_OBTENER_PEDIDO ,socketCliente);
 
-				if(strcmp(respuestaObtenerPedido->comidas,"[]") != 0)
-				{
-					sem_wait(semLog);
-					log_info(logger, "Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es: %s. Cantidad ya cocinada: %s"
-					,mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas);
-					sem_post(semLog);
-					//esta 2 veces x q el log info no muestra x pantalla
-					printf("Obtuve del pedido %u la/s siguientes comida/s: %s. Su/s cantidad/es pedida/s: %s. Cantidad ya cocinada: %s.\n",mensajeObtenerPedido->idPedido, respuestaObtenerPedido->comidas, respuestaObtenerPedido->cantTotales, respuestaObtenerPedido->cantListas);
-				}
-
-				else
-				{
-					printf("No existe el pedido %u del restaurante %s.\n",mensajeObtenerPedido->idPedido, mensajeObtenerPedido->nombreRestaurante);
-				}
+				//re piola
+				mostrar_el_estado_del_pedido_obtener_pedido(mensajeObtenerPedido, respuestaObtenerPedido, logger, semLog);
 
 				free(respuestaObtenerPedido->comidas);
 				free(respuestaObtenerPedido->cantTotales);
@@ -819,7 +817,7 @@ void obtenerInputConsolaCliente(){
 		{
 			recibir_mensaje(estructuraRespuesta, RESPUESTA_FINALIZAR_PEDIDO ,socketCliente);
 			sem_wait(semLog);
-			log_info(logger, "El intento de agregar un plato a un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+			log_info(logger, "El intento de Finalizar un Pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
 			sem_post(semLog);
 		} else {
 			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
