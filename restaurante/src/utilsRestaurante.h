@@ -72,8 +72,8 @@ sem_t* semListaPedidos;
 sem_t* mutexNew;
 sem_t* mutexListaReady;
 sem_t* mutexBlock;
+//Creo que no seria necesario ya que 1 solo hilo manipula la cola para esperar y la de uso
 sem_t* mutexColaHornos;
-
 sem_t* contadorPlatosEnNew;
 
 // Semaforos para sincronizar hilos con HCM

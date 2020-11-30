@@ -210,16 +210,16 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 		exit(-2);
 	}
 
-	obtener_pedido* datosPedido = malloc(sizeof(obtener_pedido));
+	guardar_pedido* datosPedido = malloc(sizeof(guardar_pedido));
 	datosPedido->idPedido = id;
 	datosPedido->largoNombreRestaurante = strlen(nombreRestaurante);
 	datosPedido->nombreRestaurante = malloc(strlen(nombreRestaurante) +1);
 	strcpy(datosPedido->nombreRestaurante,nombreRestaurante);
 
+	mandar_mensaje(datosPedido,OBTENER_PEDIDO,nuevoSocketSindicato);
+
 	respuesta_obtener_pedido* pedido = malloc(sizeof(respuesta_obtener_pedido));
 	int i = 0;
-
-	mandar_mensaje(datosPedido,OBTENER_PEDIDO,nuevoSocketSindicato);
 
     codigo_operacion codigoRecibido;
     bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
@@ -361,7 +361,7 @@ int preparar_pcb_plato(char* nombreComida, char* cantComida){
 
     recibir_mensaje(receta_obtenida,RESPUESTA_OBTENER_PEDIDO,socket_sindicato);
 
-    if(strcmp(receta_obtenida->pasos,"[]") != 0){
+    if(strcmp(receta_obtenida->pasos,"[]") != 0 && strcmp(receta_obtenida->pasos,"[Error]") != 0){
     	char** listaPasos = string_get_string_as_array(receta_obtenida->pasos);
     	char** listaDuracion = string_get_string_as_array(receta_obtenida->tiempoPasos);
 
@@ -389,6 +389,7 @@ int preparar_pcb_plato(char* nombreComida, char* cantComida){
     				paso->duracionAccion = atoi(listaDuracion[i]);
     			}
     			list_add(plato->pasosReceta,paso);
+    			i++;
     		}
     		agregarANew(plato);
     	}
@@ -431,8 +432,8 @@ void inicializar_colas(){
 	listaPedidos = list_create(); //inicializo la lista de pedidos
     inicializar_semaforos();
 	crearColasPlanificacion();
-	//crearHornos();
-	iniciarSemaforosPlanificacion();
+	crearHornos();
+	iniciarSemaforosPlanificacionRestaurante();
 	iniciarSemaforosCiclos();
 	crearHilosPlanificacion();
 }

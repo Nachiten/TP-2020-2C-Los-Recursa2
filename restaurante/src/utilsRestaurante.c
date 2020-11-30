@@ -143,20 +143,13 @@ void crearHilosPlanificacion(){
 
 }
 
-/*
-void crearHornos(){
-	int i;
-	listaDeHornos = list_create();
-	colaParaHornear = queue_create();
 
-	for(i=0; i<cantHornos; i++){
-		t_horno* unHorno = malloc(sizeof(t_horno));
-		unHorno->idHorno = i+1;
-		unHorno->enUso = 0;
-		list_add(listaDeHornos, unHorno);
-	}
+void crearHornos(){
+
+	colaParaHornear = queue_create();
+	platosHorneandose = list_create();
+
 }
-*/
 
 
 void agregarANew(pcb_plato* unPlato)
@@ -311,7 +304,6 @@ void hiloNew_Ready(){
         unPlato->motivoBlock = NO_BLOCK;
         unPlato->quantumRestante = 0;
         unPlato->duracionBlock = 0;
-        //los pasos de receta los preparo aca si se le llega a complicar a nico, comunicacion sindicato
 
 		agregarAReady(unPlato);
 	}
@@ -597,7 +589,9 @@ void hiloEntradaSalida(){
 		sem_wait(habilitarCicloEntradaSalida);
 
 		if(list_size(platosHorneandose)<1){
-			//no hay platos horneandose, no hago nada con respecto a ellos este ciclo
+			sem_wait(semLog);
+			log_info(logger, "[ENTRADA/SALIDA] Transcurre 1 ciclo sin platos en los hornos.");
+			sem_post(semLog);
 		} else {
 
 
@@ -637,21 +631,26 @@ void hiloEntradaSalida(){
 
 		}
 
-
+		sem_wait(mutexColaHornos);
         //me fijo si puedo agregar un plato a hornear en este ciclo, de ser posible lo hago
 		if(queue_size(colaParaHornear)<1){
-			//no hay platos en la cola para hornear, no intentare agregar ninguno
+			sem_wait(semLog);
+			log_info(logger, "[ENTRADA/SALIDA] Transcurre el mismo ciclo sin platos esperando a ser horneados.");
+			sem_post(semLog);
+			sem_post(mutexColaHornos);
 		} else {
 			//hay platos en la cola para hornear, me fijo si tengo hornos disponibles
 			if(list_size(platosHorneandose) < cantHornos){
 				pcb_plato* platoAHornear = queue_pop(colaParaHornear);
+				sem_post(mutexColaHornos);
 				if(platoAHornear == NULL){
-					//no hay platos para hornear
+        //aca no deberia entrar jamas, si un plato fue agregado a la cola de hornos se presupone que esta creado bien
 				} else {
 				list_add(platosHorneandose, platoAHornear);
+
 				sem_wait(semLog);
 				//LOG DE ENUNCIADO!!!1!!!1
-				log_info(logger, "[ENTRADA/SALIDA] Entra a hornearse el plato < %s >, del pedido < %i >."
+				log_info(logger, "[ENTRADA/SALIDA] Ingresa a hornearse un/a < %s >, del pedido < %i >."
 									, platoAHornear->nombrePlato, platoAHornear->idPedido);
 				sem_post(semLog);
 				}
@@ -661,15 +660,10 @@ void hiloEntradaSalida(){
 		}
 
 
-
-
-
          sem_post(finalizarCicloEntradaSalida);
 
 
 	}
-
-
 }
 
 
@@ -677,18 +671,23 @@ pcb_plato* obtenerSiguienteDeReady(char* afinidad){
 	int i;
 	pcb_plato* elPlatoPlanificado;
 
+
 	if(list_size(listaDeColasReady) == 0){
-		exit(-1);
+		//problema grave porque no se detectan las colas de ready en base a las afinidades, fallecer is unavoidable
+		exit(-2);
 		}
 
+	sem_wait(mutexListaReady);
 	for(i=0; i<list_size(listaDeColasReady);i++){
 		cola_ready* unaColaReadyConAfinidad = list_get(listaDeColasReady, i);
 		if(strcmp(afinidad, unaColaReadyConAfinidad->afinidad) == 0){
 			if(queue_size(unaColaReadyConAfinidad->cola) == 0){
 				elPlatoPlanificado = NULL;
+				sem_post(mutexListaReady);
 				return elPlatoPlanificado;
 			} else {
 			elPlatoPlanificado = queue_pop(unaColaReadyConAfinidad->cola);
+			sem_post(mutexListaReady);
 			return elPlatoPlanificado;
 			}
 		}
@@ -698,9 +697,11 @@ pcb_plato* obtenerSiguienteDeReady(char* afinidad){
 	cola_ready* laColaReadySinAfinidad = list_get(listaDeColasReady, i);
 	if(queue_size(laColaReadySinAfinidad->cola) == 0){
 		elPlatoPlanificado = NULL;
+		sem_post(mutexListaReady);
 		return elPlatoPlanificado;
 	} else {
 		elPlatoPlanificado = queue_pop(laColaReadySinAfinidad->cola);
+		sem_post(mutexListaReady);
 		return elPlatoPlanificado;
 	}
 
@@ -721,6 +722,9 @@ void iniciarSemaforosPlanificacion(){
 
 	mutexBlock = malloc(sizeof(sem_t));
 	sem_init(mutexBlock, 0, 1);
+
+	mutexColaHornos = malloc(sizeof(sem_t));
+	sem_init(mutexColaHornos, 0, 1);
 
 }
 
