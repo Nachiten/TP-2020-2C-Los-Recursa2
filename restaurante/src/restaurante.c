@@ -303,7 +303,7 @@ void consultar_Pedido(int32_t id, int32_t socket_cliente){
 
     //si quisieramos validar el estado para ver si le contestamos al cliente una excepcion, aca iria un if
     pedidoConsultado->estado = pedidoObtenido->estado;
-
+    pedidoConsultado->largoNombreRestaurante = strlen(nombreRestaurante);
     pedidoConsultado->nombreRestaurante = malloc(strlen(nombreRestaurante)+1);
     strcpy(pedidoConsultado->nombreRestaurante, nombreRestaurante);
 
@@ -433,7 +433,7 @@ void inicializar_colas(){
     inicializar_semaforos();
 	crearColasPlanificacion();
 	crearHornos();
-	iniciarSemaforosPlanificacionRestaurante();
+	iniciarSemaforosPlanificacion();
 	iniciarSemaforosCiclos();
 	crearHilosPlanificacion();
 }

@@ -22,6 +22,7 @@ void confirmar_Pedido(int32_t, int32_t);
 
 //***FUNCIONES***
 void inicializar_colas();
+void crearHornos();
 int32_t crear_id_pedidos();
 int preparar_pcb_plato(char* , char*);
 void freeDeArray(char**);

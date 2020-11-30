@@ -16,6 +16,8 @@ void inicializarRestaurante(char* elPathDeLaConfig){
     algoritmoElegido = config_get_string_value(configuracion, "ALGORITMO_PLANIFICACION");
     RETARDO_CICLO_CPU = config_get_int_value(configuracion, "RETARDO_CICLO_CPU");
 
+    strcat(nombreRestaurante,"\0");
+
     logger = cargarUnLog(LOG_PATH, "Restaurante");
 
     log_info(logger, "Obtuve de config el nombre: %s" , nombreRestaurante);
