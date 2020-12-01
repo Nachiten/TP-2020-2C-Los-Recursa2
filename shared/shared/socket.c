@@ -634,7 +634,6 @@ uint32_t serializar_paquete_plato_listo(t_paquete* paquete, plato_listo* estruct
 		//devuelvo el tamaño de lo que meti en el paquete para poder hacer el malloc
 		return size;
 	}
-
 }
 
 
@@ -1680,8 +1679,6 @@ void desserializar_plato_listo(plato_listo* estructura, int32_t socket_cliente){
 
 	estructura->nombrePlato = malloc(estructura->largoNombrePlato+1);
 	bytesRecibidos(recv(socket_cliente, estructura->nombrePlato, estructura->largoNombrePlato+1, MSG_WAITALL));
-
-
 }
 
 void desserializar_obtener_receta(obtener_receta* estructura, int32_t socket_cliente){

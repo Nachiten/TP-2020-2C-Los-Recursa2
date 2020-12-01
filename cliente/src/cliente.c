@@ -652,8 +652,8 @@ void obtenerInputConsolaCliente(){
 						{
 							if(cod_op_exclusivo == PLATO_LISTO)
 							{
-								recibirPlatoListoExclusivo = malloc(sizeof(sizeAAllocar));
-								recibir_mensaje(recibirPlatoListoExclusivo, PLATO_LISTO , socketCliente);
+								recibirPlatoListoExclusivo = malloc(sizeof(plato_listo));
+								recibir_mensaje(recibirPlatoListoExclusivo, PLATO_LISTO , socketCliente);//ToDo ver recepcion
 
 								sem_wait(semLog);
 								log_info(logger, "Esta listo el plato <%s> del restaurante <%s> (Pedido %u).\n", recibirPlatoListoExclusivo->nombrePlato, recibirPlatoListoExclusivo->nombreRestaurante, recibirPlatoListoExclusivo->idPedido);
@@ -906,12 +906,9 @@ void obtenerInputConsolaCliente(){
         free(mensajeObtenerReceta->nombreReceta);
         free(mensajeObtenerReceta);
         close(socketCliente);
-
     	break;
 
-
     case DESCONEXION:
-
     	break;
 
     default:
