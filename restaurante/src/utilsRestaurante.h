@@ -66,14 +66,15 @@ t_list* listaDeColasReady;
 t_queue* colaParaHornear;
 t_list* platosHorneandose;
 t_list* listaPedidos;
+t_queue* colaReadySinAfinidad;
 
 sem_t* semLog;
 sem_t* semListaPedidos;
 sem_t* mutexNew;
 sem_t* mutexListaReady;
 sem_t* mutexBlock;
+//Creo que no seria necesario ya que 1 solo hilo manipula la cola para esperar y la de uso
 sem_t* mutexColaHornos;
-
 sem_t* contadorPlatosEnNew;
 
 // Semaforos para sincronizar hilos con HCM
@@ -156,19 +157,22 @@ void crearColasPlanificacion();
 void crearHilosPlanificacion();
 //al final no la termine necesitando
 //void crearHornos();
-void hiloNew_Ready();
-void hiloBlock_Ready();
+void hiloNewReady();
+void hiloBlockReady();
 void hiloEntradaSalida();
 void hiloExecCocinero(credencialesCocinero*);
 void agregarANew(pcb_plato*);
 void agregarAReady(pcb_plato*);
 void agregarABlock(pcb_plato*);
 void agregarAExit(pcb_plato*);
-pcb_plato* obtenerSiguienteDeReady();
+pcb_plato* obtenerSiguienteDeReadySinAfinidad();
+pcb_plato* obtenerSiguienteDeReadyConAfinidad(char*);
 
 //me la robe de resto.h
 int buscar_pedido_por_id(uint32_t);
 
+void inicializar_planificacion();
+void iniciarSemaforos();
 void iniciarSemaforosPlanificacion();
 void iniciarSemaforosCiclos();
 void hiloCiclosMaestro();

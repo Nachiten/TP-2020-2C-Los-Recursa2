@@ -29,6 +29,9 @@ void crearRestaurant(char*, datosRestaurant);
 // Otros
 void enviarRespuestaBooleana(uint32_t, codigo_operacion, respuestaBool);
 respuesta_obtener_pedido* generarRtaObtenerPedidoDefault();
+char* estadoAString(estado_de_pedido);
+int estadoPedidoDeStringAInt(char*);
+int calcularCantidadPedidos(char*);
 
 // Frees
 void freeRtaObtenerPedido(respuesta_obtener_pedido* rta);

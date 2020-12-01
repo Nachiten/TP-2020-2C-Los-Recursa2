@@ -43,11 +43,13 @@ void bytesRecibidos (int32_t cantidad)
 	if(cantidad == 0)
 	{
 		puts("Conexión finalizada (0).\n");
+		sleep(5);
 	}
 
 	if(cantidad == -1)
 	{
 		puts("La conexión está caida (-1).\n");
+		sleep(2);
 	}
 
 	if(cantidad > 0)

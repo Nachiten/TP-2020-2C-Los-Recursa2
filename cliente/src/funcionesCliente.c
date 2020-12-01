@@ -163,21 +163,39 @@ void mostrar_el_estado_del_pedido_consultar_pedido(consultar_pedido* estructuraC
 	if(estructuraRespuestaConsultarPedido->estado == 1)
 	{
 		sem_wait(semLog);
-		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nRepartidor: %s\nSu estado: %s\nComidas: %s", estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante, "PENDIENTE" ,estructuraRespuestaConsultarPedido->comidas);
+		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nSu estado: %s.\nComidas: %s\nSolicitadas:%s\nCocinadas:%s",
+				estructuraConsultarPedido->idPedido,
+				estructuraRespuestaConsultarPedido->nombreRestaurante,
+				"PENDIENTE" ,
+				estructuraRespuestaConsultarPedido->comidas,
+				estructuraRespuestaConsultarPedido->cantTotales,
+				estructuraRespuestaConsultarPedido->cantListas);
 		sem_post(semLog);
 	}
 
 	if(estructuraRespuestaConsultarPedido->estado == 2)
 	{
 		sem_wait(semLog);
-		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nRepartidor: %s\nSu estado: %s\nComidas: %s", estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante, "CONFIRMADO" ,estructuraRespuestaConsultarPedido->comidas);
+		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nSu estado: %s.\nComidas: %s\nSolicitadas:%s\nCocinadas:%s",
+				estructuraConsultarPedido->idPedido,
+				estructuraRespuestaConsultarPedido->nombreRestaurante,
+				"CONFIRMADO" ,
+				estructuraRespuestaConsultarPedido->comidas,
+				estructuraRespuestaConsultarPedido->cantTotales,
+				estructuraRespuestaConsultarPedido->cantListas);
 		sem_post(semLog);
 	}
 
 	if(estructuraRespuestaConsultarPedido->estado == 3)
 	{
 		sem_wait(semLog);
-		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nRepartidor: %s\nSu estado: %s\nComidas: %s", estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante, "TERMINADO" ,estructuraRespuestaConsultarPedido->comidas);
+		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nSu estado: %s.\nComidas: %s\nSolicitadas:%s\nCocinadas:%s",
+				estructuraConsultarPedido->idPedido,
+				estructuraRespuestaConsultarPedido->nombreRestaurante,
+				"TERMINADO" ,
+				estructuraRespuestaConsultarPedido->comidas,
+				estructuraRespuestaConsultarPedido->cantTotales,
+				estructuraRespuestaConsultarPedido->cantListas);
 		sem_post(semLog);
 	}
 
