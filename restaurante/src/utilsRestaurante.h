@@ -66,6 +66,7 @@ t_list* listaDeColasReady;
 t_queue* colaParaHornear;
 t_list* platosHorneandose;
 t_list* listaPedidos;
+t_queue* colaReadySinAfinidad;
 
 sem_t* semLog;
 sem_t* semListaPedidos;
@@ -164,7 +165,8 @@ void agregarANew(pcb_plato*);
 void agregarAReady(pcb_plato*);
 void agregarABlock(pcb_plato*);
 void agregarAExit(pcb_plato*);
-pcb_plato* obtenerSiguienteDeReady();
+pcb_plato* obtenerSiguienteDeReadySinAfinidad();
+pcb_plato* obtenerSiguienteDeReadyConAfinidad(char*);
 
 //me la robe de resto.h
 int buscar_pedido_por_id(uint32_t);
