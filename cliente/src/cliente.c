@@ -363,9 +363,9 @@ void obtenerInputConsolaCliente(){
 	    {
 		respuesta_consultar_platos* estructuraRespuestaConsultarPlatos = malloc(sizeAAllocar);
 		recibir_mensaje(estructuraRespuestaConsultarPlatos, RESPUESTA_CONSULTAR_PLATOS, socketCliente);
-		//sem_wait(semLog);
+		sem_wait(semLog);
 		log_info(logger, "Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreResto, estructuraRespuestaConsultarPlatos->nombresPlatos);
-		//sem_post(semLog);
+		sem_post(semLog);
 
 		free(estructuraRespuestaConsultarPlatos->nombresPlatos);
 		free(estructuraRespuestaConsultarPlatos);

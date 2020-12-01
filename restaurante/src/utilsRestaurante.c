@@ -99,8 +99,11 @@ void obtenerMetadataRestaurante(){
 void crearColasPlanificacion(){
   int i=0;
   colaNew = queue_create();
-  listaDeColasReady = list_create();
   colaBlock = list_create();
+  colaParaHornear = queue_create();
+  platosHorneandose = list_create();
+
+  listaDeColasReady = list_create();
 
   while(listaAfinidades[i] != NULL){
     cola_ready* nuevaColaConAfinidad = malloc(sizeof(cola_ready));
@@ -120,6 +123,20 @@ void crearHilosPlanificacion(){
   int i=0;
   int j=0;
   int cantCocinerosConAfinidad = 0;
+
+  pthread_t threadNewReady;
+  pthread_create(&threadNewReady, NULL, (void*)hiloNewReady, NULL);
+
+  pthread_t threadBlockReady;
+  pthread_create(&threadBlockReady, NULL, (void*)hiloBlockReady, NULL);
+
+  pthread_t threadEntradaSalida;
+  pthread_create(&threadEntradaSalida, NULL, (void*)hiloEntradaSalida, NULL);
+
+  pthread_t threadControlCiclos;
+  pthread_create(&threadControlCiclos, NULL, (void*)hiloCiclosMaestro, NULL);
+
+
   while(listaAfinidades[i] != NULL){
 	  pthread_t unCocineroConAfinidad;
 	  //ojo ver si no conviene hacer esto y pasarle el puntero dentro del array directamente
@@ -145,13 +162,10 @@ void crearHilosPlanificacion(){
 
 }
 
-
+/*
 void crearHornos(){
-
-	colaParaHornear = queue_create();
-	platosHorneandose = list_create();
-
-}
+//
+}*/
 
 
 void agregarANew(pcb_plato* unPlato)
@@ -162,7 +176,7 @@ void agregarANew(pcb_plato* unPlato)
 
 	//LOG DE ENUNCIADO!!!!1!1!
 	sem_wait(semLog);
-	log_info(logger, "[NEW] Entra el nuevo plato < %s >, del pedido < %i >"
+	log_info(logger, "[NEW] Entra el nuevo plato < %s >, del pedido < %d >"
 			,unPlato->nombrePlato, unPlato->idPedido);
 	sem_post(semLog);
 
@@ -287,7 +301,7 @@ void agregarAExit(pcb_plato* elPlato){
 }
 
 // Hilo que maneja pasar los procesos de new a ready (preparar el Plato control block)
-void hiloNew_Ready(){
+void hiloNewReady(){
 
 	while(1){
 
@@ -326,7 +340,7 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 			if(platoAEjecutar == NULL){
 				waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
 				sem_wait(semLog);
-				log_info(logger, "[EXEC-%i] Cocinero desperdicia ciclo porque no hay nadie en ready.",
+				log_info(logger, "[EXEC-%d] Cocinero desperdicia ciclo porque no hay nadie en ready.",
 						datosCocinero->idHilo);
 				sem_post(semLog);
 				signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
@@ -526,7 +540,7 @@ void hiloBlockReady(){
 
 	  if(elementosEnBlock == 0){
 		sem_wait(semLog);
-	  	log_info(logger, "[BLOCK] No hay platos en block.");
+	  	log_info(logger, "[BLOCK] No hay platos en block. Desperdiciando ciclo.");
 	  	sem_post(semLog);
 	  	sem_post(finalizarCicloBlockReady);
         continue;
@@ -557,7 +571,9 @@ void hiloBlockReady(){
         	agregarAReady(platoActual);
         	break;
           }
+
           platoActual->duracionBlock--;
+
 
           break;
 
@@ -569,6 +585,13 @@ void hiloBlockReady(){
 	  		//le tengo que buscar un horno, lo pongo en la cola para hornear
 	  		 sem_wait(mutexColaHornos);
 	  		 queue_push(colaParaHornear, platoActual);
+
+	  		 sem_wait(semLog);
+	  		 log_info(logger,
+	  		  "[ENTRADA/SALIDA] Ingresa a la cola para hornear un/a < %s > del pedido < %d >. Cantidad de platos en espera: %d",
+				platoActual->nombrePlato, platoActual->idPedido, queue_size(colaParaHornear));
+             sem_post(semLog);
+
 	  		 sem_post(mutexColaHornos);
 	  	  break;
 	  	 }
@@ -709,6 +732,25 @@ pcb_plato* obtenerSiguienteDeReady(char* afinidad){
 
 }
 
+
+void iniciarSemaforos(){
+	semId = malloc(sizeof(sem_t));
+	semLog = malloc(sizeof(sem_t));
+	semListaPedidos = malloc(sizeof(sem_t));
+
+	sem_init(semId, 0, 1);
+	sem_init(semLog, 0, 1);
+	sem_init(semListaPedidos, 0, 1);
+}
+
+void inicializar_colas(){
+	iniciarSemaforos();
+	iniciarSemaforosPlanificacion();
+	iniciarSemaforosCiclos();
+	listaPedidos = list_create();
+	crearColasPlanificacion();
+	crearHilosPlanificacion();
+}
 
 
 // Inicializacion de semaforos necesarios

@@ -21,10 +21,8 @@ void aniadir_plato(a_plato*,int32_t);
 void confirmar_Pedido(int32_t, int32_t);
 
 //***FUNCIONES***
-void inicializar_colas();
-void crearHornos();
 int32_t crear_id_pedidos();
-int preparar_pcb_plato(char* , char*);
+int preparar_pcb_plato(uint32_t, char*, char*);
 void freeDeArray(char**);
 
 

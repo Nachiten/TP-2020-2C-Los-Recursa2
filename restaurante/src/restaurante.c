@@ -238,7 +238,7 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 
 	int respuesta;
 	while(listaComidas[i] != NULL){
-		respuesta = preparar_pcb_plato(listaComidas[i],listaComidasTotales[i]);
+		respuesta = preparar_pcb_plato(id, listaComidas[i],listaComidasTotales[i]);
 		if(respuesta == 0){
 			break;
 		}
@@ -331,7 +331,7 @@ void consultar_Pedido(int32_t id, int32_t socket_cliente){
 }
 
 //*******************FUNCIONES DE RESTO*******************
-int preparar_pcb_plato(char* nombreComida, char* cantComida){
+int preparar_pcb_plato(uint32_t idPedido, char* nombreComida, char* cantComida){
 	int i = 0;
 
 	int32_t nuevoSocketSindicato;
@@ -355,11 +355,13 @@ int preparar_pcb_plato(char* nombreComida, char* cantComida){
     bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 
     uint32_t sizePayload;
-    bytesRecibidos(recv(socket_sindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+    bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
 
     respuesta_obtener_receta* receta_obtenida = malloc(sizeof(respuesta_obtener_receta));
 
-    recibir_mensaje(receta_obtenida,RESPUESTA_OBTENER_PEDIDO,socket_sindicato);
+    recibir_mensaje(receta_obtenida,RESPUESTA_OBTENER_RECETA,nuevoSocketSindicato);
+
+    close(nuevoSocketSindicato);
 
     if(strcmp(receta_obtenida->pasos,"[]") != 0 && strcmp(receta_obtenida->pasos,"[Error]") != 0){
     	char** listaPasos = string_get_string_as_array(receta_obtenida->pasos);
@@ -369,6 +371,7 @@ int preparar_pcb_plato(char* nombreComida, char* cantComida){
 
     	for(int j = 0;j<cantPlatos;j++){
     		pcb_plato* plato = malloc(sizeof(pcb_plato));
+    		plato->idPedido = idPedido;
     		plato->nombrePlato = malloc(strlen(nombreComida) +1);
     		strcpy(plato->nombrePlato,nombreComida);
     		plato->pasosReceta = list_create();
@@ -418,25 +421,6 @@ int preparar_pcb_plato(char* nombreComida, char* cantComida){
 
 }
 
-void inicializar_semaforos(){
-	semId = malloc(sizeof(sem_t));
-	semLog = malloc(sizeof(sem_t));
-	semListaPedidos = malloc(sizeof(sem_t));
-
-	sem_init(semId, 0, 1);
-	sem_init(semLog, 0, 1);
-	sem_init(semListaPedidos, 0, 1);
-}
-
-void inicializar_colas(){
-	listaPedidos = list_create(); //inicializo la lista de pedidos
-    inicializar_semaforos();
-	crearColasPlanificacion();
-	crearHornos();
-	iniciarSemaforosPlanificacion();
-	iniciarSemaforosCiclos();
-	crearHilosPlanificacion();
-}
 
 int32_t crear_id_pedidos(){
 	sem_wait(semId);

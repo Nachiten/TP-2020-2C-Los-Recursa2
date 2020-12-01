@@ -156,8 +156,8 @@ void crearColasPlanificacion();
 void crearHilosPlanificacion();
 //al final no la termine necesitando
 //void crearHornos();
-void hiloNew_Ready();
-void hiloBlock_Ready();
+void hiloNewReady();
+void hiloBlockReady();
 void hiloEntradaSalida();
 void hiloExecCocinero(credencialesCocinero*);
 void agregarANew(pcb_plato*);
@@ -169,6 +169,8 @@ pcb_plato* obtenerSiguienteDeReady();
 //me la robe de resto.h
 int buscar_pedido_por_id(uint32_t);
 
+void inicializar_colas();
+void iniciarSemaforos();
 void iniciarSemaforosPlanificacion();
 void iniciarSemaforosCiclos();
 void hiloCiclosMaestro();
