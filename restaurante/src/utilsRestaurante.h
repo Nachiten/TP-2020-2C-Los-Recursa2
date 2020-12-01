@@ -169,7 +169,7 @@ pcb_plato* obtenerSiguienteDeReady();
 //me la robe de resto.h
 int buscar_pedido_por_id(uint32_t);
 
-void inicializar_colas();
+void inicializar_planificacion();
 void iniciarSemaforos();
 void iniciarSemaforosPlanificacion();
 void iniciarSemaforosCiclos();

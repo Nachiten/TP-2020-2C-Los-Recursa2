@@ -27,8 +27,10 @@ int main(int cantArg, char* argumentos[]){
 
 	//tendriamo que usar hilo detacheado para esto
 	//inicializar_colas();
-	pthread_create(&planificacion, NULL, (void*)inicializar_colas, NULL);
-	pthread_detach(planificacion);
+	inicializar_planificacion();
+	//pthread_detach(planificacion);
+
+	printf("Termine de ejecutar el inicializar planif\n");
 
 	iniciar_server(puerto_local);
 

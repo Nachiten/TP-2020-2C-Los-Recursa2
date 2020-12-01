@@ -111,6 +111,7 @@ void crearColasPlanificacion(){
     strcpy(nuevaColaConAfinidad->afinidad, listaAfinidades[i]);
     nuevaColaConAfinidad->cola = queue_create();
     list_add(listaDeColasReady, nuevaColaConAfinidad);
+    i++;
   }
     cola_ready* colaSinAfinidad = malloc(sizeof(cola_ready));
     colaSinAfinidad->afinidad = "SinAfinidad";
@@ -153,7 +154,7 @@ void crearHilosPlanificacion(){
   for(i=0; i<cantCocineros-cantCocinerosConAfinidad; i++){
 	  pthread_t unCocineroSinAfinidad;
 	  credencialesCocinero* datosCocineroSinAfinidad = malloc(sizeof(credencialesCocinero));
-	  datosCocineroSinAfinidad->afinidad = NULL;
+	  datosCocineroSinAfinidad->afinidad = "SinAfinidad";
 	  datosCocineroSinAfinidad->idHilo = j;
 	  pthread_create(&unCocineroSinAfinidad, NULL, (void*)hiloExecCocinero, datosCocineroSinAfinidad);
 	  i++;
@@ -743,7 +744,7 @@ void iniciarSemaforos(){
 	sem_init(semListaPedidos, 0, 1);
 }
 
-void inicializar_colas(){
+void inicializar_planificacion(){
 	iniciarSemaforos();
 	iniciarSemaforosPlanificacion();
 	iniciarSemaforosCiclos();
