@@ -229,7 +229,7 @@ void obtenerInputConsolaCliente(){
 
 		if(exito == 1)
 		{
-			respuesta_consultar_restaurantes* estructuraRespuestaConsultaRestaurantes = malloc(sizeAAllocar);
+			respuesta_consultar_restaurantes* estructuraRespuestaConsultaRestaurantes = malloc(sizeof(respuesta_consultar_restaurantes));
 
 			recibir_mensaje(estructuraRespuestaConsultaRestaurantes,RESPUESTA_CONSULTAR_R,socketCliente);
 
@@ -312,7 +312,7 @@ void obtenerInputConsolaCliente(){
 	    if(exito == 1)
 		{
 
-		respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizeAAllocar);
+		respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizeof(respuesta_obtener_restaurante));
 		recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_REST, socketCliente);
 		sem_wait(semLog);
 		log_info(logger, "Los platos del restaurante < %s > son: %s\n", estructuraObtenerRestaurante->nombreRestaurante, estructuraRespuestaObtenerRestaurante->platos);
@@ -361,7 +361,7 @@ void obtenerInputConsolaCliente(){
 
 	    if(exito == 1)
 	    {
-		respuesta_consultar_platos* estructuraRespuestaConsultarPlatos = malloc(sizeAAllocar);
+		respuesta_consultar_platos* estructuraRespuestaConsultarPlatos = malloc(sizeof(respuesta_consultar_platos));
 		recibir_mensaje(estructuraRespuestaConsultarPlatos, RESPUESTA_CONSULTAR_PLATOS, socketCliente);
 		sem_wait(semLog);
 		log_info(logger, "Los platos del restaurante < %s > consultado son: %s\n", estructuraAEnviar->nombreResto, estructuraRespuestaConsultarPlatos->nombresPlatos);
@@ -397,7 +397,7 @@ void obtenerInputConsolaCliente(){
 		socketCliente = establecer_conexion(ip_destino , puerto_destino);
 		resultado_de_conexion(socketCliente, logger, "destino");
 
-		guardar_plato* elMensajeGuardarPlato = malloc(sizeof(uint32_t)*4 + strlen(palabrasSeparadas[1]) + strlen(palabrasSeparadas[3]));
+		guardar_plato* elMensajeGuardarPlato = malloc(sizeof(guardar_plato));
 		elMensajeGuardarPlato->largoNombreRestaurante = strlen(palabrasSeparadas[1]);
 		elMensajeGuardarPlato->nombreRestaurante = malloc(elMensajeGuardarPlato->largoNombreRestaurante+1);
 		strcpy(elMensajeGuardarPlato->nombreRestaurante, palabrasSeparadas[1]);
@@ -525,7 +525,7 @@ void obtenerInputConsolaCliente(){
 		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
 		if(exito == 1)
 		{
-			respuesta_crear_pedido* estructuraRespuestaCrearPedido = malloc(sizeAAllocar);
+			respuesta_crear_pedido* estructuraRespuestaCrearPedido = malloc(sizeof(respuesta_crear_pedido));
 
 			recibir_mensaje(estructuraRespuestaCrearPedido,RESPUESTA_CREAR_PEDIDO,socketCliente);
 
@@ -673,7 +673,7 @@ void obtenerInputConsolaCliente(){
 					}
 
 					//me llego un FINALIZAR_PEDIDO por fin
-					recibirFinalizarPedidoExclusivo= malloc(sizeof(sizeAAllocar));
+					recibirFinalizarPedidoExclusivo= malloc(sizeof(sizeof(finalizar_pedido)));
 
 					recibir_mensaje(recibirFinalizarPedidoExclusivo, FINALIZAR_PEDIDO, socketCliente);
 
@@ -720,7 +720,7 @@ void obtenerInputConsolaCliente(){
     	los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
     	if(exito == 1)
     	{
-    		respuesta_consultar_pedido* estructuraRespuestaConsultarPedido = malloc(sizeAAllocar);
+    		respuesta_consultar_pedido* estructuraRespuestaConsultarPedido = malloc(sizeof(respuesta_consultar_pedido));
     		recibir_mensaje(estructuraRespuestaConsultarPedido, RESPUESTA_CONSULTAR_PEDIDO, socketCliente);
 
     		//re piola
@@ -770,7 +770,7 @@ void obtenerInputConsolaCliente(){
 
 			if(exito == 1)
 			{
-				respuesta_obtener_pedido* respuestaObtenerPedido = malloc(sizeAAllocar);
+				respuesta_obtener_pedido* respuestaObtenerPedido = malloc(sizeof(respuesta_obtener_pedido));
 				recibir_mensaje(respuestaObtenerPedido, RESPUESTA_OBTENER_PEDIDO ,socketCliente);
 
 				//re piola
@@ -892,7 +892,7 @@ void obtenerInputConsolaCliente(){
 
         if(exito == 1)
 		{
-        	respuesta_obtener_receta* estructuraRespuestaObtenerReceta = malloc(sizeAAllocar);
+        	respuesta_obtener_receta* estructuraRespuestaObtenerReceta = malloc(sizeof(respuesta_obtener_receta));
 			recibir_mensaje(estructuraRespuestaObtenerReceta, RESPUESTA_OBTENER_RECETA ,socketCliente);
 			sem_wait(semLog);
 			log_info(logger, "Los pasos para cocinar el plato < %s > son: %s, con sus tiempos: %s", mensajeObtenerReceta->nombreReceta, estructuraRespuestaObtenerReceta->pasos, estructuraRespuestaObtenerReceta->tiempoPasos);
