@@ -394,6 +394,10 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
           //esto es para forzar al for a terminar y poder pasar al siguiente plato inmediatamente
                  deboDesalojar = 1;
                  cantidadCiclos++;
+                 sem_wait(semLog);
+				 log_trace(logger, "[EXEC-%d] Cocinero utiliza ciclo en mandar un/a < %s > del pedido < %d > a Block porque debe REPOSAR.",
+						datosCocinero->idHilo+1, platoAEjecutar->nombrePlato, platoAEjecutar->idPedido);
+				 sem_post(semLog);
                  signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
 		        break;
 
@@ -408,6 +412,10 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
           //esto es para forzar al for a terminar y poder pasar al siguiente plato inmediatamente
                  deboDesalojar = 1;
                  cantidadCiclos++;
+                 sem_wait(semLog);
+				 log_trace(logger, "[EXEC-%d] Cocinero utiliza ciclo en mandar un/a < %s > del pedido < %d > a Block porque debe HORNEARSE.",
+						datosCocinero->idHilo+1, platoAEjecutar->nombrePlato, platoAEjecutar->idPedido);
+				 sem_post(semLog);
                  signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
 		        break;
 
@@ -416,6 +424,10 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 				 waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
 				 pasoPendiente->duracionAccion--;
 				 cantidadCiclos++;
+				 sem_wait(semLog);
+				 log_trace(logger, "[EXEC-%d] Cocinero utiliza ciclo para avanzar ejecucion en un/a < %s > del pedido < %d >.",
+						datosCocinero->idHilo+1, platoAEjecutar->nombrePlato, platoAEjecutar->idPedido);
+				 sem_post(semLog);
 				 signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
 				 }
 				 //list_remove(platoAEjecutar->pasosReceta, i);
