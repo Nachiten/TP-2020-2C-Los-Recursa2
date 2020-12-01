@@ -244,6 +244,7 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 		if(respuesta == 0){
 			break;
 		}
+		i++;
 	}
 
 	if(respuesta == 1){

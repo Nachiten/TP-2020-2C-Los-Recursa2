@@ -192,6 +192,9 @@ void agregarAReady(pcb_plato* unPlato){
 
 	if(list_size(listaDeColasReady) == 0){
 		sem_post(mutexListaReady);
+		sem_wait(semLog);
+		log_error(logger, "[READY] No hay colas de planificacion creadas. Time to die.");
+		sem_post(semLog);
 		exit(-1);
 	}
 
@@ -200,15 +203,21 @@ void agregarAReady(pcb_plato* unPlato){
 		cola_ready* unaColaReady = list_get(listaDeColasReady, i);
 		if(strcmp(unaColaReady->afinidad, unPlato->nombrePlato) == 0){
 			queue_push(unaColaReady->cola, unPlato);
+			sem_wait(semLog);
+			log_trace(logger, "[READY] Entra el plato < %s >, del pedido < %d > a su cola de afinidad."
+						,unPlato->nombrePlato, unPlato->idPedido);
+			sem_post(semLog);
 			sem_post(mutexListaReady);
 			return;
 		} else {
 		}
-
-
 	}
 	cola_ready* laColaReadySinAfinidad = list_get(listaDeColasReady, i);
 	queue_push(laColaReadySinAfinidad->cola, unPlato);
+	sem_wait(semLog);
+	log_trace(logger, "[READY] Entra el plato < %s >, del pedido < %d > a la cola sin afinidad."
+				,unPlato->nombrePlato, unPlato->idPedido);
+	sem_post(semLog);
 	sem_post(mutexListaReady);
 
 }
@@ -217,7 +226,9 @@ void agregarABlock(pcb_plato* elPlato){
 
 	sem_wait(mutexBlock);
 	list_add(colaBlock, elPlato);
-	//printf("[BLOCK] Ingresa el plato %s del pedido %i.\n", elPlato->nombrePlato, elPlato->idPedido);
+	sem_wait(semLog);
+	log_trace(logger, "[BLOCK] Ingresa el plato %s del pedido %d.\n", elPlato->nombrePlato, elPlato->idPedido);
+	sem_post(semLog);
 	sem_post(mutexBlock);
 
 }
@@ -341,7 +352,7 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 			if(platoAEjecutar == NULL){
 				waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
 				sem_wait(semLog);
-				log_info(logger, "[EXEC-%d] Cocinero desperdicia ciclo porque no hay nadie en ready.",
+				log_trace(logger, "[EXEC-%d] Cocinero desperdicia ciclo porque no hay nadie en ready.",
 						datosCocinero->idHilo);
 				sem_post(semLog);
 				signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
@@ -536,12 +547,13 @@ void hiloBlockReady(){
 
 	  sem_wait(habilitarCicloBlockReady);
 
-
+      sem_wait(mutexBlock);
 	  int elementosEnBlock = list_size(colaBlock);
+	  sem_post(mutexBlock);
 
 	  if(elementosEnBlock == 0){
 		sem_wait(semLog);
-	  	log_info(logger, "[BLOCK] No hay platos en block. Desperdiciando ciclo.");
+	  	log_trace(logger, "[BLOCK] No hay platos en block. Desperdiciando ciclo.");
 	  	sem_post(semLog);
 	  	sem_post(finalizarCicloBlockReady);
         continue;
@@ -588,7 +600,7 @@ void hiloBlockReady(){
 	  		 queue_push(colaParaHornear, platoActual);
 
 	  		 sem_wait(semLog);
-	  		 log_info(logger,
+	  		 log_trace(logger,
 	  		  "[ENTRADA/SALIDA] Ingresa a la cola para hornear un/a < %s > del pedido < %d >. Cantidad de platos en espera: %d",
 				platoActual->nombrePlato, platoActual->idPedido, queue_size(colaParaHornear));
              sem_post(semLog);
@@ -616,7 +628,7 @@ void hiloEntradaSalida(){
 
 		if(list_size(platosHorneandose)<1){
 			sem_wait(semLog);
-			log_info(logger, "[ENTRADA/SALIDA] Transcurre 1 ciclo sin platos en los hornos.");
+			log_trace(logger, "[ENTRADA/SALIDA] Transcurre 1 ciclo sin platos en los hornos.");
 			sem_post(semLog);
 		} else {
 
@@ -661,7 +673,7 @@ void hiloEntradaSalida(){
         //me fijo si puedo agregar un plato a hornear en este ciclo, de ser posible lo hago
 		if(queue_size(colaParaHornear)<1){
 			sem_wait(semLog);
-			log_info(logger, "[ENTRADA/SALIDA] Transcurre el mismo ciclo sin platos esperando a ser horneados.");
+			log_trace(logger, "[ENTRADA/SALIDA] Transcurre dicho ciclo sin platos esperando a ser horneados.");
 			sem_post(semLog);
 			sem_post(mutexColaHornos);
 		} else {
@@ -807,7 +819,7 @@ void hiloCiclosMaestro(){
     while(1){
 
     	sem_wait(semLog);
-		log_info(logger, "[HCM] Habilitando ciclo: %i\n", numCiclo);
+		log_trace(logger, "[HCM] Habilitando ciclo: %i\n", numCiclo);
         sem_post(semLog);
 		for(i = 0; i < cantCocineros; i++){
 			signalSemaforoHabilitarCicloExec(i);
@@ -816,7 +828,7 @@ void hiloCiclosMaestro(){
         sem_post(habilitarCicloEntradaSalida);
 		sleep(RETARDO_CICLO_CPU);
 		sem_wait(semLog);
-		log_info(logger, "[HCM] Finalizando ciclo: %i", numCiclo);
+		log_trace(logger, "[HCM] Finalizando ciclo: %i", numCiclo);
 		sem_post(semLog);
 		for(i = 0; i < cantCocineros; i++){
 			waitSemaforoFinalizarCicloExec(i);
