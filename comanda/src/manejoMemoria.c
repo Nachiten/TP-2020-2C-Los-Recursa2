@@ -1151,6 +1151,7 @@ void matarPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, ui
 		tablaDePedidosDelRestaurante->miTablaDePedidos = malloc(sizeof(segmentos));
 		inicializar_tabla_de_segmentos(tablaDePedidosDelRestaurante->miTablaDePedidos);
 	}
+	tablaDePedidosDelRestaurante->cantidadDeSegmentos--;
 	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 }
 
