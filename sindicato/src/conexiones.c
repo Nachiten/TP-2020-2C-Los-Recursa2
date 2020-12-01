@@ -26,7 +26,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 
 	switch(cod_op){
 		case CONSULTAR_PLATOS:;
-			consultar_platos* estructuraMensajePlatos = malloc(sizeAAllocar);
+			consultar_platos* estructuraMensajePlatos = malloc(sizeof(consultar_platos));
 			recibir_mensaje(estructuraMensajePlatos, CONSULTAR_PLATOS, *socket_cliente);
 
 			consultarPlatos_sindicato(estructuraMensajePlatos->nombreResto, *socket_cliente);
@@ -37,7 +37,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 	    break;
 
 		case OBTENER_RESTAURANTE:;
-			obtener_restaurante* estructuraMensajeRest = malloc(sizeAAllocar);
+			obtener_restaurante* estructuraMensajeRest = malloc(sizeof(obtener_restaurante));
             recibir_mensaje(estructuraMensajeRest, OBTENER_RESTAURANTE, *socket_cliente);
 
             obtenerRestaurante_sindicato(estructuraMensajeRest->nombreRestaurante, *socket_cliente);
@@ -47,7 +47,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 		break;
 
 		case OBTENER_RECETA:;
-			obtener_receta* estructuraMensajeRecet = malloc(sizeAAllocar);
+			obtener_receta* estructuraMensajeRecet = malloc(sizeof(obtener_receta));
 			recibir_mensaje(estructuraMensajeRecet, OBTENER_RECETA, *socket_cliente);
 
 			obtenerReceta(estructuraMensajeRecet->nombreReceta, *socket_cliente);
@@ -56,7 +56,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 		break;
 
 		case GUARDAR_PEDIDO:;
-            guardar_pedido* estructuraMensajeGuardarPedido = malloc(sizeAAllocar);
+            guardar_pedido* estructuraMensajeGuardarPedido = malloc(sizeof(guardar_pedido));
             recibir_mensaje(estructuraMensajeGuardarPedido, GUARDAR_PEDIDO, *socket_cliente);
 
             guardarPedido_sindicato(estructuraMensajeGuardarPedido->nombreRestaurante, estructuraMensajeGuardarPedido->idPedido, *socket_cliente);
@@ -65,7 +65,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 		break;
 
 		case OBTENER_PEDIDO:;
-            guardar_pedido* estructuraMensajeObtenerP = malloc(sizeAAllocar);
+            guardar_pedido* estructuraMensajeObtenerP = malloc(sizeof(guardar_pedido));
             recibir_mensaje(estructuraMensajeObtenerP, OBTENER_PEDIDO, *socket_cliente);
 
             obtenerPedido(estructuraMensajeObtenerP->nombreRestaurante, estructuraMensajeObtenerP->idPedido, *socket_cliente);
@@ -74,7 +74,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 		break;
 
 		case GUARDAR_PLATO:;
-			guardar_plato* estructuraMensajeGuardarPlato = malloc(sizeAAllocar);
+			guardar_plato* estructuraMensajeGuardarPlato = malloc(sizeof(guardar_plato));
 			recibir_mensaje(estructuraMensajeGuardarPlato, GUARDAR_PLATO, *socket_cliente);
 
 			guardarPlato(estructuraMensajeGuardarPlato->nombreRestaurante,
@@ -88,7 +88,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
         break;
 
 		case CONFIRMAR_PEDIDO:;
-			guardar_pedido* estructuraMensajeConfirmarP = malloc(sizeAAllocar);
+			guardar_pedido* estructuraMensajeConfirmarP = malloc(sizeof(guardar_pedido));
 			recibir_mensaje(estructuraMensajeConfirmarP, CONFIRMAR_PEDIDO, *socket_cliente);
 
 			confirmarPedido_sindicato(estructuraMensajeConfirmarP->nombreRestaurante, estructuraMensajeConfirmarP->idPedido, *socket_cliente);
@@ -98,7 +98,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 		break;
 
 		case PLATO_LISTO:;
-			plato_listo* estructuraMensajePlatoL = malloc(sizeAAllocar);
+			plato_listo* estructuraMensajePlatoL = malloc(sizeof(plato_listo));
 			recibir_mensaje(estructuraMensajePlatoL, PLATO_LISTO, *socket_cliente);
 
 			platoListo(estructuraMensajePlatoL->nombreRestaurante, estructuraMensajePlatoL->idPedido, estructuraMensajePlatoL->nombrePlato,  *socket_cliente);
@@ -109,7 +109,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 		break;
 
 		case TERMINAR_PEDIDO:;
-			guardar_pedido* estructuraMensajeTerminarP = malloc(sizeAAllocar);
+			guardar_pedido* estructuraMensajeTerminarP = malloc(sizeof(guardar_pedido));
 			recibir_mensaje(estructuraMensajeTerminarP, TERMINAR_PEDIDO, *socket_cliente);
 
 			terminarPedido(estructuraMensajeTerminarP->nombreRestaurante, estructuraMensajeTerminarP->idPedido,  *socket_cliente);
@@ -119,7 +119,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 		break;
 
 		case HANDSHAKE:;
-            handshake* elHandshake = malloc(sizeAAllocar);
+            handshake* elHandshake = malloc(sizeof(handshake));
             recibir_mensaje(elHandshake, HANDSHAKE, *socket_cliente);
             free(elHandshake->id);
             free(elHandshake);
