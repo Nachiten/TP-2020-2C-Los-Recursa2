@@ -212,6 +212,13 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 		exit(-2);
 	}
 
+	indiceDelPedidoQueFueConfirmado = buscar_pedido_por_id(id);
+		if(indiceDelPedidoQueFueConfirmado == -2){
+			log_error(logger, "[RESTAURANTE] Se desea confirmar el pedido < %d >"
+			   ", pero dicho pedido no se encuentra en los registros del restaurante. Safaste porque lo tiene Sindicato."
+				, id);
+		}
+
 	guardar_pedido* datosPedido = malloc(sizeof(guardar_pedido));
 	datosPedido->idPedido = id;
 	datosPedido->largoNombreRestaurante = strlen(nombreRestaurante);
@@ -270,7 +277,7 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 	close(nuevoSocketSindicato);
 }
 void consultar_Pedido(int32_t id, int32_t socket_cliente){
-	int32_t nuevoSocketSindicato;
+	int32_t nuevoSocketSindicato, indiceDelPedidoQueFueConsultado;
 
 	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
 	if(nuevoSocketSindicato < 0){
@@ -278,6 +285,13 @@ void consultar_Pedido(int32_t id, int32_t socket_cliente){
 		log_info(logger, "Sindicato esta muerto, me muero yo tambien");
 		sem_post(semLog);
 		exit(-2);
+	}
+
+	indiceDelPedidoQueFueConsultado = buscar_pedido_por_id(id);
+	if(indiceDelPedidoQueFueConsultado == -2){
+		log_error(logger, "[RESTAURANTE] Se desea consultar el pedido < %d >"
+		   ", pero dicho pedido no se encuentra en los registros del restaurante. Safaste porque lo tiene Sindicato."
+			, id);
 	}
 
 	guardar_pedido* datosPedido = malloc(sizeof(guardar_pedido));
@@ -479,7 +493,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		break;
 
 	case CREAR_PEDIDO:
-		recibidoCrearPedido = malloc(sizeAAllocar);
+		recibidoCrearPedido = malloc(sizeof(crear_pedido));
 		recibir_mensaje(recibidoCrearPedido,CREAR_PEDIDO,socket_cliente);
 		crear_Pedido(recibidoCrearPedido, socket_cliente);
 		free(recibidoCrearPedido->id);
@@ -487,7 +501,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		break;
 
 	case A_PLATO:
-		recibidoAPlato = malloc(sizeAAllocar);
+		recibidoAPlato = malloc(sizeof(a_plato));
 		recibir_mensaje(recibidoAPlato,A_PLATO,socket_cliente);
 		aniadir_plato(recibidoAPlato,socket_cliente);
 		free(recibidoAPlato->nombrePlato);
@@ -495,7 +509,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		break;
 
 	case CONFIRMAR_PEDIDO:
-		recibidoConfirmarPedido = malloc(sizeAAllocar);
+		recibidoConfirmarPedido = malloc(sizeof(confirmar_pedido));
 		recibir_mensaje(recibidoConfirmarPedido,CONFIRMAR_PEDIDO,socket_cliente);
 		confirmar_Pedido(recibidoConfirmarPedido->idPedido,socket_cliente);
 		free(recibidoConfirmarPedido->nombreRestaurante);
@@ -503,14 +517,14 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		break;
 
 	case CONSULTAR_PEDIDO:
-		recibidoConsultarPedido = malloc(sizeAAllocar);
+		recibidoConsultarPedido = malloc(sizeof(consultar_pedido));
 		recibir_mensaje(recibidoConsultarPedido,CONSULTAR_PEDIDO,socket_cliente);
 		consultar_Pedido(recibidoConsultarPedido->idPedido, socket_cliente);
 		free(recibidoConsultarPedido);
 		break;
 
 	case HANDSHAKE:
-		recibidoHandshake = malloc(sizeAAllocar);
+		recibidoHandshake = malloc(sizeof(handshake));
 		recibir_mensaje(recibidoHandshake,HANDSHAKE,socket_cliente);
 		free(recibidoHandshake->id);
 		free(recibidoHandshake);

@@ -237,7 +237,7 @@ void agregarAExit(pcb_plato* elPlato){
 
 	sem_wait(semLog);
 	//LOG DE ENUNCIADO!!!!1!1!
-	log_info(logger, "[EXIT] Entra el plato < %s >, del pedido < %i > por haber culminado su receta."
+	log_info(logger, "[EXIT] Entra el plato < %s >, del pedido < %d > por haber culminado su receta."
 				, elPlato->nombrePlato, elPlato->idPedido);
 	sem_post(semLog);
 
@@ -256,10 +256,10 @@ void agregarAExit(pcb_plato* elPlato){
 	strcpy(notificacionPlatoListoAMandar->nombreRestaurante, nombreRestaurante);
 
 	indiceDelPedidoAsociado = buscar_pedido_por_id(elPlato->idPedido);
-
 	if(indiceDelPedidoAsociado == -2){
-		puts("Estas al horno");
-		exit(-2);
+		log_error(logger, "[EXIT] Entra el plato < %s >, del pedido < %d > por haber culminado su receta, "
+		   "pero dicho pedido no se encuentra en los registros del restaurante. Safaste porque lo tiene Sindicato."
+			, elPlato->nombrePlato, elPlato->idPedido);
 	}
 
 	sem_wait(semListaPedidos);
@@ -273,7 +273,10 @@ void agregarAExit(pcb_plato* elPlato){
 
     	respuesta_ok_error* respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
     	recibir_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO, elPedidoAsociado->socket_cliente);
-
+    	sem_wait(semLog);
+        log_trace(logger,"[EXIT] El modulo que solicito el pedido <%d> respondio a una notificacion de plato listo con: %d",
+        		respuestaNotificacion->respuesta);
+        sem_post(semLog);
     	free(respuestaNotificacion);
     }
 
@@ -293,6 +296,10 @@ void agregarAExit(pcb_plato* elPlato){
 		respuesta_ok_error* respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
 		recibir_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO, nuevoSocketSindicato);
 
+		sem_wait(semLog);
+		log_trace(logger,"[EXIT] Sindicato, ante el pedido <%d> respondio a una notificacion de plato listo con: %d",
+				respuestaNotificacion->respuesta);
+		sem_post(semLog);
 		free(respuestaNotificacion);
 	}
 
