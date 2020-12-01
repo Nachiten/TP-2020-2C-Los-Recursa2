@@ -715,7 +715,10 @@ void hiloEntradaSalida(){
 				log_info(logger, "[ENTRADA/SALIDA] Ingresa a hornearse un/a < %s >, del pedido < %i >."
 									, platoAHornear->nombrePlato, platoAHornear->idPedido);
 				sem_post(semLog);
+
 				}
+			} else {
+				sem_post(mutexColaHornos);
 			}
 
 
