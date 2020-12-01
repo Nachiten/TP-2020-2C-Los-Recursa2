@@ -362,8 +362,9 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 			}
 
 			if(list_size(platoAEjecutar->pasosReceta) < 1){
-	    //obtuve un plato de ready sin receta para procesar, jamas deberia pasar, asi que me muero
-				exit(-1);
+				//obtuve un plato de ready sin receta para procesar, jamas deberia pasar, asi que me muero
+				printf("ERROR | El plato de ready no tiene receta.\n");
+				exit(2);
 			}
 
 			cantidadCiclos = 1;
@@ -380,7 +381,8 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 		         waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
                  platoAEjecutar->motivoBlock = REPOSO;
                  platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
-                 list_remove(platoAEjecutar->pasosReceta, i);
+                 //list_remove(platoAEjecutar->pasosReceta, i);
+                 list_remove_and_destroy_element(platoAEjecutar->pasosReceta, i, (void*)free);
                  agregarABlock(platoAEjecutar);
           //esto es para forzar al for a terminar y poder pasar al siguiente plato inmediatamente
                  deboDesalojar = 1;
@@ -393,7 +395,8 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 		         waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
 		         platoAEjecutar->motivoBlock = HORNO;
 				 platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
-				 list_remove(platoAEjecutar->pasosReceta, i);
+				 //list_remove(platoAEjecutar->pasosReceta, i);
+				 list_remove_and_destroy_element(platoAEjecutar->pasosReceta, i, (void*)free);
                  agregarABlock(platoAEjecutar);
           //esto es para forzar al for a terminar y poder pasar al siguiente plato inmediatamente
                  deboDesalojar = 1;
@@ -408,7 +411,8 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 				 cantidadCiclos++;
 				 signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
 				 }
-				 list_remove(platoAEjecutar->pasosReceta, i);
+				 //list_remove(platoAEjecutar->pasosReceta, i);
+				 list_remove_and_destroy_element(platoAEjecutar->pasosReceta, i, (void*)free);
                  i--;
 				 if(list_size(platoAEjecutar->pasosReceta) < 1){
 					agregarAExit(platoAEjecutar);
@@ -478,7 +482,7 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 				 waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
 				 platoAEjecutar->motivoBlock = REPOSO;
 				 platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
-				 list_remove(platoAEjecutar->pasosReceta, i);
+				 list_remove_and_destroy_element(platoAEjecutar->pasosReceta, i, (void*)free);
 				 agregarABlock(platoAEjecutar);
 				 deboDesalojar = 1;
 				 signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
@@ -492,7 +496,7 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 				 waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
 				 platoAEjecutar->motivoBlock = HORNO;
 				 platoAEjecutar->duracionBlock = pasoPendiente->duracionAccion;
-				 list_remove(platoAEjecutar->pasosReceta, i);
+				 list_remove_and_destroy_element(platoAEjecutar->pasosReceta, i, (void*)free);
 				 agregarABlock(platoAEjecutar);
 				 deboDesalojar = 1;
 				 signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
@@ -516,7 +520,8 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 					   if(pasoPendiente->duracionAccion == 0)
 					   {
 
-					  	 list_remove(platoAEjecutar->pasosReceta, i);
+					  	 //list_remove(platoAEjecutar->pasosReceta, i);
+					  	 list_remove_and_destroy_element(platoAEjecutar->pasosReceta, i, (void*)free);
                          i--;
 
 					  	   if(list_size(platoAEjecutar->pasosReceta)<1)
