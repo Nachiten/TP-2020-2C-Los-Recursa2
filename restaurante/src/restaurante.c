@@ -373,6 +373,7 @@ int preparar_pcb_plato(uint32_t idPedido, char* nombreComida, char* cantComida){
     	int cantPlatos = atoi(cantComida);
 
     	for(int j = 0;j<cantPlatos;j++){
+    		i=0;
     		pcb_plato* plato = malloc(sizeof(pcb_plato));
     		plato->idPedido = idPedido;
     		plato->nombrePlato = malloc(strlen(nombreComida) +1);
