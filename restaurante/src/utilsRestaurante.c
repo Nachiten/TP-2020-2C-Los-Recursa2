@@ -586,12 +586,13 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 
 
 void hiloBlockReady(){
+	int elementosEnBlock;
 	while(1){
 
 	  sem_wait(habilitarCicloBlockReady);
 
       sem_wait(mutexBlock);
-	  int elementosEnBlock = list_size(colaBlock);
+	  elementosEnBlock = list_size(colaBlock);
 	  sem_post(mutexBlock);
 
 	  if(elementosEnBlock == 0){
@@ -756,26 +757,28 @@ pcb_plato* obtenerSiguienteDeReadySinAfinidad(){
 	pcb_plato* elPlatoPlanificado;
 
 	sem_wait(mutexListaReady);
-	for(i=0; i<list_size(listaDeColasReady);i++){
-		cola_ready* unaColaReadyConAfinidad = list_get(listaDeColasReady, i);
-		if(queue_size(unaColaReadyConAfinidad->cola) == 0){
-          //no hago nada, me fijo la proxima
-		} else {
-		elPlatoPlanificado = queue_pop(unaColaReadyConAfinidad->cola);
-		sem_post(mutexListaReady);
-		return elPlatoPlanificado;
-		}
 
-    }
-
-	if(queue_size(colaReadySinAfinidad) == 0){
-		sem_post(mutexListaReady);
-		elPlatoPlanificado = NULL;
-		return elPlatoPlanificado;
-	} else {
+	if(queue_size(colaReadySinAfinidad) > 0){
 		elPlatoPlanificado = queue_pop(colaReadySinAfinidad);
 		sem_post(mutexListaReady);
 		return elPlatoPlanificado;
+
+		} else {
+
+	    for(i=0; i<list_size(listaDeColasReady);i++){
+		   cola_ready* unaColaReadyConAfinidad = list_get(listaDeColasReady, i);
+		   if(queue_size(unaColaReadyConAfinidad->cola) == 0){
+            //no hay nada en esta cola de afinidad, me fijo en la proxima
+		   } else {
+		   elPlatoPlanificado = queue_pop(unaColaReadyConAfinidad->cola);
+		   sem_post(mutexListaReady);
+		   return elPlatoPlanificado;
+		}
+
+       }
+	    sem_post(mutexListaReady);
+	    elPlatoPlanificado = NULL;
+	    return elPlatoPlanificado;
 	}
 
 }

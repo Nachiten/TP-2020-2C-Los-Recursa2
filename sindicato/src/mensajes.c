@@ -24,13 +24,12 @@
  * Obtener restaurante - Logs hechos -> Tested
  * Consultar platos - Logs hechos -> Tested
  * Obtener receta - Logs hechos -> Tested
- * Guardar pedido - Logs hechos -> Hay que revisar
- * Guardar plato - Logs hechos -> Hay que revisar
- * Obtener pedido - Logs hechos -> Hay que revisar
- * Plato listo - Logs hechos ->
- * Confirmar pedido - Logs hechos ->
+ * Guardar pedido - Logs hechos -> Tested
+ * Guardar plato - Logs hechos -> Tested
+ * Obtener pedido - Logs hechos -> Tested
+ * Plato listo - Logs hechos -> Hay que revisar
+ * Confirmar pedido - Logs hechos -> Tested
  * Terminar pedido - Logs hechos ->
-
  *
  */
 
