@@ -76,6 +76,8 @@ void consultar_Platos(int32_t socket_cliente){
 
     mandar_mensaje(platos,RESPUESTA_CONSULTAR_PLATOS,socket_cliente);
 
+    close(nuevoSocketSindicato);
+
     free(consulta->nombreResto);
     free(consulta);
     free(platos->nombresPlatos);
@@ -335,6 +337,8 @@ void consultar_Pedido(int32_t id, int32_t socket_cliente){
     strcpy(pedidoConsultado->cantTotales, pedidoObtenido->cantTotales);
 
     mandar_mensaje(pedidoConsultado, RESPUESTA_CONSULTAR_PEDIDO, socket_cliente);
+
+    close(nuevoSocketSindicato);
 
     free(pedidoObtenido->comidas);
     free(pedidoObtenido->cantListas);
