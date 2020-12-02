@@ -186,12 +186,14 @@ void escuchar_mensajes(int32_t* socket_conexion_establecida)
 
 		//mando lo que me llego para que lo procesen
 		procesar_mensaje(cod_op, sizeAAllocar, *socket_conexion_establecida);
+
 	}
 
 	else
 	{
 		puts("El mensaje mala leche fue recibido y felizmente ignorado.");
 	}
+	free(socket_conexion_establecida);
 }
 
 void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_socket)

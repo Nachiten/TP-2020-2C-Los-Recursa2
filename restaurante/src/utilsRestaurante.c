@@ -302,6 +302,7 @@ void agregarAExit(pcb_plato* elPlato){
 		sem_post(semLog);
 		free(respuestaNotificacion);
 	}
+    close(nuevoSocketSindicato);
 
 	//No se si hace falta esto, confirmenme
 	//list_destroy(elPlato->pasosReceta)
