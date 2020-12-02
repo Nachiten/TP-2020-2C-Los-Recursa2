@@ -45,6 +45,7 @@ typedef enum
 	RESPUESTA_TERMINAR_PEDIDO,
 	RESPUESTA_OBTENER_RECETA,
 	AGREGAR_RESTAURANTE, //cuando un restaurante se reporta en la app para ser tenido en cuenta en CONSULTAR_RESTAURANTES
+	RESPUESTA_AGREGAR_RESTAURANTE,
 	HANDSHAKE,
 	ERROR = -1,
 	DESCONEXION = 0
@@ -233,5 +234,16 @@ typedef struct{
 	uint32_t sizeId;
 	char* id;
 }crear_pedido;
+
+typedef struct{
+	uint32_t largoNombreRestaurante;
+	char* nombreRestaurante;
+	uint32_t largoIp;
+	char* ip;
+	uint32_t largoPuerto;
+	char* puerto;
+	uint32_t posX;
+	uint32_t posY;
+}agregar_restaurante;
 
 #endif /* SHARED_ESTRUCTURAS_H_ */

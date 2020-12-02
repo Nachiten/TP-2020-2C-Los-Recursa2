@@ -280,6 +280,15 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
             size_ya_armado = serializar_paquete_respuesta_obtener_receta(paquete, mensaje);
 			break;
 
+		case AGREGAR_RESTAURANTE:
+			size_ya_armado = serializar_paquete_agregar_restaurante(paquete, mensaje);
+			break;
+
+		case RESPUESTA_AGREGAR_RESTAURANTE:
+			paquete->buffer->stream = malloc(sizeof(respuesta_ok_error));
+			size_ya_armado = serializar_paquete_ok_fail(paquete, mensaje);
+			break;
+
 		default:
 			puts("\n\n\nATENCION: Switch de serializar_paquete pasó por el caso default.\n\n\n");
 			break;
@@ -1361,7 +1370,69 @@ uint32_t serializar_paquete_crear_pedido(t_paquete* paquete, crear_pedido* estru
 
 }
 
-//Todo faltan meter todas las otras serializaciones*************************
+uint32_t serializar_paquete_agregar_restaurante(t_paquete* paquete, agregar_restaurante* estructura){
+	uint32_t size = 0;
+	uint32_t desplazamiento = 0;
+	uint32_t pesoDeElementosAEnviar = 0;
+
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+	buffer->size = sizeof(uint32_t)*5
+				 + estructura->largoNombreRestaurante+1
+	             + estructura->largoIp+1
+	             + estructura->largoPuerto+1;
+
+	void* streamAuxiliar = malloc(buffer->size);
+
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->largoNombreRestaurante),  sizeof(estructura->largoNombreRestaurante));
+	desplazamiento += sizeof(estructura->largoNombreRestaurante);
+
+	memcpy(streamAuxiliar + desplazamiento, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1);
+	desplazamiento += estructura->largoNombreRestaurante+1;
+
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->largoIp),  sizeof(estructura->largoIp));
+	desplazamiento += sizeof(estructura->largoIp);
+
+	memcpy(streamAuxiliar + desplazamiento, estructura->ip, estructura->largoIp+1);
+	desplazamiento += estructura->largoIp+1;
+
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->largoPuerto),  sizeof(estructura->largoPuerto));
+	desplazamiento += sizeof(estructura->largoPuerto);
+
+	memcpy(streamAuxiliar + desplazamiento, estructura->puerto, estructura->largoPuerto+1);
+	desplazamiento += estructura->largoPuerto+1;
+
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->posX),  sizeof(estructura->posX));
+	desplazamiento += sizeof(estructura->posX);
+
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->posY),  sizeof(estructura->posY));
+	desplazamiento += sizeof(estructura->posY);
+
+	//controlo que el desplazamiento sea = al peso de lo que mando
+	pesoDeElementosAEnviar = buffer->size;
+
+
+	if(desplazamiento != pesoDeElementosAEnviar)
+	{
+		puts("Hubo un error al serializar un mensaje, se pudre todo.\n");
+		abort();
+	}
+
+	else
+	{
+		buffer->stream = streamAuxiliar;
+		paquete->buffer = buffer;
+		//le meto al size del buffer el tamaño de lo que acabo de meter en el buffer
+		paquete->buffer->size = desplazamiento;
+
+		//el tamaño del mensaje entero es el codigo de operacion + la variable donde me guarde el size del buffer + lo que pesa el buffer
+		size = sizeof(codigo_operacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
+
+		//devuelvo el tamaño de lo que meti en el paquete para poder hacer el malloc
+		return size;
+	}
+
+
+}
 
 
 void eliminar_paquete(t_paquete* paquete)
@@ -1515,6 +1586,14 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 
 		case RESPUESTA_OBTENER_RECETA:
             desserializar_respuesta_obtener_receta(estructura, socket_cliente);
+			break;
+
+		case AGREGAR_RESTAURANTE:
+			desserializar_agregar_restaurante(estructura, socket_cliente);
+			break;
+
+		case RESPUESTA_AGREGAR_RESTAURANTE:
+			desserializar_ok_fail(estructura, socket_cliente);
 			break;
 
 		default:
@@ -1825,8 +1904,27 @@ void desserializar_respuesta_obtener_receta(respuesta_obtener_receta* estructura
 	bytesRecibidos(recv(socket_cliente, estructura->tiempoPasos, estructura->sizeTiempoPasos+1,  MSG_WAITALL));
 }
 
+void desserializar_agregar_restaurante(agregar_restaurante* estructura, int32_t socket_cliente){
 
+	bytesRecibidos(recv(socket_cliente, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante),  MSG_WAITALL));
 
+	estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
+	bytesRecibidos(recv(socket_cliente, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1,  MSG_WAITALL));
+
+	bytesRecibidos(recv(socket_cliente, &(estructura->largoIp), sizeof(estructura->largoIp),  MSG_WAITALL));
+
+	estructura->ip = malloc(estructura->largoIp+1);
+	bytesRecibidos(recv(socket_cliente, estructura->ip, estructura->largoIp+1,  MSG_WAITALL));
+
+	bytesRecibidos(recv(socket_cliente, &(estructura->largoPuerto), sizeof(estructura->largoPuerto),  MSG_WAITALL));
+
+	estructura->puerto = malloc(estructura->largoPuerto+1);
+	bytesRecibidos(recv(socket_cliente, estructura->puerto, estructura->largoPuerto+1,  MSG_WAITALL));
+
+	bytesRecibidos(recv(socket_cliente, &(estructura->posX), sizeof(estructura->posX),  MSG_WAITALL));
+
+	bytesRecibidos(recv(socket_cliente, &(estructura->posY), sizeof(estructura->posY),  MSG_WAITALL));
+}
 
 
 
