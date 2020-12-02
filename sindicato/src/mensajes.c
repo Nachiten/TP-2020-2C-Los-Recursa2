@@ -54,8 +54,8 @@ void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_
 
 	char* datosPedido = leerDatosPedido(nombreRestaurant, IDPedido);
 
-	if(!pedidoEstaEnEstado("Pendiente", datosPedido)){
-		printf("ERROR | No esta en estado pendiente.\n");
+	if(!pedidoEstaEnEstado("Confirmado", datosPedido)){
+		printf("ERROR | No esta en estado confirmado.\n");
 		signalSemaforoPedido(nombreRestaurant, IDPedido);
 		free(datosPedido);
 		log_info(logger, "[EnvioMSG] RTA_PLATO_LISTO | Valor: FAIL");

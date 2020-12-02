@@ -345,7 +345,7 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 
 		int i;
 		int deboDesalojar;
-		int cantidadCiclos;
+		//int cantidadCiclos;
 
 		while(1){
             pcb_plato* platoAEjecutar;
@@ -368,11 +368,13 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 
 			if(list_size(platoAEjecutar->pasosReceta) < 1){
 				//obtuve un plato de ready sin receta para procesar, jamas deberia pasar, asi que me muero
-				printf("ERROR | El plato de ready no tiene receta.\n");
+				sem_wait(semLog);
+				log_error(logger, "ERROR | Un plato de ready no tiene receta.\n");
+				sem_post(semLog);
 				exit(2);
 			}
 
-			cantidadCiclos = 1;
+			//cantidadCiclos = 1;
 			deboDesalojar = 0;
 
 		    for(i=0;i < list_size(platoAEjecutar->pasosReceta); i++){
@@ -395,7 +397,7 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
                  agregarABlock(platoAEjecutar);
           //esto es para forzar al for a terminar y poder pasar al siguiente plato inmediatamente
                  deboDesalojar = 1;
-                 cantidadCiclos++;
+                 //cantidadCiclos++;
                  sem_wait(semLog);
 				 log_trace(logger, "[EXEC-%d] Cocinero utiliza ciclo en mandar un/a < %s > del pedido < %d > a Block porque debe REPOSAR.",
 						datosCocinero->idHilo+1, platoAEjecutar->nombrePlato, platoAEjecutar->idPedido);
@@ -413,7 +415,7 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
                  agregarABlock(platoAEjecutar);
           //esto es para forzar al for a terminar y poder pasar al siguiente plato inmediatamente
                  deboDesalojar = 1;
-                 cantidadCiclos++;
+                 //cantidadCiclos++;
                  sem_wait(semLog);
 				 log_trace(logger, "[EXEC-%d] Cocinero utiliza ciclo en mandar un/a < %s > del pedido < %d > a Block porque debe HORNEARSE.",
 						datosCocinero->idHilo+1, platoAEjecutar->nombrePlato, platoAEjecutar->idPedido);
@@ -425,7 +427,7 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 				 while(pasoPendiente->duracionAccion > 0){
 				 waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
 				 pasoPendiente->duracionAccion--;
-				 cantidadCiclos++;
+				 //cantidadCiclos++;
 				 sem_wait(semLog);
 				 log_trace(logger, "[EXEC-%d] Cocinero utiliza ciclo para avanzar ejecucion en un/a < %s > del pedido < %d >.",
 						datosCocinero->idHilo+1, platoAEjecutar->nombrePlato, platoAEjecutar->idPedido);
@@ -454,11 +456,11 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 
 
 
-    //si no es FIFO, se eligio RR
+    //si no es FIFO, se eligio RR -------------------------------------------------
 	} else {
 		int i;
 		int deboDesalojar;
-		int cantidadCiclos;
+		//int cantidadCiclos;
 
 		while(1){
 			pcb_plato* platoAEjecutar;
@@ -482,17 +484,24 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 
 			if(list_size(platoAEjecutar->pasosReceta) < 1){
 			//obtuve un plato de ready sin receta para procesar, jamas deberia pasar, asi que me muero
-			   exit(-1);
+				sem_wait(semLog);
+				log_error(logger, "ERROR | Un plato de ready no tiene receta.\n");
+				sem_post(semLog);
+				exit(2);
 			}
 
-			cantidadCiclos = 1;
+			//cantidadCiclos = 1;
 			deboDesalojar = 0;
 
-			platoAEjecutar->quantumRestante = quantumElegido;
+
 
 			for(i=0;i<list_size(platoAEjecutar->pasosReceta); i++){
 
 				paso_receta* pasoPendiente = list_get(platoAEjecutar->pasosReceta, i);
+
+				if (pasoPendiente == NULL){
+				   break;
+				}
 
 				switch(pasoPendiente->accion){
 
@@ -525,6 +534,7 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 				break;
 
 			case OTRO:
+			platoAEjecutar->quantumRestante = quantumElegido;
 
 			  while(pasoPendiente->duracionAccion > 0){
 			  //Chequeo si aun tiene quantum para laburar
@@ -535,7 +545,11 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 					  waitSemaforoHabilitarCicloExec(datosCocinero->idHilo);
 					  pasoPendiente->duracionAccion--;
 					  platoAEjecutar->quantumRestante--;
-					  cantidadCiclos++;
+					  sem_wait(semLog);
+					  log_trace(logger, "[EXEC-%d] Cocinero utiliza ciclo para avanzar ejecucion en un/a < %s > del pedido < %d >.",
+							datosCocinero->idHilo+1, platoAEjecutar->nombrePlato, platoAEjecutar->idPedido);
+					  sem_post(semLog);
+					  //cantidadCiclos++;
 					  signalSemaforoFinalizarCicloExec(datosCocinero->idHilo);
 
 					   if(pasoPendiente->duracionAccion == 0)
@@ -559,6 +573,10 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 
 				   } else {
 					   agregarAReady(platoAEjecutar);
+					   sem_wait(semLog);
+					   log_trace(logger, "[EXEC-%d] Se desaloja un/a < %s > del pedido < %d > por interrupcion de reloj.",
+							datosCocinero->idHilo+1, platoAEjecutar->nombrePlato, platoAEjecutar->idPedido);
+					   sem_post(semLog);
 					   deboDesalojar = 1;
 					   break;
 				   }
