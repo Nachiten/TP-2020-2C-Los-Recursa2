@@ -89,7 +89,7 @@ void platoListo(char* nombreRestaurant, int IDPedido, char* nombrePlato, uint32_
 	// Pido mas bloques y los agrego en listaBloques si son necesarios
 	pedirOLiberarBloquesDeSerNecesario(cantidadBloquesNecesarios, cantidadBloquesActuales, listaBloquesActual, nombreParaLog);
 
-	free(nombreParaLog);
+	//free(nombreParaLog);
 
 	// Separar los datos en una lista
 	t_list* listaDatosSeparados = separarStringEnBloques(datosNuevos, cantidadBloquesNecesarios);
