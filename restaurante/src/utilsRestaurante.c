@@ -378,7 +378,7 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 			cantidadCiclos = 1;
 			deboDesalojar = 0;
 
-		    for(i=0;i<list_size(platoAEjecutar->pasosReceta); i++){
+		    for(i=0;i < list_size(platoAEjecutar->pasosReceta); i++){
 
                 paso_receta* pasoPendiente = list_get(platoAEjecutar->pasosReceta, i);
 
