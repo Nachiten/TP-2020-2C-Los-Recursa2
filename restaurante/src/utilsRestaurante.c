@@ -594,35 +594,35 @@ void hiloBlockReady(){
 	int elementosEnBlock;
 	while(1){
 
-	  sem_wait(habilitarCicloBlockReady);
+		sem_wait(habilitarCicloBlockReady);
 
-      sem_wait(mutexBlock);
-	  elementosEnBlock = list_size(colaBlock);
-	  sem_post(mutexBlock);
+		sem_wait(mutexBlock);
+		elementosEnBlock = list_size(colaBlock);
+		sem_post(mutexBlock);
 
-	  if(elementosEnBlock == 0){
-		sem_wait(semLog);
-	  	log_trace(logger, "[BLOCK] No hay platos en block. Desperdiciando ciclo.");
-	  	sem_post(semLog);
-	  	sem_post(finalizarCicloBlockReady);
-        continue;
-	  }
+		if(elementosEnBlock == 0){
+			sem_wait(semLog);
+			log_trace(logger, "[BLOCK] No hay platos en block. Desperdiciando ciclo.");
+			sem_post(semLog);
+			sem_post(finalizarCicloBlockReady);
+			continue;
+		}
 
-	  int i;
+		int i;
 
-	  // Escaneo todos los elementos en block para sumar 1 ciclo de reposo/horno a cada plato
-	  for (i = 0; i < elementosEnBlock; i++){
+		// Escaneo todos los elementos en block para sumar 1 ciclo de reposo/horno a cada plato
+		for (i = 0; i < elementosEnBlock; i++){
 
-	    sem_wait(mutexBlock);
-	  	pcb_plato* platoActual = list_get(colaBlock, i);
-	  	sem_post(mutexBlock);
+		sem_wait(mutexBlock);
+		pcb_plato* platoActual = list_get(colaBlock, i);
+		sem_post(mutexBlock);
 
-	  	if (platoActual == NULL){
-	  		break;
-	  	}
+		if (platoActual == NULL){
+			break;
+		}
 
-	  	switch(platoActual->motivoBlock)
-	  	{
+		switch(platoActual->motivoBlock)
+		{
 			case NO_BLOCK:
 				//jamas deberia entrar un plato aca sin tener su motivoBlock alterado
 				sem_wait(semLog);
@@ -672,9 +672,9 @@ void hiloBlockReady(){
 
 				 sem_post(mutexColaHornos);
 			  break;
-	  	 }
+		 }
 
-	  }
+		}
 
 	  sem_post(finalizarCicloBlockReady);
 
