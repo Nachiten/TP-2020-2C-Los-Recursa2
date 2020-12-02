@@ -669,11 +669,9 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
         	puts("El mensaje mala leche fue recibido y felizmente ignorado.");
         	break;
     }
-
-    //ToDo agregar un close para el socket? -> o no? mejor que las conexiones las cierren del otro lado
 }
 
-void inicializarSemaforos() //Todo matar semaforos?
+void inicializarSemaforos()
 {
 	semaforoNumeroVictima = malloc(sizeof(sem_t));
 	semaforoLogger = malloc(sizeof(sem_t));
