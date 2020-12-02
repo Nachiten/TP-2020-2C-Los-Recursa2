@@ -382,6 +382,10 @@ void hiloExecCocinero(credencialesCocinero* datosCocinero){
 
                 paso_receta* pasoPendiente = list_get(platoAEjecutar->pasosReceta, i);
 
+                if (pasoPendiente == NULL){
+                	break;
+                }
+
 		      switch(pasoPendiente->accion){
 
 		        case REPOSAR:
@@ -613,45 +617,61 @@ void hiloBlockReady(){
 	  	pcb_plato* platoActual = list_get(colaBlock, i);
 	  	sem_post(mutexBlock);
 
+	  	if (platoActual == NULL){
+	  		break;
+	  	}
+
 	  	switch(platoActual->motivoBlock)
 	  	{
-	  	case NO_BLOCK:
-	  		//jamas deberia entrar un plato aca sin tener su motivoBlock alterado
-	  		break;
+			case NO_BLOCK:
+				//jamas deberia entrar un plato aca sin tener su motivoBlock alterado
+				sem_wait(semLog);
+				log_error(logger, "ERROR | Un plato entró a block sin tener ningun estado block.");
+				sem_post(semLog);
+				break;
 
-	  	case REPOSO:
-          if(platoActual->duracionBlock == 0){
-        	//el plato termino de reposar, es devuelto a ready siempre A MENOS QUE este fue su ultimo paso
-        	platoActual->motivoBlock = NO_BLOCK;
-        	if(list_size(platoActual->pasosReceta) < 1){
-        	  agregarAExit(platoActual);
-        	}
-        	agregarAReady(platoActual);
-        	break;
-          }
+			case REPOSO:
+			  if(platoActual->duracionBlock == 0){
+				//el plato termino de reposar, es devuelto a ready siempre A MENOS QUE este fue su ultimo paso
+				platoActual->motivoBlock = NO_BLOCK;
 
-          platoActual->duracionBlock--;
+				sem_wait(mutexBlock);
+				list_remove(colaBlock, i);
+				sem_post(mutexBlock);
+				// Para que al volver a entrar al for entre en el item siguiente (que ahora tiene el mismo index que el actual)
+				i--;
+
+				if(list_size(platoActual->pasosReceta) < 1){
+					agregarAExit(platoActual);
+				} else {
+					agregarAReady(platoActual);
+				}
+
+				break;
+			  }
+
+			  platoActual->duracionBlock--;
+			  break;
 
 
-          break;
+			case HORNO:
+				 sem_wait(mutexBlock);
+				 list_remove(colaBlock, i);
+				 // Para que al volver a entrar al for entre en el item siguiente (que ahora tiene el mismo index que el actual)
+				 i--;
+				 sem_post(mutexBlock);
+				//le tengo que buscar un horno, lo pongo en la cola para hornear
+				 sem_wait(mutexColaHornos);
+				 queue_push(colaParaHornear, platoActual);
 
+				 sem_wait(semLog);
+				 log_trace(logger,
+				  "[ENTRADA/SALIDA] Ingresa a la cola para hornear un/a < %s > del pedido < %d >. Cantidad de platos en espera: %d",
+					platoActual->nombrePlato, platoActual->idPedido, queue_size(colaParaHornear));
+				 sem_post(semLog);
 
-	  	case HORNO:
-	  		 sem_wait(mutexBlock);
-	  	     list_remove(colaBlock, i);
-	  		 sem_post(mutexBlock);
-	  		//le tengo que buscar un horno, lo pongo en la cola para hornear
-	  		 sem_wait(mutexColaHornos);
-	  		 queue_push(colaParaHornear, platoActual);
-
-	  		 sem_wait(semLog);
-	  		 log_trace(logger,
-	  		  "[ENTRADA/SALIDA] Ingresa a la cola para hornear un/a < %s > del pedido < %d >. Cantidad de platos en espera: %d",
-				platoActual->nombrePlato, platoActual->idPedido, queue_size(colaParaHornear));
-             sem_post(semLog);
-
-	  		 sem_post(mutexColaHornos);
-	  	  break;
+				 sem_post(mutexColaHornos);
+			  break;
 	  	 }
 
 	  }
