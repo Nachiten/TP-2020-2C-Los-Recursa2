@@ -436,7 +436,7 @@ void actualizarTodosLosPlatosConDatosDeMP(tablas_segmentos_restaurantes* tablaDe
 }
 
 //este guacho ya tiene los semaforos dentro de la propia funcion!!!
-uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido)
+uint32_t verificarExistenciaDePedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido, uint32_t verificarPlatosCargados)
 {
 	sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
 	segmentos* tablaDePedidos = tablaDePedidosDelRestaurante->miTablaDePedidos;
@@ -447,6 +447,11 @@ uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedi
 		if(tablaDePedidos->id_Pedido == idDelPedido)
 		{
 			existe = 1;
+
+			if(verificarPlatosCargados == 1)
+			{
+				existe = pedido_tiene_platos_bool(tablaDePedidos);
+			}
 		}
 		tablaDePedidos = tablaDePedidos->sig_segmento;
 	}
@@ -1237,4 +1242,17 @@ tabla_paginas* buscarPaginaAsociadaAlMarco(tablas_segmentos_restaurantes* lasLis
 		recorrerRestaurantes = recorrerRestaurantes->sig_lista;
 	}
 	return paginaBuscada;
+}
+
+uint32_t pedido_tiene_platos_bool(segmentos* tablaDePedidos)
+{
+	if(tablaDePedidos->mi_tabla->largoPostaDeMorfi != 0)
+	{
+		return 1;
+	}
+
+	else
+	{
+		return 0;
+	}
 }

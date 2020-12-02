@@ -53,14 +53,14 @@ segmentos* selectordePedidoDeRestaurante(tablas_segmentos_restaurantes* tablaDeP
 //busca si ya existe la lista de pedidos de X restaurante
 uint32_t buscar_tabla_de_segmentos_de_restaurante(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, char* nombreDeRestaurante);
 //para ver si ya existe el pedido, y devolver FAIL, o si no (Existe = 1, no existe = 0)
-uint32_t verificarExistenciaDePedido (tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido);
+uint32_t verificarExistenciaDePedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t idDelPedido, uint32_t verificarPlatosCargados);
 //devuelve el numero de segmento si lo encontro, o 0 si no existe
 uint32_t buscar_segmento_de_pedido(tablas_segmentos_restaurantes* laTablaDeSegmentos, uint32_t idDelPedido);
 
 //toma todos los platos de un pedido y se asegura que esten cargados en MP (NO los carga en SWAP, ya deberían estar ahi)
 void cargarPaginasEnMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento);
 
-//se trae los datos de MP a las paginas del pedido ToDO revisar si en realidad hay que traerlas desde SWAP
+//se trae los datos de MP a las paginas del pedido
 void actualizarTodosLosPlatosConDatosDeMP(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, uint32_t numeroDeSegmento);
 
 //busco si existe el plato con el nombre provisto en la lista de platos del pedido seleccionado (Existe = 1, no existe = 0)
@@ -115,5 +115,8 @@ void matarPlatos(segmentos* segmentoSeleccionado);
 
 //dado un numero de marco, devuelve la pagina guardada en ese marco
 tabla_paginas* buscarPaginaAsociadaAlMarco(tablas_segmentos_restaurantes* lasListasDePedidosDeRestaurantes, uint32_t numeroDeMarco);
+
+//reviso si un pedido dado tiene platos cargados
+uint32_t pedido_tiene_platos_bool(segmentos* tablaDePedidos);
 
 #endif /* SRC_MANEJOMEMORIA_H_ */

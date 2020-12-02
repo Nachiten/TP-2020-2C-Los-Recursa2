@@ -228,7 +228,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
         	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
 
         	//si la ID del pedido ya existe
-        	if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoGuardarPedido->idPedido))
+        	if(verificarExistenciaDePedido(tablaDePedidosDelRestaurante, recibidoGuardarPedido->idPedido, 0))
         	{
         		//devolvemos FAIL por que no se pudo crear un nuevo pedido
         		resultado->respuesta = 0;
@@ -273,7 +273,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
         	else
         	{
         		//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
-        		if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoGuardarPlato->idPedido))
+        		if(verificarExistenciaDePedido(tablaDePedidosDelRestaurante, recibidoGuardarPlato->idPedido, 0))
         		{
         			//tomamos el numero de segmento del pedido
         			sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
@@ -403,7 +403,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
         	else
         	{
         		//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
-        		if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoObtenerPedido->idPedido))
+        		if(verificarExistenciaDePedido(tablaDePedidosDelRestaurante, recibidoObtenerPedido->idPedido, 1))
         		{
         			//tomamos el numero de segmento del pedido
         			sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
@@ -430,7 +430,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
         		//el pedido no existe
         		else
         		{
-        			puts("El pedido solicitado no existe.");
+        			puts("El pedido solicitado no existe o no tiene platos cargados.");
         			resultadoObtenerPedido->estado = NADA_CARGADO;
             		resultadoObtenerPedido->comidas = malloc(3);
             		strcpy(resultadoObtenerPedido->comidas, "[]");
@@ -478,7 +478,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
 			else
 			{
 				//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
-				if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoConfirmarPedido->idPedido))
+				if(verificarExistenciaDePedido(tablaDePedidosDelRestaurante, recibidoConfirmarPedido->idPedido, 0))
 				{
 					//tomamos el numero de segmento del pedido
 					sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
@@ -544,7 +544,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
 			else
 			{
 				//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
-				if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoPlatoListo->idPedido))
+				if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoPlatoListo->idPedido, 0))
 				{
 					//tomamos el numero de segmento del pedido
 					sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);
@@ -623,7 +623,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
 			else
 			{
 				//obtenemos el numero del segmento del restaurante que nos piden, si no existe, se envia FAIL
-				if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoFinalizarPedido->idPedido))
+				if(verificarExistenciaDePedido (tablaDePedidosDelRestaurante, recibidoFinalizarPedido->idPedido, 0))
 				{
 					//tomamos el numero de segmento del pedido
 					sem_wait(semaforoTocarListaPedidosTodosLosRestaurantes);

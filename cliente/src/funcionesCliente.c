@@ -125,7 +125,7 @@ void mostrar_el_estado_del_pedido_obtener_pedido(guardar_pedido* mensajeObtenerP
 {
 	if(respuestaObtenerPedido->estado == 0)
 	{
-		printf("No existe el pedido %u del restaurante %s.\n",mensajeObtenerPedido->idPedido, mensajeObtenerPedido->nombreRestaurante);
+		printf("No existe el pedido %u del restaurante %s, o no posee platos cargados aún.\n",mensajeObtenerPedido->idPedido, mensajeObtenerPedido->nombreRestaurante);
 	}
 
 	if(respuestaObtenerPedido->estado == 1)
