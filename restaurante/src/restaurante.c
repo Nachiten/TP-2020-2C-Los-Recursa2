@@ -202,17 +202,12 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 }
 
 void confirmar_Pedido(int32_t id, int32_t socket_cliente){
-	int32_t nuevoSocketSindicato;
+	int32_t nuevoSocketSindicato, nuevoSocketSindicato2;
 	Pedido* elPedidoQueFueConfirmado;
 	int32_t indiceDelPedidoQueFueConfirmado;
-
-	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
-	if(nuevoSocketSindicato < 0){
-		sem_wait(semLog);
-		log_info(logger, "Sindicato esta muerto, me muero yo tambien");
-		sem_post(semLog);
-		exit(-2);
-	}
+	codigo_operacion codigoRecibido;
+	uint32_t sizePayload;
+	int respuesta;
 
 	indiceDelPedidoQueFueConfirmado = buscar_pedido_por_id(id);
 		if(indiceDelPedidoQueFueConfirmado == -2){
@@ -220,6 +215,14 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 			   ", pero dicho pedido no se encuentra en los registros del restaurante. Safaste porque lo tiene Sindicato."
 				, id);
 		}
+
+	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
+		if(nuevoSocketSindicato < 0){
+			sem_wait(semLog);
+			log_info(logger, "Sindicato esta muerto, me muero yo tambien");
+			sem_post(semLog);
+			exit(-2);
+	}
 
 	guardar_pedido* datosPedido = malloc(sizeof(guardar_pedido));
 	datosPedido->idPedido = id;
@@ -232,22 +235,80 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 	respuesta_obtener_pedido* pedido = malloc(sizeof(respuesta_obtener_pedido));
 	int i = 0;
 
-    codigo_operacion codigoRecibido;
     bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
-
-//    printf("El codigo recibido del emisor es: %d", codigoRecibido);
-
-    uint32_t sizePayload;
     bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
-
-//    printf("El size del buffer/payload es: %u", sizePayload);
-
     recibir_mensaje(pedido,RESPUESTA_OBTENER_PEDIDO,nuevoSocketSindicato);
+
+    close(nuevoSocketSindicato);
+
+    respuesta = 0;
+    respuesta_ok_error* respuestaAMandar = malloc(sizeof(respuesta_ok_error));
+
+    if(pedido->estado == 0 || pedido->estado == 2 || pedido->estado == 3){
+    //el pedido ya esta confirmado, finalizado de antes o directamente no existe, hay q denegar y frenar la operacion
+    	respuestaAMandar->respuesta = respuesta;
+
+    	mandar_mensaje(respuestaAMandar,RESPUESTA_CONFIRMAR_PEDIDO,socket_cliente);
+
+    	free(datosPedido->nombreRestaurante);
+		free(datosPedido);
+		free(pedido->cantTotales);
+		free(pedido->cantListas);
+		free(pedido->comidas);
+		free(pedido);
+		free(respuestaAMandar);
+
+    	return;
+    }
+    //el estado es 1, PENDIENTE, por lo que me conecto a SINDICATO DE NUEVO para pedirle que
+    //actualice el estado de pedido a CONFIRMADO
+    nuevoSocketSindicato2 = establecer_conexion(ip_sindicato, puerto_sindicato);
+	if(nuevoSocketSindicato2 < 0){
+		sem_wait(semLog);
+		log_info(logger, "Sindicato esta muerto, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
+    guardar_pedido* datosPedidoAConfirmar = malloc(sizeof(guardar_pedido));
+    datosPedidoAConfirmar->idPedido = id;
+    datosPedidoAConfirmar->largoNombreRestaurante = strlen(nombreRestaurante);
+    datosPedidoAConfirmar->nombreRestaurante = malloc(strlen(nombreRestaurante) +1);
+	strcpy(datosPedidoAConfirmar->nombreRestaurante,nombreRestaurante);
+
+	mandar_mensaje(datosPedido, CONFIRMAR_PEDIDO,nuevoSocketSindicato2);
+
+	respuesta_ok_error* respuestaConfirmacionSindicato = malloc(sizeof(respuesta_ok_error));
+
+	bytesRecibidos(recv(nuevoSocketSindicato2, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+	bytesRecibidos(recv(nuevoSocketSindicato2, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+    recibir_mensaje(respuestaConfirmacionSindicato, RESPUESTA_CONFIRMAR_PEDIDO, nuevoSocketSindicato2);
+
+	close(nuevoSocketSindicato2);
+
+    if(respuestaConfirmacionSindicato->respuesta == 0){
+    	//fracaso la confirmacion final
+		respuestaAMandar->respuesta = respuesta;
+
+		mandar_mensaje(respuestaAMandar,RESPUESTA_CONFIRMAR_PEDIDO,socket_cliente);
+
+		free(datosPedido->nombreRestaurante);
+		free(datosPedido);
+		free(pedido->cantTotales);
+		free(pedido->cantListas);
+		free(pedido->comidas);
+		free(pedido);
+		free(respuestaAMandar);
+		free(datosPedidoAConfirmar->nombreRestaurante);
+		free(datosPedidoAConfirmar);
+		free(respuestaConfirmacionSindicato);
+
+		return;
+    }
+    //la confirmacion final fue exitosa, comienzo a preparar los pcbs para planificarlos
 
 	char** listaComidas = string_get_string_as_array(pedido->comidas);
 	char** listaComidasTotales = string_get_string_as_array(pedido->cantTotales);
 
-	int respuesta;
 	while(listaComidas[i] != NULL){
 		respuesta = preparar_pcb_plato(id, listaComidas[i],listaComidasTotales[i]);
 		if(respuesta == 0){
@@ -256,15 +317,16 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 		i++;
 	}
 
+	//todos los pcbs fueron cargados correctamente, seteo el socket actual para mandar las notificaciones posteriores
 	if(respuesta == 1){
-		indiceDelPedidoQueFueConfirmado = buscar_pedido_por_id(id);
 		sem_wait(semListaPedidos);
 		elPedidoQueFueConfirmado = list_get(listaPedidos, indiceDelPedidoQueFueConfirmado);
 		elPedidoQueFueConfirmado->socket_cliente = socket_cliente;
 		sem_post(semListaPedidos);
 	}
 
-	respuesta_ok_error* respuestaAMandar = malloc(sizeof(respuesta_ok_error));
+	//mando la respuesta definitiva con el flujo completo
+	//sera 0 si fracaso la preparacion de algun pcb, caso contrario sera 1 (exitosa)
 	respuestaAMandar->respuesta = respuesta;
 
 	mandar_mensaje(respuestaAMandar,RESPUESTA_CONFIRMAR_PEDIDO,socket_cliente);
@@ -276,8 +338,12 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 	free(pedido->comidas);
 	free(pedido);
 	free(respuestaAMandar);
-	close(nuevoSocketSindicato);
+	free(datosPedidoAConfirmar->nombreRestaurante);
+	free(datosPedidoAConfirmar);
+	free(respuestaConfirmacionSindicato);
 }
+
+
 void consultar_Pedido(int32_t id, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato, indiceDelPedidoQueFueConsultado;
 

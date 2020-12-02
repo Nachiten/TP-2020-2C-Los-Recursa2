@@ -44,24 +44,7 @@ int main(int cantArg, char* argumentos[]){
 	//Dejo cargado un logger para loguear los eventos.
 	logger = cargarUnLogDeCliente(LOG_PATH, "Cliente");
 
-	//ToDo levantamos socket para recibir mensajes (hilo)
-
-	//ToDo hay que levantarlo como hilo, y agregar toda la parte del accept, recibir mensaje y el manejo del mensaje recibido
-
-
 	//Preparar consola que se mantendra activa hasta la terminacion del proceso (hilo)  WIP
-
-	/* 	ToDo VER SI BORRAR LA ESTRUCTURA ESTA
-	t_conexion tuplaConexion;
-    tuplaConexion.ip_destino = ip_destino;
-    tuplaConexion.puerto_destino = puerto_destino;
-    tuplaConexion.mi_logger = logger;
-    */
-
-//	char* lineaEntera;
-//	char* auxLinea;
-//    lineaEntera = NULL;
-//	size_t longitud = 0;
 
 	comandoParaEjecutar = malloc(sizeof(sem_t));
 	sem_init(comandoParaEjecutar, 0, 1);
@@ -201,11 +184,11 @@ void obtenerInputConsolaCliente(){
     Consultar Restaurantes -> Check and tested
     Seleccionar Restaurante -> Check and tested
     Obtener Restaurante -> Check and tested
-    Consultar Platos -> Check and tested (Ver temas parametros)
+    Consultar Platos -> Check and tested
     Guardar Plato -> Check and tested
     Aniadir Plato -> Check and tested
     Plato listo -> Check and tested
-    Crear Pedido -> Check
+    Crear Pedido -> Check and tested
     Guardar Pedido -> Check and tested
     Confirmar Pedido -> Check
     Consultar Pedido -> Check and tested

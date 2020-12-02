@@ -241,11 +241,8 @@ void agregarAExit(pcb_plato* elPlato){
 				, elPlato->nombrePlato, elPlato->idPedido);
 	sem_post(semLog);
 
-
-
 	//se envia un mensaje a sindicato para q actualice el estado del pedido,
 	//con el id del mismo y mi restaurante, aparentemente tambien al modulo que lo solicito el pedido
-	//Se enviaria PLATO_LISTO, ver con nico despues los detalles
 	notificacionPlatoListoAMandar = malloc(sizeof(plato_listo));
 	notificacionPlatoListoAMandar->idPedido = elPlato->idPedido;
 	notificacionPlatoListoAMandar->largoNombrePlato = strlen(elPlato->nombrePlato);
@@ -297,8 +294,8 @@ void agregarAExit(pcb_plato* elPlato){
 		recibir_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO, nuevoSocketSindicato);
 
 		sem_wait(semLog);
-		log_trace(logger,"[EXIT] Sindicato, ante el pedido <%d> respondio a una notificacion de plato listo con: %d",
-				respuestaNotificacion->respuesta);
+		log_trace(logger,"[EXIT] Sindicato, ante el pedido <%d> respondio a una notificacion plato listo con: %d",
+				elPlato->idPedido, respuestaNotificacion->respuesta);
 		sem_post(semLog);
 		free(respuestaNotificacion);
 	}

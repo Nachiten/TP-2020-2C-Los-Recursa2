@@ -157,7 +157,7 @@ void mostrar_el_estado_del_pedido_consultar_pedido(consultar_pedido* estructuraC
 {
 	if(estructuraRespuestaConsultarPedido->estado == 0)
 	{
-		printf("No existe el pedido %u del restaurante %s.\n",estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante);
+		printf("No existe el pedido %d del restaurante %s.\n",estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante);
 	}
 
 	if(estructuraRespuestaConsultarPedido->estado == 1)
