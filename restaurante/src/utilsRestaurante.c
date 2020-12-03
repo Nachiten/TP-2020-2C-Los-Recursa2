@@ -276,7 +276,7 @@ void agregarAExit(pcb_plato* elPlato){
 	 plato_listo* notificacionPlatoListoAMandar;
      Pedido* elPedidoAsociado;
      uint32_t exito;
-     int32_t sizeAAllocar, nuevoSocketSindicato, indiceDelPedidoAsociado;
+     int32_t sizeAAllocar, nuevoSocketSindicato, nuevoSocketApp, indiceDelPedidoAsociado;
 
 	sem_wait(semLog);
 	//LOG DE ENUNCIADO!!!!1!1!
@@ -306,6 +306,37 @@ void agregarAExit(pcb_plato* elPlato){
 	elPedidoAsociado = list_get(listaPedidos,indiceDelPedidoAsociado);
 	sem_post(semListaPedidos);
 
+	if(appEnPruebas == 1){
+	//la notificacion tiene que pasar por la app, para luego ser redirigida al cliente
+       nuevoSocketApp = establecer_conexion(ip_app, puerto_app);
+       if(nuevoSocketApp < 0){
+       		sem_wait(semLog);
+       		log_error(logger, "La app esta muerta, me muero yo tambien");
+       		sem_post(semLog);
+       		exit(-2);
+       	}
+
+       mandar_mensaje(notificacionPlatoListoAMandar, PLATO_LISTO, nuevoSocketApp);
+       los_recv_repetitivos(nuevoSocketApp, &exito, &sizeAAllocar);
+       if(exito == 1){
+			respuesta_ok_error* respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
+			recibir_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO, nuevoSocketApp);
+			sem_wait(semLog);
+			log_trace(logger,"[EXIT] APP, que solicito el pedido <%d> respondio a una notificacion de plato listo con: %d",
+					respuestaNotificacion->respuesta);
+			sem_post(semLog);
+			free(respuestaNotificacion);
+       } else {
+    	    sem_wait(semLog);
+			log_error(logger,"[RESTAURANTE] Hubo un problema recibiendo una respuesta de plato listo de app.");
+			sem_post(semLog);
+       }
+       close(nuevoSocketApp);
+
+
+	} else {
+    //se la mando directamente al cliente solicitante
+
     mandar_mensaje(notificacionPlatoListoAMandar, PLATO_LISTO, elPedidoAsociado->socket_cliente);
 
     los_recv_repetitivos(elPedidoAsociado->socket_cliente, &exito, &sizeAAllocar);
@@ -314,11 +345,18 @@ void agregarAExit(pcb_plato* elPlato){
     	respuesta_ok_error* respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
     	recibir_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO, elPedidoAsociado->socket_cliente);
     	sem_wait(semLog);
-        log_trace(logger,"[EXIT] El modulo que solicito el pedido <%d> respondio a una notificacion de plato listo con: %d",
+        log_trace(logger,"[EXIT] El cliente que solicito el pedido <%d> respondio a una notificacion de plato listo con: %d",
         		respuestaNotificacion->respuesta);
         sem_post(semLog);
     	free(respuestaNotificacion);
+    } else {
+    	sem_wait(semLog);
+		log_error(logger,"[RESTAURANTE] Hubo un problema recibiendo una respuesta de plato listo de un cliente.");
+		sem_post(semLog);
     }
+
+	}
+	//Luego, intento mandarla a sindicato, para que actualice el estado del pedido
 
     nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
 	if(nuevoSocketSindicato < 0){
@@ -341,9 +379,13 @@ void agregarAExit(pcb_plato* elPlato){
 				elPlato->idPedido, respuestaNotificacion->respuesta);
 		sem_post(semLog);
 		free(respuestaNotificacion);
+	} else {
+		sem_wait(semLog);
+		log_error(logger,"[RESTAURANTE] Hubo un problema recibiendo una respuesta de plato listo de sindicato.");
+		sem_post(semLog);
 	}
-    close(nuevoSocketSindicato);
 
+    close(nuevoSocketSindicato);
 	//No se si hace falta esto, confirmenme
 	//list_destroy(elPlato->pasosReceta)
 	//se libera memoria ocupada por donPlato

@@ -759,7 +759,7 @@ void consultarPedido(consultar_pedido* elPedidoBuscado, int32_t socket_cliente){
 
 void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cliente){
 
-	int indicePedidoAsociado, indiceRestoAsociado, respuesta;
+	int indicePedidoAsociado, indiceRestoAsociado;
 	perfil_pedido* elPedidoAConfirmar;
 	obtener_pedido* elPedidoAObtener;
 	respuesta_obtener_pedido* elPedidoObtenido;
@@ -770,7 +770,6 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 	codigo_operacion codigoRecibido, cod_op;
 	confirmar_pedido* solicitudConfirmacion;
 
-	respuesta = 0;
     sem_wait(mutexListaPedidos);
     indicePedidoAsociado = buscarPedidoPorIDGlobal(datosPedidoAConfirmar->idPedido);
     sem_post(mutexListaPedidos);
@@ -914,10 +913,6 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 				close(nuevoSocketComanda);
                 free(elPedidoAObtener->nombreRestaurante);
                 free(elPedidoAObtener);
-                free(elPedidoObtenido->comidas);
-				free(elPedidoObtenido->cantListas);
-				free(elPedidoObtenido->cantTotales);
-				free(elPedidoObtenido);
 				free(respuestaConfirmacion);
 				respuestaConfirmacion->respuesta = 0;
 			}
@@ -938,7 +933,7 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 				strcpy(solicitudConfirmacion->nombreRestaurante, restoAsociado->nombre_resto);
 
 				nuevoSocketRestaurante = establecer_conexion(restoAsociado->ip, restoAsociado->puerto);
-				if(nuevoSocketComanda < 0){
+				if(nuevoSocketRestaurante < 0){
 					sem_wait(semLog);
 					log_info(logger, "Un restaurante al que le quiero confirmar pedido esta muerto, me muero yo tambien");
 					sem_post(semLog);
