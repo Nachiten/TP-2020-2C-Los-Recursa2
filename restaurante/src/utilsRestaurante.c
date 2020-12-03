@@ -3,7 +3,6 @@
 
 void inicializarRestaurante(char* elPathDeLaConfig){
 
-
 	configuracion = leerConfiguracion(elPathDeLaConfig);
     LOG_PATH = config_get_string_value(configuracion,"LOG_FILE_PATH"); //cargo el path del archivo log
 	ip_sindicato = config_get_string_value(configuracion,"IP_SINDICATO");
@@ -15,6 +14,8 @@ void inicializarRestaurante(char* elPathDeLaConfig){
     quantumElegido = config_get_int_value(configuracion, "QUANTUM");
     algoritmoElegido = config_get_string_value(configuracion, "ALGORITMO_PLANIFICACION");
     RETARDO_CICLO_CPU = config_get_int_value(configuracion, "RETARDO_CICLO_CPU");
+    appEnPruebas = config_get_string_value(configuracion, "APP_TESTEANDOSE");
+    ip_local = config_get_string_value(configuracion,"IP_LOCAL");
 
     strcat(nombreRestaurante,"\0");
 
@@ -30,7 +31,9 @@ void inicializarRestaurante(char* elPathDeLaConfig){
 
 void obtenerMetadataRestaurante(){
     uint32_t exito;
-    int32_t sizeAAllocar, nuevoSocketSindicato;
+    int32_t sizeAAllocar, nuevoSocketSindicato, nuevoSocketApp;
+    agregar_restaurante* credencialesRestaurante;
+    respuesta_ok_error* respuestaAgregarResto;
 
 
 	//me trato de conectar con sindicato que deberia estar levantado esperando que le vaya a pedir la info
@@ -92,6 +95,46 @@ void obtenerMetadataRestaurante(){
     	puts("Hubo un problemita al recibir la metadata de sindicatox.\n");
     }
     close(socket_sindicato);
+
+    if(strcmp(appEnPruebas,"SI") == 0){
+	//Si APP se esta probando, quiere decir prueba completa, por lo que tengo que identificarme ante ella
+		nuevoSocketApp = establecer_conexion(ip_app, puerto_app);
+		if(nuevoSocketApp < 0){
+			log_error(logger, "App esta muerta, me muero yo tambien.");
+			exit(-1);
+		}
+		credencialesRestaurante = malloc(sizeof(agregar_restaurante));
+		credencialesRestaurante->largoNombreRestaurante = strlen(nombreRestaurante);
+		credencialesRestaurante->largoIp = strlen(ip_local);
+		credencialesRestaurante->largoPuerto = strlen(puerto_local);
+		credencialesRestaurante->nombreRestaurante = malloc(strlen(nombreRestaurante)+1);
+		credencialesRestaurante->ip = malloc(strlen(ip_local)+1);
+		credencialesRestaurante->puerto = malloc(strlen(puerto_local)+1);
+		strcpy(credencialesRestaurante->nombreRestaurante, nombreRestaurante);
+		strcpy(credencialesRestaurante->ip, ip_local);
+		strcpy(credencialesRestaurante->puerto, puerto_local);
+		credencialesRestaurante->posX = miPosicionX;
+		credencialesRestaurante->posY = miPosicionY;
+
+		mandar_mensaje(credencialesRestaurante, AGREGAR_RESTAURANTE, nuevoSocketApp);
+
+		codigo_operacion codigoRecibido;
+		bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+		uint32_t sizePayload;
+		bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+
+		respuestaAgregarResto = malloc(sizeof(respuesta_ok_error));
+
+		recibir_mensaje(respuestaAgregarResto, RESPUESTA_AGREGAR_RESTAURANTE, nuevoSocketApp);
+
+		if(respuestaAgregarResto->respuesta == 0){
+			log_error(logger, "La App no me pudo registrar, me tengo que morir.");
+			exit(-1);
+		}
+
+		log_trace(logger, "La App me pudo registrar satisfactoriamente.");
+
+        }
 }
 
 

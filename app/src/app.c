@@ -85,10 +85,12 @@ void inicializar_colas(){
 void inicializar_semaforos(){
 	semId = malloc(sizeof(sem_t));
 	semLog = malloc(sizeof(sem_t));
-    planificacionInicializada = malloc(sizeof(sem_t));
+	mutexListaRestos = malloc(sizeof(sem_t));
+    //planificacionInicializada = malloc(sizeof(sem_t));
 	sem_init(semId, 0, 1);
 	sem_init(semLog, 0, 1);
-	sem_init(planificacionInicializada, 0, 1);
+	//sem_init(planificacionInicializada, 0, 1);
+	sem_init(mutexListaRestos, 0, 1);
 }
 
 // *********************************FIN SETUP******************************************************
@@ -763,24 +765,44 @@ void consultar_Pedido(consultar_pedido* elPedido, int32_t socket_cliente){
 
 
 // agrega un restaurante que se conecto a app a la lista de restaurantes
-void agregar_restaurante(info_resto* recibidoAgregarRestaurante){
-	int numero_resto;
-	info_resto* resto;
+void registrar_restaurante(agregar_restaurante* recibidoAgregarRestaurante, int32_t socket_cliente){
+	int idResto;
+	info_resto* nuevoRestaurante;
+	int correspondeAgregar = 0;
 
 	if(listaRestos->elements_count != 0){
-		numero_resto = buscar_resto(recibidoAgregarRestaurante->nombre_resto);
+		idResto = buscar_resto(recibidoAgregarRestaurante->nombreRestaurante);
 
-		if(numero_resto != 0){ // si encontro el restaurante en la lista actualiza el socket, sino lo agrega
-			resto = list_get(listaRestos,numero_resto);
-			resto->socket = recibidoAgregarRestaurante->socket;
+			if(idResto != 0){ // se encontro el restaurante en la lista de antes
+				sem_wait(semLog);
+				log_error(logger, "Se intento agregar al restaurante %s, pero ya existe en los registros."
+						, recibidoAgregarRestaurante->nombreRestaurante);
+				sem_post(semLog);
+				return;
+			}else{
+				correspondeAgregar = 1;
+			}
 
-		}else{
-			list_add(listaRestos,recibidoAgregarRestaurante);
 		}
+	    correspondeAgregar = 1;
 
-	}else{
-		list_add(listaRestos,recibidoAgregarRestaurante);
-	}
+
+	    if(correspondeAgregar == 1){
+
+			nuevoRestaurante = malloc(sizeof(info_resto));
+			nuevoRestaurante->nombre_resto = malloc(recibidoAgregarRestaurante->largoNombreRestaurante+1);
+			nuevoRestaurante->ip = malloc(recibidoAgregarRestaurante->largoIp+1);
+			nuevoRestaurante->puerto = malloc(recibidoAgregarRestaurante->largoPuerto+1);
+			strcpy(nuevoRestaurante->nombre_resto, recibidoAgregarRestaurante->nombreRestaurante);
+			strcpy(nuevoRestaurante->ip, recibidoAgregarRestaurante->ip);
+			strcpy(nuevoRestaurante->puerto, recibidoAgregarRestaurante->puerto);
+			nuevoRestaurante->posX = recibidoAgregarRestaurante->posX;
+			nuevoRestaurante->posY = recibidoAgregarRestaurante->posY;
+			sem_wait(mutexListaRestos);
+			list_add(listaRestos,recibidoAgregarRestaurante);
+			sem_post(mutexListaRestos);
+	    }
+
 }
 
 void registrarHandshake(handshake* recibidoHandshake, int32_t socket_cliente){
@@ -1009,7 +1031,7 @@ void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_client
 //************* FUNCIONES DE SERVER *************
 
 void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t sizeAAllocar)  {
-	info_resto* recibidoAgregarRestaurante;
+	agregar_restaurante* recibidoAgregarRestaurante;
 	seleccionar_restaurante* recibidoSeleccionarRestaurante;
 	a_plato* recibidoAPlato;
 	plato_listo* recibidoPlatoListo ;
@@ -1025,7 +1047,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			break;
 
 		case SELECCIONAR_RESTAURANTE:
-			recibidoSeleccionarRestaurante = malloc(sizeAAllocar);
+			recibidoSeleccionarRestaurante = malloc(sizeof(seleccionar_restaurante));
 			recibir_mensaje(recibidoSeleccionarRestaurante,SELECCIONAR_RESTAURANTE,socket_cliente);
 			seleccionarRestaurante(recibidoSeleccionarRestaurante->idCliente,recibidoSeleccionarRestaurante->nombreRestaurante,socket_cliente);
 			free(recibidoSeleccionarRestaurante->idCliente);
@@ -1034,7 +1056,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			break;
 
 		case CONSULTAR_PLATOS:
-			recibidoConsultarPlatos = malloc(sizeAAllocar);
+			recibidoConsultarPlatos = malloc(sizeof(consultar_platos));
 			recibir_mensaje(recibidoConsultarPlatos,CONSULTAR_PLATOS,socket_cliente);
 			consultarPlatos(recibidoConsultarPlatos,socket_cliente);
 			free(recibidoConsultarPlatos->id);
@@ -1043,7 +1065,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			break;
 
 		case CREAR_PEDIDO:
-			recibidoCrearPedido = malloc(sizeAAllocar);
+			recibidoCrearPedido = malloc(sizeof(crear_pedido));
 			recibir_mensaje(recibidoCrearPedido,CREAR_PEDIDO,socket_cliente);
 			crear_Pedido(recibidoCrearPedido,socket_cliente);
 			free(recibidoCrearPedido->id);
@@ -1051,41 +1073,45 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			break;
 
 		case A_PLATO:
-			recibidoAPlato = malloc(sizeAAllocar);
+			recibidoAPlato = malloc(sizeof(a_plato));
 			recibir_mensaje(recibidoAPlato,A_PLATO,socket_cliente);
 			aniadir_plato(recibidoAPlato, socket_cliente);
 			free(recibidoAPlato);
 			break;
 
 		case PLATO_LISTO:
-			recibidoPlatoListo = malloc(sizeAAllocar);
+			recibidoPlatoListo = malloc(sizeof(plato_listo));
 			recibir_mensaje(recibidoPlatoListo,PLATO_LISTO,socket_cliente);
 			plato_Listo(recibidoPlatoListo,socket_cliente);
 			free(recibidoPlatoListo); //todo ver si esto no rompe nada
 			break;
 
 		case CONFIRMAR_PEDIDO:
-			recibidoConfirmarPedido = malloc(sizeAAllocar);
+			recibidoConfirmarPedido = malloc(sizeof(guardar_pedido));
 			recibir_mensaje(recibidoConfirmarPedido,CONFIRMAR_PEDIDO,socket_cliente);
 			confirmar_Pedido(recibidoConfirmarPedido, socket_cliente);
 			free(recibidoConfirmarPedido);
 			break;
 
 		case CONSULTAR_PEDIDO:
-            recibidoConsultarPedido = malloc(sizeAAllocar);
+            recibidoConsultarPedido = malloc(sizeof(consultar_pedido));
             recibir_mensaje(recibidoConsultarPedido,CONSULTAR_PEDIDO, socket_cliente);
             consultar_Pedido(recibidoConsultarPedido, socket_cliente);
             free(recibidoConsultarPedido);
 			break;
 
 		case AGREGAR_RESTAURANTE:
-			recibidoAgregarRestaurante = malloc(sizeAAllocar);
+			recibidoAgregarRestaurante = malloc(sizeof(agregar_restaurante));
 			recibir_mensaje(recibidoAgregarRestaurante,AGREGAR_RESTAURANTE,socket_cliente);
-			agregar_restaurante(recibidoAgregarRestaurante);
+			registrar_restaurante(recibidoAgregarRestaurante, socket_cliente);
+			free(recibidoAgregarRestaurante->nombreRestaurante);
+			free(recibidoAgregarRestaurante->ip);
+			free(recibidoAgregarRestaurante->puerto);
+			free(recibidoAgregarRestaurante);
 			break;
 
 		case HANDSHAKE:
-			recibidoHandshake = malloc(sizeAAllocar);
+			recibidoHandshake = malloc(sizeof(handshake));
 			recibir_mensaje(recibidoHandshake,HANDSHAKE,socket_cliente);
 			registrarHandshake(recibidoHandshake, socket_cliente);
 			break;
@@ -1142,7 +1168,7 @@ void esperar_cliente(int32_t socket_servidor)
 
 	socklen_t tam_direccion = sizeof(struct sockaddr_in);
 	pthread_t thread;
-	int32_t* socket_cliente = malloc(sizeof(int32_t));// todo verificar que no da problemas
+	int32_t* socket_cliente = malloc(sizeof(int32_t));
 	*socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
 
 	//pthread_create(&thread,NULL,(void*)serve_client,&socket_cliente);

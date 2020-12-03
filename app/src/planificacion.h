@@ -55,6 +55,7 @@ sem_t* mutexNew;
 sem_t* mutexReady;
 sem_t* mutexBlock;
 sem_t* mutexPedidosListos;
+sem_t* mutexListaRestos;
 sem_t* contadorRepartidoresDisp;
 // Semaforos para sincronizar hilos con HCM
 t_list* listaSemHabilitarCicloExec;
@@ -83,6 +84,15 @@ typedef struct{
 	// Esta asignado a algun pedido
 	int asignado;
 }repartidor;
+
+typedef struct{
+	int32_t socket;
+	char* nombre_resto;
+	char* ip;
+	char* puerto;
+	int32_t posX;
+	int32_t posY;
+}info_resto;
 
 typedef enum{
 	// No esta en block

@@ -48,6 +48,8 @@ char* algoritmoElegido;
 uint32_t quantumElegido;
 uint32_t RETARDO_CICLO_CPU;
 char* nombreRestaurante;
+char* appEnPruebas;
+char* ip_local;
 int32_t socket_sindicato;
 uint32_t miPosicionX;
 uint32_t miPosicionY;

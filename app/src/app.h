@@ -5,14 +5,6 @@
 
 
 // *** ESTRUCTURAS DE APP***
-typedef struct{
-	int32_t socket;
-	char* nombre_resto;
-	char* ip;
-	char* puerto;
-	int32_t posX;
-	int32_t posY;
-}info_resto;
 
 t_config* config;
 
@@ -43,7 +35,7 @@ void consultarPlatos(consultar_platos*,int32_t);
 void aniadir_plato(a_plato*, int32_t);
 void plato_Listo(plato_listo*, int32_t);
 void confirmar_Pedido(confirmar_pedido*, int32_t);
-void agregar_restaurante(info_resto*);
+void registrar_restaurante(agregar_restaurante*, int32_t);
 void registrarHandshake(handshake*, int32_t);
 
 // ***MANEJO DE MENSAJES***
