@@ -320,6 +320,10 @@ void hiloBlock_Ready(){
 			pcb_pedido* pedidoActual = list_get(colaBlock, indicePedido);
 			sem_post(mutexBlock);
 
+			if (pedidoActual == NULL){
+				break;
+			}
+
 			repartidor* repartidorActual = pedidoActual->repartidorAsignado;
 
 			switch(pedidoActual->accionBlocked){
@@ -342,11 +346,13 @@ void hiloBlock_Ready(){
 
 							log_info(logger, "[READY] Ingresa pedido %i por terminar de descansar.", pedidoActual->pedidoID);
 							moverPedidoDeBlockAReady(indicePedido);
+							indicePedido--;
 
 						} else if (pedidoActual->proximoEstado == EXIT){
 
 							// Termina de descansar y ya esta terminado
 							moverPedidoDeBlockAExit(indicePedido);
+							indicePedido--;
 
 						} else {
 							printf("BLOCK | ERROR: El proximo estado tiene un valor invalido.\n");
@@ -371,6 +377,7 @@ void hiloBlock_Ready(){
 						} else {
 							log_info(logger, "[READY] Ingresa pedido %i por ya estar listo.", pedidoActual->pedidoID);
 							moverPedidoDeBlockAReady(indicePedido);
+							indicePedido--;
 						}
 
 
@@ -395,6 +402,7 @@ void hiloBlock_Ready(){
 					// No esta cansado, va a exit
 					} else {
 						moverPedidoDeBlockAExit(indicePedido);
+						indicePedido--;
 					}
 
 					break;
@@ -453,23 +461,6 @@ void hiloExec(int* numHiloExecPuntero){
 
 	}
 }
-
-// 0: No se desaloja, 1: Se desaloja por estar cansado, 2: Se desaloja porque termino la rafaga
-//int codigoDesalojo(pcb_pedido* unPedido){
-//
-//	// Si termino de reliazar toda la rafaga
-//	if (unPedido->instruccionesRealizadas == unPedido->instruccionesTotales){
-//		return 2;
-//	}
-//
-//	// Si se canso ya y debe ir a blocked
-//	if (unPedido->instruccionesRealizadas == unPedido->repartidorAsignado->frecuenciaDescanso){
-//		return 1;
-//	}
-//
-//	// Ninguna (sigue ejecutando)
-//	return 0;
-//}
 
 // 1 Si sigue ejecutando 0 Si desalojo
 int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
