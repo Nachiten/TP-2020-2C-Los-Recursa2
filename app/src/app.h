@@ -13,9 +13,6 @@ char* LOG_PATH;
 char* mi_puerto;
 char* platos_default;
 
-int32_t posX_resto;
-int32_t posY_resto;
-
 sem_t* semId;
 int32_t id_global;
 int32_t id_restoDefault;
@@ -39,7 +36,7 @@ void registrarRestaurante(agregar_restaurante*, int32_t);
 void registrarHandshake(handshake*, int32_t);
 
 // ***MANEJO DE MENSAJES***
-int32_t crear_id_pedidos();
+int32_t crearIDGlobalPedido();
 int buscarPedidoPorIDGlobal(uint32_t);
 int buscarAsociacion(char*);
 int buscarRestaurante(char*);

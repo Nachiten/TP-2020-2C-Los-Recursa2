@@ -830,7 +830,7 @@ void agregarANew(pcb_pedido* unPedido)
 
 	queue_push(colaNew, unPedido);
 
-	log_info(logger, "[NEW] Entra el nuevo pedido %i.", unPedido->pedidoID);
+	log_info(logger, "[NEW] Entra el nuevo pedido %d a la cola.", unPedido->pedidoID);
 
 	sem_post(mutexNew);
 

@@ -42,8 +42,8 @@ int main(){
 
 	// cargo datos de restoDefault
 	platos_default = config_get_string_value(config,"PLATOS_DEFAULT");
-	posX_resto = config_get_int_value(config,"POSICION_REST_DEFAULT_X");
-	posY_resto = config_get_int_value(config,"POSICION_REST_DEFAULT_Y");
+	posX_restoDefault = config_get_int_value(config,"POSICION_REST_DEFAULT_X");
+	posY_restoDefault = config_get_int_value(config,"POSICION_REST_DEFAULT_Y");
 
 
 
@@ -380,16 +380,23 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 				//RECIEN aca lo tendria que crear al pedido en sus estructuras internas la app
                 elPedidoACrear = malloc(sizeof(perfil_pedido));
                 elPedidoACrear->id_pedido_resto = respuestaCreacion->idPedido;
-                elPedidoACrear->id_pedido_global = crear_id_pedidos();
+                elPedidoACrear->id_pedido_global = crearIDGlobalPedido();
                 elPedidoACrear->socket_cliente = socket_cliente;
                 elPedidoACrear->perfilActivo = 0;
-                elPedidoACrear->posX = asociacionBuscada->posX;
-                elPedidoACrear->posY = asociacionBuscada->posY;
+                elPedidoACrear->posClienteX = asociacionBuscada->posClienteX;
+                elPedidoACrear->posClienteY = asociacionBuscada->posClienteY;
                 elPedidoACrear->idCliente = malloc(strlen(asociacionBuscada->idCliente)+1);
                 elPedidoACrear->nombreRestaurante = malloc(strlen(asociacionBuscada->nombreRestaurante)+1);
                 strcpy(elPedidoACrear->idCliente, asociacionBuscada->idCliente);
                 strcpy(elPedidoACrear->nombreRestaurante, asociacionBuscada->nombreRestaurante);
 
+                sem_wait(semLog);
+				log_trace(logger, "[APP] Exito al crear un pedido para el cliente < %s >. Sus credenciales corresponden a:"
+						"ID Global <%d> / ID Restaurante <%d>."
+					 , elPedidoACrear->idCliente, elPedidoACrear->id_pedido_global, elPedidoACrear->id_pedido_resto);
+				sem_post(semLog);
+
+				respuestaCreacion->idPedido = 0;
         //esto lo hago para que el cliente reciba y se maneje con el id global, el que app reconoce univocamente
                 respuestaCreacion->idPedido = elPedidoACrear->id_pedido_global;
                 mandar_mensaje(respuestaCreacion, RESPUESTA_CREAR_PEDIDO, socket_cliente);
@@ -411,7 +418,7 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 			//no esta conectado ningun restaurante, se prueba app sola
 
 			guardarPedidoRequerido = malloc(sizeof(guardar_pedido));
-			guardarPedidoRequerido->idPedido = crear_id_pedidos();
+			guardarPedidoRequerido->idPedido = crearIDGlobalPedido();
 			guardarPedidoRequerido->nombreRestaurante = malloc(strlen(asociacionBuscada->nombreRestaurante)+1);
 			guardarPedidoRequerido->largoNombreRestaurante = strlen(asociacionBuscada->nombreRestaurante);
 			strcpy(guardarPedidoRequerido->nombreRestaurante, asociacionBuscada->nombreRestaurante);
@@ -464,8 +471,8 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 			elPedidoACrear->id_pedido_global = respuestaCreacion->idPedido;
 			elPedidoACrear->socket_cliente = socket_cliente;
 			elPedidoACrear->perfilActivo = 0;
-			elPedidoACrear->posX = asociacionBuscada->posX;
-			elPedidoACrear->posY = asociacionBuscada->posY;
+			elPedidoACrear->posClienteX = asociacionBuscada->posClienteX;
+			elPedidoACrear->posClienteY = asociacionBuscada->posClienteY;
 			elPedidoACrear->idCliente = malloc(strlen(asociacionBuscada->idCliente)+1);
 			elPedidoACrear->nombreRestaurante = malloc(strlen(asociacionBuscada->nombreRestaurante)+1);
 			strcpy(elPedidoACrear->idCliente, asociacionBuscada->idCliente);
@@ -679,7 +686,7 @@ void consultarPedido(consultar_pedido* elPedidoBuscado, int32_t socket_cliente){
 		sem_wait(semLog);
 		log_error(logger, "[APP] Arribo una solicitud de consulta de un pedido que no existe en los registros...");
 		sem_post(semLog);
-		//mandar estructura vacia ???
+		//ToDo mandar estructura vacia ???
 		return;
 	}
 
@@ -750,131 +757,370 @@ void consultarPedido(consultar_pedido* elPedidoBuscado, int32_t socket_cliente){
 }
 
 
-void confirmarPedido(confirmar_pedido* pedido, int32_t socket_cliente){
-	/*
-	int numero_cliente, numero_resto;
-	perfil_cliente* cliente;
-	info_resto* resto;
-	respuesta_ok_error* respuesta = malloc(sizeof(respuesta_ok_error));
+void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cliente){
+
+	int indicePedidoAsociado, indiceRestoAsociado, respuesta;
+	perfil_pedido* elPedidoAConfirmar;
+	obtener_pedido* elPedidoAObtener;
+	respuesta_obtener_pedido* elPedidoObtenido;
+	info_resto* restoAsociado;
+	respuesta_ok_error* respuestaConfirmacion;
 	pcb_pedido* nuevoPcb;
-	int32_t recibidos, recibidosSize = 0, sizeAAllocar, nuevoSocketComanda;
-	codigo_operacion cod_op;
-	confirmar_pedido* aux;
-	respuesta->respuesta = 0;
+	int32_t recibidos, recibidosSize = 0, sizePayload, sizeAAllocar, nuevoSocketComanda, nuevoSocketRestaurante;
+	codigo_operacion codigoRecibido, cod_op;
+	confirmar_pedido* solicitudConfirmacion;
 
-	numero_cliente = buscar_pedido_por_id(pedido->idPedido);
+	respuesta = 0;
+    sem_wait(mutexListaPedidos);
+    indicePedidoAsociado = buscarPedidoPorIDGlobal(datosPedidoAConfirmar->idPedido);
+    sem_post(mutexListaPedidos);
 
-	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
-	if(nuevoSocketComanda < 0){
-		sem_wait(semLog);
-		log_info(logger, "Comanda esta muerta, me muero yo tambien");
-		sem_post(semLog);
-		exit(-2);
-	}
+    respuestaConfirmacion = malloc(sizeof(respuesta_ok_error));
 
-	if(numero_cliente != -2){
-		cliente = list_get(listaPedidos,numero_cliente);
-		cliente->socket_cliente = socket_cliente; //lo piso porque este socket es el que se va a quedar abierto
-		//nada mas que para recibir la eventual notificacion del FINALIZAR_PEDIDO que emite APP, para hacerle
-		//saber, que el repartidor con su pedido ha llegado a su posicion al no tener parametros CREAR_PEDIDO
+    sem_wait(mutexListaPedidos);
+	if(indicePedidoAsociado != -2){
+		elPedidoAConfirmar = list_get(listaPedidos, indicePedidoAsociado);
+		elPedidoAConfirmar->socket_cliente = socket_cliente; //lo piso porque este socket es el que se va a quedar abierto
+		//nada mas que para recibir las eventuales notificaciones que emite Restaurante, APP siendo el pasamanos.
 
-		if(strcmp(cliente->nombre_resto,"RestoDefault") == 0){
-			nuevoPcb = malloc(sizeof(pcb_pedido));
+		if(strcmp(elPedidoAConfirmar->nombreRestaurante,"RestoDefault") == 0){
+        //EN ESTE CASO NO tengo que mandarle el CONFIRMAR_PEDIDO al restaurante/sindicato, el default es instantaneo
+        //DIRECTAMENTE CHEQUEO CON COMANDA EL ESTADO
+			nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+			if(nuevoSocketComanda < 0){
+				sem_wait(semLog);
+				log_info(logger, "Comanda esta muerta, me muero yo tambien");
+				sem_post(semLog);
+				exit(-2);
+			}
+			elPedidoAObtener = malloc(sizeof(obtener_pedido));
+			elPedidoAObtener->idPedido = elPedidoAConfirmar->id_pedido_global;
+			elPedidoAObtener->largoNombreRestaurante = strlen(elPedidoAConfirmar->nombreRestaurante);
+			elPedidoAObtener->nombreRestaurante = malloc(strlen(elPedidoAConfirmar->nombreRestaurante)+1);
+			strcpy(elPedidoAObtener->nombreRestaurante, elPedidoAConfirmar->nombreRestaurante);
 
-			nuevoPcb->pedidoID = pedido->idPedido;
-			nuevoPcb->posRestauranteX = posX_resto;
-			nuevoPcb->posRestauranteY = posY_resto;
-			nuevoPcb->socketCliente = cliente->socket_cliente;
-
-			agregarANew(nuevoPcb);
-
-			mandar_mensaje(pedido,CONFIRMAR_PEDIDO,nuevoSocketComanda);
+			mandar_mensaje(elPedidoAObtener, OBTENER_PEDIDO, nuevoSocketComanda);
 
 			recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 
 			if(recibidos >= 1){
 				recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 				bytesRecibidos(recibidosSize);
-				recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,nuevoSocketComanda);
+
+				elPedidoObtenido = malloc(sizeof(respuesta_obtener_pedido));
+
+				recibir_mensaje(elPedidoObtenido, RESPUESTA_OBTENER_PEDIDO,nuevoSocketComanda);
+
+				close(nuevoSocketComanda);
+
+				if(elPedidoObtenido->estado == PENDIENTE){
+					//los datos en comanda estan correctos, podemos pedirle que confirme
+					nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+					if(nuevoSocketComanda < 0){
+						sem_wait(semLog);
+						log_error(logger, "Comanda esta muerta, me muero yo tambien");
+						sem_post(semLog);
+						exit(-2);
+					}
+
+                    solicitudConfirmacion = malloc(sizeof(confirmar_pedido));
+                    solicitudConfirmacion->idPedido = elPedidoAConfirmar->id_pedido_global;
+                    solicitudConfirmacion->largoNombreRestaurante = strlen(elPedidoAConfirmar->nombreRestaurante);
+                    solicitudConfirmacion->nombreRestaurante = malloc(strlen(elPedidoAConfirmar->nombreRestaurante)+1);
+                    strcpy(solicitudConfirmacion->nombreRestaurante, elPedidoAConfirmar->nombreRestaurante);
+
+                    mandar_mensaje(solicitudConfirmacion, CONFIRMAR_PEDIDO, nuevoSocketComanda);
+
+                    bytesRecibidos(recv(nuevoSocketComanda, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+                    bytesRecibidos(recv(nuevoSocketComanda, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+                    //aca validaria con if los recibidos, ya se me esta haciendo eterno...
+
+                    respuestaConfirmacion = malloc(sizeof(respuesta_ok_error));
+
+                    recibir_mensaje(respuestaConfirmacion, RESPUESTA_CONFIRMAR_PEDIDO, nuevoSocketComanda);
+
+                    close(nuevoSocketComanda);
+
+                    if(respuestaConfirmacion->respuesta == 1){
+                    	//deberia crear el pcb pedido y agregarlo a NEW, caso contrario no lo hago
+
+						nuevoPcb = malloc(sizeof(pcb_pedido));
+
+						nuevoPcb->pedidoID = elPedidoAConfirmar->id_pedido_resto;
+						nuevoPcb->pedidoIDGlobal = elPedidoAConfirmar->id_pedido_global;
+						nuevoPcb->posRestauranteX = posX_restoDefault;
+						nuevoPcb->posRestauranteY = posY_restoDefault;
+						nuevoPcb->posClienteX = elPedidoAConfirmar->posClienteX;
+						nuevoPcb->posClienteY = elPedidoAConfirmar->posClienteY;
+						nuevoPcb->socketCliente = elPedidoAConfirmar->socket_cliente;
+
+						sem_wait(semLog);
+						log_trace(logger, "[APP] Se confirmo el pedido de id global: <%d>, id restaur: <%d>"
+								", del restaurante: <%s>."
+								,elPedidoAConfirmar->id_pedido_global
+								,elPedidoAConfirmar->id_pedido_resto
+								,elPedidoAConfirmar->nombreRestaurante);
+						sem_post(semLog);
+
+						agregarANew(nuevoPcb);
+
+						sem_post(mutexListaPedidos);
+						sem_post(mutexListaRestos);
+						free(elPedidoAObtener->nombreRestaurante);
+						free(elPedidoAObtener);
+						free(elPedidoObtenido->comidas);
+						free(elPedidoObtenido->cantListas);
+						free(elPedidoObtenido->cantTotales);
+						free(elPedidoObtenido);
+						free(solicitudConfirmacion->nombreRestaurante);
+						free(solicitudConfirmacion);
+						free(respuestaConfirmacion);
+						return;
+                    }
+
+                    sem_wait(semLog);
+					log_error(logger, "[APP] La confirmacion definitiva fracaso en comanda.");
+					sem_post(semLog);
+
+                    free(elPedidoAObtener->nombreRestaurante);
+					free(elPedidoAObtener);
+					free(elPedidoObtenido->comidas);
+					free(elPedidoObtenido->cantListas);
+					free(elPedidoObtenido->cantTotales);
+					free(elPedidoObtenido);
+					free(solicitudConfirmacion->nombreRestaurante);
+					free(solicitudConfirmacion);
+					free(respuestaConfirmacion);
+					respuestaConfirmacion->respuesta = 0;
+				}
+				sem_wait(semLog);
+				log_error(logger, "[APP] Se ha intentando confirmar un pedido que no se encuentra pendiente.");
+				sem_post(semLog);
+
+				free(elPedidoObtenido->comidas);
+				free(elPedidoObtenido->cantListas);
+				free(elPedidoObtenido->cantTotales);
+				free(elPedidoObtenido);
+				respuestaConfirmacion->respuesta = 0;
 
 			}else{
 				sem_wait(semLog);
-				log_info(logger, "ocurrio un error");
+				log_error(logger, "[APP] Ocurrio un error en comanda al obtener los datos del pedido para confirmar.");
 				sem_post(semLog);
+				close(nuevoSocketComanda);
+                free(elPedidoAObtener->nombreRestaurante);
+                free(elPedidoAObtener);
+                free(elPedidoObtenido->comidas);
+				free(elPedidoObtenido->cantListas);
+				free(elPedidoObtenido->cantTotales);
+				free(elPedidoObtenido);
+				free(respuestaConfirmacion);
+				respuestaConfirmacion->respuesta = 0;
 			}
 
-			mandar_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO, socket_cliente);
-
 		}else{
-			numero_resto = buscar_resto(cliente->nombre_resto);
+			//EN ESTE OTRO CASO, el restaurante asociado NO es el default, por lo que tengo que adicionalmente
+			//solicitar confirmacion del pedido en el mismo (y por transitividad, en sindicato)
+			sem_wait(mutexListaRestos);
+			indiceRestoAsociado = buscarRestaurante(elPedidoAConfirmar->nombreRestaurante);
 
-			if(numero_resto != -2){
-				resto = list_get(listaRestos,numero_resto);
+			if(indiceRestoAsociado != -2){
+				restoAsociado = list_get(listaRestos, indiceRestoAsociado);
 
-				aux = malloc(sizeof(confirmar_pedido));
-				aux->idPedido = cliente->id_pedido_resto;
+				solicitudConfirmacion = malloc(sizeof(confirmar_pedido));
+				solicitudConfirmacion->idPedido = elPedidoAConfirmar->id_pedido_global;
+				solicitudConfirmacion->largoNombreRestaurante = strlen(restoAsociado->nombre_resto);
+				solicitudConfirmacion->nombreRestaurante = malloc(strlen(restoAsociado->nombre_resto)+1);
+				strcpy(solicitudConfirmacion->nombreRestaurante, restoAsociado->nombre_resto);
 
-				mandar_mensaje(aux,CONFIRMAR_PEDIDO,resto->socket);
+				nuevoSocketRestaurante = establecer_conexion(restoAsociado->ip, restoAsociado->puerto);
+				if(nuevoSocketComanda < 0){
+					sem_wait(semLog);
+					log_info(logger, "Un restaurante al que le quiero confirmar pedido esta muerto, me muero yo tambien");
+					sem_post(semLog);
+					exit(-2);
+				}
+                sem_post(mutexListaRestos);
 
-				recibidos = recv(resto->socket, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+				mandar_mensaje(solicitudConfirmacion, CONFIRMAR_PEDIDO, nuevoSocketRestaurante);
+
+				recibidos = recv(nuevoSocketRestaurante, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 
 				if(recibidos >= 1){
-					recibidosSize = recv(resto->socket, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+					recibidosSize = recv(nuevoSocketRestaurante, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 					bytesRecibidos(recibidosSize);
-					recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,resto->socket);
+					recibir_mensaje(respuestaConfirmacion,RESPUESTA_CONFIRMAR_PEDIDO, nuevoSocketRestaurante);
 
 				}else{
 					sem_wait(semLog);
-					log_info(logger, "ocurrio un error");
+					log_error(logger,"[APP] El restaurante/sindicato murio durante el proceso de contestarme confirmacion.");
 					sem_post(semLog);
 				}
 
-				if(respuesta->respuesta == 1){
-					nuevoPcb = malloc(sizeof(pcb_pedido));
+				if(respuestaConfirmacion->respuesta == 1){
+				//SI SALIO BIEN EN EL RESTAURANTE/SINDICATO, ENTONCES PROSIGO A CHEQUEAR EL ESTADO CON COMANDA.
+					nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+					if(nuevoSocketComanda < 0){
+						sem_wait(semLog);
+						log_info(logger, "Comanda esta muerta, me muero yo tambien");
+						sem_post(semLog);
+						exit(-2);
+					}
+					elPedidoAObtener = malloc(sizeof(obtener_pedido));
+					elPedidoAObtener->idPedido = elPedidoAConfirmar->id_pedido_resto;
+					elPedidoAObtener->largoNombreRestaurante = strlen(elPedidoAConfirmar->nombreRestaurante);
+					elPedidoAObtener->nombreRestaurante = malloc(strlen(elPedidoAConfirmar->nombreRestaurante)+1);
+					strcpy(elPedidoAObtener->nombreRestaurante, elPedidoAConfirmar->nombreRestaurante);
 
-					nuevoPcb->pedidoID = pedido->idPedido;
-					nuevoPcb->posRestauranteX = posX_resto;
-					nuevoPcb->posRestauranteY = posY_resto;
-
-					agregarANew(nuevoPcb);
-
-					mandar_mensaje(pedido,CONFIRMAR_PEDIDO,nuevoSocketComanda);
+					mandar_mensaje(elPedidoAObtener, OBTENER_PEDIDO, nuevoSocketComanda);
 
 					recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
-
 					if(recibidos >= 1){
 						recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 						bytesRecibidos(recibidosSize);
-						recibir_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,nuevoSocketComanda);
-					}
 
-					mandar_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,socket_cliente);
+						elPedidoObtenido = malloc(sizeof(respuesta_obtener_pedido));
+
+						recibir_mensaje(elPedidoObtenido,RESPUESTA_OBTENER_PEDIDO,nuevoSocketComanda);
+
+						close(nuevoSocketComanda);
+
+						if(elPedidoObtenido->estado == PENDIENTE){
+							//los datos en comanda estan correctos, podemos pedirle que confirme
+							nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+							if(nuevoSocketComanda < 0){
+								sem_wait(semLog);
+								log_info(logger, "Comanda esta muerta, me muero yo tambien");
+								sem_post(semLog);
+								exit(-2);
+							}
+
+							solicitudConfirmacion = malloc(sizeof(confirmar_pedido));
+							solicitudConfirmacion->idPedido = elPedidoAConfirmar->id_pedido_resto;
+							solicitudConfirmacion->largoNombreRestaurante = strlen(elPedidoAConfirmar->nombreRestaurante);
+							solicitudConfirmacion->nombreRestaurante = malloc(strlen(elPedidoAConfirmar->nombreRestaurante)+1);
+							strcpy(solicitudConfirmacion->nombreRestaurante, elPedidoAConfirmar->nombreRestaurante);
+
+							mandar_mensaje(solicitudConfirmacion, CONFIRMAR_PEDIDO, nuevoSocketComanda);
+
+							bytesRecibidos(recv(nuevoSocketComanda, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+							bytesRecibidos(recv(nuevoSocketComanda, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+							//aca validaria con if los recibidos, ya se me esta haciendo eterno...
+
+							respuestaConfirmacion = malloc(sizeof(respuesta_ok_error));
+
+							recibir_mensaje(respuestaConfirmacion, RESPUESTA_CONFIRMAR_PEDIDO, nuevoSocketComanda);
+
+							close(nuevoSocketComanda);
+
+							if(respuestaConfirmacion->respuesta == 1){
+								//deberia crear el pcb pedido y agregarlo a NEW, caso contrario no lo hago
+
+								nuevoPcb = malloc(sizeof(pcb_pedido));
+
+								nuevoPcb->pedidoID = elPedidoAConfirmar->id_pedido_resto;
+								nuevoPcb->pedidoIDGlobal = elPedidoAConfirmar->id_pedido_global;
+								nuevoPcb->posRestauranteX = posX_restoDefault;
+								nuevoPcb->posRestauranteY = posY_restoDefault;
+								nuevoPcb->posClienteX = elPedidoAConfirmar->posClienteX;
+								nuevoPcb->posClienteY = elPedidoAConfirmar->posClienteY;
+								nuevoPcb->socketCliente = elPedidoAConfirmar->socket_cliente;
+
+								agregarANew(nuevoPcb);
+
+								sem_wait(semLog);
+								log_trace(logger, "[APP] Se confirmo el pedido de id global: <%d>, id restaur: <%d>"
+										", del restaurante: <%s>."
+										,elPedidoAConfirmar->id_pedido_global
+										,elPedidoAConfirmar->id_pedido_resto
+										,elPedidoAConfirmar->nombreRestaurante);
+								sem_post(semLog);
+
+								mandar_mensaje(respuestaConfirmacion, RESPUESTA_CONFIRMAR_PEDIDO, socket_cliente);
+
+								sem_post(mutexListaPedidos);
+								sem_post(mutexListaRestos);
+								free(elPedidoAObtener->nombreRestaurante);
+								free(elPedidoAObtener);
+								free(elPedidoObtenido->comidas);
+								free(elPedidoObtenido->cantListas);
+								free(elPedidoObtenido->cantTotales);
+								free(elPedidoObtenido);
+								free(solicitudConfirmacion->nombreRestaurante);
+								free(solicitudConfirmacion);
+								free(respuestaConfirmacion);
+								return;
+							}
+							sem_wait(semLog);
+							log_error(logger, "[APP] La confirmacion definitiva fracaso en comanda.");
+							sem_post(semLog);
+
+							free(elPedidoAObtener->nombreRestaurante);
+							free(elPedidoAObtener);
+							free(elPedidoObtenido->comidas);
+							free(elPedidoObtenido->cantListas);
+							free(elPedidoObtenido->cantTotales);
+							free(elPedidoObtenido);
+							free(solicitudConfirmacion->nombreRestaurante);
+							free(solicitudConfirmacion);
+							respuestaConfirmacion->respuesta = 0;
+						}
+						sem_wait(semLog);
+						log_error(logger, "[APP] Se intento confirmar un pedido que no esta pendiente en comanda.");
+						sem_post(semLog);
+						free(solicitudConfirmacion->nombreRestaurante);
+						free(solicitudConfirmacion);
+						free(elPedidoAObtener->nombreRestaurante);
+						free(elPedidoAObtener);
+						free(elPedidoObtenido->comidas);
+						free(elPedidoObtenido->cantListas);
+						free(elPedidoObtenido->cantTotales);
+						free(elPedidoObtenido);
+						respuestaConfirmacion->respuesta = 0;
+					}
+					sem_wait(semLog);
+					log_error(logger, "[APP] Hubo un problema recibiendo la respuesta de obtener el pedido en comanda...");
+					sem_post(semLog);
+					free(solicitudConfirmacion->nombreRestaurante);
+					free(solicitudConfirmacion);
+					free(elPedidoAObtener->nombreRestaurante);
+					free(elPedidoAObtener);
+                    respuestaConfirmacion->respuesta = 0;
 
 				}else{
-					mandar_mensaje(respuesta,RESPUESTA_CONFIRMAR_PEDIDO,socket_cliente);
+					sem_wait(semLog);
+					log_error(logger, "[APP] La confirmacion fracaso en alguna parte de restaur/sindic.");
+					sem_post(semLog);
+					free(solicitudConfirmacion->nombreRestaurante);
+					free(solicitudConfirmacion);
+					respuestaConfirmacion->respuesta = 0;
 				}
 
 			}else{
 				sem_wait(semLog);
-				log_info(logger, "no se pudo encontrar el restaurante");
+				log_error(logger, "[APP] No se pudo encontrar el restaurante de un pedido ya creado...");
 				sem_post(semLog);
+				free(respuestaConfirmacion);
+				respuestaConfirmacion->respuesta = 0;
 			}
+			sem_post(mutexListaRestos);
 		}
 
 	}else{
 		sem_wait(semLog);
-		log_info(logger, "no se pudo encontrar el cliente");
+		log_error(logger, "[APP] No se pudo encontrar el pedido que se pretende confirmar.");
 		sem_post(semLog);
+		respuestaConfirmacion->respuesta = 0;
 	}
-    close(nuevoSocketComanda);
-	free(respuesta);
-	*/
+	sem_post(mutexListaPedidos);
+	mandar_mensaje(respuestaConfirmacion, RESPUESTA_CONFIRMAR_PEDIDO, socket_cliente);
+	free(respuestaConfirmacion);
 }
 
 
 
 void platoListo(plato_listo* platoListo, int32_t socket_cliente){
-	/*
+/*
 	respuesta_ok_error* respuesta;
 	obtener_pedido* obtenerPedidoRequerido;
 	respuesta_obtener_pedido* pedidoObtenido;
@@ -991,7 +1237,7 @@ void platoListo(plato_listo* platoListo, int32_t socket_cliente){
 	}
 	close(nuevoSocketComanda);
 	free(respuesta);
-	*/
+*/
 }
 
 
@@ -1083,9 +1329,6 @@ void consultar_Pedido(consultar_pedido* pedido){
 }*/
 
 
-
-
-
 // agrega un restaurante que se conecto a app a la lista de restaurantes
 void registrarRestaurante(agregar_restaurante* recibidoAgregarRestaurante, int32_t socket_cliente){
 	int idResto;
@@ -1131,8 +1374,8 @@ void registrarHandshake(handshake* recibidoHandshake, int32_t socket_cliente){
 	asociacion_cliente* nuevaAsociacion;
 
 	nuevaAsociacion = malloc(sizeof(asociacion_cliente));
-	nuevaAsociacion->posX = recibidoHandshake->posX;
-	nuevaAsociacion->posY = recibidoHandshake->posY;
+	nuevaAsociacion->posClienteX = recibidoHandshake->posX;
+	nuevaAsociacion->posClienteY = recibidoHandshake->posY;
 	nuevaAsociacion->idCliente = malloc(strlen(recibidoHandshake->id)+1);
 	nuevaAsociacion->nombreRestaurante = "N/A";
 	strcpy(nuevaAsociacion->idCliente, recibidoHandshake->id);
@@ -1142,13 +1385,13 @@ void registrarHandshake(handshake* recibidoHandshake, int32_t socket_cliente){
 	sem_post(mutexListaAsociaciones);
 
 	sem_wait(semLog);
-	log_trace(logger, "[APP] Se creo exitosamente un perfil para el cliente < %s >.", recibidoHandshake->id);
+	log_trace(logger, "[APP] Se creo exitosamente una asociacion para el cliente < %s >.", recibidoHandshake->id);
 	sem_post(semLog);
 }
 
 // **************************************FIN MENSAJES**************************************
 
-int32_t crear_id_pedidos(){
+int32_t crearIDGlobalPedido(){
 	sem_wait(semId);
 	id_global += 1;
 	sem_post(semId);
@@ -1179,20 +1422,6 @@ int buscarAsociacion(char* idClienteBuscado){
 	return -2;
 }
 
-/*
-int buscar_cliente_por_socket(int32_t socketBuscado){
-	perfil_cliente* cliente;
-	for(int i = 0; i < listaPedidos->elements_count; i++){
-		cliente = list_get(listaPedidos,i);// conseguis el perfil del cliente
-
-		if(cliente->socket_cliente == socketBuscado && cliente->id_pedido_resto == 0){
-			return i;
-		}
-	}
-	return -2;
-}*/
-
-
 int buscarRestaurante(char* nombreResto){
 	info_resto* resto;
 	if(listaRestos->elements_count != 0){
@@ -1209,22 +1438,6 @@ int buscarRestaurante(char* nombreResto){
 	return -2;
 }
 
-/*
-int buscar_resto_por_socket(int32_t socket_resto){
-	info_resto* resto;
-	if(listaRestos->elements_count != 0){
-
-		for(int i = 0; i < listaRestos->elements_count; i++){
-			resto = list_get(listaRestos,i);// coseguis el restaurante de la posicion i
-
-			if(resto->socket == socket_resto){
-				return i;
-			}
-		}
-	}
-
-	return -2;
-}*/
 
 /*
 //maneja todos los flujos de mensajes que requieran respuestas

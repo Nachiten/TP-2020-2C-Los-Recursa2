@@ -48,6 +48,8 @@ int GRADO_MULTIPROCE;
 int RETARDO_CICLO_CPU;
 char* puerto_commanda;
 char* ip_commanda;
+int32_t posX_restoDefault;
+int32_t posY_restoDefault;
 
 // SEMAFOROS
 sem_t* planificacionInicializada;
@@ -135,19 +137,20 @@ typedef struct{
 	uint32_t id_pedido_global;
 	uint32_t id_pedido_resto;
 	uint32_t perfilActivo;
-	int32_t posX;
-	int32_t posY;
+	int32_t posClienteX;
+	int32_t posClienteY;
 }perfil_pedido;
 
 typedef struct{
 	char* idCliente;
 	char* nombreRestaurante;
-	int32_t posX;
-	int32_t posY;
+	int32_t posClienteX;
+	int32_t posClienteY;
 }asociacion_cliente;
 
 typedef struct{
 	int pedidoID;
+	int pedidoIDGlobal;
 	int instruccionesTotales;//rafaga a realizar
 	int instruccionesRealizadas;//lo cumplido de la rafaga a realizar
 	int instruccionesAnteriores;
