@@ -550,8 +550,9 @@ uint32_t serializar_paquete_aniadir_plato(t_paquete* paquete, a_plato* estructur
 
 	//reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
 	t_buffer* buffer = malloc(sizeof(t_buffer));
-	buffer->size = sizeof(uint32_t)*2
-			     + strlen(estructura->nombrePlato)+1;
+	buffer->size = sizeof(uint32_t)*3
+			     + strlen(estructura->nombrePlato)+1
+	             + strlen(estructura->id);
 
 	void* streamAuxiliar = malloc(buffer->size);
 
@@ -564,8 +565,19 @@ uint32_t serializar_paquete_aniadir_plato(t_paquete* paquete, a_plato* estructur
 	memcpy(streamAuxiliar + desplazamiento, &(estructura->idPedido), sizeof(estructura->idPedido));
 	desplazamiento += sizeof(estructura->idPedido);
 
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->sizeId), sizeof(estructura->sizeId));
+	desplazamiento += sizeof(estructura->sizeId);
+
+	memcpy(streamAuxiliar + desplazamiento, estructura->id, strlen(estructura->id)+1);
+    desplazamiento += strlen(estructura->id)+1;
+
+
 	//controlo que el desplazamiento sea = al peso de lo que mando
-	pesoDeElementosAEnviar = sizeof(estructura->largoNombrePlato) + strlen(estructura->nombrePlato)+1 + sizeof(estructura->idPedido);
+	pesoDeElementosAEnviar = sizeof(estructura->largoNombrePlato)
+			               + strlen(estructura->nombrePlato)+1
+						   + sizeof(estructura->idPedido)
+						   + sizeof(estructura->sizeId)
+						   + strlen(estructura->id)+1;
 
 
 		if(desplazamiento != pesoDeElementosAEnviar)
@@ -709,13 +721,21 @@ uint32_t serializar_paquete_consultar_pedido(t_paquete* paquete, consultar_pedid
 
 	 //reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
 	t_buffer* buffer = malloc(sizeof(t_buffer));
-	buffer->size = sizeof(uint32_t);
+	buffer->size = sizeof(uint32_t)*2
+			     + strlen(estructura->id)+1;
 
 	void* streamAuxiliar = malloc(buffer->size);
 
 	//meto la ID del pedido
 	memcpy(streamAuxiliar + desplazamiento, &(estructura->idPedido), sizeof(estructura->idPedido));
 	desplazamiento += sizeof(estructura->idPedido);
+
+	memcpy(streamAuxiliar + desplazamiento, &(estructura->sizeId), sizeof(estructura->sizeId));
+	desplazamiento += sizeof(estructura->sizeId);
+
+	memcpy(streamAuxiliar + desplazamiento, estructura->id, strlen(estructura->id)+1);
+	desplazamiento += strlen(estructura->id)+1;
+
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
 	pesoDeElementosAEnviar = sizeof(estructura->idPedido);
@@ -1727,6 +1747,12 @@ void desserializar_consultar_pedido(consultar_pedido* estructura, int32_t socket
 {
 	//saco el id del pedido
 	bytesRecibidos(recv(socket_cliente, &(estructura->idPedido), sizeof(estructura->idPedido), MSG_WAITALL));
+
+	bytesRecibidos(recv(socket_cliente, &(estructura->sizeId), sizeof(estructura->sizeId), MSG_WAITALL));
+
+	estructura->id = malloc(estructura->sizeId+1);
+
+	bytesRecibidos(recv(socket_cliente, estructura->id, estructura->sizeId+1, MSG_WAITALL));
 }
 
 
@@ -1742,6 +1768,12 @@ void desserializar_aniadir_plato(a_plato* estructura, int32_t socket_cliente){
 
 	//saco la ID del pedido
 	bytesRecibidos(recv(socket_cliente, &(estructura->idPedido), sizeof(estructura->idPedido), MSG_WAITALL));
+
+	bytesRecibidos(recv(socket_cliente, &(estructura->sizeId), sizeof(estructura->sizeId), MSG_WAITALL));
+
+	estructura->id = malloc(estructura->sizeId+1);
+
+	bytesRecibidos(recv(socket_cliente, estructura->id, estructura->sizeId+1, MSG_WAITALL));
 
 }
 

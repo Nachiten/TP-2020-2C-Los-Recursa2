@@ -70,6 +70,9 @@ int main(int cantArg, char* argumentos[]){
 
     mandar_mensaje(elHandshake, HANDSHAKE, socketDelHandshake);
 
+    close(socketDelHandshake);
+    free(elHandshake->id);
+    free(elHandshake);
 /*
     pthread_create(&hiloNotificaciones, NULL, (void*)recibirNotificaciones, &socketCliente);
     pthread_detach(hiloNotificaciones);

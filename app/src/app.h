@@ -24,30 +24,26 @@ int32_t socket_commanda;
 pthread_t planificacion;
 
 // ***SETUP***
-void inicializar_colas();
+void inicializar_listas();
 void inicializar_semaforos();
 
 // ***MENSAJES DE APP***
-void consultar_restaurantes(int32_t);
-void seleccionarRestaurante(char*, char*, int32_t);
-void crear_Pedido(crear_pedido*, int32_t);
+void consultarRestaurantes(int32_t);
+void seleccionarRestaurante(seleccionar_restaurante*, int32_t);
 void consultarPlatos(consultar_platos*,int32_t);
-void aniadir_plato(a_plato*, int32_t);
-void plato_Listo(plato_listo*, int32_t);
-void confirmar_Pedido(confirmar_pedido*, int32_t);
-void registrar_restaurante(agregar_restaurante*, int32_t);
+void crearPedido(crear_pedido*, int32_t);
+void aniadirPlato(a_plato*, int32_t);
+void platoListo(plato_listo*, int32_t);
+void confirmarPedido(confirmar_pedido*, int32_t);
+void registrarRestaurante(agregar_restaurante*, int32_t);
 void registrarHandshake(handshake*, int32_t);
 
 // ***MANEJO DE MENSAJES***
 int32_t crear_id_pedidos();
-//void crear_pedido(int32_t);
-//int buscar_pedido_por_id(uint32_t);
-int buscar_pedido_por_id_y_resto(uint32_t, info_resto*);
-int buscar_cliente(char*);
-int buscar_resto(char*);
-int buscar_cliente_por_socket(int32_t);
-void recibir_respuesta(codigo_operacion, info_resto*, perfil_cliente*, int32_t);
-void pedido_entregado(int32_t id_pedido);
+int buscarPedidoPorIDGlobal(uint32_t);
+int buscarAsociacion(char*);
+int buscarRestaurante(char*);
+void pedidoEentregado(int32_t id_pedido);
 
 // ***SERVIDOR***
 void process_request(codigo_operacion, int32_t, uint32_t) ;

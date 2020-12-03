@@ -36,6 +36,7 @@ t_list* pedidosListos;
 //***VARIABLES***
 t_list* listaRestos;
 t_list* listaPedidos;
+t_list* listaAsociaciones;
 
 // OTROS
 t_log* logger;
@@ -56,6 +57,8 @@ sem_t* mutexReady;
 sem_t* mutexBlock;
 sem_t* mutexPedidosListos;
 sem_t* mutexListaRestos;
+sem_t* mutexListaAsociaciones;
+sem_t* mutexListaPedidos;
 sem_t* contadorRepartidoresDisp;
 // Semaforos para sincronizar hilos con HCM
 t_list* listaSemHabilitarCicloExec;
@@ -128,14 +131,20 @@ typedef enum{
 typedef struct{
 	int32_t socket_cliente;
 	char* idCliente;
-	char* nombre_resto;
-	uint32_t id_global;
+	char* nombreRestaurante;
+	uint32_t id_pedido_global;
 	uint32_t id_pedido_resto;
-	int perfilActivo;
+	uint32_t perfilActivo;
 	int32_t posX;
 	int32_t posY;
-}perfil_cliente;
+}perfil_pedido;
 
+typedef struct{
+	char* idCliente;
+	char* nombreRestaurante;
+	int32_t posX;
+	int32_t posY;
+}asociacion_cliente;
 
 typedef struct{
 	int pedidoID;
@@ -187,7 +196,7 @@ pcb_pedido* obtenerSiguienteSJFSD();
 int codigoDesalojo(pcb_pedido*);
 int sigoEjecutando(pcb_pedido*);
 
-int buscar_pedido_por_id(uint32_t);
+int buscarPedidoPorID(uint32_t);
 
 
 // SEMAFOROS

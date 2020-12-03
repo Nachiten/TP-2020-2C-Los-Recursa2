@@ -191,7 +191,9 @@ int checkearPedidoListo(int idPedido){
 	return retorno;
 }
 
+
 void pedido_entregado(int32_t id_pedido){
+	/*
 	int numCliente = buscar_pedido_por_id(id_pedido);
 	perfil_cliente* cliente = list_get(listaPedidos,numCliente);
 	int32_t nuevoSocketComanda, sizeAAllocar = 0;
@@ -204,11 +206,12 @@ void pedido_entregado(int32_t id_pedido){
 	strcpy(pedidoFinalizado->nombreRestaurante, cliente->nombre_resto);
 	pedidoFinalizado->largoNombreRestaurante = strlen(cliente->nombre_resto);
 
-	/* esto no seria necesario, cliente ya sabe desserializar finalizar_pedido
-	pedido_finalizado* aMandar = malloc(sizeof(pedido_finalizado));
-	aMandar->mensaje = "Pedido Finalizado";
-	aMandar->sizeMensaje = strlen("Pedido Finalizado");
-    */
+
+	// esto no seria necesario, cliente ya sabe desserializar finalizar_pedido
+	//pedido_finalizado* aMandar = malloc(sizeof(pedido_finalizado));
+	//aMandar->mensaje = "Pedido Finalizado";
+	//aMandar->sizeMensaje = strlen("Pedido Finalizado");
+
 
 	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
 	if(nuevoSocketComanda < 0){
@@ -261,7 +264,7 @@ void pedido_entregado(int32_t id_pedido){
 	 free(respuestaConfirmacionCliente);
 	 free(pedidoFinalizado->nombreRestaurante);
 	 free(pedidoFinalizado);
-
+*/
 }
 
 
@@ -382,7 +385,7 @@ void hiloBlock_Ready(){
 
 					// Se entrega el pedido
 					log_info(logger, "[BLOCK] Repartidor %i entrega pedido %i.", pedidoActual->repartidorAsignado->numeroRepartidor, pedidoActual->pedidoID);
-					pedido_entregado(pedidoActual->pedidoID);
+					//pedido_entregado(pedidoActual->pedidoID);
 
 					// Debe descansar antes de volver a ready
 					if (pedidoActual->repartidorAsignado->cansado){
@@ -1014,6 +1017,7 @@ void freeDeArray(char** array){
 	free(array);
 }
 
+/*
 int buscar_pedido_por_id(uint32_t id_pedido){
 	perfil_cliente* cliente;
 	for(int i = 0; i < listaPedidos->elements_count; i++){
@@ -1025,4 +1029,4 @@ int buscar_pedido_por_id(uint32_t id_pedido){
 	}
 	return -2;
 }
-
+*/

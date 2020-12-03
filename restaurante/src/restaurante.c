@@ -570,6 +570,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		recibir_mensaje(recibidoAPlato,A_PLATO,socket_cliente);
 		aniadir_plato(recibidoAPlato,socket_cliente);
 		free(recibidoAPlato->nombrePlato);
+		free(recibidoAPlato->id);
 		free(recibidoAPlato);
 		break;
 
@@ -585,6 +586,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 		recibidoConsultarPedido = malloc(sizeof(consultar_pedido));
 		recibir_mensaje(recibidoConsultarPedido,CONSULTAR_PEDIDO,socket_cliente);
 		consultar_Pedido(recibidoConsultarPedido->idPedido, socket_cliente);
+		free(recibidoConsultarPedido->id);
 		free(recibidoConsultarPedido);
 		break;
 

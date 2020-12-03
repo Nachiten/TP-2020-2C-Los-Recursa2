@@ -97,6 +97,8 @@ typedef struct{
 	uint32_t largoNombrePlato;
 	char* nombrePlato;
 	uint32_t idPedido;
+	uint32_t sizeId;     //lo agrego "de manera rustica" porque sin esto app esta en bolas
+	char* id;             //lo agrego "de manera rustica" porque sin esto app esta en bolas
 }a_plato;//añadir plato
 
 typedef struct{
@@ -125,6 +127,8 @@ typedef struct{
 
 typedef struct{
 	uint32_t idPedido;
+	uint32_t sizeId;  //lo agrego "de manera rustica" porque sin esto app esta en bolas
+	char* id;         //lo agrego "de manera rustica" porque sin esto app esta en bolas
 }consultar_pedido;
 
 //ATENCION!!!! Reutilizamos serializacion de GUARDAR_PEDIDO
@@ -226,13 +230,13 @@ typedef struct{
 typedef struct{
 	uint32_t sizeNombre;
 	char* nombreResto;
-	uint32_t sizeId;
-	char* id;
+	uint32_t sizeId;        //lo agrego "de manera rustica" porque sin esto app esta en bolas
+	char* id;               //lo agrego "de manera rustica" porque sin esto app esta en bolas
 }consultar_platos;
 
 typedef struct{
-	uint32_t sizeId;
-	char* id;
+	uint32_t sizeId;        //lo agrego "de manera rustica" porque sin esto app esta en bolas
+	char* id;               //lo agrego "de manera rustica" porque sin esto app esta en bolas
 }crear_pedido;
 
 typedef struct{
