@@ -362,7 +362,7 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 				if(respuestaComanda->respuesta == 0){
 					//comanda fallo en guardar el pedido en sus estructuras, tengo que abortar la operacion
 					sem_wait(semLog);
-					log_error(logger, "Fracase en crear pedido al restaurante < %s > porque hubo un error en comanda."
+					log_error(logger, "[APP] Fracase en crear pedido al restaurante < %s > porque hubo un error en comanda."
 						 , restoAsociado->nombre_resto);
 					sem_post(semLog);
 					respuestaCreacion->idPedido = 0;
@@ -1117,35 +1117,85 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 }
 
 
-
-void platoListo(plato_listo* platoListo, int32_t socket_cliente){
+//generalmente me los va a mandar el restaurante, pero podria ser el cliente tambien
+//el parametro "socket_cliente" en esta funcion, va a representar cual de ellos es
+void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 /*
-	respuesta_ok_error* respuesta;
+	respuesta_ok_error* respuestaNotificacion;
 	obtener_pedido* obtenerPedidoRequerido;
 	respuesta_obtener_pedido* pedidoObtenido;
 	int32_t recibidos, recibidosSize = 0, sizeAAllocar, nuevoSocketComanda;
 	codigo_operacion cod_op;
 	info_resto* restoAsociado;
 	perfil_pedido* elPedidoBuscado;
-	int indicePedidoAsociado;
+	int indicePedidoAsociado = 0;
 
-	indicePedidoAsociado = buscarPedidoPorIDGlobal(platoListo->idPedido);
+
+	sem_wait(mutexListaPedidos);
+	//aca, como el ID que me ingresa puede venir desde cliente (global) o desde restaurante (id_resto), tengo que buscarlo
+	//de una manera un poco diferente, ver si es estrictamente necesario
+	indicePedidoAsociado = buscarPedidoPorIDRestoYNombreResto(notificacionPlatoListo->idPedido, notificacionPlatoListo->nombreRestaurante);
+    sem_post(mutexListaPedidos);
 
 	if(indicePedidoAsociado == -2){
 		sem_wait(semLog);
 		log_error(logger, "[APP] Arribo una notificacion de un plato listo de un pedido que no existe en los registros...");
 		sem_post(semLog);
+		return;
+	}
+
+	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+	if(nuevoSocketComanda < 0){
+		sem_wait(semLog);
+		log_info(logger, "Comanda esta muerta, me muero yo tambien");
+		sem_post(semLog);
 		exit(-2);
 	}
 
+	mandar_mensaje(notificacionPlatoListo, PLATO_LISTO, nuevoSocketComanda);
 
-	respuesta->respuesta = 0;
+	respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
 
-	obtener_Pedido = malloc(sizeof(obtener_pedido));
-	obtener_Pedido->largoNombreRestaurante = platoListo->largoNombreRestaurante;
-	obtener_Pedido->nombreRestaurante = malloc(strlen(platoListo->nombreRestaurante)+1);
-	strcpy(obtener_Pedido->nombreRestaurante,platoListo->nombreRestaurante);
-	obtener_Pedido->idPedido = platoListo->idPedido;
+	recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+	if(recibidos >= 1){
+		recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+		bytesRecibidos(recibidosSize);
+		recibir_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO,nuevoSocketComanda);
+
+		close(nuevoSocketComanda);
+
+		if(respuestaNotificacion->respuesta == 1){
+			//comanda pudo actualizar las cantListas correctamente, entonces ahora chequeo a ver que onda si estan
+			//todas las comidas cocinadas
+
+			nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+			if(nuevoSocketComanda < 0){
+				sem_wait(semLog);
+				log_error(logger, "Comanda esta muerta, me muero yo tambien");
+				sem_post(semLog);
+				exit(-2);
+			}
+
+			obtenerPedidoRequerido = malloc(sizeof(obtener_pedido));
+			obtenerPedidoRequerido->largoNombreRestaurante = notificacionPlatoListo->largoNombreRestaurante;
+			obtenerPedidoRequerido->nombreRestaurante = malloc(strlen(notificacionPlatoListo->nombreRestaurante)+1);
+			strcpy(obtenerPedidoRequerido->nombreRestaurante,notificacionPlatoListo->nombreRestaurante);
+			obtenerPedidoRequerido->idPedido = notificacionPlatoListo->idPedido;
+
+		} else {
+			sem_wait(semLog);
+			log_error(logger, "[APP] Comanda tuvo un problema actualizando las comidas listas.");
+			sem_post(semLog);
+		}
+	} else {
+		sem_wait(semLog);
+		log_error(logger, "[APP] Comanda murio antes de intentar mandarme la respuesta a la notificacion plato listo.");
+		sem_post(semLog);
+		close(nuevoSocketComanda);
+	}
+
+
+
 
 	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
 	if(nuevoSocketComanda < 0){
@@ -1409,6 +1459,18 @@ int buscarPedidoPorIDGlobal(uint32_t idPedidoSolicitado){
 	return -2;
 }
 
+int buscarPedidoPorIDRestoYNombreResto(uint32_t idPedidoSolicitado, char* restauranteAsociado){
+	perfil_pedido* pedidoBuscado;
+	for(int i = 0; i < listaPedidos->elements_count; i++){
+		pedidoBuscado = list_get(listaPedidos,i);// conseguis el perfil del cliente
+
+		if(pedidoBuscado->id_pedido_resto == idPedidoSolicitado && strcmp(pedidoBuscado->nombreRestaurante, restauranteAsociado) == 0){
+			return i;
+		}
+	}
+	return -2;
+}
+
 int buscarAsociacion(char* idClienteBuscado){
 	asociacion_cliente* unaAsociacion;
 	for(int i = 0; i < listaAsociaciones->elements_count; i++){
@@ -1579,10 +1641,10 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	 * CONSULTAR_RESTAURANTES -> Done
 	 * SELECCIONAR_RESTAURANTES -> Done
 	 * CONSULTAR_PLATOS -> Done
-	 * CREAR_PEDIDO -> Done (ver temita id global)
-	 * ANIADIR_PLATO -> Done (ver temita id global)
-	 * CONSULTAR_PEDIDO -> Done (ver temita id global)
-	 * CONFIRMAR_PEDIDO ->
+	 * CREAR_PEDIDO -> Done
+	 * ANIADIR_PLATO -> Done
+	 * CONSULTAR_PEDIDO -> Done
+	 * CONFIRMAR_PEDIDO -> Done
 	 * PLATO_LISTO ->
 	 * HANDSHAKE -> Done
 	 * AGREGAR_RESTAURANTE -> Done

@@ -170,8 +170,8 @@ void agregarAExit(pcb_plato*);
 pcb_plato* obtenerSiguienteDeReadySinAfinidad();
 pcb_plato* obtenerSiguienteDeReadyConAfinidad(char*);
 
-//me la robe de resto.h
-int buscar_pedido_por_id(uint32_t);
+int buscarPedidoPorIDRestoYNombreResto(uint32_t, char*);
+int buscarPedidoPorIDGlobal(uint32_t);
 
 void inicializar_planificacion();
 void iniciarSemaforos();

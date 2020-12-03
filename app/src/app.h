@@ -37,7 +37,6 @@ void registrarHandshake(handshake*, int32_t);
 
 // ***MANEJO DE MENSAJES***
 int32_t crearIDGlobalPedido();
-int buscarPedidoPorIDGlobal(uint32_t);
 int buscarAsociacion(char*);
 int buscarRestaurante(char*);
 void pedidoEentregado(int32_t id_pedido);
