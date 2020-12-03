@@ -852,7 +852,11 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 						nuevoPcb->posRestauranteY = posY_restoDefault;
 						nuevoPcb->posClienteX = elPedidoAConfirmar->posClienteX;
 						nuevoPcb->posClienteY = elPedidoAConfirmar->posClienteY;
-						nuevoPcb->socketCliente = elPedidoAConfirmar->socket_cliente;
+						//este es el socket de parte del cliente que se va a quedar esperando
+						//los PLATO_LISTO que sean necesarios y un eventual FINALIZAR_PEDIDO
+						//que APP tendra que validar, lo fijo para no perderlo
+						nuevoPcb->socketCliente = socket_cliente;
+						elPedidoAConfirmar->socket_cliente = socket_cliente;
 
 						sem_wait(semLog);
 						log_trace(logger, "[APP] Se confirmo el pedido de id global: <%d>, id restaur: <%d>"
