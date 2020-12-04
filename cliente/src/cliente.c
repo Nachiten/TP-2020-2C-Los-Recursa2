@@ -184,20 +184,20 @@ void obtenerInputConsolaCliente(){
     /*
     CASES LABURADOS:
 
-    Consultar Restaurantes -> Check and tested
-    Seleccionar Restaurante -> Check and tested
+    Consultar Restaurantes -> Check and tested (falta testear con app)
+    Seleccionar Restaurante -> Check and tested (falta testear con app)
     Obtener Restaurante -> Check and tested
-    Consultar Platos -> Check and tested
+    Consultar Platos -> Check and tested (falta testear con app)
     Guardar Plato -> Check and tested
-    Aniadir Plato -> Check and tested
-    Plato listo -> Check and tested
-    Crear Pedido -> Check and tested
+    Aniadir Plato -> Check and tested (falta testear con app)
+    Plato listo -> Check and tested (falta testear con app)
+    Crear Pedido -> Check and tested (falta testear con app)
     Guardar Pedido -> Check and tested
-    Confirmar Pedido -> Check
-    Consultar Pedido -> Check and tested
+    Confirmar Pedido -> Check and tested (falta testear con app)
+    Consultar Pedido -> Check and tested (falta testear con app)
     Obtener Pedido -> Check and tested
     Finalizar Pedido -> Check and tested
-    Terminar Pedido -> Check
+    Terminar Pedido -> Check and tested
     Obtener Receta -> Check and tested
     */
 

@@ -136,7 +136,6 @@ typedef struct{
 	char* nombreRestaurante;
 	uint32_t id_pedido_global;
 	uint32_t id_pedido_resto;
-	uint32_t perfilActivo;
 	int32_t posClienteX;
 	int32_t posClienteY;
 }perfil_pedido;
@@ -170,7 +169,7 @@ typedef struct{
 
 
 // PEDIDO LISTO
-void guardarPedidoListo(int);
+void guardarPedidoListo(perfil_pedido*);
 void eliminarPedidoListo(int);
 int checkearPedidoListo(int);
 
@@ -199,8 +198,8 @@ pcb_pedido* obtenerSiguienteSJFSD();
 int codigoDesalojo(pcb_pedido*);
 int sigoEjecutando(pcb_pedido*);
 
-int buscarPedidoPorID(uint32_t);
-
+int buscarPedidoPorIDGlobal(uint32_t);
+int buscarPedidoPorIDRestoYNombreResto(uint32_t, char*);
 
 // SEMAFOROS
 void waitSemaforoHabilitarCicloExec(uint32_t);

@@ -170,8 +170,7 @@ void agregarAExit(pcb_plato*);
 pcb_plato* obtenerSiguienteDeReadySinAfinidad();
 pcb_plato* obtenerSiguienteDeReadyConAfinidad(char*);
 
-int buscarPedidoPorIDRestoYNombreResto(uint32_t, char*);
-int buscarPedidoPorIDGlobal(uint32_t);
+int buscar_pedido_por_id(uint32_t);
 
 void inicializar_planificacion();
 void iniciarSemaforos();

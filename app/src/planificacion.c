@@ -141,37 +141,39 @@ void iniciarPlanificacion(){
 	pthread_join(hiloNewReady, NULL);
 }
 
-void guardarPedidoListo(int idPedido){
-	int* pedidoAGuardar = malloc(sizeof(int));
+void guardarPedidoListo(perfil_pedido* elPedidoQueHaFinalizado){
 
-	*pedidoAGuardar = idPedido;
+	// Agrego el pedido finalizado a la lista.
+	list_add(pedidosListos, elPedidoQueHaFinalizado);
 
-	sem_wait(mutexPedidosListos);
-	// Agrego un nuevo pedido listo a la lista
-	list_add(pedidosListos, pedidoAGuardar);
-	sem_post(mutexPedidosListos);
-
-	log_trace(logger, "[GuardarPedido] Se guarda como listo el pedido %i\n", idPedido);
+	sem_wait(semLog);
+	log_trace(logger, "[APP-GuardarPedido] Se guarda como listo el pedido: IDGlobal: <%d>,"
+			"IDRestaurante: <%d>, del restaurante: <%s>.", elPedidoQueHaFinalizado->id_pedido_global,
+			elPedidoQueHaFinalizado->id_pedido_resto, elPedidoQueHaFinalizado->nombreRestaurante);
+	sem_post(semLog);
 }
 
-void eliminarPedidoListo(int idPedido){
+void eliminarPedidoListo(int idGlobalDelPedidoQueFinalizo){
 	sem_wait(mutexPedidosListos);
 	int i;
 	// Recorro la lista de pedidos listos a ver si encuentro el que necesito
 	for (i = 0; i< list_size(pedidosListos); i++){
-		int* pedidoCandidato = list_get(pedidosListos, i);
+		int* idGlobalPedidoCandidato = list_get(pedidosListos, i);
 
-		if (*pedidoCandidato == idPedido){
+		if (*idGlobalPedidoCandidato == idGlobalDelPedidoQueFinalizo){
 			int* pedidoAEliminar = list_remove(pedidosListos, i);
 			free(pedidoAEliminar);
-			log_trace(logger, "[Pedidos] Eliminado pedido %i de pedidos listos.\n", idPedido);
+			sem_wait(semLog);
+			log_trace(logger, "[APP-PedidosListos] Eliminado pedido de IDGlobal: <%d> de la lista pedidos listos.", idGlobalDelPedidoQueFinalizo);
+		    sem_post(semLog);
 		}
+
 	}
 	sem_post(mutexPedidosListos);
 }
 
 
-int checkearPedidoListo(int idPedido){
+int checkearPedidoListo(int idPedidoGlobalACheckear){
 
 	int retorno = 0;
 
@@ -181,7 +183,7 @@ int checkearPedidoListo(int idPedido){
 	for (i = 0; i< list_size(pedidosListos); i++){
 		int* pedidoCandidato = list_get(pedidosListos, i);
 
-		if (*pedidoCandidato == idPedido){
+		if (*pedidoCandidato == idPedidoGlobalACheckear){
 			retorno = 1;
 			break;
 		}
@@ -365,8 +367,8 @@ void hiloBlock_Ready(){
 				case ESPERANDO_MSG:
 
 					// Ya esta listo el pedido
-					if (checkearPedidoListo(pedidoActual->pedidoID)){
-						log_trace(logger, "[BLOCK] El pedido %i ya esta listo.\n", pedidoActual->pedidoID);
+					if (checkearPedidoListo(pedidoActual->pedidoIDGlobal)){
+						log_trace(logger, "[BLOCK] El pedido de IDGlobal: %d ya esta listo.\n", pedidoActual->pedidoIDGlobal);
 
 						// Debe descansar antes de volver a ready
 						if (pedidoActual->repartidorAsignado->cansado){
@@ -846,13 +848,90 @@ void agregarAReady(pcb_pedido* unPedido){
 	sem_post(mutexReady);
 }
 
-void agregarAExit(pcb_pedido* unPedido){
-	log_info(logger, "[EXIT] Pedido %i esta en exit por haber terminado.", unPedido->pedidoID);
+void agregarAExit(pcb_pedido* elPCBQueFinalizo){
+	guardar_pedido* notificacionFinalizarPedido;
+	respuesta_ok_error* respuestaNotificacion;
+	perfil_pedido* elPedidoQueFinalizo;
+	int indicePedidoQueFinalizo, recibidos, sizeAAllocar, recibidosSize = 0;
+	codigo_operacion cod_op;
+	int32_t nuevoSocketComanda;
 
-	eliminarPedidoListo(unPedido->pedidoID);
-	unPedido->repartidorAsignado->asignado = 0;
-	free(unPedido);
 
+	log_info(logger, "[EXIT] Pedido de IDGlobal: <%d> e IDResto: <%d> esta en exit por haber llegado a la posicion del cliente."
+			, elPCBQueFinalizo->pedidoIDGlobal, elPCBQueFinalizo->pedidoID);
+
+	eliminarPedidoListo(elPCBQueFinalizo->pedidoIDGlobal);
+	elPCBQueFinalizo->repartidorAsignado->asignado = 0;
+
+	//antes de hacerle free al pcb y al perfil_pedido, tengo que hacer DOS COSAS (maybe 3):
+	//-> Informar a comanda un FINALIZAR_PEDIDO del pedido que acaba de llegar a exit.
+	//-> Informar al cliente solicitante un FINALIZAR_PEDIDO porque el pedido llego a su posicion
+
+	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
+	if(nuevoSocketComanda < 0){
+		sem_wait(semLog);
+		log_info(logger, "Comanda esta muerta, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
+
+	sem_wait(mutexListaPedidos);
+	indicePedidoQueFinalizo = buscarPedidoPorIDGlobal(elPCBQueFinalizo->pedidoIDGlobal);
+	elPedidoQueFinalizo = list_remove(listaPedidos, indicePedidoQueFinalizo);
+	sem_post(mutexListaPedidos);
+
+    notificacionFinalizarPedido = malloc(sizeof(guardar_pedido));
+    notificacionFinalizarPedido->idPedido = elPedidoQueFinalizo->id_pedido_resto;
+    notificacionFinalizarPedido->largoNombreRestaurante = strlen(elPedidoQueFinalizo->nombreRestaurante);
+    notificacionFinalizarPedido->nombreRestaurante = malloc(strlen(elPedidoQueFinalizo->nombreRestaurante)+1);
+
+    mandar_mensaje(notificacionFinalizarPedido, FINALIZAR_PEDIDO, nuevoSocketComanda);
+    respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
+
+    recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+	if(recibidos >= 1){
+		recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+		bytesRecibidos(recibidosSize);
+		recibir_mensaje(respuestaNotificacion, RESPUESTA_FINALIZAR_PEDIDO, nuevoSocketComanda);
+		if(respuestaNotificacion->respuesta == 0){
+			//comanda fallo en finalizarlo, lo logueo por las moscas
+			sem_wait(semLog);
+			log_error(logger, "[EXIT] Comanda fracaso en finalizar el pedido.");
+			sem_post(semLog);
+		}
+	} else {
+		sem_wait(semLog);
+		log_error(logger, "[EXIT] Comanda se murio en el proceso de responder a un Finalizar_pedido.");
+		sem_post(semLog);
+	}
+
+    //uso la misma estructura de antes, pero con IDGlobal, para dirigirme al cliente
+	notificacionFinalizarPedido->idPedido = elPedidoQueFinalizo->id_pedido_global;
+	mandar_mensaje(notificacionFinalizarPedido, FINALIZAR_PEDIDO, elPedidoQueFinalizo->socket_cliente);
+	recibidos = recv(elPedidoQueFinalizo->socket_cliente, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
+    if(recibidos >= 1){
+		recibidosSize = recv(elPedidoQueFinalizo->socket_cliente, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
+		bytesRecibidos(recibidosSize);
+		recibir_mensaje(respuestaNotificacion, RESPUESTA_FINALIZAR_PEDIDO, elPedidoQueFinalizo->socket_cliente);
+		if(respuestaNotificacion->respuesta == 1){
+			sem_wait(semLog);
+			log_trace(logger, "[EXIT] El cliente fue notificado satisfactoriamente de la finalizacion del pedido.");
+			sem_post(semLog);
+		}
+	} else {
+		sem_wait(semLog);
+		log_error(logger, "[EXIT] El cliente se murio en el proceso de responder a un Finalizar_pedido.");
+		sem_post(semLog);
+	}
+
+    //libero tutti
+    free(notificacionFinalizarPedido->nombreRestaurante);
+    free(notificacionFinalizarPedido);
+    free(respuestaNotificacion);
+    free(elPedidoQueFinalizo->nombreRestaurante);
+    free(elPedidoQueFinalizo->idCliente);
+    free(elPedidoQueFinalizo);
+	free(elPCBQueFinalizo);
 	sem_post(contadorRepartidoresDisp);
 }
 

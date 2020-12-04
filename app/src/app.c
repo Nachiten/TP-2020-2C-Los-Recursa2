@@ -382,7 +382,6 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
                 elPedidoACrear->id_pedido_resto = respuestaCreacion->idPedido;
                 elPedidoACrear->id_pedido_global = crearIDGlobalPedido();
                 elPedidoACrear->socket_cliente = socket_cliente;
-                elPedidoACrear->perfilActivo = 0;
                 elPedidoACrear->posClienteX = asociacionBuscada->posClienteX;
                 elPedidoACrear->posClienteY = asociacionBuscada->posClienteY;
                 elPedidoACrear->idCliente = malloc(strlen(asociacionBuscada->idCliente)+1);
@@ -396,7 +395,6 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 					 , elPedidoACrear->idCliente, elPedidoACrear->id_pedido_global, elPedidoACrear->id_pedido_resto);
 				sem_post(semLog);
 
-				respuestaCreacion->idPedido = 0;
         //esto lo hago para que el cliente reciba y se maneje con el id global, el que app reconoce univocamente
                 respuestaCreacion->idPedido = elPedidoACrear->id_pedido_global;
                 mandar_mensaje(respuestaCreacion, RESPUESTA_CREAR_PEDIDO, socket_cliente);
@@ -470,7 +468,6 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 			elPedidoACrear->id_pedido_resto = respuestaCreacion->idPedido;
 			elPedidoACrear->id_pedido_global = respuestaCreacion->idPedido;
 			elPedidoACrear->socket_cliente = socket_cliente;
-			elPedidoACrear->perfilActivo = 0;
 			elPedidoACrear->posClienteX = asociacionBuscada->posClienteX;
 			elPedidoACrear->posClienteY = asociacionBuscada->posClienteY;
 			elPedidoACrear->idCliente = malloc(strlen(asociacionBuscada->idCliente)+1);
@@ -1126,9 +1123,8 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 	respuesta_obtener_pedido* pedidoObtenido;
 	int32_t recibidos, recibidosSize = 0, sizeAAllocar, sizePayload, nuevoSocketComanda;
 	codigo_operacion cod_op, codigoRecibido;
-	info_resto* restoAsociado;
 	perfil_pedido* elPedidoBuscado;
-	int indicePedidoAsociado = 0;
+	int indicePedidoBuscado = 0;
 
 	respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
 	respuestaNotificacion->respuesta = 0;
@@ -1136,10 +1132,10 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 	sem_wait(mutexListaPedidos);
 	//como el ID que me ingresa puede venir desde cliente (global) o desde restaurante (id_resto), tengo que buscarlo
 	//de una manera un poco diferente, ver si es estrictamente necesario
-	indicePedidoAsociado = buscarPedidoPorIDRestoYNombreResto(notificacionPlatoListo->idPedido, notificacionPlatoListo->nombreRestaurante);
+	indicePedidoBuscado = buscarPedidoPorIDRestoYNombreResto(notificacionPlatoListo->idPedido, notificacionPlatoListo->nombreRestaurante);
     sem_post(mutexListaPedidos);
 
-	if(indicePedidoAsociado == -2){
+	if(indicePedidoBuscado == -2){
 		sem_wait(semLog);
 		log_error(logger, "[APP] Arribo una notificacion de un plato listo de un pedido que no existe en los registros...");
 		sem_post(semLog);
@@ -1210,7 +1206,14 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 			}
 			//el pedido esta terminado
 			if(contadorTotales == contadorListas){
-				guardarPedidoListo(notificacionPlatoListo->idPedido);
+
+				sem_wait(mutexListaPedidos);
+				elPedidoBuscado = list_get(listaPedidos, indicePedidoBuscado);
+				sem_wait(mutexPedidosListos);
+				guardarPedidoListo(elPedidoBuscado);
+				sem_post(mutexPedidosListos);
+				sem_post(mutexListaPedidos);
+
 				sem_wait(semLog);
 				log_info(logger, "[APP] El pedido <%d> del restaurante <%s> ha sido cocinado en su totalidad."
 						, notificacionPlatoListo->idPedido, notificacionPlatoListo->nombreRestaurante);

@@ -306,7 +306,7 @@ void agregarAExit(pcb_plato* elPlato){
 	elPedidoAsociado = list_get(listaPedidos,indiceDelPedidoAsociado);
 	sem_post(semListaPedidos);
 
-	if(appEnPruebas == 1){
+	if(atoi(appEnPruebas) == 1){
 	//la notificacion tiene que pasar por la app, para luego ser redirigida al cliente
        nuevoSocketApp = establecer_conexion(ip_app, puerto_app);
        if(nuevoSocketApp < 0){
