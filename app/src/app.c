@@ -1120,19 +1120,21 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 //generalmente me los va a mandar el restaurante, pero podria ser el cliente tambien
 //el parametro "socket_cliente" en esta funcion, va a representar cual de ellos es
 void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
-/*
+
 	respuesta_ok_error* respuestaNotificacion;
 	obtener_pedido* obtenerPedidoRequerido;
 	respuesta_obtener_pedido* pedidoObtenido;
-	int32_t recibidos, recibidosSize = 0, sizeAAllocar, nuevoSocketComanda;
-	codigo_operacion cod_op;
+	int32_t recibidos, recibidosSize = 0, sizeAAllocar, sizePayload, nuevoSocketComanda;
+	codigo_operacion cod_op, codigoRecibido;
 	info_resto* restoAsociado;
 	perfil_pedido* elPedidoBuscado;
 	int indicePedidoAsociado = 0;
 
+	respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
+	respuestaNotificacion->respuesta = 0;
 
 	sem_wait(mutexListaPedidos);
-	//aca, como el ID que me ingresa puede venir desde cliente (global) o desde restaurante (id_resto), tengo que buscarlo
+	//como el ID que me ingresa puede venir desde cliente (global) o desde restaurante (id_resto), tengo que buscarlo
 	//de una manera un poco diferente, ver si es estrictamente necesario
 	indicePedidoAsociado = buscarPedidoPorIDRestoYNombreResto(notificacionPlatoListo->idPedido, notificacionPlatoListo->nombreRestaurante);
     sem_post(mutexListaPedidos);
@@ -1153,8 +1155,6 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 	}
 
 	mandar_mensaje(notificacionPlatoListo, PLATO_LISTO, nuevoSocketComanda);
-
-	respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
 
 	recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 	if(recibidos >= 1){
@@ -1182,6 +1182,54 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 			strcpy(obtenerPedidoRequerido->nombreRestaurante,notificacionPlatoListo->nombreRestaurante);
 			obtenerPedidoRequerido->idPedido = notificacionPlatoListo->idPedido;
 
+			mandar_mensaje(obtenerPedidoRequerido, OBTENER_PEDIDO, nuevoSocketComanda);
+
+			pedidoObtenido = malloc(sizeof(respuesta_obtener_pedido));
+
+			bytesRecibidos(recv(nuevoSocketComanda, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+			bytesRecibidos(recv(nuevoSocketComanda, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+			//aca validaria con if los recibidos, ya se me esta haciendo eterno...
+
+			recibir_mensaje(pedidoObtenido, RESPUESTA_OBTENER_PEDIDO, nuevoSocketComanda);
+			close(nuevoSocketComanda);
+
+			//chequeo si cantTotales equivale a cantListas, caso afirmativo el pedido esta listo para ser procesado
+			//por un repartidor
+			char** listaComidas = string_get_string_as_array(pedidoObtenido->comidas);
+			char** listaComidasTotales = string_get_string_as_array(pedidoObtenido->cantTotales);
+			char** listaComidasListas = string_get_string_as_array(pedidoObtenido->cantListas);
+			int i = 0;
+			int contadorTotales = 0;
+			int contadorListas = 0;
+
+			//puedo usar cualquiera de las dos tranquilamente, son 2 arrays de char de exactamente la misma longitud
+			while(listaComidasTotales[i] != NULL){
+				contadorTotales =+ atoi(listaComidasTotales[i]);
+				contadorListas =+ atoi(listaComidasListas[i]);
+			    i++;
+			}
+			//el pedido esta terminado
+			if(contadorTotales == contadorListas){
+				guardarPedidoListo(notificacionPlatoListo->idPedido);
+				sem_wait(semLog);
+				log_info(logger, "[APP] El pedido <%d> del restaurante <%s> ha sido cocinado en su totalidad."
+						, notificacionPlatoListo->idPedido, notificacionPlatoListo->nombreRestaurante);
+				sem_post(semLog);
+			} else {
+			//el pedido no esta terminado, no hago nada especial
+			}
+
+			respuestaNotificacion->respuesta = 1;
+
+			freeDeArray(listaComidas);
+			freeDeArray(listaComidasTotales);
+			freeDeArray(listaComidasListas);
+			free(obtenerPedidoRequerido->nombreRestaurante);
+			free(obtenerPedidoRequerido);
+			free(pedidoObtenido->comidas);
+			free(pedidoObtenido->cantListas);
+			free(pedidoObtenido->cantTotales);
+			free(pedidoObtenido);
 		} else {
 			sem_wait(semLog);
 			log_error(logger, "[APP] Comanda tuvo un problema actualizando las comidas listas.");
@@ -1193,100 +1241,8 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 		sem_post(semLog);
 		close(nuevoSocketComanda);
 	}
-
-
-
-
-	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
-	if(nuevoSocketComanda < 0){
-		sem_wait(semLog);
-		log_info(logger, "Comanda esta muerta, me muero yo tambien");
-		sem_post(semLog);
-		exit(-2);
-	}
-
-	mandar_mensaje(platoListo,PLATO_LISTO,nuevoSocketComanda);
-
-	recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
-
-	if(recibidos >= 1){
-		recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
-		bytesRecibidos(recibidosSize);
-		recibir_mensaje(respuesta,RESPUESTA_PLATO_LISTO,nuevoSocketComanda);
-	}
-
-	if(respuesta->respuesta == 1){
-		mandar_mensaje(obtener_Pedido,OBTENER_PEDIDO,nuevoSocketComanda);
-
-		recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
-
-		if(recibidos >= 1){
-			recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
-			bytesRecibidos(recibidosSize);
-
-			respuesta_consulta = malloc(sizeAAllocar);
-
-			recibir_mensaje(respuesta_consulta,RESPUESTA_OBTENER_PEDIDO,nuevoSocketComanda);
-
-			char** listaComidas = string_get_string_as_array(respuesta_consulta->comidas);
-			char** listaComidasTotales = string_get_string_as_array(respuesta_consulta->cantTotales);
-			char** listaComidasListas = string_get_string_as_array(respuesta_consulta->cantListas);
-			int i = 0, j = 0;
-
-			while(listaComidas != NULL && strcmp(platoListo->nombrePlato,listaComidas[i]) == 0){
-				i++;
-			}
-
-			if(strcmp(platoListo->nombrePlato,listaComidas[i]) == 0){
-
-				if(strcmp(listaComidasTotales[i],listaComidasListas[i]) == 0){
-
-					i = 0;
-					while(listaComidas != NULL){
-
-						if(strcmp(listaComidasTotales[i],listaComidasListas[i]) == 0){
-							j++;
-						}
-						i++;
-					}
-					if(i == j){
-						sem_wait(semLog);
-						log_info(logger, "pedido completo, avisando al repartidor");
-						sem_post(semLog);
-
-						// Se avisa a planificacion que el pedido esta listo
-						guardarPedidoListo(cliente->id_global);
-
-
-					}else{
-						sem_wait(semLog);
-						log_info(logger, "pedido incompleto, faltan comidas por preparar");
-						sem_post(semLog);
-					}
-
-				}else{
-					sem_wait(semLog);
-					log_info(logger, "pedido incompleto, actualizando commanda");
-					sem_post(semLog);
-
-					mandar_mensaje(platoListo,PLATO_LISTO,nuevoSocketComanda);
-				}
-
-			}else{
-				sem_wait(semLog);
-				log_info(logger, "plato no perteneciente al pedido");
-				sem_post(semLog);
-			}
-		}
-
-	}else{
-		sem_wait(semLog);
-		log_info(logger, "ocurrio un error");
-		sem_post(semLog);
-	}
-	close(nuevoSocketComanda);
-	free(respuesta);
-*/
+	mandar_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO, socket_cliente);
+	free(respuestaNotificacion);
 }
 
 
