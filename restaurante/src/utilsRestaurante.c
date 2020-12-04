@@ -201,10 +201,6 @@ void crearHilosPlanificacion(){
 
 }
 
-/*
-void crearHornos(){
-//
-}*/
 
 void chequearSiElPedidoEstaListo(int idDelPedidoSospechoso){
 	int32_t nuevoSocketSindicato, sizePayload, indicePedidoBuscado;

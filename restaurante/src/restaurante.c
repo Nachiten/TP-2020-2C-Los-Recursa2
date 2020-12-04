@@ -367,13 +367,8 @@ void consultar_Pedido(int32_t id, int32_t socket_cliente){
 
     codigo_operacion codigoRecibido;
     bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
-
-//  printf("El codigo recibido del emisor es: %d", codigoRecibido);
-
     uint32_t sizePayload;
     bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
-
-//  printf("El size del buffer/payload es: %u", sizePayload);
 
     respuesta_obtener_pedido* pedidoObtenido = malloc(sizeof(respuesta_obtener_pedido));
 
