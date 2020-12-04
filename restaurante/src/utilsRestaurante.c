@@ -128,12 +128,10 @@ void obtenerMetadataRestaurante(){
 		recibir_mensaje(respuestaAgregarResto, RESPUESTA_AGREGAR_RESTAURANTE, nuevoSocketApp);
 
 		if(respuestaAgregarResto->respuesta == 0){
-			log_error(logger, "La App no me pudo registrar, me tengo que morir.");
+			log_error(logger, "[RESTAURANTE] La APP no me pudo registrar, me tengo que morir.");
 			exit(-1);
 		}
-
-		log_trace(logger, "La App me pudo registrar satisfactoriamente.");
-
+		log_trace(logger, "[RESTAURANTE] La APP me pudo registrar satisfactoriamente.");
         }
 }
 
@@ -208,6 +206,122 @@ void crearHornos(){
 //
 }*/
 
+void chequearSiElPedidoEstaListo(int idDelPedidoSospechoso){
+	int32_t nuevoSocketSindicato, sizePayload, indicePedidoBuscado;
+	respuesta_ok_error* respuestaTerminacion;
+	obtener_pedido* elPedidoAObtener;
+	respuesta_obtener_pedido* elPedidoObtenido;
+	codigo_operacion codigoRecibido;
+	perfil_pedido* elPedidoAsociado;
+	guardar_pedido* notificacionPedidoTerminado;
+
+	nuevoSocketSindicato = establecer_conexion(ip_sindicato,puerto_sindicato);
+	if(nuevoSocketSindicato < 0){
+		sem_wait(semLog);
+		log_error(logger, "Sindicato esta muerto, me muero yo tambien");
+		sem_post(semLog);
+		exit(-2);
+	}
+
+	elPedidoAObtener = malloc(sizeof(obtener_pedido));
+	elPedidoAObtener->largoNombreRestaurante = strlen(nombreRestaurante);
+	elPedidoAObtener->nombreRestaurante = malloc(strlen(nombreRestaurante)+1);
+	strcpy(elPedidoAObtener->nombreRestaurante, nombreRestaurante);
+	elPedidoAObtener->idPedido = idDelPedidoSospechoso;
+
+	mandar_mensaje(elPedidoAObtener, OBTENER_PEDIDO, nuevoSocketSindicato);
+
+	elPedidoObtenido = malloc(sizeof(respuesta_obtener_pedido));
+
+	bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+	bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+	//aca validaria con if los recibidos, ya se me esta haciendo eterno...
+
+	recibir_mensaje(elPedidoObtenido, RESPUESTA_OBTENER_PEDIDO, nuevoSocketSindicato);
+
+	close(nuevoSocketSindicato);
+
+	//chequeo si cantTotales equivale a cantListas, caso afirmativo el pedido esta listo para ser procesado
+	//y tengo que enviar TERMINAR_PEDIDO a sindicato
+	char** listaComidas = string_get_string_as_array(elPedidoObtenido->comidas);
+	char** listaComidasTotales = string_get_string_as_array(elPedidoObtenido->cantTotales);
+	char** listaComidasListas = string_get_string_as_array(elPedidoObtenido->cantListas);
+	int i = 0;
+	int contadorTotales = 0;
+	int contadorListas = 0;
+
+	//puedo usar cualquiera de las dos tranquilamente, son 2 arrays de char de exactamente la misma longitud
+	while(listaComidasTotales[i] != NULL){
+		contadorTotales += atoi(listaComidasTotales[i]);
+		contadorListas += atoi(listaComidasListas[i]);
+		i++;
+	}
+	//el pedido esta terminado
+	if(contadorTotales == contadorListas){
+		indicePedidoBuscado = buscar_pedido_por_id(idDelPedidoSospechoso);
+
+		sem_wait(semListaPedidos);
+		elPedidoAsociado = list_remove(listaPedidos, indicePedidoBuscado);
+		free(elPedidoAsociado);
+		sem_post(semListaPedidos);
+
+		sem_wait(semLog);
+		log_trace(logger, "[EXIT] El pedido <%d> ha sido cocinado en su totalidad." ,idDelPedidoSospechoso);
+		sem_post(semLog);
+
+		nuevoSocketSindicato = establecer_conexion(ip_sindicato,puerto_sindicato);
+		if(nuevoSocketSindicato < 0){
+			sem_wait(semLog);
+			log_error(logger, "Sindicato esta muerto, me muero yo tambien");
+			sem_post(semLog);
+			exit(-2);
+		}
+
+		notificacionPedidoTerminado = malloc(sizeof(guardar_pedido));
+		notificacionPedidoTerminado->idPedido = idDelPedidoSospechoso;
+		notificacionPedidoTerminado->largoNombreRestaurante = strlen(nombreRestaurante);
+		notificacionPedidoTerminado->nombreRestaurante = malloc(strlen(nombreRestaurante)+1);
+		strcpy(notificacionPedidoTerminado->nombreRestaurante, nombreRestaurante);
+
+        mandar_mensaje(notificacionPedidoTerminado, TERMINAR_PEDIDO, nuevoSocketSindicato);
+        bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+		bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+		//aca validaria con if los recibidos, ya se me esta haciendo eterno...
+
+		respuestaTerminacion = malloc(sizeof(respuesta_ok_error));
+
+		recibir_mensaje(respuestaTerminacion, RESPUESTA_TERMINAR_PEDIDO, nuevoSocketSindicato);
+		close(nuevoSocketSindicato);
+
+        if(respuestaTerminacion->respuesta == 0){
+        	sem_wait(semLog);
+			log_error(logger, "[EXIT] Sindicato no consiguio exterminar el pedido de sus registros.");
+			sem_post(semLog);
+        }
+        sem_wait(semLog);
+		log_trace(logger, "[EXIT] Sindicato extermino el pedido de sus registros adecuadamente.");
+		sem_post(semLog);
+
+        free(respuestaTerminacion);
+
+
+	} else {
+		sem_wait(semLog);
+		log_trace(logger, "[EXIT] Se ha preparado uno de los platos del pedido <%d>, pero faltan mas."
+				, elPedidoAObtener->idPedido);
+		sem_post(semLog);
+	}
+
+    free(elPedidoAObtener->nombreRestaurante);
+    free(elPedidoAObtener);
+    free(elPedidoObtenido->comidas);
+    free(elPedidoObtenido->cantListas);
+    free(elPedidoObtenido->cantTotales);
+    free(elPedidoObtenido);
+	freeDeArray(listaComidas);
+	freeDeArray(listaComidasTotales);
+	freeDeArray(listaComidasListas);
+}
 
 void agregarANew(pcb_plato* unPlato)
 {
@@ -274,7 +388,7 @@ void agregarABlock(pcb_plato* elPlato){
 
 void agregarAExit(pcb_plato* elPlato){
 	 plato_listo* notificacionPlatoListoAMandar;
-     Pedido* elPedidoAsociado;
+     perfil_pedido* elPedidoAsociado;
      uint32_t exito;
      int32_t sizeAAllocar, nuevoSocketSindicato, nuevoSocketApp, indiceDelPedidoAsociado;
 
@@ -306,7 +420,7 @@ void agregarAExit(pcb_plato* elPlato){
 	elPedidoAsociado = list_get(listaPedidos,indiceDelPedidoAsociado);
 	sem_post(semListaPedidos);
 
-	if(atoi(appEnPruebas) == 1){
+	if(strcmp(appEnPruebas,"SI") == 0){
 	//la notificacion tiene que pasar por la app, para luego ser redirigida al cliente
        nuevoSocketApp = establecer_conexion(ip_app, puerto_app);
        if(nuevoSocketApp < 0){
@@ -386,6 +500,9 @@ void agregarAExit(pcb_plato* elPlato){
 	}
 
     close(nuevoSocketSindicato);
+
+    chequearSiElPedidoEstaListo(elPlato->idPedido);
+
 	//No se si hace falta esto, confirmenme
 	//list_destroy(elPlato->pasosReceta)
 	//se libera memoria ocupada por donPlato

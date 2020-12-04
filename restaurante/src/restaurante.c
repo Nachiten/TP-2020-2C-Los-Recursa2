@@ -84,7 +84,7 @@ void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	guardar_pedido* pedida_a_guardar;
 	respuesta_ok_error* resultado_guardar_pedido;
 	respuesta_crear_pedido* respuesta;
-	Pedido* pedido = malloc(sizeof(Pedido));
+	perfil_pedido* pedido = malloc(sizeof(perfil_pedido));
 	pedido->socket_cliente = socket_cliente;
 	pedido->numPedido = crear_id_pedidos();
 
@@ -198,7 +198,7 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 
 void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato, nuevoSocketSindicato2;
-	Pedido* elPedidoQueFueConfirmado;
+	perfil_pedido* elPedidoQueFueConfirmado;
 	int32_t indiceDelPedidoQueFueConfirmado;
 	codigo_operacion codigoRecibido;
 	uint32_t sizePayload;
@@ -513,7 +513,7 @@ int32_t crear_id_pedidos(){
 }
 
 int buscar_pedido_por_id(uint32_t id_pedido){
-	Pedido* pedido;
+	perfil_pedido* pedido;
 	int retorno = -2;
 	sem_wait(semListaPedidos);
 	for(int i = 0; i < listaPedidos->elements_count; i++){

@@ -97,7 +97,6 @@ typedef enum{
 }t_estado;
 
 
-
 typedef enum{
 	FIFO = 1,
 	RR,
@@ -107,7 +106,7 @@ typedef enum{
 typedef struct{
 	int32_t numPedido;
 	int32_t socket_cliente;
-}Pedido;
+}perfil_pedido;
 
 typedef enum{
 	REPOSAR = 1,
@@ -171,6 +170,9 @@ pcb_plato* obtenerSiguienteDeReadySinAfinidad();
 pcb_plato* obtenerSiguienteDeReadyConAfinidad(char*);
 
 int buscar_pedido_por_id(uint32_t);
+
+// PEDIDO LISTO
+void chequearSiElPedidoEstaListo(int);
 
 void inicializar_planificacion();
 void iniciarSemaforos();

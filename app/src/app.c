@@ -1200,8 +1200,8 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 
 			//puedo usar cualquiera de las dos tranquilamente, son 2 arrays de char de exactamente la misma longitud
 			while(listaComidasTotales[i] != NULL){
-				contadorTotales =+ atoi(listaComidasTotales[i]);
-				contadorListas =+ atoi(listaComidasListas[i]);
+				contadorTotales += atoi(listaComidasTotales[i]);
+				contadorListas += atoi(listaComidasListas[i]);
 			    i++;
 			}
 			//el pedido esta terminado
@@ -1250,7 +1250,7 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 
 
 
-// TODO | Ver si esto es cliente
+// TODO | Revisar despues si esto sirve para el cliente
 /*
 void consultar_Pedido(consultar_pedido* pedido){
 	perfil_cliente* cliente;

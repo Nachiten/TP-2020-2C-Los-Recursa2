@@ -194,82 +194,6 @@ int checkearPedidoListo(int idPedidoGlobalACheckear){
 }
 
 
-void pedido_entregado(int32_t id_pedido){
-	/*
-	int numCliente = buscar_pedido_por_id(id_pedido);
-	perfil_cliente* cliente = list_get(listaPedidos,numCliente);
-	int32_t nuevoSocketComanda, sizeAAllocar = 0;
-	uint32_t exito = 0;
-
-	guardar_pedido* pedidoFinalizado;
-	pedidoFinalizado = malloc(sizeof(finalizar_pedido));
-	pedidoFinalizado->idPedido = id_pedido;
-	pedidoFinalizado->nombreRestaurante = malloc(strlen(cliente->nombre_resto)+1);
-	strcpy(pedidoFinalizado->nombreRestaurante, cliente->nombre_resto);
-	pedidoFinalizado->largoNombreRestaurante = strlen(cliente->nombre_resto);
-
-
-	// esto no seria necesario, cliente ya sabe desserializar finalizar_pedido
-	//pedido_finalizado* aMandar = malloc(sizeof(pedido_finalizado));
-	//aMandar->mensaje = "Pedido Finalizado";
-	//aMandar->sizeMensaje = strlen("Pedido Finalizado");
-
-
-	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
-	if(nuevoSocketComanda < 0){
-		sem_wait(semLog);
-		log_info(logger, "Comanda esta muerta, me muero yo tambien");
-		sem_post(semLog);
-		exit(-2);
-	}
-
-	mandar_mensaje(pedidoFinalizado, FINALIZAR_PEDIDO, nuevoSocketComanda);
-
-	respuesta_ok_error* respuestaConfirmacionComanda = malloc(sizeof(respuesta_ok_error));
-	los_recv_repetitivos(nuevoSocketComanda, &exito, &sizeAAllocar);
-
-
-		if(exito == 1)
-		{
-			recibir_mensaje(respuestaConfirmacionComanda,RESPUESTA_FINALIZAR_PEDIDO, nuevoSocketComanda);
-			sem_wait(semLog);
-			log_info(logger, "El intento de confirmar el pedido con comanda fue: %i.",
-					resultadoDeRespuesta(respuestaConfirmacionComanda->respuesta));
-			sem_post(semLog);
-		}
-		else
-		{
-			printf("Ocurrió un error al intentar recibir la respuesta de FINALIZAR Pedido a comanda.\n");
-		}
-
-	close(nuevoSocketComanda);
-	free(respuestaConfirmacionComanda);
-
-	mandar_mensaje(pedidoFinalizado, FINALIZAR_PEDIDO, cliente->socket_cliente);
-
-	respuesta_ok_error* respuestaConfirmacionCliente = malloc(sizeof(respuesta_ok_error));
-	los_recv_repetitivos(nuevoSocketComanda, &exito, &sizeAAllocar);
-
-	    if(exito == 1)
-		{
-			recibir_mensaje(respuestaConfirmacionCliente,RESPUESTA_FINALIZAR_PEDIDO, cliente->socket_cliente);
-			sem_wait(semLog);
-			log_info(logger, "El intento de confirmar el pedido con el cliente fue: %i",
-					resultadoDeRespuesta(respuestaConfirmacionCliente->respuesta));
-			sem_post(semLog);
-		}
-		else
-		{
-			printf("Ocurrió un error al intentar recibir la respuesta de FINALIZAR Pedido a cliente.\n");
-		}
-
-	 free(respuestaConfirmacionCliente);
-	 free(pedidoFinalizado->nombreRestaurante);
-	 free(pedidoFinalizado);
-*/
-}
-
-
 void moverPedidoDeBlockAReady(int indicePedido){
 	sem_wait(mutexBlock);
 	pcb_pedido* pedidoAReady = list_remove(colaBlock, indicePedido);
@@ -394,7 +318,7 @@ void hiloBlock_Ready(){
 
 					// Se entrega el pedido
 					log_info(logger, "[BLOCK] Repartidor %i entrega pedido %i.", pedidoActual->repartidorAsignado->numeroRepartidor, pedidoActual->pedidoID);
-					//pedido_entregado(pedidoActual->pedidoID);
+					//pedido_entregado(pedidoActual); esto ya no seria necesario broder
 
 					// Debe descansar antes de volver a ready
 					if (pedidoActual->repartidorAsignado->cansado){
