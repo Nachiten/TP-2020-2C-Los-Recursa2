@@ -601,6 +601,8 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 				respuestaAniadir = malloc(sizeof(respuesta_ok_error));
 				respuestaAniadir->respuesta = 0;
 
+				recibidoAPlato->idPedido = elPedidoAModificar->id_pedido_resto;
+
 				mandar_mensaje(recibidoAPlato, A_PLATO, nuevoSocketRestaurante);
 
 				recibidos = recv(nuevoSocketRestaurante, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
@@ -637,7 +639,7 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 					pasamanosGuardarPlato->idPedido = elPedidoAModificar->id_pedido_resto;
 					pasamanosGuardarPlato->cantidadPlatos = 1;
 
-					mandar_mensaje(recibidoAPlato,GUARDAR_PLATO,nuevoSocketComanda);
+					mandar_mensaje(pasamanosGuardarPlato,GUARDAR_PLATO,nuevoSocketComanda);
 
 					recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 					if(recibidos >= 1){
