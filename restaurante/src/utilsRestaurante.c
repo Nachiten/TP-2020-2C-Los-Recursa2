@@ -1169,3 +1169,16 @@ void signalSemaforoFinalizarCicloExec(uint32_t indice){
 	sem_post(semaforoObjetivo);
 }
 
+// Hacer free de un array con cosas
+void freeDeArray(char** array){
+    int cantidadElementosArray = cantidadDeElementosEnArray(array);
+
+    int i;
+
+    for (i = cantidadElementosArray; i>= 0; i--){
+        free(array[i]);
+    }
+
+    free(array);
+}
+

@@ -524,18 +524,6 @@ int buscar_pedido_por_id(uint32_t id_pedido){
 	return retorno;
 }
 
-// Hacer free de un array con cosas
-void freeDeArray(char** array){
-    int cantidadElementosArray = cantidadDeElementosEnArray(array);
-
-    int i;
-
-    for (i = cantidadElementosArray; i>= 0; i--){
-        free(array[i]);
-    }
-
-    free(array);
-}
 
 //*******************FUNCIONES DEL SERVER*******************
 

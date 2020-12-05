@@ -184,5 +184,5 @@ void signalSemaforoHabilitarCicloExec(uint32_t indice);
 void waitSemaforoFinalizarCicloExec(uint32_t indice);
 void signalSemaforoFinalizarCicloExec(uint32_t indice);
 
-
+void freeDeArray(char**);
 #endif /* SRC_UTILSRESTAURANTE_H_ */

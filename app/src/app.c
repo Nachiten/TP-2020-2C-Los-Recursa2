@@ -48,10 +48,13 @@ int main(){
 	int32_t nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
 	if(nuevoSocketComanda < 0){
 	  sem_wait(semLog);
-	  log_info(logger, "Comanda esta muerta, me muero yo tambien");
+	  log_error(logger, "Comanda esta muerta, me muero yo tambien");
 	  sem_post(semLog);
 	  exit(-2);
 	}
+	close(nuevoSocketComanda);
+
+	log_trace(logger, "[APP] Comanda esta viva, procedo a completar las demas configuraciones.");
 
 	// NOTA: Alterar el orden de estos llamados va a romper (dependen uno del anterior)
 	// Inicializo semaforos necesarios para planif
