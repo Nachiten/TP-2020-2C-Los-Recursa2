@@ -126,8 +126,7 @@ void consultarRestaurantes(int32_t socket_cliente){
 		string_append(&stringCompleto, stringInicial);// agregas un [ al principio
 		string_append(&stringCompleto, stringNuevoParaAgregar);
 
-	}
-	else{
+	}else{
 		stringCompleto = string_new();
 		string_append(&stringCompleto, stringInicial);
 
@@ -1382,7 +1381,7 @@ void registrarRestaurante(agregar_restaurante* recibidoAgregarRestaurante, int32
 			nuevoRestaurante->posX = recibidoAgregarRestaurante->posX;
 			nuevoRestaurante->posY = recibidoAgregarRestaurante->posY;
 			sem_wait(mutexListaRestos);
-			list_add(listaRestos,recibidoAgregarRestaurante);
+			list_add(listaRestos,nuevoRestaurante);
 			sem_post(mutexListaRestos);
 			sem_wait(semLog);
 			log_trace(logger, "[APP] Se agrego al restaurante < %s > en los registros satisfactoriamente."
@@ -1396,6 +1395,18 @@ void registrarRestaurante(agregar_restaurante* recibidoAgregarRestaurante, int32
 
 void registrarHandshake(handshake* recibidoHandshake, int32_t socket_cliente){
 	asociacion_cliente* nuevaAsociacion;
+	int indiceAsociacionPrevia;
+
+	sem_wait(mutexListaAsociaciones);
+	indiceAsociacionPrevia = buscarAsociacion(recibidoHandshake->id);
+	sem_post(mutexListaAsociaciones);
+
+	if(indiceAsociacionPrevia != -2){
+		sem_wait(semLog);
+		log_error(logger, "[APP] Se intento crear una asociacion para el: < %s >, pero ya existe una de antes.", recibidoHandshake->id);
+		sem_post(semLog);
+		return;
+	}
 
 	nuevaAsociacion = malloc(sizeof(asociacion_cliente));
 	nuevaAsociacion->posClienteX = recibidoHandshake->posX;
@@ -1410,7 +1421,7 @@ void registrarHandshake(handshake* recibidoHandshake, int32_t socket_cliente){
 	sem_post(mutexListaAsociaciones);
 
 	sem_wait(semLog);
-	log_trace(logger, "[APP] Se creo exitosamente una asociacion para el cliente < %s >.", recibidoHandshake->id);
+	log_trace(logger, "[APP] Se creo exitosamente una asociacion para el: < %s >.", recibidoHandshake->id);
 	sem_post(semLog);
 }
 
@@ -1616,13 +1627,13 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	 *
 	 * CONSULTAR_RESTAURANTES -> Done + Tested
 	 * SELECCIONAR_RESTAURANTES -> Done + Tested
-	 * CONSULTAR_PLATOS -> Done
+	 * CONSULTAR_PLATOS -> Done + Tested
 	 * CREAR_PEDIDO -> Done +
 	 * ANIADIR_PLATO -> Done +
 	 * CONSULTAR_PEDIDO -> Done +
 	 * CONFIRMAR_PEDIDO -> Done +
 	 * PLATO_LISTO -> Done +
-	 * HANDSHAKE -> Done +
+	 * REGISTRO HANDSHAKE/ASOCIACION -> Done + Tested
 	 * AGREGAR_RESTAURANTE -> Done + Tested
 	 *
 	 */
