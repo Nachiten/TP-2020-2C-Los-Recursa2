@@ -1626,8 +1626,8 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	 * CONSULTAR_RESTAURANTES -> Done + Tested
 	 * SELECCIONAR_RESTAURANTES -> Done + Tested
 	 * CONSULTAR_PLATOS -> Done + Tested
-	 * CREAR_PEDIDO -> Done + Tested
-	 * ANIADIR_PLATO -> Done +
+	 * CREAR_PEDIDO -> Done + Tested (VER TEMITA SINDICATO CREANDO RESTAURANTE SIN AFINIDADES
+	 * ANIADIR_PLATO -> Done + Tested
 	 * CONSULTAR_PEDIDO -> Done +
 	 * CONFIRMAR_PEDIDO -> Done +
 	 * PLATO_LISTO -> Done +
