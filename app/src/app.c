@@ -89,6 +89,7 @@ void inicializar_semaforos(){
 	sem_init(semLog, 0, 1);
 	sem_init(mutexListaRestos, 0, 1);
 	sem_init(mutexListaAsociaciones, 0, 1);
+	sem_init(mutexListaPedidos, 0, 1);
 }
 
 // *********************************FIN SETUP******************************************************
@@ -131,7 +132,7 @@ void consultarRestaurantes(int32_t socket_cliente){
 		string_append(&stringCompleto, stringInicial);
 
 		for(int i = 0; i < listaRestos->elements_count; i++){
-			if(i > 1){
+			if(i >= 1){
 				string_append(&stringCompleto, stringSeparador);// agregas una , si ya hay elementos agregados
 			}
 			resto = list_get(listaRestos,i);// coseguis el restaurante de la posicion i
@@ -412,8 +413,6 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 				free(guardarPedidoRequerido->nombreRestaurante);
 				free(guardarPedidoRequerido);
 				sem_post(mutexListaRestos);
-				sem_post(mutexListaAsociaciones);
-				//recibir_respuesta(CREAR_PEDIDO,resto,cliente, socket_cliente);
 			}
 
 		}else if(strcmp(asociacionBuscada->nombreRestaurante,"RestoDefault") == 0){
@@ -483,22 +482,21 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 			list_add(listaPedidos, elPedidoACrear);
 			sem_post(mutexListaPedidos);
 
-			sem_post(mutexListaAsociaciones);
             free(respuestaComanda);
 			free(guardarPedidoRequerido->nombreRestaurante);
 			free(guardarPedidoRequerido);
 			free(respuestaCreacion);
-		}
+		} else {
 		sem_wait(semLog);
 		log_error(logger, "[APP] Problemas internos creando el pedido.");
 		sem_post(semLog);
-
+		}
 	}else{
 		sem_wait(semLog);
 		log_error(logger, "[APP] Un cliente ha intentado crear un pedido sin haber seleccionado su restaurante.");
 		sem_post(semLog);
-		sem_post(mutexListaAsociaciones);
 	}
+	sem_post(mutexListaAsociaciones);
 }
 
 void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
@@ -1353,7 +1351,7 @@ void registrarRestaurante(agregar_restaurante* recibidoAgregarRestaurante, int32
 	if(listaRestos->elements_count != 0){
 		idResto = buscarRestaurante(recibidoAgregarRestaurante->nombreRestaurante);
 
-			if(idResto != 0){ // se encontro el restaurante en la lista de antes
+			if(idResto != -2){ // se encontro el restaurante en la lista de antes
 				sem_wait(semLog);
 				log_error(logger, "[APP] Se intento agregar al restaurante < %s >, pero ya existe en los registros."
 						, recibidoAgregarRestaurante->nombreRestaurante);
