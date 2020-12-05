@@ -547,7 +547,8 @@ tabla_paginas* agregarPlatoAPedido(tablas_segmentos_restaurantes* tablaDePedidos
 			{
 				encontrado = 1;
 				//sumo la cantidad de platos nueva que llego
-				tablaDePlatos->cantidadPedidaComida += cantidadPlatos; //ToDo ver si hay que poner bit de modificacion en 1
+				tablaDePlatos->cantidadPedidaComida += cantidadPlatos;
+				tablaDePlatos->bitDeModificacion = 1;
 			}
 
 			//no es el que busco
