@@ -52,7 +52,7 @@ int32_t posX_restoDefault;
 int32_t posY_restoDefault;
 
 // SEMAFOROS
-sem_t* planificacionInicializada;
+//sem_t* planificacionInicializada;
 sem_t* contadorProcesosEnNew;
 sem_t* mutexNew;
 sem_t* mutexReady;

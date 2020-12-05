@@ -66,10 +66,8 @@ int main(){
 	}
 	close(socket_commanda);
 */
-	pthread_create(&planificacion, NULL,(void*)iniciarPlanificacion, NULL);
-	pthread_detach(planificacion);
+	iniciarPlanificacion();
 
-	sem_wait(planificacionInicializada);
 	//inicio el server
 	iniciar_server(mi_puerto);
 
@@ -88,10 +86,8 @@ void inicializar_semaforos(){
 	mutexListaRestos = malloc(sizeof(sem_t));
 	mutexListaAsociaciones = malloc(sizeof(sem_t));
 	mutexListaPedidos = malloc(sizeof(sem_t));
-    planificacionInicializada = malloc(sizeof(sem_t));
 	sem_init(semId, 0, 1);
 	sem_init(semLog, 0, 1);
-	sem_init(planificacionInicializada, 0, 1);
 	sem_init(mutexListaRestos, 0, 1);
 	sem_init(mutexListaAsociaciones, 0, 1);
 }

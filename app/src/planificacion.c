@@ -137,8 +137,7 @@ void iniciarPlanificacion(){
 //
 //	guardarPedidoListo(4);
 //	guardarPedidoListo(5);
-    sem_post(planificacionInicializada);
-	pthread_join(hiloNewReady, NULL);
+	//pthread_join(hiloNewReady, NULL);
 }
 
 void guardarPedidoListo(perfil_pedido* elPedidoQueHaFinalizado){
