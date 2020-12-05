@@ -1627,20 +1627,14 @@ void desserializar_seleccionar_restaurante(seleccionar_restaurante* estructura, 
 	//saco el largo del ID del cliente
 	bytesRecibidos(recv(socket_cliente, &(estructura->largoIDCliente), sizeof(estructura->largoIDCliente), MSG_WAITALL));
 
+	estructura->idCliente = malloc(estructura->largoIDCliente+1);
 	bytesRecibidos(recv(socket_cliente, estructura->idCliente, estructura->largoIDCliente+1, MSG_WAITALL));
 
 	//saco el largo del nombre del restaurante
 	bytesRecibidos(recv(socket_cliente, &(estructura->largoNombreRestaurante), sizeof(estructura->largoNombreRestaurante), MSG_WAITALL));
 
-	//preparo un espacio de memoria del tamaño del nombre para poder guardarlo
 	estructura->nombreRestaurante = malloc(estructura->largoNombreRestaurante+1);
-
-	//saco el nombre del restaurante en si
 	bytesRecibidos(recv(socket_cliente, estructura->nombreRestaurante, estructura->largoNombreRestaurante+1, MSG_WAITALL));
-
-	printf("el identificador del cliente es: %s\n", estructura->idCliente);
-	printf("el largo del nombre del restaurante es: %u\n", estructura->largoNombreRestaurante);
-	printf("el nombre del restaurante es: %s.\n", estructura->nombreRestaurante);
 }
 
 void desserializar_obtener_restaurante(obtener_restaurante* estructura, int32_t socket_cliente)

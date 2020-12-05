@@ -163,19 +163,19 @@ void consultarRestaurantes(int32_t socket_cliente){
  * restaurante para el cliente, en caso de no encontrar el nombre manda un 0 en señal de error
 */
 void seleccionarRestaurante(seleccionar_restaurante* seleccRestoRecibido, int32_t socket_cliente){
-	int restoBuscado, asociacionClienteExistente;
+	int indiceRestoBuscado, indiceAsociacionBuscada;
 	respuesta_ok_error* respuesta;
 	asociacion_cliente* asociacionBuscada;
 
-	restoBuscado = buscarRestaurante(seleccRestoRecibido->nombreRestaurante);
+	indiceRestoBuscado = buscarRestaurante(seleccRestoRecibido->nombreRestaurante);
 
 	respuesta = malloc(sizeof(respuesta_ok_error));
 
 	sem_wait(mutexListaAsociaciones);
-	if(restoBuscado != -2 || strcmp(seleccRestoRecibido->nombreRestaurante,"RestoDefault") == 0){
+	if(indiceRestoBuscado != -2 || strcmp(seleccRestoRecibido->nombreRestaurante,"RestoDefault") == 0){
         //el restaurante existe, me fijo si el tipo no esta asociado ya con algun restaurante de antes
-		asociacionClienteExistente = buscarAsociacion(seleccRestoRecibido->idCliente);
-		if(asociacionClienteExistente == -2){
+		indiceAsociacionBuscada = buscarAsociacion(seleccRestoRecibido->idCliente);
+		if(indiceAsociacionBuscada == -2){
 			//el cliente no hizo el handshake, no deberia pasar nunca
 			//no puedo hacer nadaxd
 			sem_wait(semLog);
@@ -183,7 +183,9 @@ void seleccionarRestaurante(seleccionar_restaurante* seleccRestoRecibido, int32_
 			sem_post(semLog);
 		} else {
 			//le seteo el restaurante que quiere en esta ocasion
-			asociacionBuscada = list_get(listaAsociaciones, asociacionClienteExistente);
+			asociacionBuscada = list_get(listaAsociaciones, indiceAsociacionBuscada);
+			free(asociacionBuscada->nombreRestaurante);
+			asociacionBuscada->nombreRestaurante = malloc(seleccRestoRecibido->largoNombreRestaurante+1);
 			strcpy(asociacionBuscada->nombreRestaurante, seleccRestoRecibido->nombreRestaurante);
 		}
 		//se concluyo bien la operacion, se agrego un restaurante a la asociacion del cliente o se piso uno previo
@@ -209,6 +211,14 @@ void consultarPlatos(consultar_platos* consultarPlatosRecibido, int32_t socket_c
 
 	sem_wait(mutexListaAsociaciones);
 	indiceAsociacionBuscada = buscarAsociacion(consultarPlatosRecibido->id);
+
+	if(indiceAsociacionBuscada == -2){
+		sem_wait(semLog);
+	    log_error(logger, "[APP] Somehow al conectarse un cliente no registro una asociacion. Exploto en consultarPlatos.");
+	    sem_post(semLog);
+	    exit(-2);
+	}
+
 	asociacionBuscada = list_get(listaAsociaciones, indiceAsociacionBuscada);// busca el perfil del cliente en la lista de pedidos
 
 	if(strcmp(asociacionBuscada->nombreRestaurante, "N/A") != 0){
@@ -1336,16 +1346,21 @@ void consultar_Pedido(consultar_pedido* pedido){
 void registrarRestaurante(agregar_restaurante* recibidoAgregarRestaurante, int32_t socket_cliente){
 	int idResto;
 	info_resto* nuevoRestaurante;
+	respuesta_ok_error* respuestaRegistro;
 	int correspondeAgregar = 0;
+
+	respuestaRegistro = malloc(sizeof(respuesta_ok_error));
 
 	if(listaRestos->elements_count != 0){
 		idResto = buscarRestaurante(recibidoAgregarRestaurante->nombreRestaurante);
 
 			if(idResto != 0){ // se encontro el restaurante en la lista de antes
 				sem_wait(semLog);
-				log_error(logger, "[APP] Se intento agregar al restaurante %s, pero ya existe en los registros."
+				log_error(logger, "[APP] Se intento agregar al restaurante < %s >, pero ya existe en los registros."
 						, recibidoAgregarRestaurante->nombreRestaurante);
 				sem_post(semLog);
+				respuestaRegistro->respuesta=0;
+				mandar_mensaje(respuestaRegistro, RESPUESTA_AGREGAR_RESTAURANTE, socket_cliente);
 				return;
 			}else{
 				correspondeAgregar = 1;
@@ -1369,8 +1384,14 @@ void registrarRestaurante(agregar_restaurante* recibidoAgregarRestaurante, int32
 			sem_wait(mutexListaRestos);
 			list_add(listaRestos,recibidoAgregarRestaurante);
 			sem_post(mutexListaRestos);
+			sem_wait(semLog);
+			log_trace(logger, "[APP] Se agrego al restaurante < %s > en los registros satisfactoriamente."
+					, recibidoAgregarRestaurante->nombreRestaurante);
+			sem_post(semLog);
+			respuestaRegistro->respuesta = 1;
+			mandar_mensaje(respuestaRegistro, RESPUESTA_AGREGAR_RESTAURANTE, socket_cliente);
 	    }
-
+     free(respuestaRegistro);
 }
 
 void registrarHandshake(handshake* recibidoHandshake, int32_t socket_cliente){
@@ -1380,8 +1401,9 @@ void registrarHandshake(handshake* recibidoHandshake, int32_t socket_cliente){
 	nuevaAsociacion->posClienteX = recibidoHandshake->posX;
 	nuevaAsociacion->posClienteY = recibidoHandshake->posY;
 	nuevaAsociacion->idCliente = malloc(strlen(recibidoHandshake->id)+1);
-	nuevaAsociacion->nombreRestaurante = "N/A";
+	nuevaAsociacion->nombreRestaurante = malloc(strlen("N/A")+1);
 	strcpy(nuevaAsociacion->idCliente, recibidoHandshake->id);
+	strcpy(nuevaAsociacion->nombreRestaurante, "N/A");
 
 	sem_wait(mutexListaAsociaciones);
 	list_add(listaAsociaciones, nuevaAsociacion);
@@ -1428,7 +1450,7 @@ int buscarPedidoPorIDRestoYNombreResto(uint32_t idPedidoSolicitado, char* restau
 int buscarAsociacion(char* idClienteBuscado){
 	asociacion_cliente* unaAsociacion;
 	for(int i = 0; i < listaAsociaciones->elements_count; i++){
-		unaAsociacion = list_get(listaPedidos,i);
+		unaAsociacion = list_get(listaAsociaciones,i);
 
 		if(strcmp(unaAsociacion->idCliente, idClienteBuscado) == 0){
 			return i;
@@ -1592,16 +1614,16 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	/*
 	 *   STATUS Manejo Mensajes APP 2.0
 	 *
-	 * CONSULTAR_RESTAURANTES -> Done
-	 * SELECCIONAR_RESTAURANTES -> Done
+	 * CONSULTAR_RESTAURANTES -> Done + Tested
+	 * SELECCIONAR_RESTAURANTES -> Done + Tested
 	 * CONSULTAR_PLATOS -> Done
-	 * CREAR_PEDIDO -> Done
-	 * ANIADIR_PLATO -> Done
-	 * CONSULTAR_PEDIDO -> Done
-	 * CONFIRMAR_PEDIDO -> Done
-	 * PLATO_LISTO ->
-	 * HANDSHAKE -> Done
-	 * AGREGAR_RESTAURANTE -> Done
+	 * CREAR_PEDIDO -> Done +
+	 * ANIADIR_PLATO -> Done +
+	 * CONSULTAR_PEDIDO -> Done +
+	 * CONFIRMAR_PEDIDO -> Done +
+	 * PLATO_LISTO -> Done +
+	 * HANDSHAKE -> Done +
+	 * AGREGAR_RESTAURANTE -> Done + Tested
 	 *
 	 */
 
