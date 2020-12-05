@@ -53,8 +53,9 @@ int main(){
 	  exit(-2);
 	}
 	close(nuevoSocketComanda);
-
+	sem_wait(semLog);
 	log_trace(logger, "[APP] Comanda esta viva, procedo a completar las demas configuraciones.");
+	sem_post(semLog);
 
 	// NOTA: Alterar el orden de estos llamados va a romper (dependen uno del anterior)
 	// Inicializo semaforos necesarios para planif
@@ -64,17 +65,6 @@ int main(){
 	// Inicializo los semaforos para ciclos de CPU
 	iniciarSemaforosCiclos();
 
-/*
-	//conexion a commanda, pero hariamos on demand, chequear despues
-	socket_commanda = establecer_conexion(ip_commanda,puerto_commanda);
-	if(socket_commanda<0){
-		sem_wait(semLog);
-		log_info(logger, "Comanda esta muerto, procedo a fallecer");
-		sem_post(semLog);
-		exit(-2);
-	}
-	close(socket_commanda);
-*/
 	iniciarPlanificacion();
 
 	//inicio el server
