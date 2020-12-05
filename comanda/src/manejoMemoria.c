@@ -3,7 +3,7 @@
 void inicializar_lista_de_tablas_de_segmentos_de_restaurantes(tablas_segmentos_restaurantes* listas_de_pedidos)
 {
 	listas_de_pedidos->nombreRestaurante = "";//chequear si se mantiene asi o si hace agua
-	listas_de_pedidos->cantidadDeSegmentos = 1;
+	listas_de_pedidos->cantidadDeSegmentos = 0;
 	listas_de_pedidos->miTablaDePedidos = malloc(sizeof(segmentos));
 	inicializar_tabla_de_segmentos(listas_de_pedidos->miTablaDePedidos);
 	listas_de_pedidos->anter_lista = NULL;
@@ -95,6 +95,8 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 	{
 		tablaDePedidos->id_Pedido = idDelPedido;
 		tablaDePedidos->estado = PENDIENTE;
+		//el restaurante ahora tiene un pedido +
+		tablaDePedidosDelRestaurante->cantidadDeSegmentos++;
 		return tablaDePedidos->numero_de_segmento;
 	}
 
@@ -124,6 +126,9 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 		nuevoSegmento->numero_de_segmento = ultimoSegmento->numero_de_segmento + 1;
 		nuevoSegmento->mi_tabla = malloc(sizeof(tabla_paginas));
 		inicializar_tabla_de_paginas(nuevoSegmento->mi_tabla);
+
+		//el restaurante ahora tiene un pedido +
+		tablaDePedidosDelRestaurante->cantidadDeSegmentos++;
 
 		//devuelvo el numero del segmento creado
 		return nuevoSegmento->numero_de_segmento;
