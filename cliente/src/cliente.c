@@ -436,6 +436,9 @@ void obtenerInputConsolaCliente(){
 		mensajeAniadirPlato->nombrePlato = malloc(mensajeAniadirPlato->largoNombrePlato+1);
 		strcpy(mensajeAniadirPlato->nombrePlato, palabrasSeparadas[1]);
 		mensajeAniadirPlato->idPedido = atoi(palabrasSeparadas[2]);
+		mensajeAniadirPlato->sizeId = strlen(idCliente);
+		mensajeAniadirPlato->id = malloc(mensajeAniadirPlato->sizeId+1);
+		strcpy(mensajeAniadirPlato->id, idCliente);
 
 		mandar_mensaje(mensajeAniadirPlato, A_PLATO, socketCliente);
 		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);

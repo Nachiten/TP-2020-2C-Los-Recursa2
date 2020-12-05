@@ -552,7 +552,7 @@ uint32_t serializar_paquete_aniadir_plato(t_paquete* paquete, a_plato* estructur
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 	buffer->size = sizeof(uint32_t)*3
 			     + strlen(estructura->nombrePlato)+1
-	             + strlen(estructura->id);
+	             + strlen(estructura->id)+1;
 
 	void* streamAuxiliar = malloc(buffer->size);
 

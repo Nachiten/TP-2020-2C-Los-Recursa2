@@ -1626,7 +1626,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	 * CONSULTAR_RESTAURANTES -> Done + Tested
 	 * SELECCIONAR_RESTAURANTES -> Done + Tested
 	 * CONSULTAR_PLATOS -> Done + Tested
-	 * CREAR_PEDIDO -> Done +
+	 * CREAR_PEDIDO -> Done + Tested
 	 * ANIADIR_PLATO -> Done +
 	 * CONSULTAR_PEDIDO -> Done +
 	 * CONFIRMAR_PEDIDO -> Done +
@@ -1729,7 +1729,6 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 
 void serve_client(int32_t* socket)
 {
-	//while(1){
 		int32_t sizeAAllocar = 0;
 		codigo_operacion cod_op = 0;
 		int32_t recibidosSize = 0;
@@ -1758,8 +1757,6 @@ void serve_client(int32_t* socket)
 
 		recibidosSize = 0;
 		recibidos = 0;
-	//}
-	//close(socket);
 }
 
 void esperar_cliente(int32_t socket_servidor)
