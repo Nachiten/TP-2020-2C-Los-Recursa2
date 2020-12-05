@@ -299,7 +299,7 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 	sem_wait(mutexListaAsociaciones);
 	indiceAsociacionBuscada = buscarAsociacion(crearPedidoRecibido->id);
 
-	asociacionBuscada = list_get(listaPedidos, indiceAsociacionBuscada);
+	asociacionBuscada = list_get(listaAsociaciones, indiceAsociacionBuscada);
 	if(strcmp(asociacionBuscada->nombreRestaurante, "N/A") != 0){
 
 		if(listaRestos->elements_count != 0 && strcmp(asociacionBuscada->nombreRestaurante,"RestoDefault") != 0){
@@ -477,7 +477,7 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 			elPedidoACrear->idCliente = malloc(strlen(asociacionBuscada->idCliente)+1);
 			elPedidoACrear->nombreRestaurante = malloc(strlen(asociacionBuscada->nombreRestaurante)+1);
 			strcpy(elPedidoACrear->idCliente, asociacionBuscada->idCliente);
-			strcpy(elPedidoACrear->nombreRestaurante, "asociacionBuscada->nombreRestaurante");
+			strcpy(elPedidoACrear->nombreRestaurante, asociacionBuscada->nombreRestaurante);
 
 			sem_wait(mutexListaPedidos);
 			list_add(listaPedidos, elPedidoACrear);
