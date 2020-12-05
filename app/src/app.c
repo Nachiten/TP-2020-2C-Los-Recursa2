@@ -581,7 +581,6 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 			free(pasamanosGuardarPlato->nombreRestaurante);
 			free(pasamanosGuardarPlato);
 			free(respuestaAniadir);
-			sem_post(mutexListaPedidos);
 
 		}else{
 			indiceRestoAsociado = buscarRestaurante(elPedidoAModificar->nombreRestaurante);
@@ -593,7 +592,7 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 				sem_post(mutexListaRestos);
 				if(nuevoSocketRestaurante < 0){
 					sem_wait(semLog);
-					log_error(logger, "[APP] Un restaurante con un pedido activo no esta levantado, me muero yo tambien");
+					log_error(logger, "Un restaurante con un pedido activo no esta levantado, me muero yo tambien");
 					sem_post(semLog);
 					exit(-2);
 				}
@@ -661,14 +660,19 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 				free(respuestaAniadir);
 				close(nuevoSocketRestaurante);
 			}
-			sem_post(mutexListaPedidos);
+
 		}
 
 	}else{
 		sem_wait(semLog);
 		log_error(logger, "[APP] Se ingreso un ID de pedido global equivocado al querer aniadir un plato.");
 		sem_post(semLog);
+		respuestaAniadir = malloc(sizeof(respuesta_ok_error));
+		respuestaAniadir->respuesta = 0;
+		mandar_mensaje(respuestaAniadir, RESPUESTA_A_PLATO, socket_cliente);
+		free(respuestaAniadir);
 	}
+	sem_post(mutexListaPedidos);
 }
 
 
@@ -1628,7 +1632,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	 * CONSULTAR_RESTAURANTES -> Done + Tested
 	 * SELECCIONAR_RESTAURANTES -> Done + Tested
 	 * CONSULTAR_PLATOS -> Done + Tested
-	 * CREAR_PEDIDO -> Done + Tested (VER TEMITA SINDICATO CREANDO RESTAURANTE SIN AFINIDADES
+	 * CREAR_PEDIDO -> Done + Tested
 	 * ANIADIR_PLATO -> Done + Tested
 	 * CONSULTAR_PEDIDO -> Done +
 	 * CONFIRMAR_PEDIDO -> Done +
