@@ -17,7 +17,7 @@ int main(int cantArg, char* argumentos[]){
 	// Si no hay ningun parametro del path de config genero valor default
 	if (cantArg < 2){
 		printf("El path de la config no está especificado, tomando valor default.\nValor default: /home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/restaurante1.config\n");
-		pathConfig = "/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/restaurante1.config";
+		pathConfig = "/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/restaurante3.config";
 	// Si hay un parametro asumo que es el path de la config y lo uso
 	} else {
 		pathConfig = argumentos[1];
@@ -81,7 +81,7 @@ void consultar_Platos(int32_t socket_cliente){
 
 void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato;
-	guardar_pedido* pedida_a_guardar;
+	guardar_pedido* pedidoAGuardar;
 	respuesta_ok_error* resultado_guardar_pedido;
 	respuesta_crear_pedido* respuesta;
 	perfil_pedido* pedido = malloc(sizeof(perfil_pedido));
@@ -100,13 +100,13 @@ void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	list_add(listaPedidos,pedido);
 	sem_post(semListaPedidos);
 
-	pedida_a_guardar = malloc(sizeof(guardar_pedido));
-	pedida_a_guardar->idPedido = pedido->numPedido;
-	pedida_a_guardar->largoNombreRestaurante = strlen(nombreRestaurante);
-	pedida_a_guardar->nombreRestaurante = malloc(sizeof(strlen(nombreRestaurante) + 1));
-	strcpy(pedida_a_guardar->nombreRestaurante,nombreRestaurante);
+	pedidoAGuardar = malloc(sizeof(guardar_pedido));
+	pedidoAGuardar->idPedido = pedido->numPedido;
+	pedidoAGuardar->largoNombreRestaurante = strlen(nombreRestaurante);
+	pedidoAGuardar->nombreRestaurante = malloc(strlen(nombreRestaurante)+1);
+	strcpy(pedidoAGuardar->nombreRestaurante,nombreRestaurante);
 
-	mandar_mensaje(pedida_a_guardar, GUARDAR_PEDIDO, nuevoSocketSindicato);
+	mandar_mensaje(pedidoAGuardar, GUARDAR_PEDIDO, nuevoSocketSindicato);
 
 	respuesta = malloc(sizeof(respuesta_crear_pedido));
 	respuesta->idPedido = pedido->numPedido;
@@ -136,8 +136,8 @@ void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 		free(resultado_guardar_pedido);
 	}
 	close(nuevoSocketSindicato);
-    free(pedida_a_guardar->nombreRestaurante);
-    free(pedida_a_guardar);
+    free(pedidoAGuardar->nombreRestaurante);
+    free(pedidoAGuardar);
 	free(respuesta);
 }
 
