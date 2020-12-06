@@ -494,7 +494,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
 						//pasamos el pedido a CONFIRMADO
 						cambiarEstado(segmentoSeleccionado, CONFIRMADO);
 						resultado->respuesta = 1;
-						puts("El pedido solicitado ahora se encuentra en estado CONFIRMADO.");
+						printf("El pedido %u del restaurante %s ahora se encuentra en estado CONFIRMADO.\n", recibidoConfirmarPedido->idPedido, recibidoConfirmarPedido->nombreRestaurante);
 					}
 
 					//nop
