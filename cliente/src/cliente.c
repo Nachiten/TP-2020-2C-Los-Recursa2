@@ -682,7 +682,9 @@ void obtenerInputConsolaCliente(){
 		//a la mierda tod0, ni me aceptaron el confirmar pedido
 		else
 		{
-			puts("Falló la recepción de la respuesta de confirmar pedido.");
+			sem_wait(semLog);
+			log_error(logger, "Ocurrio un problema al recibir la respuesta confirmar pedido.");
+			sem_post(semLog);
 		}
 
 		free(elMensajeConfirmarPedido->nombreRestaurante); //porfa no olvidarse de este free, tambien es importante, no solo liberar la estructura, sino nos va a caber
@@ -700,10 +702,13 @@ void obtenerInputConsolaCliente(){
 		}
 
     	socketCliente = establecer_conexion(ip_destino , puerto_destino);
-    	resultado_de_conexion(socketCliente, logger, "destino");
 
     	consultar_pedido* estructuraConsultarPedido = malloc(sizeof(uint32_t));
     	estructuraConsultarPedido->idPedido = atoi(palabrasSeparadas[1]);
+    	estructuraConsultarPedido->sizeId = strlen(idCliente);
+    	estructuraConsultarPedido->id = malloc(estructuraConsultarPedido->sizeId+1);
+    	strcpy(estructuraConsultarPedido->id,idCliente);
+
 
     	mandar_mensaje(estructuraConsultarPedido, CONSULTAR_PEDIDO, socketCliente);
     	los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
@@ -715,26 +720,18 @@ void obtenerInputConsolaCliente(){
     		//re piola
     		mostrar_el_estado_del_pedido_consultar_pedido(estructuraConsultarPedido, estructuraRespuestaConsultarPedido, logger, semLog);
 
-			/*
-    		sem_wait(semLog);
-    		log_info(logger, "El pedido < %d > del restaurante < %s >, trajo los campos:\nRepartidor: %s\nEstado: %d\nComidas: %s"
-    			,estructuraConsultarPedido->idPedido, estructuraRespuestaConsultarPedido->nombreRestaurante
-				,estructuraRespuestaConsultarPedido->estado
-				,estructuraRespuestaConsultarPedido->comidas);
-    		sem_post(semLog);
-    		*/
-
     		free(estructuraRespuestaConsultarPedido->nombreRestaurante);
     		free(estructuraRespuestaConsultarPedido->comidas);
     		free(estructuraRespuestaConsultarPedido->cantTotales);
     		free(estructuraRespuestaConsultarPedido->cantListas);
     	} else {
-    		printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
+    		sem_wait(semLog);
+    		log_error(logger, "Ocurrio un problema al recibir la respuesta consultar pedido.");
+			sem_post(semLog);
     	}
 
     	free(estructuraConsultarPedido);
         close(socketCliente);
-
     	break;
 
     case OBTENER_PEDIDO:
@@ -757,27 +754,26 @@ void obtenerInputConsolaCliente(){
 		mandar_mensaje(mensajeObtenerPedido, OBTENER_PEDIDO , socketCliente);
 		los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
 
-			if(exito == 1)
-			{
-				respuesta_obtener_pedido* respuestaObtenerPedido = malloc(sizeof(respuesta_obtener_pedido));
-				recibir_mensaje(respuestaObtenerPedido, RESPUESTA_OBTENER_PEDIDO ,socketCliente);
+		if(exito == 1)
+		{
+			respuesta_obtener_pedido* respuestaObtenerPedido = malloc(sizeof(respuesta_obtener_pedido));
+			recibir_mensaje(respuestaObtenerPedido, RESPUESTA_OBTENER_PEDIDO ,socketCliente);
 
-				//re piola
-				mostrar_el_estado_del_pedido_obtener_pedido(mensajeObtenerPedido, respuestaObtenerPedido, logger, semLog);
+			//re piola
+			mostrar_el_estado_del_pedido_obtener_pedido(mensajeObtenerPedido, respuestaObtenerPedido, logger, semLog);
 
-				free(respuestaObtenerPedido->comidas);
-				free(respuestaObtenerPedido->cantTotales);
-				free(respuestaObtenerPedido->cantListas);
-				free(respuestaObtenerPedido);
-			} else
-			{
-				printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
-			}
+			free(respuestaObtenerPedido->comidas);
+			free(respuestaObtenerPedido->cantTotales);
+			free(respuestaObtenerPedido->cantListas);
+			free(respuestaObtenerPedido);
+		} else
+		{
+			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
+		}
 
-			free(mensajeObtenerPedido->nombreRestaurante);
-			free(mensajeObtenerPedido);
-			close(socketCliente);
-
+		free(mensajeObtenerPedido->nombreRestaurante);
+		free(mensajeObtenerPedido);
+		close(socketCliente);
     	break;
 
 

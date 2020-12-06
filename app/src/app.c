@@ -891,6 +891,8 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 								,elPedidoAConfirmar->nombreRestaurante);
 						sem_post(semLog);
 
+						guardarPedidoListo(elPedidoAConfirmar);
+
 						agregarANew(nuevoPcb);
 
 						sem_post(mutexListaPedidos);
@@ -953,7 +955,7 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 				restoAsociado = list_get(listaRestos, indiceRestoAsociado);
 
 				solicitudConfirmacion = malloc(sizeof(confirmar_pedido));
-				solicitudConfirmacion->idPedido = elPedidoAConfirmar->id_pedido_global;
+				solicitudConfirmacion->idPedido = elPedidoAConfirmar->id_pedido_resto;
 				solicitudConfirmacion->largoNombreRestaurante = strlen(restoAsociado->nombre_resto);
 				solicitudConfirmacion->nombreRestaurante = malloc(strlen(restoAsociado->nombre_resto)+1);
 				strcpy(solicitudConfirmacion->nombreRestaurante, restoAsociado->nombre_resto);
