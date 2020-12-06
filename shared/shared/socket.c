@@ -738,7 +738,7 @@ uint32_t serializar_paquete_consultar_pedido(t_paquete* paquete, consultar_pedid
 
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
-	pesoDeElementosAEnviar = sizeof(estructura->idPedido);
+	pesoDeElementosAEnviar = buffer->size;
 
 	if(desplazamiento != pesoDeElementosAEnviar)
 	{

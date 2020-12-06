@@ -685,13 +685,34 @@ void consultarPedido(consultar_pedido* elPedidoBuscado, int32_t socket_cliente){
 	uint32_t sizePayload;
 	codigo_operacion codigoRecibido;
 
+	sem_wait(mutexListaPedidos);
 	indiceDelPedidoAConsultar = buscarPedidoPorIDGlobal(elPedidoBuscado->idPedido);
+    sem_post(mutexListaPedidos);
 
 	if(indiceDelPedidoAConsultar == -2){
 		sem_wait(semLog);
 		log_error(logger, "[APP] Arribo una solicitud de consulta de un pedido que no existe en los registros...");
 		sem_post(semLog);
-		//ToDo mandar estructura vacia ???
+		elPedidoYaConsultado = malloc(sizeof(respuesta_consultar_pedido));
+		elPedidoYaConsultado->estado = NADA_CARGADO;
+		elPedidoYaConsultado->largoNombreRestaurante =  strlen("N/A");
+		elPedidoYaConsultado->sizeComidas = strlen("[]");
+		elPedidoYaConsultado->sizeCantTotales = strlen("[]");
+		elPedidoYaConsultado->sizeCantListas = strlen("[]");
+		elPedidoYaConsultado->nombreRestaurante = malloc(strlen("N/A")+1);
+		elPedidoYaConsultado->cantTotales = malloc(strlen("[]")+1);
+		elPedidoYaConsultado->comidas = malloc(strlen("[]")+1);
+		elPedidoYaConsultado->cantListas = malloc(strlen("[]")+1);
+		strcpy(elPedidoYaConsultado->comidas, "N/A");
+		strcpy(elPedidoYaConsultado->comidas, "[]");
+		strcpy(elPedidoYaConsultado->cantTotales, "[]");
+		strcpy(elPedidoYaConsultado->cantListas, "[]");
+		mandar_mensaje(elPedidoYaConsultado, RESPUESTA_CONSULTAR_PEDIDO, socket_cliente);
+		free(elPedidoYaConsultado->nombreRestaurante);
+		free(elPedidoYaConsultado->comidas);
+		free(elPedidoYaConsultado->cantTotales);
+		free(elPedidoYaConsultado->cantListas);
+		free(elPedidoYaConsultado);
 		return;
 	}
 
@@ -870,6 +891,8 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 								,elPedidoAConfirmar->nombreRestaurante);
 						sem_post(semLog);
 
+						guardarPedidoListo(elPedidoAConfirmar);
+
 						agregarANew(nuevoPcb);
 
 						sem_post(mutexListaPedidos);
@@ -932,7 +955,7 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 				restoAsociado = list_get(listaRestos, indiceRestoAsociado);
 
 				solicitudConfirmacion = malloc(sizeof(confirmar_pedido));
-				solicitudConfirmacion->idPedido = elPedidoAConfirmar->id_pedido_global;
+				solicitudConfirmacion->idPedido = elPedidoAConfirmar->id_pedido_resto;
 				solicitudConfirmacion->largoNombreRestaurante = strlen(restoAsociado->nombre_resto);
 				solicitudConfirmacion->nombreRestaurante = malloc(strlen(restoAsociado->nombre_resto)+1);
 				strcpy(solicitudConfirmacion->nombreRestaurante, restoAsociado->nombre_resto);
