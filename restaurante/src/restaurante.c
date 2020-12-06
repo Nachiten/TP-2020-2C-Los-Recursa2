@@ -81,7 +81,7 @@ void consultar_Platos(int32_t socket_cliente){
 
 void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato;
-	guardar_pedido* pedida_a_guardar;
+	guardar_pedido* pedidoAGuardar;
 	respuesta_ok_error* resultado_guardar_pedido;
 	respuesta_crear_pedido* respuesta;
 	perfil_pedido* pedido = malloc(sizeof(perfil_pedido));
@@ -100,13 +100,13 @@ void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	list_add(listaPedidos,pedido);
 	sem_post(semListaPedidos);
 
-	pedida_a_guardar = malloc(sizeof(guardar_pedido));
-	pedida_a_guardar->idPedido = pedido->numPedido;
-	pedida_a_guardar->largoNombreRestaurante = strlen(nombreRestaurante);
-	pedida_a_guardar->nombreRestaurante = malloc(sizeof(strlen(nombreRestaurante) + 1));
-	strcpy(pedida_a_guardar->nombreRestaurante,nombreRestaurante);
+	pedidoAGuardar = malloc(sizeof(guardar_pedido));
+	pedidoAGuardar->idPedido = pedido->numPedido;
+	pedidoAGuardar->largoNombreRestaurante = strlen(nombreRestaurante);
+	pedidoAGuardar->nombreRestaurante = malloc(strlen(nombreRestaurante)+1);
+	strcpy(pedidoAGuardar->nombreRestaurante,nombreRestaurante);
 
-	mandar_mensaje(pedida_a_guardar, GUARDAR_PEDIDO, nuevoSocketSindicato);
+	mandar_mensaje(pedidoAGuardar, GUARDAR_PEDIDO, nuevoSocketSindicato);
 
 	respuesta = malloc(sizeof(respuesta_crear_pedido));
 	respuesta->idPedido = pedido->numPedido;
@@ -136,20 +136,23 @@ void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 		free(resultado_guardar_pedido);
 	}
 	close(nuevoSocketSindicato);
-    free(pedida_a_guardar->nombreRestaurante);
-    free(pedida_a_guardar);
+    free(pedidoAGuardar->nombreRestaurante);
+    free(pedidoAGuardar);
 	free(respuesta);
 }
 
 void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
-	respuesta_ok_error* respuesta = malloc(sizeof(respuesta_ok_error));
+	respuesta_ok_error* respuestaAniadir = malloc(sizeof(respuesta_ok_error));
 	int32_t nuevoSocketSindicato;
 	guardar_plato* pasamanosGuardarPlato;
 
 	//sem_wait(semListaPedidos);
 	if(buscar_pedido_por_id(recibidoAPlato->idPedido) != -2){
 
-		printf("Encontre el pedido buscado.\n");
+		sem_wait(semLog);
+		log_trace(logger, "[RESTAURANTE] Encontre el pedido buscado de ID: < %d >.", recibidoAPlato->idPedido);
+		sem_post(semLog);
+
 		nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
 		if(nuevoSocketSindicato < 0){
 			sem_wait(semLog);
@@ -171,17 +174,23 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 
 		codigo_operacion codigoRecibido;
 	    bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
-
-//	    printf("El codigo recibido del emisor es: %d", codigoRecibido);
-
 	    uint32_t sizePayload;
 	    bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
 
-//	    printf("El size del buffer/payload es: %u", sizePayload);
+	    recibir_mensaje(respuestaAniadir,RESPUESTA_GUARDAR_PLATO, nuevoSocketSindicato);
 
-	    recibir_mensaje(respuesta,RESPUESTA_GUARDAR_PLATO, nuevoSocketSindicato);
+	    if(respuestaAniadir->respuesta == 0){
+	    	sem_wait(semLog);
+			log_error(logger, "[RESTAURANTE] Sindicato experimento un problema con el pedido de ID: < %d > al intentar "
+					"aniadirle un plato.", recibidoAPlato->idPedido);
+			sem_post(semLog);
+	    } else {
+	    	sem_wait(semLog);
+			log_trace(logger, "[RESTAURANTE] Sindicato guardo un plato en el pedido: < %d >.", recibidoAPlato->idPedido);
+			sem_post(semLog);
+	    }
 
-	    mandar_mensaje(respuesta,RESPUESTA_A_PLATO,socket_cliente);
+	    mandar_mensaje(respuestaAniadir,RESPUESTA_A_PLATO,socket_cliente);
 	    close(nuevoSocketSindicato);
 
 	    free(pasamanosGuardarPlato->nombrePlato);
@@ -189,11 +198,14 @@ void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 	    free(pasamanosGuardarPlato);
 
 	}else{
-		respuesta->respuesta = 0;
-		mandar_mensaje(respuesta,RESPUESTA_A_PLATO,socket_cliente);
+		sem_wait(semLog);
+		log_error(logger, "[RESTAURANTE] No encontre el pedido buscado de ID: < %d > para aniadirle un plato.", recibidoAPlato->idPedido);
+		sem_post(semLog);
+		respuestaAniadir->respuesta = 0;
+		mandar_mensaje(respuestaAniadir,RESPUESTA_A_PLATO,socket_cliente);
 	}
 	//sem_post(semListaPedidos);
-	free(respuesta);
+	free(respuestaAniadir);
 }
 
 void confirmar_Pedido(int32_t id, int32_t socket_cliente){
@@ -524,18 +536,6 @@ int buscar_pedido_por_id(uint32_t id_pedido){
 	return retorno;
 }
 
-// Hacer free de un array con cosas
-void freeDeArray(char** array){
-    int cantidadElementosArray = cantidadDeElementosEnArray(array);
-
-    int i;
-
-    for (i = cantidadElementosArray; i>= 0; i--){
-        free(array[i]);
-    }
-
-    free(array);
-}
 
 //*******************FUNCIONES DEL SERVER*******************
 

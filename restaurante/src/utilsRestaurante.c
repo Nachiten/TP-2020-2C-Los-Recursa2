@@ -14,7 +14,7 @@ void inicializarRestaurante(char* elPathDeLaConfig){
     quantumElegido = config_get_int_value(configuracion, "QUANTUM");
     algoritmoElegido = config_get_string_value(configuracion, "ALGORITMO_PLANIFICACION");
     RETARDO_CICLO_CPU = config_get_int_value(configuracion, "RETARDO_CICLO_CPU");
-    appEnPruebas = config_get_string_value(configuracion, "APP_TESTEANDOSE");
+    appEnPruebas = config_get_string_value(configuracion, "APP_ENPRUEBAS");
     ip_local = config_get_string_value(configuracion,"IP_LOCAL");
 
     strcat(nombreRestaurante,"\0");
@@ -119,9 +119,9 @@ void obtenerMetadataRestaurante(){
 		mandar_mensaje(credencialesRestaurante, AGREGAR_RESTAURANTE, nuevoSocketApp);
 
 		codigo_operacion codigoRecibido;
-		bytesRecibidos(recv(nuevoSocketSindicato, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+		bytesRecibidos(recv(nuevoSocketApp, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 		uint32_t sizePayload;
-		bytesRecibidos(recv(nuevoSocketSindicato, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+		bytesRecibidos(recv(nuevoSocketApp, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
 
 		respuestaAgregarResto = malloc(sizeof(respuesta_ok_error));
 
@@ -1167,5 +1167,18 @@ void waitSemaforoFinalizarCicloExec(uint32_t indice){
 void signalSemaforoFinalizarCicloExec(uint32_t indice){
 	sem_t* semaforoObjetivo = list_get(listaSemFinalizarCicloExec, indice);
 	sem_post(semaforoObjetivo);
+}
+
+// Hacer free de un array con cosas
+void freeDeArray(char** array){
+    int cantidadElementosArray = cantidadDeElementosEnArray(array);
+
+    int i;
+
+    for (i = cantidadElementosArray; i>= 0; i--){
+        free(array[i]);
+    }
+
+    free(array);
 }
 

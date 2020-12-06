@@ -48,10 +48,14 @@ int main(){
 	int32_t nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
 	if(nuevoSocketComanda < 0){
 	  sem_wait(semLog);
-	  log_info(logger, "Comanda esta muerta, me muero yo tambien");
+	  log_error(logger, "Comanda esta muerta, me muero yo tambien");
 	  sem_post(semLog);
 	  exit(-2);
 	}
+	close(nuevoSocketComanda);
+	sem_wait(semLog);
+	log_trace(logger, "[APP] Comanda esta viva, procedo a completar las demas configuraciones.");
+	sem_post(semLog);
 
 	// NOTA: Alterar el orden de estos llamados va a romper (dependen uno del anterior)
 	// Inicializo semaforos necesarios para planif
@@ -61,17 +65,6 @@ int main(){
 	// Inicializo los semaforos para ciclos de CPU
 	iniciarSemaforosCiclos();
 
-/*
-	//conexion a commanda, pero hariamos on demand, chequear despues
-	socket_commanda = establecer_conexion(ip_commanda,puerto_commanda);
-	if(socket_commanda<0){
-		sem_wait(semLog);
-		log_info(logger, "Comanda esta muerto, procedo a fallecer");
-		sem_post(semLog);
-		exit(-2);
-	}
-	close(socket_commanda);
-*/
 	iniciarPlanificacion();
 
 	//inicio el server
@@ -96,6 +89,7 @@ void inicializar_semaforos(){
 	sem_init(semLog, 0, 1);
 	sem_init(mutexListaRestos, 0, 1);
 	sem_init(mutexListaAsociaciones, 0, 1);
+	sem_init(mutexListaPedidos, 0, 1);
 }
 
 // *********************************FIN SETUP******************************************************
@@ -133,13 +127,12 @@ void consultarRestaurantes(int32_t socket_cliente){
 		string_append(&stringCompleto, stringInicial);// agregas un [ al principio
 		string_append(&stringCompleto, stringNuevoParaAgregar);
 
-	}
-	else{
+	}else{
 		stringCompleto = string_new();
 		string_append(&stringCompleto, stringInicial);
 
 		for(int i = 0; i < listaRestos->elements_count; i++){
-			if(i > 1){
+			if(i >= 1){
 				string_append(&stringCompleto, stringSeparador);// agregas una , si ya hay elementos agregados
 			}
 			resto = list_get(listaRestos,i);// coseguis el restaurante de la posicion i
@@ -170,19 +163,19 @@ void consultarRestaurantes(int32_t socket_cliente){
  * restaurante para el cliente, en caso de no encontrar el nombre manda un 0 en señal de error
 */
 void seleccionarRestaurante(seleccionar_restaurante* seleccRestoRecibido, int32_t socket_cliente){
-	int restoBuscado, asociacionClienteExistente;
+	int indiceRestoBuscado, indiceAsociacionBuscada;
 	respuesta_ok_error* respuesta;
 	asociacion_cliente* asociacionBuscada;
 
-	restoBuscado = buscarRestaurante(seleccRestoRecibido->nombreRestaurante);
+	indiceRestoBuscado = buscarRestaurante(seleccRestoRecibido->nombreRestaurante);
 
 	respuesta = malloc(sizeof(respuesta_ok_error));
 
 	sem_wait(mutexListaAsociaciones);
-	if(restoBuscado != -2 || strcmp(seleccRestoRecibido->nombreRestaurante,"RestoDefault") == 0){
+	if(indiceRestoBuscado != -2 || strcmp(seleccRestoRecibido->nombreRestaurante,"RestoDefault") == 0){
         //el restaurante existe, me fijo si el tipo no esta asociado ya con algun restaurante de antes
-		asociacionClienteExistente = buscarAsociacion(seleccRestoRecibido->idCliente);
-		if(asociacionClienteExistente == -2){
+		indiceAsociacionBuscada = buscarAsociacion(seleccRestoRecibido->idCliente);
+		if(indiceAsociacionBuscada == -2){
 			//el cliente no hizo el handshake, no deberia pasar nunca
 			//no puedo hacer nadaxd
 			sem_wait(semLog);
@@ -190,7 +183,9 @@ void seleccionarRestaurante(seleccionar_restaurante* seleccRestoRecibido, int32_
 			sem_post(semLog);
 		} else {
 			//le seteo el restaurante que quiere en esta ocasion
-			asociacionBuscada = list_get(listaAsociaciones, asociacionClienteExistente);
+			asociacionBuscada = list_get(listaAsociaciones, indiceAsociacionBuscada);
+			free(asociacionBuscada->nombreRestaurante);
+			asociacionBuscada->nombreRestaurante = malloc(seleccRestoRecibido->largoNombreRestaurante+1);
 			strcpy(asociacionBuscada->nombreRestaurante, seleccRestoRecibido->nombreRestaurante);
 		}
 		//se concluyo bien la operacion, se agrego un restaurante a la asociacion del cliente o se piso uno previo
@@ -216,6 +211,14 @@ void consultarPlatos(consultar_platos* consultarPlatosRecibido, int32_t socket_c
 
 	sem_wait(mutexListaAsociaciones);
 	indiceAsociacionBuscada = buscarAsociacion(consultarPlatosRecibido->id);
+
+	if(indiceAsociacionBuscada == -2){
+		sem_wait(semLog);
+	    log_error(logger, "[APP] Somehow al conectarse un cliente no registro una asociacion. Exploto en consultarPlatos.");
+	    sem_post(semLog);
+	    exit(-2);
+	}
+
 	asociacionBuscada = list_get(listaAsociaciones, indiceAsociacionBuscada);// busca el perfil del cliente en la lista de pedidos
 
 	if(strcmp(asociacionBuscada->nombreRestaurante, "N/A") != 0){
@@ -297,7 +300,7 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 	sem_wait(mutexListaAsociaciones);
 	indiceAsociacionBuscada = buscarAsociacion(crearPedidoRecibido->id);
 
-	asociacionBuscada = list_get(listaPedidos, indiceAsociacionBuscada);
+	asociacionBuscada = list_get(listaAsociaciones, indiceAsociacionBuscada);
 	if(strcmp(asociacionBuscada->nombreRestaurante, "N/A") != 0){
 
 		if(listaRestos->elements_count != 0 && strcmp(asociacionBuscada->nombreRestaurante,"RestoDefault") != 0){
@@ -410,8 +413,6 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 				free(guardarPedidoRequerido->nombreRestaurante);
 				free(guardarPedidoRequerido);
 				sem_post(mutexListaRestos);
-				sem_post(mutexListaAsociaciones);
-				//recibir_respuesta(CREAR_PEDIDO,resto,cliente, socket_cliente);
 			}
 
 		}else if(strcmp(asociacionBuscada->nombreRestaurante,"RestoDefault") == 0){
@@ -475,28 +476,27 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 			elPedidoACrear->idCliente = malloc(strlen(asociacionBuscada->idCliente)+1);
 			elPedidoACrear->nombreRestaurante = malloc(strlen(asociacionBuscada->nombreRestaurante)+1);
 			strcpy(elPedidoACrear->idCliente, asociacionBuscada->idCliente);
-			strcpy(elPedidoACrear->nombreRestaurante, "asociacionBuscada->nombreRestaurante");
+			strcpy(elPedidoACrear->nombreRestaurante, asociacionBuscada->nombreRestaurante);
 
 			sem_wait(mutexListaPedidos);
 			list_add(listaPedidos, elPedidoACrear);
 			sem_post(mutexListaPedidos);
 
-			sem_post(mutexListaAsociaciones);
             free(respuestaComanda);
 			free(guardarPedidoRequerido->nombreRestaurante);
 			free(guardarPedidoRequerido);
 			free(respuestaCreacion);
-		}
+		} else {
 		sem_wait(semLog);
 		log_error(logger, "[APP] Problemas internos creando el pedido.");
 		sem_post(semLog);
-
+		}
 	}else{
 		sem_wait(semLog);
 		log_error(logger, "[APP] Un cliente ha intentado crear un pedido sin haber seleccionado su restaurante.");
 		sem_post(semLog);
-		sem_post(mutexListaAsociaciones);
 	}
+	sem_post(mutexListaAsociaciones);
 }
 
 void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
@@ -581,7 +581,6 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 			free(pasamanosGuardarPlato->nombreRestaurante);
 			free(pasamanosGuardarPlato);
 			free(respuestaAniadir);
-			sem_post(mutexListaPedidos);
 
 		}else{
 			indiceRestoAsociado = buscarRestaurante(elPedidoAModificar->nombreRestaurante);
@@ -593,13 +592,15 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 				sem_post(mutexListaRestos);
 				if(nuevoSocketRestaurante < 0){
 					sem_wait(semLog);
-					log_error(logger, "[APP] Un restaurante con un pedido activo no esta levantado, me muero yo tambien");
+					log_error(logger, "Un restaurante con un pedido activo no esta levantado, me muero yo tambien");
 					sem_post(semLog);
 					exit(-2);
 				}
 
 				respuestaAniadir = malloc(sizeof(respuesta_ok_error));
 				respuestaAniadir->respuesta = 0;
+
+				recibidoAPlato->idPedido = elPedidoAModificar->id_pedido_resto;
 
 				mandar_mensaje(recibidoAPlato, A_PLATO, nuevoSocketRestaurante);
 
@@ -637,7 +638,7 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 					pasamanosGuardarPlato->idPedido = elPedidoAModificar->id_pedido_resto;
 					pasamanosGuardarPlato->cantidadPlatos = 1;
 
-					mandar_mensaje(recibidoAPlato,GUARDAR_PLATO,nuevoSocketComanda);
+					mandar_mensaje(pasamanosGuardarPlato,GUARDAR_PLATO,nuevoSocketComanda);
 
 					recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
 					if(recibidos >= 1){
@@ -659,14 +660,19 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 				free(respuestaAniadir);
 				close(nuevoSocketRestaurante);
 			}
-			sem_post(mutexListaPedidos);
+
 		}
 
 	}else{
 		sem_wait(semLog);
 		log_error(logger, "[APP] Se ingreso un ID de pedido global equivocado al querer aniadir un plato.");
 		sem_post(semLog);
+		respuestaAniadir = malloc(sizeof(respuesta_ok_error));
+		respuestaAniadir->respuesta = 0;
+		mandar_mensaje(respuestaAniadir, RESPUESTA_A_PLATO, socket_cliente);
+		free(respuestaAniadir);
 	}
+	sem_post(mutexListaPedidos);
 }
 
 
@@ -679,13 +685,34 @@ void consultarPedido(consultar_pedido* elPedidoBuscado, int32_t socket_cliente){
 	uint32_t sizePayload;
 	codigo_operacion codigoRecibido;
 
+	sem_wait(mutexListaPedidos);
 	indiceDelPedidoAConsultar = buscarPedidoPorIDGlobal(elPedidoBuscado->idPedido);
+    sem_post(mutexListaPedidos);
 
 	if(indiceDelPedidoAConsultar == -2){
 		sem_wait(semLog);
 		log_error(logger, "[APP] Arribo una solicitud de consulta de un pedido que no existe en los registros...");
 		sem_post(semLog);
-		//ToDo mandar estructura vacia ???
+		elPedidoYaConsultado = malloc(sizeof(respuesta_consultar_pedido));
+		elPedidoYaConsultado->estado = NADA_CARGADO;
+		elPedidoYaConsultado->largoNombreRestaurante =  strlen("N/A");
+		elPedidoYaConsultado->sizeComidas = strlen("[]");
+		elPedidoYaConsultado->sizeCantTotales = strlen("[]");
+		elPedidoYaConsultado->sizeCantListas = strlen("[]");
+		elPedidoYaConsultado->nombreRestaurante = malloc(strlen("N/A")+1);
+		elPedidoYaConsultado->cantTotales = malloc(strlen("[]")+1);
+		elPedidoYaConsultado->comidas = malloc(strlen("[]")+1);
+		elPedidoYaConsultado->cantListas = malloc(strlen("[]")+1);
+		strcpy(elPedidoYaConsultado->comidas, "N/A");
+		strcpy(elPedidoYaConsultado->comidas, "[]");
+		strcpy(elPedidoYaConsultado->cantTotales, "[]");
+		strcpy(elPedidoYaConsultado->cantListas, "[]");
+		mandar_mensaje(elPedidoYaConsultado, RESPUESTA_CONSULTAR_PEDIDO, socket_cliente);
+		free(elPedidoYaConsultado->nombreRestaurante);
+		free(elPedidoYaConsultado->comidas);
+		free(elPedidoYaConsultado->cantTotales);
+		free(elPedidoYaConsultado->cantListas);
+		free(elPedidoYaConsultado);
 		return;
 	}
 
@@ -1343,16 +1370,21 @@ void consultar_Pedido(consultar_pedido* pedido){
 void registrarRestaurante(agregar_restaurante* recibidoAgregarRestaurante, int32_t socket_cliente){
 	int idResto;
 	info_resto* nuevoRestaurante;
+	respuesta_ok_error* respuestaRegistro;
 	int correspondeAgregar = 0;
+
+	respuestaRegistro = malloc(sizeof(respuesta_ok_error));
 
 	if(listaRestos->elements_count != 0){
 		idResto = buscarRestaurante(recibidoAgregarRestaurante->nombreRestaurante);
 
-			if(idResto != 0){ // se encontro el restaurante en la lista de antes
+			if(idResto != -2){ // se encontro el restaurante en la lista de antes
 				sem_wait(semLog);
-				log_error(logger, "[APP] Se intento agregar al restaurante %s, pero ya existe en los registros."
+				log_error(logger, "[APP] Se intento agregar al restaurante < %s >, pero ya existe en los registros."
 						, recibidoAgregarRestaurante->nombreRestaurante);
 				sem_post(semLog);
+				respuestaRegistro->respuesta=0;
+				mandar_mensaje(respuestaRegistro, RESPUESTA_AGREGAR_RESTAURANTE, socket_cliente);
 				return;
 			}else{
 				correspondeAgregar = 1;
@@ -1374,28 +1406,47 @@ void registrarRestaurante(agregar_restaurante* recibidoAgregarRestaurante, int32
 			nuevoRestaurante->posX = recibidoAgregarRestaurante->posX;
 			nuevoRestaurante->posY = recibidoAgregarRestaurante->posY;
 			sem_wait(mutexListaRestos);
-			list_add(listaRestos,recibidoAgregarRestaurante);
+			list_add(listaRestos,nuevoRestaurante);
 			sem_post(mutexListaRestos);
+			sem_wait(semLog);
+			log_trace(logger, "[APP] Se agrego al restaurante < %s > en los registros satisfactoriamente."
+					, recibidoAgregarRestaurante->nombreRestaurante);
+			sem_post(semLog);
+			respuestaRegistro->respuesta = 1;
+			mandar_mensaje(respuestaRegistro, RESPUESTA_AGREGAR_RESTAURANTE, socket_cliente);
 	    }
-
+     free(respuestaRegistro);
 }
 
 void registrarHandshake(handshake* recibidoHandshake, int32_t socket_cliente){
 	asociacion_cliente* nuevaAsociacion;
+	int indiceAsociacionPrevia;
+
+	sem_wait(mutexListaAsociaciones);
+	indiceAsociacionPrevia = buscarAsociacion(recibidoHandshake->id);
+	sem_post(mutexListaAsociaciones);
+
+	if(indiceAsociacionPrevia != -2){
+		sem_wait(semLog);
+		log_error(logger, "[APP] Se intento crear una asociacion para el: < %s >, pero ya existe una de antes.", recibidoHandshake->id);
+		sem_post(semLog);
+		return;
+	}
 
 	nuevaAsociacion = malloc(sizeof(asociacion_cliente));
 	nuevaAsociacion->posClienteX = recibidoHandshake->posX;
 	nuevaAsociacion->posClienteY = recibidoHandshake->posY;
 	nuevaAsociacion->idCliente = malloc(strlen(recibidoHandshake->id)+1);
-	nuevaAsociacion->nombreRestaurante = "N/A";
+	nuevaAsociacion->nombreRestaurante = malloc(strlen("N/A")+1);
 	strcpy(nuevaAsociacion->idCliente, recibidoHandshake->id);
+	strcpy(nuevaAsociacion->nombreRestaurante, "N/A");
 
 	sem_wait(mutexListaAsociaciones);
 	list_add(listaAsociaciones, nuevaAsociacion);
 	sem_post(mutexListaAsociaciones);
 
 	sem_wait(semLog);
-	log_trace(logger, "[APP] Se creo exitosamente una asociacion para el cliente < %s >.", recibidoHandshake->id);
+	log_trace(logger, "[APP] Se creo exitosamente una asociacion para el: < %s >.", recibidoHandshake->id);
 	sem_post(semLog);
 }
 
@@ -1435,7 +1486,7 @@ int buscarPedidoPorIDRestoYNombreResto(uint32_t idPedidoSolicitado, char* restau
 int buscarAsociacion(char* idClienteBuscado){
 	asociacion_cliente* unaAsociacion;
 	for(int i = 0; i < listaAsociaciones->elements_count; i++){
-		unaAsociacion = list_get(listaPedidos,i);
+		unaAsociacion = list_get(listaAsociaciones,i);
 
 		if(strcmp(unaAsociacion->idCliente, idClienteBuscado) == 0){
 			return i;
@@ -1599,16 +1650,16 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	/*
 	 *   STATUS Manejo Mensajes APP 2.0
 	 *
-	 * CONSULTAR_RESTAURANTES -> Done
-	 * SELECCIONAR_RESTAURANTES -> Done
-	 * CONSULTAR_PLATOS -> Done
-	 * CREAR_PEDIDO -> Done
-	 * ANIADIR_PLATO -> Done
-	 * CONSULTAR_PEDIDO -> Done
-	 * CONFIRMAR_PEDIDO -> Done
-	 * PLATO_LISTO ->
-	 * HANDSHAKE -> Done
-	 * AGREGAR_RESTAURANTE -> Done
+	 * CONSULTAR_RESTAURANTES -> Done + Tested
+	 * SELECCIONAR_RESTAURANTES -> Done + Tested
+	 * CONSULTAR_PLATOS -> Done + Tested
+	 * CREAR_PEDIDO -> Done + Tested
+	 * ANIADIR_PLATO -> Done + Tested
+	 * CONSULTAR_PEDIDO -> Done +
+	 * CONFIRMAR_PEDIDO -> Done +
+	 * PLATO_LISTO -> Done +
+	 * REGISTRO HANDSHAKE/ASOCIACION -> Done + Tested
+	 * AGREGAR_RESTAURANTE -> Done + Tested
 	 *
 	 */
 
@@ -1705,7 +1756,6 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 
 void serve_client(int32_t* socket)
 {
-	//while(1){
 		int32_t sizeAAllocar = 0;
 		codigo_operacion cod_op = 0;
 		int32_t recibidosSize = 0;
@@ -1734,8 +1784,6 @@ void serve_client(int32_t* socket)
 
 		recibidosSize = 0;
 		recibidos = 0;
-	//}
-	//close(socket);
 }
 
 void esperar_cliente(int32_t socket_servidor)

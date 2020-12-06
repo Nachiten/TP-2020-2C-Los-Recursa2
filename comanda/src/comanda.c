@@ -300,7 +300,7 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
 
             		else//si ya estaba en SWAP, le doy el espacio que tenia antes
             		{
-            			numeroDeEspacioEnSwap = plato_creado_o_editado->posicionInicialEnSWAP;
+            			numeroDeEspacioEnSwap = plato_creado_o_editado->posicionInicialEnSWAP/32;
             		}
 
             		if(numeroDeEspacioEnSwap != -1)
