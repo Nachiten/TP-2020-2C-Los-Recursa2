@@ -891,6 +891,8 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 								,elPedidoAConfirmar->nombreRestaurante);
 						sem_post(semLog);
 
+						guardarPedidoListo(elPedidoAConfirmar);
+
 						agregarANew(nuevoPcb);
 
 						sem_post(mutexListaPedidos);
