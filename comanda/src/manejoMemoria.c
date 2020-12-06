@@ -127,9 +127,6 @@ uint32_t crearSegmento(tablas_segmentos_restaurantes* tablaDePedidosDelRestauran
 		nuevoSegmento->mi_tabla = malloc(sizeof(tabla_paginas));
 		inicializar_tabla_de_paginas(nuevoSegmento->mi_tabla);
 
-		//el restaurante ahora tiene un pedido +
-		tablaDePedidosDelRestaurante->cantidadDeSegmentos++;
-
 		//devuelvo el numero del segmento creado
 		return nuevoSegmento->numero_de_segmento;
 	}
@@ -447,7 +444,7 @@ uint32_t verificarExistenciaDePedido(tablas_segmentos_restaurantes* tablaDePedid
 	segmentos* tablaDePedidos = tablaDePedidosDelRestaurante->miTablaDePedidos;
 	uint32_t existe = 0;
 
-	while(tablaDePedidos != NULL)
+	while(tablaDePedidos != NULL && existe == 0)
 	{
 		if(tablaDePedidos->id_Pedido == idDelPedido)
 		{
@@ -1153,14 +1150,19 @@ void matarPedido(tablas_segmentos_restaurantes* tablaDePedidosDelRestaurante, ui
 		if(pedidoSiguiente != NULL)
 		{
 			tablaDePedidosDelRestaurante->miTablaDePedidos = pedidoSiguiente;
+			pedidoSiguiente->anter_segmento = NULL;
+			free(segmentoSeleccionado);
 		}
 
-		//este es el unico pedido que tiene... pos que lastima, a la mierda!
-		free(segmentoSeleccionado);
+		else
+		{
+			//este es el unico pedido que tiene... pos que lastima, a la mierda!
+			free(segmentoSeleccionado);
 
-		//its the circle of life...
-		tablaDePedidosDelRestaurante->miTablaDePedidos = malloc(sizeof(segmentos));
-		inicializar_tabla_de_segmentos(tablaDePedidosDelRestaurante->miTablaDePedidos);
+			//its the circle of life...
+			tablaDePedidosDelRestaurante->miTablaDePedidos = malloc(sizeof(segmentos));
+			inicializar_tabla_de_segmentos(tablaDePedidosDelRestaurante->miTablaDePedidos);
+		}
 	}
 	tablaDePedidosDelRestaurante->cantidadDeSegmentos--;
 	sem_post(semaforoTocarListaPedidosTodosLosRestaurantes);
@@ -1190,7 +1192,7 @@ void matarPlatos(segmentos* segmentoSeleccionado)
 		if(tablaDePlatos->cargadoEnSWAP == 1)
 		{
 			sem_wait(semaforoTocarListaEspaciosEnMP);
-			marcarEspacioComoLibre(lista_de_espacios_en_SWAP, tablaDePlatos->posicionInicialEnSWAP);
+			marcarEspacioComoLibre(lista_de_espacios_en_SWAP, tablaDePlatos->posicionInicialEnSWAP/32);
 			sem_post(semaforoTocarListaEspaciosEnMP);
 		}
 
