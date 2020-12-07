@@ -1522,7 +1522,7 @@ void recibir_mensaje (void* estructura, codigo_operacion tipoMensaje, int32_t so
 
 		//usa exactamente la misma que respuesta_crear_pedido
 		case CONSULTAR_PEDIDO:
-            desserializar_respuesta_crear_pedido(estructura, socket_cliente);
+            desserializar_consultar_pedido(estructura, socket_cliente);
 			break;
 
 		//usa exactamente la misma que guardar pedido

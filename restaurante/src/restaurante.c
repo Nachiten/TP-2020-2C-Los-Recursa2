@@ -141,7 +141,7 @@ void crear_Pedido(crear_pedido* solicitudCrear, int32_t socket_cliente){
 	free(respuesta);
 }
 
-void aniadir_plato(a_plato* recibidoAPlato, int32_t socket_cliente){
+void aniadir_Plato(a_plato* recibidoAPlato, int32_t socket_cliente){
 	respuesta_ok_error* respuestaAniadir = malloc(sizeof(respuesta_ok_error));
 	int32_t nuevoSocketSindicato;
 	guardar_plato* pasamanosGuardarPlato;
@@ -351,7 +351,7 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 }
 
 
-void consultar_Pedido(int32_t id, int32_t socket_cliente){
+void consultar_Pedido(int id, int32_t socket_cliente){
 	int32_t nuevoSocketSindicato, indiceDelPedidoQueFueConsultado;
 
 	nuevoSocketSindicato = establecer_conexion(ip_sindicato, puerto_sindicato);
@@ -563,7 +563,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	case A_PLATO:
 		recibidoAPlato = malloc(sizeof(a_plato));
 		recibir_mensaje(recibidoAPlato,A_PLATO,socket_cliente);
-		aniadir_plato(recibidoAPlato,socket_cliente);
+		aniadir_Plato(recibidoAPlato,socket_cliente);
 		free(recibidoAPlato->nombrePlato);
 		free(recibidoAPlato->id);
 		free(recibidoAPlato);
