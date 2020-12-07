@@ -364,9 +364,9 @@ void consultar_Pedido(int32_t id, int32_t socket_cliente){
 
 	indiceDelPedidoQueFueConsultado = buscar_pedido_por_id(id);
 	if(indiceDelPedidoQueFueConsultado == -2){
-		log_error(logger, "[RESTAURANTE] Se desea consultar el pedido < %d >"
-		   ", pero dicho pedido no se encuentra en los registros del restaurante. Safaste porque lo tiene Sindicato."
-			, id);
+		sem_wait(semLog);
+		log_error(logger, "[RESTAURANTE] El pedido < %d > no se encuentra en los registros del restaurante.", id);
+		sem_post(semLog);
 	}
 
 	guardar_pedido* datosPedido = malloc(sizeof(guardar_pedido));
