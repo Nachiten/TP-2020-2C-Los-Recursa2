@@ -407,9 +407,10 @@ void agregarAExit(pcb_plato* elPlato){
 
 	indiceDelPedidoAsociado = buscar_pedido_por_id(elPlato->idPedido);
 	if(indiceDelPedidoAsociado == -2){
-		log_error(logger, "[EXIT] Entra el plato < %s >, del pedido < %d > por haber culminado su receta, "
-		   "pero dicho pedido no se encuentra en los registros del restaurante. Safaste porque lo tiene Sindicato."
+		sem_wait(semLog);
+		log_error(logger, "[EXIT] El pedido < %d > no se encuentra en los registros del restaurante. Safaste porque lo tiene Sindicato."
 			, elPlato->nombrePlato, elPlato->idPedido);
+		sem_post(semLog);
 	}
 
 	sem_wait(semListaPedidos);

@@ -883,7 +883,7 @@ respuesta_obtener_pedido* generarRtaObtenerPedidoDefault(){
 	respuesta_obtener_pedido* rta = malloc(sizeof(respuesta_obtener_pedido));
 
 	char* arrayVacio = "[]";
-
+    rta->estado = NADA_CARGADO;
 	rta->sizeCantListas = 0;
 	rta->sizeCantTotales = 0;
 	rta->sizeComidas = 0;
