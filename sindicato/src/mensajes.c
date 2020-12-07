@@ -884,9 +884,9 @@ respuesta_obtener_pedido* generarRtaObtenerPedidoDefault(){
 
 	char* arrayVacio = "[]";
     rta->estado = NADA_CARGADO;
-	rta->sizeCantListas = 0;
-	rta->sizeCantTotales = 0;
-	rta->sizeComidas = 0;
+	rta->sizeCantListas = strlen(arrayVacio);
+	rta->sizeCantTotales = strlen(arrayVacio);
+	rta->sizeComidas = strlen(arrayVacio);
 
 	rta->cantListas = malloc(strlen(arrayVacio) + 1);
 	strcpy(rta->cantListas, arrayVacio);
