@@ -187,14 +187,23 @@ void seleccionarRestaurante(seleccionar_restaurante* seleccRestoRecibido, int32_
 			free(asociacionBuscada->nombreRestaurante);
 			asociacionBuscada->nombreRestaurante = malloc(seleccRestoRecibido->largoNombreRestaurante+1);
 			strcpy(asociacionBuscada->nombreRestaurante, seleccRestoRecibido->nombreRestaurante);
+			sem_wait(semLog);
+			log_trace(logger, "[APP] El <%s> ha sido correctamente asociado al restaurante <%s>.",
+					seleccRestoRecibido->idCliente, seleccRestoRecibido->nombreRestaurante);
+			sem_post(semLog);
 		}
 		//se concluyo bien la operacion, se agrego un restaurante a la asociacion del cliente o se piso uno previo
 		respuesta->respuesta = 1;
 		mandar_mensaje(respuesta,RESPUESTA_SELECCIONAR_R,socket_cliente);
 	}else{
 		//el restaurante deseado no existe, tengo que denegar la operacion
+		sem_wait(semLog);
+		log_error(logger, "[APP] El <%s> ha intentado seleccionar un restaurante que no existe en los registros.",
+				seleccRestoRecibido->idCliente);
+		sem_post(semLog);
 		respuesta->respuesta = 0;
 		mandar_mensaje(respuesta,RESPUESTA_SELECCIONAR_R,socket_cliente);
+
 	}
 	sem_post(mutexListaAsociaciones);
 	free(respuesta);
@@ -487,13 +496,21 @@ void crearPedido(crear_pedido* crearPedidoRecibido, int32_t socket_cliente){
 			free(guardarPedidoRequerido);
 			free(respuestaCreacion);
 		} else {
+		respuestaCreacion = malloc(sizeof(respuesta_crear_pedido));
+		respuestaCreacion->idPedido = -1;
+		mandar_mensaje(respuestaCreacion, RESPUESTA_CREAR_PEDIDO, socket_cliente);
+		free(respuestaCreacion);
 		sem_wait(semLog);
 		log_error(logger, "[APP] Problemas internos creando el pedido.");
 		sem_post(semLog);
 		}
 	}else{
+		respuestaCreacion = malloc(sizeof(respuesta_crear_pedido));
+		respuestaCreacion->idPedido = -1;
+		mandar_mensaje(respuestaCreacion, RESPUESTA_CREAR_PEDIDO, socket_cliente);
+		free(respuestaCreacion);
 		sem_wait(semLog);
-		log_error(logger, "[APP] Un cliente ha intentado crear un pedido sin haber seleccionado su restaurante.");
+		log_error(logger, "[APP] Un cliente ha intentado crear un pedido sin haber seleccionado un restaurante.");
 		sem_post(semLog);
 	}
 	sem_post(mutexListaAsociaciones);
@@ -550,6 +567,21 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 				exit(-2);
 			}
 
+			//antes de hacer nada me fijo si me mandaron un plato que el restoDefault no puede cocinar lmao
+			int platoDisponible = 0;
+			int i = 0;
+			char** platosDelRestoDefault = string_get_string_as_array(platos_default);
+			while(platosDelRestoDefault[i] != NULL){
+                 if(strcmp(platosDelRestoDefault[i], recibidoAPlato->nombrePlato) == 0){
+                	 platoDisponible = 1;
+                	 break;
+                 }
+                 i++;
+			}
+			freeDeArray(platosDelRestoDefault);
+
+            if(platoDisponible == 1){
+
 			pasamanosGuardarPlato = malloc(sizeof(guardar_plato));
 			pasamanosGuardarPlato->nombrePlato = malloc(strlen(recibidoAPlato->nombrePlato)+1);
 			pasamanosGuardarPlato->largoNombrePlato = strlen(recibidoAPlato->nombrePlato);
@@ -567,12 +599,23 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 				recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 				bytesRecibidos(recibidosSize);
 				recibir_mensaje(respuestaAniadir, RESPUESTA_GUARDAR_PLATO, nuevoSocketComanda);
-				//yo lo mando, sea un fracaso o un exito, el cliente ha de recibir el resultado tal cual.
+				if(respuestaAniadir->respuesta == 0){
+					sem_wait(semLog);
+					log_error(logger, "[APP] Comanda fracaso al guardar un/a <%s> al pedido <%d>."
+							, pasamanosGuardarPlato->nombrePlato, pasamanosGuardarPlato->idPedido);
+					sem_post(semLog);
+				} else {
+					sem_wait(semLog);
+					log_trace(logger, "[APP] Se aniadio un/a <%s> al pedido <%d> correctamente."
+							, pasamanosGuardarPlato->nombrePlato, pasamanosGuardarPlato->idPedido);
+					sem_post(semLog);
+				}
 				mandar_mensaje(respuestaAniadir, RESPUESTA_A_PLATO, socket_cliente);
 			} else {
 				sem_wait(semLog);
-				log_error(logger, "Comanda se murio en el proceso de responder a un guardar_plato.");
+				log_error(logger, "[APP] Comanda se murio en el proceso de responder a un guardar_plato.");
 				sem_post(semLog);
+				respuestaAniadir->respuesta = 0;
 				mandar_mensaje(respuestaAniadir, RESPUESTA_A_PLATO, socket_cliente);
 			}
 
@@ -581,6 +624,13 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 			free(pasamanosGuardarPlato->nombreRestaurante);
 			free(pasamanosGuardarPlato);
 			free(respuestaAniadir);
+		} else {
+			sem_wait(semLog);
+			log_error(logger, "[APP] Se ha intentado aniadir un plato que el RestoDefault no conoce.");
+			sem_post(semLog);
+			respuestaAniadir->respuesta = 0;
+			mandar_mensaje(respuestaAniadir, RESPUESTA_A_PLATO, socket_cliente);
+		}
 
 		}else{
 			indiceRestoAsociado = buscarRestaurante(elPedidoAModificar->nombreRestaurante);
