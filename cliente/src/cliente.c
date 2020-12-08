@@ -662,12 +662,12 @@ void obtenerInputConsolaCliente(){
 					}
 
 					//me llego un FINALIZAR_PEDIDO por fin
-					recibirFinalizarPedidoExclusivo= malloc(sizeof(sizeof(finalizar_pedido)));
+					recibirFinalizarPedidoExclusivo = malloc(sizeof(finalizar_pedido));
 
 					recibir_mensaje(recibirFinalizarPedidoExclusivo, FINALIZAR_PEDIDO, socketCliente);
 
 					sem_wait(semLog);
-					log_info(logger, "Esta Finalizado el Pedido %u del restaurante <%s>.\n", recibirFinalizarPedidoExclusivo->nombreRestaurante, recibirFinalizarPedidoExclusivo->idPedido);
+					log_info(logger, "Ha arribado una notificacion de que el pedido <%d> del restaurante <%s> ha finalizado.", recibirFinalizarPedidoExclusivo->idPedido, recibirFinalizarPedidoExclusivo->nombreRestaurante);
 					sem_post(semLog);
 
 					estructuraRespuesta->respuesta = 1;

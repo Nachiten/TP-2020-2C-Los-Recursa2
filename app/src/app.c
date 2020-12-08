@@ -830,6 +830,7 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
     sem_post(mutexListaPedidos);
 
     respuestaConfirmacion = malloc(sizeof(respuesta_ok_error));
+    respuestaConfirmacion->respuesta = 0;
 
     sem_wait(mutexListaPedidos);
 	if(indicePedidoAsociado != -2){
@@ -920,9 +921,11 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 								,elPedidoAConfirmar->nombreRestaurante);
 						sem_post(semLog);
 
-						guardarPedidoListo(elPedidoAConfirmar);
+						guardarPedidoListo(elPedidoAConfirmar->id_pedido_global);
 
 						agregarANew(nuevoPcb);
+
+						mandar_mensaje(respuestaConfirmacion, RESPUESTA_CONFIRMAR_PEDIDO, socket_cliente);
 
 						sem_post(mutexListaPedidos);
 						sem_post(mutexListaRestos);
@@ -1270,7 +1273,7 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 				sem_wait(mutexListaPedidos);
 				elPedidoBuscado = list_get(listaPedidos, indicePedidoBuscado);
 				sem_wait(mutexPedidosListos);
-				guardarPedidoListo(elPedidoBuscado);
+				guardarPedidoListo(elPedidoBuscado->id_pedido_global);
 				sem_post(mutexPedidosListos);
 				sem_post(mutexListaPedidos);
 

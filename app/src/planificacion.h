@@ -169,7 +169,7 @@ typedef struct{
 
 
 // PEDIDO LISTO
-void guardarPedidoListo(perfil_pedido*);
+void guardarPedidoListo(uint32_t);
 void eliminarPedidoListo(int);
 int checkearPedidoListo(int);
 

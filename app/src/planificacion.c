@@ -140,15 +140,18 @@ void iniciarPlanificacion(){
 	//pthread_join(hiloNewReady, NULL);
 }
 
-void guardarPedidoListo(perfil_pedido* elPedidoQueHaFinalizado){
+void guardarPedidoListo(uint32_t idGlobalDelPedidoQueFinalizo){
+	int* pedidoAGuardar = malloc(sizeof(int));
+
+	*pedidoAGuardar = idGlobalDelPedidoQueFinalizo;
 
 	// Agrego el pedido finalizado a la lista.
-	list_add(pedidosListos, elPedidoQueHaFinalizado);
-
+	sem_wait(mutexPedidosListos);
+	list_add(pedidosListos, pedidoAGuardar);
+    sem_post(mutexPedidosListos);
 	sem_wait(semLog);
-	log_trace(logger, "[APP-GuardarPedido] Se guarda como listo el pedido: IDGlobal: <%d>,"
-			"IDRestaurante: <%d>, del restaurante: <%s>.", elPedidoQueHaFinalizado->id_pedido_global,
-			elPedidoQueHaFinalizado->id_pedido_resto, elPedidoQueHaFinalizado->nombreRestaurante);
+	log_trace(logger, "[APP-GuardarPedido] Se guarda como listo el pedido de IDGlobal: <%d>.",
+			idGlobalDelPedidoQueFinalizo);
 	sem_post(semLog);
 }
 
@@ -291,7 +294,9 @@ void hiloBlock_Ready(){
 
 					// Ya esta listo el pedido
 					if (checkearPedidoListo(pedidoActual->pedidoIDGlobal)){
+						sem_wait(semLog);
 						log_trace(logger, "[BLOCK] El pedido de IDGlobal: %d ya esta listo.\n", pedidoActual->pedidoIDGlobal);
+                        sem_post(semLog);
 
 						// Debe descansar antes de volver a ready
 						if (pedidoActual->repartidorAsignado->cansado){
@@ -300,7 +305,9 @@ void hiloBlock_Ready(){
 
 						// No esta cansado, va a ready
 						} else {
+							sem_wait(semLog);
 							log_info(logger, "[READY] Ingresa pedido %i por ya estar listo.", pedidoActual->pedidoID);
+							sem_post(semLog);
 							moverPedidoDeBlockAReady(indicePedido);
 							indicePedido--;
 						}
@@ -308,7 +315,9 @@ void hiloBlock_Ready(){
 
 					// No esta listo
 					} else {
+						sem_wait(semLog);
 						log_trace(logger, "[BLOCK] El pedido %i todavia no esta listo.\n", pedidoActual->pedidoID);
+						sem_post(semLog);
 					}
 
 					break;
@@ -807,6 +816,7 @@ void agregarAExit(pcb_pedido* elPCBQueFinalizo){
     notificacionFinalizarPedido->idPedido = elPedidoQueFinalizo->id_pedido_resto;
     notificacionFinalizarPedido->largoNombreRestaurante = strlen(elPedidoQueFinalizo->nombreRestaurante);
     notificacionFinalizarPedido->nombreRestaurante = malloc(strlen(elPedidoQueFinalizo->nombreRestaurante)+1);
+    strcpy(notificacionFinalizarPedido->nombreRestaurante, elPedidoQueFinalizo->nombreRestaurante);
 
     mandar_mensaje(notificacionFinalizarPedido, FINALIZAR_PEDIDO, nuevoSocketComanda);
     respuestaNotificacion = malloc(sizeof(respuesta_ok_error));
