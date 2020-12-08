@@ -703,12 +703,11 @@ void obtenerInputConsolaCliente(){
 
     	socketCliente = establecer_conexion(ip_destino , puerto_destino);
 
-    	consultar_pedido* estructuraConsultarPedido = malloc(sizeof(uint32_t));
+    	consultar_pedido* estructuraConsultarPedido = malloc(sizeof(consultar_pedido));
     	estructuraConsultarPedido->idPedido = atoi(palabrasSeparadas[1]);
     	estructuraConsultarPedido->sizeId = strlen(idCliente);
     	estructuraConsultarPedido->id = malloc(estructuraConsultarPedido->sizeId+1);
     	strcpy(estructuraConsultarPedido->id,idCliente);
-
 
     	mandar_mensaje(estructuraConsultarPedido, CONSULTAR_PEDIDO, socketCliente);
     	los_recv_repetitivos(socketCliente, &exito, &sizeAAllocar);
