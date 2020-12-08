@@ -743,6 +743,27 @@ void consultarPedido(consultar_pedido* elPedidoBuscado, int32_t socket_cliente){
 		sem_wait(semLog);
 		log_error(logger, "[APP] Arribo una solicitud de consulta de un pedido que no existe en los registros...");
 		sem_post(semLog);
+		elPedidoYaConsultado = malloc(sizeof(respuesta_consultar_pedido));
+		elPedidoYaConsultado->estado = NADA_CARGADO;
+		elPedidoYaConsultado->largoNombreRestaurante = strlen("N/A");
+		elPedidoYaConsultado->nombreRestaurante = malloc(strlen("N/A")+1);
+		strcpy(elPedidoYaConsultado->nombreRestaurante, "N/A");
+		elPedidoYaConsultado->sizeComidas = strlen("[]");
+		elPedidoYaConsultado->sizeCantListas = strlen("[]");
+		elPedidoYaConsultado->sizeCantTotales = strlen("[]");
+		elPedidoYaConsultado->comidas = malloc(strlen("[]")+1);
+		elPedidoYaConsultado->cantListas = malloc(strlen("[]")+1);
+		elPedidoYaConsultado->cantTotales = malloc(strlen("[]")+1);
+		strcpy(elPedidoYaConsultado->comidas, "[]");
+		strcpy(elPedidoYaConsultado->cantListas, "[]");
+		strcpy(elPedidoYaConsultado->cantTotales, "[]");
+		mandar_mensaje(elPedidoYaConsultado, RESPUESTA_CONSULTAR_PEDIDO, socket_cliente);
+		free(elPedidoYaConsultado->nombreRestaurante);
+		free(elPedidoYaConsultado->comidas);
+		free(elPedidoYaConsultado->cantListas);
+		free(elPedidoYaConsultado->cantTotales);
+		free(elPedidoYaConsultado);
+		return;
 	}
 
 	sem_wait(mutexListaPedidos);
