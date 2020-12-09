@@ -248,10 +248,10 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 
     close(nuevoSocketSindicato);
 
-    respuesta = 0;
     respuesta_ok_error* respuestaAMandar = malloc(sizeof(respuesta_ok_error));
+    respuestaAMandar->respuesta = 0;
 
-    if(pedido->estado == 0 || pedido->estado == 2 || pedido->estado == 3){
+    if(pedido->estado == NADA_CARGADO || pedido->estado == CONFIRMADO || pedido->estado == TERMINADO){
     //el pedido ya esta confirmado, finalizado de antes o directamente no existe, hay q denegar y frenar la operacion
     	respuestaAMandar->respuesta = respuesta;
 
@@ -294,9 +294,8 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 
     if(respuestaConfirmacionSindicato->respuesta == 0){
     	//fracaso la confirmacion final
-		respuestaAMandar->respuesta = respuesta;
 
-		mandar_mensaje(respuestaAMandar,RESPUESTA_CONFIRMAR_PEDIDO,socket_cliente);
+		mandar_mensaje(respuestaConfirmacionSindicato,RESPUESTA_CONFIRMAR_PEDIDO,socket_cliente);
 
 		free(datosPedido->nombreRestaurante);
 		free(datosPedido);
