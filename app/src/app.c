@@ -1293,9 +1293,7 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 
 				sem_wait(mutexListaPedidos);
 				elPedidoBuscado = list_get(listaPedidos, indicePedidoBuscado);
-				sem_wait(mutexPedidosListos);
 				guardarPedidoListo(elPedidoBuscado->id_pedido_global);
-				sem_post(mutexPedidosListos);
 				sem_post(mutexListaPedidos);
 
 				sem_wait(semLog);

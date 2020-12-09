@@ -291,12 +291,17 @@ void chequearSiElPedidoEstaListo(int idDelPedidoSospechoso){
 
         if(respuestaTerminacion->respuesta == 0){
         	sem_wait(semLog);
-			log_error(logger, "[EXIT] Sindicato no consiguio exterminar el pedido de sus registros.");
+			log_error(logger, "[EXIT] Sindicato no consiguio terminar el pedido en sus registros.");
 			sem_post(semLog);
         }
         sem_wait(semLog);
-		log_trace(logger, "[EXIT] Sindicato extermino el pedido de sus registros adecuadamente.");
+		log_trace(logger, "[EXIT] Sindicato marco el pedido como TERMINADO en sus registros adecuadamente.");
 		sem_post(semLog);
+
+		/* VER SI LO TERMINAMOS IMPLEMENTANDING
+		if(strcmp(appEnPruebas, "SI") == 0){
+			//notifico al cliente del pedido finalizado directamente yo, no lo va a hacer la app por mi
+		}*/
 
         free(respuestaTerminacion);
 

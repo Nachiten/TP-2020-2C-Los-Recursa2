@@ -253,7 +253,6 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 
     if(pedido->estado == NADA_CARGADO || pedido->estado == CONFIRMADO || pedido->estado == TERMINADO){
     //el pedido ya esta confirmado, finalizado de antes o directamente no existe, hay q denegar y frenar la operacion
-    	respuestaAMandar->respuesta = respuesta;
 
     	mandar_mensaje(respuestaAMandar,RESPUESTA_CONFIRMAR_PEDIDO,socket_cliente);
 
