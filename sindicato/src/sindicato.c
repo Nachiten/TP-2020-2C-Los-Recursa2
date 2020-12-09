@@ -7,6 +7,31 @@
 
 #include "sindicato.h"
 
+//void testingEscribirBloqueRestaurant(){
+//
+//	int bloqueSig = 3;
+//
+//	FILE* bloque = fopen( "25.AFIP" , "w" );
+//
+//	fwrite(&bloqueSig, sizeof(bloqueSig), 1, bloque);
+//
+//	fclose(bloque);
+//
+//}
+//
+//void testingLeerBloqueRestaurant(){
+//
+//	int* dato = malloc(sizeof(int));
+//
+//	FILE* bloque = fopen( "25.AFIP" , "r" );
+//
+//	fread(dato, sizeof(dato), 1, bloque);
+//
+//	printf("Dato leido: %i", *dato);
+//
+//	fclose(bloque);
+//}
+
 char* generarNombrePedidoParaLog(char* nombreRestaurante, int numeroPedido){
 
 	char* numeroPedidoString;
@@ -76,7 +101,7 @@ char* sumarPlatoListoAPedido(char* datosPedido, int indexPlatoEnPedido){
 	freeDeArray(lineaCantidadLista);
 	freeDeArray(lineaCantidadTotal);
 
-	printf("Nuevos datos:\n%s", nuevosDatos);
+	//printf("Nuevos datos:\n%s", nuevosDatos);
 
 	return nuevosDatos;
 }
@@ -103,7 +128,6 @@ int cantidadListaNoEsMayorATotal(char* cantidadLista, char* cantidadTotal, int i
 
 	return retorno;
 }
-
 
 // Sumar la cantidad de un plato que ya existe en un pedido
 char* sumarCantidadAPlatoExistente(int indexPlatoEnPedido, char* datosPedido, int precioPlato, int cantidadPlatos){
@@ -347,7 +371,7 @@ void pedirOLiberarBloquesDeSerNecesario(int cantidadBloquesNecesarios, int canti
 	// Necesito quitar bloques
 	} else if (cantidadBloquesNecesarios < cantidadBloquesActuales){
 
-		printf("Se liberan bloques..\n");
+		//printf("Se liberan bloques..\n");
 		int cantidadBloquesALiberar = cantidadBloquesActuales - cantidadBloquesNecesarios;
 
 		int cantidadBloquesEnLista = list_size(listaBloquesActual);
@@ -477,7 +501,7 @@ t_config* leerConfig(char** PUNTO_MONTAJE){
 	t_config* config = leerConfiguracion("/home/utnso/workspace/tp-2020-2c-Los-Recursa2/configs/sindicato.config");
 
 	if (config == NULL){
-		printf("No se pudo leer la config!!\n");
+		printf("ERROR | No se pudo leer la config!!\n");
 		exit(1);
 	}
 
@@ -505,7 +529,7 @@ t_config* leerMetadataBin(){
 	t_config* metadataBin = leerConfiguracion(pathMetadataBin);
 
 	if (metadataBin == NULL){
-		printf("No se pudo leer el archivo Metadata/Metadata.AFIP");
+		printf("ERROR | No se pudo leer el archivo Metadata/Metadata.AFIP");
 		exit(2);
 	}
 
@@ -526,31 +550,6 @@ t_config* leerMetadataBin(){
 //	printf("MagicNumber: %s\n", MAGIC_NUMBER);
 
 	return metadataBin;
-}
-
-void testingEscribirBloqueRestaurant(){
-
-	int bloqueSig = 3;
-
-	FILE* bloque = fopen( "25.AFIP" , "w" );
-
-	fwrite(&bloqueSig, sizeof(bloqueSig), 1, bloque);
-
-	fclose(bloque);
-
-}
-
-void testingLeerBloqueRestaurant(){
-
-	int* dato = malloc(sizeof(int));
-
-	FILE* bloque = fopen( "25.AFIP" , "r" );
-
-	fread(dato, sizeof(dato), 1, bloque);
-
-	printf("Dato leido: %i", *dato);
-
-	fclose(bloque);
 }
 
 // Generar el string que se debe pegar en los bloques
@@ -606,7 +605,7 @@ char* generarSringInfoRestaurant(datosRestaurant unRestaurant){
 	free(cantHornos);
 
 	//printf("String completo:\n%s", stringCompleto);
-	printf("Tamaño total: %i\n", strlen(stringCompleto));
+	//printf("Tamaño total: %i\n", strlen(stringCompleto));
 
 	return stringCompleto;
 }

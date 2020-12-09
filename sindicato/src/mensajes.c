@@ -534,7 +534,7 @@ void obtenerPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente)
 	}
 
 	if(!existePedido(nombreRestaurant, IDPedido)){
-		printf("ERROR | No existe el pedido solicitado");
+		printf("ERROR | No existe el pedido solicitado.\n");
 		respuesta_obtener_pedido* rtaDefault = generarRtaObtenerPedidoDefault();
 
 		loguearRtaObtenerPedido(rtaDefault);
