@@ -29,6 +29,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 			consultar_platos* estructuraMensajePlatos = malloc(sizeof(consultar_platos));
 			recibir_mensaje(estructuraMensajePlatos, CONSULTAR_PLATOS, *socket_cliente);
 
+			log_info(logger, "[ReciboMSG] CONSULTAR_PLATOS | nombreResto=%s", estructuraMensajePlatos->nombreResto);
 			consultarPlatos_sindicato(estructuraMensajePlatos->nombreResto, *socket_cliente);
 
 			free(estructuraMensajePlatos->nombreResto);
@@ -40,6 +41,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 			obtener_restaurante* estructuraMensajeRest = malloc(sizeof(obtener_restaurante));
             recibir_mensaje(estructuraMensajeRest, OBTENER_RESTAURANTE, *socket_cliente);
 
+            log_info(logger, "[ReciboMSG] OBTENER_RESTAURANTE : nombreResto=%s", estructuraMensajeRest->nombreRestaurante);
             obtenerRestaurante_sindicato(estructuraMensajeRest->nombreRestaurante, *socket_cliente);
 
             free(estructuraMensajeRest->nombreRestaurante);
@@ -50,6 +52,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 			obtener_receta* estructuraMensajeRecet = malloc(sizeof(obtener_receta));
 			recibir_mensaje(estructuraMensajeRecet, OBTENER_RECETA, *socket_cliente);
 
+			log_info(logger, "[ReciboMSG] OBTENER_RECETA : nombreReceta=%s", estructuraMensajeRecet->nombreReceta);
 			obtenerReceta(estructuraMensajeRecet->nombreReceta, *socket_cliente);
 			free(estructuraMensajeRecet->nombreReceta);
 			free(estructuraMensajeRecet);
@@ -59,6 +62,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
             guardar_pedido* estructuraMensajeGuardarPedido = malloc(sizeof(guardar_pedido));
             recibir_mensaje(estructuraMensajeGuardarPedido, GUARDAR_PEDIDO, *socket_cliente);
 
+            log_info(logger, "[ReciboMSG] GUARDAR_PEDIDO : nombreResto=%s | idPedido=%i", estructuraMensajeGuardarPedido->nombreRestaurante, estructuraMensajeGuardarPedido->idPedido);
             guardarPedido_sindicato(estructuraMensajeGuardarPedido->nombreRestaurante, estructuraMensajeGuardarPedido->idPedido, *socket_cliente);
 			free(estructuraMensajeGuardarPedido->nombreRestaurante);
 			free(estructuraMensajeGuardarPedido);
@@ -68,6 +72,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
             guardar_pedido* estructuraMensajeObtenerP = malloc(sizeof(guardar_pedido));
             recibir_mensaje(estructuraMensajeObtenerP, OBTENER_PEDIDO, *socket_cliente);
 
+            log_info(logger, "[ReciboMSG] OBTENER_PEDIDO : nombreResto=%s | idPedido=%i", estructuraMensajeObtenerP->nombreRestaurante, estructuraMensajeObtenerP->idPedido);
             obtenerPedido(estructuraMensajeObtenerP->nombreRestaurante, estructuraMensajeObtenerP->idPedido, *socket_cliente);
 			free(estructuraMensajeObtenerP->nombreRestaurante);
 			free(estructuraMensajeObtenerP);
@@ -77,6 +82,8 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 			guardar_plato* estructuraMensajeGuardarPlato = malloc(sizeof(guardar_plato));
 			recibir_mensaje(estructuraMensajeGuardarPlato, GUARDAR_PLATO, *socket_cliente);
 
+			log_info(logger, "[ReciboMSG] GUARDAR_PLATO : nombreResto=%s | idPedido=%i | nombrePlato=%s | cantidadPlatos=%i",
+					estructuraMensajeGuardarPlato->nombreRestaurante, estructuraMensajeGuardarPlato->idPedido, estructuraMensajeGuardarPlato->nombrePlato, estructuraMensajeGuardarPlato->cantidadPlatos);
 			guardarPlato(estructuraMensajeGuardarPlato->nombreRestaurante,
 					estructuraMensajeGuardarPlato->idPedido,
 					estructuraMensajeGuardarPlato->nombrePlato,
@@ -91,6 +98,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 			guardar_pedido* estructuraMensajeConfirmarP = malloc(sizeof(guardar_pedido));
 			recibir_mensaje(estructuraMensajeConfirmarP, CONFIRMAR_PEDIDO, *socket_cliente);
 
+			log_info(logger, "[ReciboMSG] CONFIRMAR_PEDIDO : nombreResto=%s | idPedido=%i", estructuraMensajeConfirmarP->nombreRestaurante, estructuraMensajeConfirmarP->idPedido);
 			confirmarPedido_sindicato(estructuraMensajeConfirmarP->nombreRestaurante, estructuraMensajeConfirmarP->idPedido, *socket_cliente);
 			free(estructuraMensajeConfirmarP->nombreRestaurante);
 			free(estructuraMensajeConfirmarP);
@@ -101,6 +109,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 			plato_listo* estructuraMensajePlatoL = malloc(sizeof(plato_listo));
 			recibir_mensaje(estructuraMensajePlatoL, PLATO_LISTO, *socket_cliente);
 
+			log_info(logger, "[ReciboMSG] PLATO_LISTO : nombreResto=%s | idPedido=%i | nombrePlato=%s", estructuraMensajePlatoL->nombreRestaurante, estructuraMensajePlatoL->idPedido, estructuraMensajePlatoL->nombrePlato);
 			platoListo(estructuraMensajePlatoL->nombreRestaurante, estructuraMensajePlatoL->idPedido, estructuraMensajePlatoL->nombrePlato,  *socket_cliente);
 			free(estructuraMensajePlatoL->nombreRestaurante);
 			free(estructuraMensajePlatoL->nombrePlato);
@@ -112,6 +121,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 			guardar_pedido* estructuraMensajeTerminarP = malloc(sizeof(guardar_pedido));
 			recibir_mensaje(estructuraMensajeTerminarP, TERMINAR_PEDIDO, *socket_cliente);
 
+			log_info(logger, "[ReciboMSG] TERMINAR_PEDIDO : nombreResto=%s | idPedido=%i", estructuraMensajeTerminarP->nombreRestaurante, estructuraMensajeTerminarP->idPedido);
 			terminarPedido(estructuraMensajeTerminarP->nombreRestaurante, estructuraMensajeTerminarP->idPedido,  *socket_cliente);
 			free(estructuraMensajeTerminarP->nombreRestaurante);
 			free(estructuraMensajeTerminarP);
@@ -134,6 +144,7 @@ void process_request(codigo_operacion cod_op, int32_t* socket_cliente, uint32_t 
 		break;
 
 		default:
+			printf("ERROR | Sindicato recibe un mensaje que no sabe procesar.\n");
 		break;
 	}
 

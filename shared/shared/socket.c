@@ -1227,7 +1227,7 @@ uint32_t serializar_paquete_respuesta_obtener_pedido(t_paquete* paquete, respues
 						   + sizeof(estructura->sizeCantTotales)
 						   + estructura->sizeCantTotales+1
 						   + sizeof(estructura->sizeCantListas)
-						   + estructura->sizeCantTotales+1;
+						   + estructura->sizeCantListas+1;
 
 
 			if(desplazamiento != pesoDeElementosAEnviar)
