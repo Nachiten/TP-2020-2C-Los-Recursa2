@@ -388,8 +388,8 @@ void hiloExec(int* numHiloExecPuntero){
 				sem_wait(semLog);
 				log_trace(logger, "[EXEC-%d] Repartidor %d invierte ciclo en avanzar una posicion para el pedido %d."
 						" Para llegar al objetivo actual, requiere %d ciclos adicionales."
-						, pedidoAEjecutar->repartidorAsignado->numeroRepartidor, pedidoAEjecutar->pedidoIDGlobal
-						, pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
+						,numHiloExec , pedidoAEjecutar->repartidorAsignado->numeroRepartidor, pedidoAEjecutar->pedidoIDGlobal
+					    ,pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
                 sem_post(semLog);
 				signalSemaforoFinalizarCicloExec(numHiloExec);
 				cantidadCiclos++;
@@ -428,7 +428,8 @@ int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
 				                            + (1-alpha)*pedidoEnEjecucion->estimacionAnterior;
 		repartidorActual->instruccionesRealizadas = 0;
 		sem_wait(semLog);
-		log_info(logger, "[BLOCK] Ingresa pedido %d por estar cansado.", pedidoEnEjecucion->pedidoIDGlobal);
+		log_info(logger, "[BLOCK] Ingresa el repartidor %d del pedido %d por estar cansado.",
+				pedidoEnEjecucion->repartidorAsignado->numeroRepartidor, pedidoEnEjecucion->pedidoIDGlobal);
 		sem_post(semLog);
 		retorno = 0;
 	}
