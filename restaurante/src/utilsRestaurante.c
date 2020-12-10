@@ -203,12 +203,13 @@ void crearHilosPlanificacion(){
 
 
 void chequearSiElPedidoEstaListo(int idDelPedidoSospechoso){
-	int32_t nuevoSocketSindicato, sizePayload, indicePedidoBuscado;
+	int32_t nuevoSocketSindicato, sizePayload;
 	respuesta_ok_error* respuestaTerminacion;
 	obtener_pedido* elPedidoAObtener;
 	respuesta_obtener_pedido* elPedidoObtenido;
 	codigo_operacion codigoRecibido;
-	perfil_pedido* elPedidoAsociado;
+//	perfil_pedido* elPedidoAsociado;
+//	int32_t indicePedidoBuscado;
 	guardar_pedido* notificacionPedidoTerminado;
 
 	nuevoSocketSindicato = establecer_conexion(ip_sindicato,puerto_sindicato);
@@ -254,7 +255,7 @@ void chequearSiElPedidoEstaListo(int idDelPedidoSospechoso){
 	}
 	//el pedido esta terminado
 	if(contadorTotales == contadorListas){
-		indicePedidoBuscado = buscar_pedido_por_id(idDelPedidoSospechoso);
+		//indicePedidoBuscado = buscar_pedido_por_id(idDelPedidoSospechoso);
 
 		/*
 		sem_wait(semListaPedidos);
