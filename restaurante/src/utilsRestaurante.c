@@ -256,10 +256,12 @@ void chequearSiElPedidoEstaListo(int idDelPedidoSospechoso){
 	if(contadorTotales == contadorListas){
 		indicePedidoBuscado = buscar_pedido_por_id(idDelPedidoSospechoso);
 
+		/*
 		sem_wait(semListaPedidos);
 		elPedidoAsociado = list_remove(listaPedidos, indicePedidoBuscado);
 		free(elPedidoAsociado);
 		sem_post(semListaPedidos);
+		*/
 
 		sem_wait(semLog);
 		log_trace(logger, "[EXIT] El pedido <%d> ha sido cocinado en su totalidad." ,idDelPedidoSospechoso);
