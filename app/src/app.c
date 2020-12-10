@@ -1229,6 +1229,8 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 	sem_wait(mutexListaPedidos);
 	elPedidoBuscado = list_get(listaPedidos, indicePedidoBuscado);
 
+	notificacionPlatoListo->idPedido = elPedidoBuscado->id_pedido_global;
+
 	mandar_mensaje(notificacionPlatoListo, PLATO_LISTO, elPedidoBuscado->socket_cliente);
 	bytesRecibidos(recv(elPedidoBuscado->socket_cliente, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
 	bytesRecibidos(recv(elPedidoBuscado->socket_cliente, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
@@ -1243,6 +1245,7 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 		sem_post(semLog);
 		exit(-2);
 	}
+	notificacionPlatoListo->idPedido = elPedidoBuscado->id_pedido_resto;
 
 	mandar_mensaje(notificacionPlatoListo, PLATO_LISTO, nuevoSocketComanda);
 
