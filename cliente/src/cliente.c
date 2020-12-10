@@ -743,7 +743,7 @@ void obtenerInputConsolaCliente(){
     case OBTENER_PEDIDO:
     	if(palabrasSeparadas[1] == NULL || palabrasSeparadas[2] == NULL)
     	{
-			printf("El formato correcto es: OBTENER_PEDIDO [nombreRest] [idPedido]");
+			printf("El formato correcto es: OBTENER_PEDIDO [nombreRest] [idPedido]\n");
 			break;
 		}
     	strcat(palabrasSeparadas[1],"\0");
