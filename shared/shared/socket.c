@@ -113,7 +113,7 @@ void mandar_mensaje(void* mensaje, codigo_operacion tipoMensaje, int32_t socket)
 	paquete_por_armar->buffer = malloc(sizeof(t_buffer));
 	uint32_t size_serializado = 0;
 
-	printf("Voy a mandar un mensaje del tipo %i.\n", tipoMensaje);
+	//printf("Voy a mandar un mensaje del tipo %i.\n", tipoMensaje);
 
 	//preparo el paquete para mandar
 	void* paquete_serializado = serializar_paquete(paquete_por_armar, mensaje, tipoMensaje, &size_serializado);
@@ -295,7 +295,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 	}
 
 	//ahora me preparo para meter en el buffer "posta", el choclo que va a enviar mandar_mensaje
-	printf("El size que tiene armado es: %i \n", size_ya_armado);
+	//printf("El size que tiene armado es: %i \n", size_ya_armado);
 	buffer_serializar = malloc(size_ya_armado);
 	uint32_t desplazamiento = 0;
 
@@ -306,7 +306,7 @@ void* serializar_paquete(t_paquete* paquete, void* mensaje, codigo_operacion tip
 	//meto en el buffer el tamaño de lo que meti en el buffer del paquete que voy a mandar
 	memcpy(buffer_serializar  + desplazamiento, &(paquete->buffer->size), sizeof(paquete->buffer->size));
 	desplazamiento += sizeof(paquete->buffer->size);
-	printf("El tamaño del Payload es: %i \n", paquete->buffer->size);
+	//printf("El tamaño del Payload es: %i \n", paquete->buffer->size);
 
 	//por ultimo meto en el buffer lo que meti en el buffer del paquete
 	memcpy(buffer_serializar  + desplazamiento, paquete->buffer->stream, paquete->buffer->size);
@@ -664,11 +664,6 @@ uint32_t serializar_paquete_guardar_pedido(t_paquete* paquete, guardar_pedido* e
 	uint32_t desplazamiento = 0;
 	uint32_t pesoDeElementosAEnviar = 0;
 
-	if(strlen(estructura->nombreRestaurante) != estructura->largoNombreRestaurante){
-		   printf("Error en la serializacion de longitudes, sos pollo\n");
-		   return -1;
-		}
-
 	 //reservo memoria ESPECIFICAMENTE para el buffer de bytes (payload) que mi querido paquete va a contener
 	t_buffer* buffer = malloc(sizeof(t_buffer));
 	buffer->size = sizeof(uint32_t)*2
@@ -689,7 +684,9 @@ uint32_t serializar_paquete_guardar_pedido(t_paquete* paquete, guardar_pedido* e
 	desplazamiento += sizeof(estructura->idPedido);
 
 	//controlo que el desplazamiento sea = al peso de lo que mando
-	pesoDeElementosAEnviar = sizeof(estructura->largoNombreRestaurante) + estructura->largoNombreRestaurante + 1 + sizeof(estructura->idPedido);
+	pesoDeElementosAEnviar = sizeof(estructura->largoNombreRestaurante)
+			               + estructura->largoNombreRestaurante+1
+						   + sizeof(estructura->idPedido);
 
 	if(desplazamiento != pesoDeElementosAEnviar)
 	{
@@ -1701,13 +1698,6 @@ void desserializar_guardar_plato(guardar_plato* estructura, int32_t socket_clien
 
 	//saco la cantidad de platos a agregar al pedido
 	bytesRecibidos(recv(socket_cliente, &(estructura->cantidadPlatos), sizeof(estructura->cantidadPlatos), MSG_WAITALL));
-
-	printf("el largo del nombre del restaurante es: %u\n", estructura->largoNombreRestaurante);
-	printf("el nombre del restaurante es: %s.\n", estructura->nombreRestaurante);
-	printf("la ID del pedido es: %u.\n", estructura->idPedido);
-	printf("el largo del nombre del plato es: %u.\n", estructura->largoNombrePlato);
-	printf("el nombre del plato es: %s.\n", estructura->nombrePlato);
-	printf("la cantidad de platos es: %u.\n", estructura->cantidadPlatos);
 }
 
 void desserializar_ok_fail(respuesta_ok_error* estructura, int32_t socket_cliente)
@@ -1731,10 +1721,6 @@ void desserializar_guardar_pedido(guardar_pedido* estructura, int32_t socket_cli
 
 	//saco la ID del pedido
 	bytesRecibidos(recv(socket_cliente, &(estructura->idPedido), sizeof(estructura->idPedido), MSG_WAITALL));
-
-	printf("el largo del nombre del restaurante es: %u\n", estructura->largoNombreRestaurante);
-	printf("el nombre del restaurante es: %s.\n", estructura->nombreRestaurante);
-	printf("la ID del pedido es: %u.\n", estructura->idPedido);
 }
 
 void desserializar_consultar_pedido(consultar_pedido* estructura, int32_t socket_cliente)

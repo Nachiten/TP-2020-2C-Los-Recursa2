@@ -163,7 +163,7 @@ void serve_client(int32_t* socketCliente)
 		{
 			recibidosSize = recv(*socketCliente, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 			bytesRecibidos(recibidosSize);
-			printf("Tamaño de lo que sigue en el buffer: %u.\n", sizeAAllocar);
+			//printf("Tamaño de lo que sigue en el buffer: %u.\n", sizeAAllocar);
 
 			process_request(cod_op, socketCliente, sizeAAllocar);
 		}

@@ -728,7 +728,7 @@ void aniadirPlato(a_plato* recibidoAPlato, int32_t socket_cliente){
 
 void consultarPedido(consultar_pedido* elPedidoBuscado, int32_t socket_cliente){
 	perfil_pedido* elPedidoQueQueremosConsultar;
-	obtener_pedido* datosPedido;
+	guardar_pedido* datosPedidoAObtener;
 	respuesta_obtener_pedido* elPedidoObtenido;
 	respuesta_consultar_pedido* elPedidoYaConsultado;
 	int32_t indiceDelPedidoAConsultar, nuevoSocketComanda;
@@ -777,20 +777,19 @@ void consultarPedido(consultar_pedido* elPedidoBuscado, int32_t socket_cliente){
 		exit(-2);
 	}
 
-	datosPedido = malloc(sizeof(obtener_pedido));
+	datosPedidoAObtener = malloc(sizeof(guardar_pedido));
+	datosPedidoAObtener->largoNombreRestaurante = strlen(elPedidoQueQueremosConsultar->nombreRestaurante);
+	datosPedidoAObtener->nombreRestaurante = malloc(strlen(elPedidoQueQueremosConsultar->nombreRestaurante)+1);
+	strcpy(datosPedidoAObtener->nombreRestaurante,elPedidoQueQueremosConsultar->nombreRestaurante);
 
-	datosPedido->largoNombreRestaurante = strlen(elPedidoQueQueremosConsultar->nombreRestaurante);
-	datosPedido->nombreRestaurante = malloc(strlen(elPedidoQueQueremosConsultar->nombreRestaurante) +1);
-	strcpy(datosPedido->nombreRestaurante,elPedidoQueQueremosConsultar->nombreRestaurante);
-
-	if(strcmp(datosPedido->nombreRestaurante, "RestoDefault") == 0){
-	    datosPedido->idPedido = elPedidoQueQueremosConsultar->id_pedido_global;
+	if(strcmp(datosPedidoAObtener->nombreRestaurante, "RestoDefault") == 0){
+		datosPedidoAObtener->idPedido = elPedidoQueQueremosConsultar->id_pedido_global;
     }else{
-    	datosPedido->idPedido = elPedidoQueQueremosConsultar->id_pedido_resto;
+    	datosPedidoAObtener->idPedido = elPedidoQueQueremosConsultar->id_pedido_resto;
     }
 	sem_post(mutexListaPedidos);
 
-	mandar_mensaje(datosPedido, OBTENER_PEDIDO, nuevoSocketComanda);
+	mandar_mensaje(datosPedidoAObtener, OBTENER_PEDIDO, nuevoSocketComanda);
 
     bytesRecibidos(recv(nuevoSocketComanda, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
     bytesRecibidos(recv(nuevoSocketComanda, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
@@ -819,8 +818,8 @@ void consultarPedido(consultar_pedido* elPedidoBuscado, int32_t socket_cliente){
 
     mandar_mensaje(elPedidoYaConsultado, RESPUESTA_CONSULTAR_PEDIDO, socket_cliente);
 
-    free(datosPedido->nombreRestaurante);
-    free(datosPedido);
+    free(datosPedidoAObtener->nombreRestaurante);
+    free(datosPedidoAObtener);
     free(elPedidoObtenido->comidas);
     free(elPedidoObtenido->cantTotales);
     free(elPedidoObtenido->cantListas);
@@ -888,6 +887,25 @@ void confirmarPedido(confirmar_pedido* datosPedidoAConfirmar, int32_t socket_cli
 				recibir_mensaje(elPedidoObtenido, RESPUESTA_OBTENER_PEDIDO,nuevoSocketComanda);
 
 				close(nuevoSocketComanda);
+
+				if(strcmp(elPedidoObtenido->comidas, "[]") == 0){
+					//el pedido a confirmar todavia no se le agrego ningun plato en comanda, deberia denegar la operacion
+                    sem_wait(semLog);
+					log_error(logger, "[APP] El pedido %d no tiene platos aniadidos, no se lo puede confirmar.",
+							elPedidoAConfirmar->id_pedido_global);
+					sem_post(semLog);
+					mandar_mensaje(respuestaConfirmacion, RESPUESTA_CONFIRMAR_PEDIDO, socket_cliente);
+					free(respuestaConfirmacion);
+					free(elPedidoAObtener->nombreRestaurante);
+					free(elPedidoAObtener);
+					free(elPedidoObtenido->comidas);
+					free(elPedidoObtenido->cantListas);
+					free(elPedidoObtenido->cantTotales);
+					free(elPedidoObtenido);
+					sem_post(mutexListaPedidos);
+					return;
+				}
+
 
 				if(elPedidoObtenido->estado == PENDIENTE){
 					//los datos en comanda estan correctos, podemos pedirle que confirme
@@ -1344,94 +1362,6 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 }
 
 
-
-// TODO | Revisar despues si esto sirve para el cliente
-/*
-void consultar_Pedido(consultar_pedido* pedido){
-	perfil_cliente* cliente;
-	respuesta_consultar_pedido* datosObtenerPedido;
-	obtener_pedido* obtener_Pedido;
-	respuesta_obtener_pedido* respuesta_consulta;
-	int32_t recibidos, recibidosSize = 0, sizeAAllocar, numero_cliente, nuevoSocketComanda;
-	codigo_operacion cod_op;
-
-	numero_cliente = buscar_pedido_por_id(pedido->idPedido);
-	cliente = list_get(listaPedidos,numero_cliente);
-
-	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
-	if(nuevoSocketComanda < 0){
-		sem_wait(semLog);
-		log_info(logger, "Comanda esta muerta, me muero yo tambien");
-		sem_post(semLog);
-		exit(-2);
-	}
-
-	obtener_Pedido = malloc(sizeof(obtener_pedido));
-	obtener_Pedido->largoNombreRestaurante = strlen(cliente->nombre_resto);
-	obtener_Pedido->nombreRestaurante = malloc(strlen(cliente->nombre_resto)+1);
-	strcpy(obtener_Pedido->nombreRestaurante,cliente->nombre_resto);
-	obtener_Pedido->idPedido = cliente->id_global;
-
-
-
-	mandar_mensaje(obtener_Pedido,OBTENER_PEDIDO,nuevoSocketComanda);
-
-	recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
-
-	if(recibidos >= 1){
-		recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
-		bytesRecibidos(recibidosSize);
-
-		respuesta_consulta = malloc(sizeAAllocar);
-
-		recibir_mensaje(respuesta_consulta,RESPUESTA_OBTENER_PEDIDO,nuevoSocketComanda);
-
-		char** listaComidas = string_get_string_as_array(respuesta_consulta->comidas);
-		char** listaComidasTotales = string_get_string_as_array(respuesta_consulta->cantTotales);
-		char** listaComidasListas = string_get_string_as_array(respuesta_consulta->cantListas);
-		int i = 0, j = 0;
-
-		char* stringCompleto = string_new();
-		char* stringInicial = "[";
-		char* stringFinal = "]";
-		char* stringSeparador = ",";
-		char* stringCorcheteInicial = "{";
-		char* stringCorcheteFinal = "}";
-
-		string_append(&stringCompleto, stringInicial);
-
-		while(listaComidas[i] != NULL){
-			string_append(&stringCompleto, stringCorcheteInicial);
-			string_append(&stringCompleto, listaComidas[i]);
-			string_append(&stringCompleto, stringSeparador);
-			string_append(&stringCompleto, listaComidasTotales[i]);
-			string_append(&stringCompleto, stringSeparador);
-			string_append(&stringCompleto, listaComidasListas[i]);
-			string_append(&stringCompleto, stringCorcheteFinal);
-
-			if(listaComidas[i+1] != NULL){
-					string_append(&stringCompleto, stringSeparador);// agregas una , si ya hay elementos agregados
-				}
-			i++;
-			j++;
-		}
-		string_append(&stringCompleto, stringFinal);
-
-		datosObtenerPedido = malloc(sizeof(respuesta_consultar_pedido));
-		datosObtenerPedido->largoNombreRestaurante = strlen(cliente->nombre_resto);
-		datosObtenerPedido->nombreRestaurante = malloc(strlen(cliente->nombre_resto) + 1);
-		strcpy(datosObtenerPedido->nombreRestaurante,cliente->nombre_resto);
-
-		// TODO | Revisar
-		datosObtenerPedido->comidas = malloc(strlen(stringCompleto) + 1);
-		strcpy(datosObtenerPedido->comidas,stringCompleto);
-		datosObtenerPedido->sizeComidas = strlen(stringCompleto);
-
-		mandar_mensaje(datosObtenerPedido,RESPUESTA_CONSULTAR_PEDIDO,cliente->socket_cliente);
-	}
-}*/
-
-
 // agrega un restaurante que se conecto a app a la lista de restaurantes
 void registrarRestaurante(agregar_restaurante* recibidoAgregarRestaurante, int32_t socket_cliente){
 	int idResto;
@@ -1578,128 +1508,6 @@ int buscarRestaurante(char* nombreResto){
 }
 
 
-/*
-//maneja todos los flujos de mensajes que requieran respuestas
-void recibir_respuesta(codigo_operacion cod_op, info_resto* resto, perfil_cliente* cliente, int32_t socketCliente){
-	int32_t socketRespuestas;
-	respuesta_ok_error* respuesta;
-	guardar_pedido* estructura_guardar_pedido;
-	//----esto es porque la serializacion de consultar_platos reutiliza la de obtener_restaurante, son lo mismo----
-	obtener_restaurante* mensajeConsultarPlatos;
-	confirmar_pedido* estructura_idPedido;
-	respuesta_consultar_platos* estructura_consultar_platos;
-	int32_t recibidos, recibidosSize = 0, sizeAAllocar = 0, nuevoSocketComanda;
-
-	switch(cod_op){
-	case CREAR_PEDIDO:
-		estructura_idPedido = malloc(sizeof(confirmar_pedido));
-		estructura_idPedido->idPedido = 0;
-
-		socketRespuestas = establecer_conexion(resto->ip,resto->puerto);
-		mandar_mensaje(estructura_idPedido,CREAR_PEDIDO,socketRespuestas);//todo cambiar si rompe
-
-		recibidos = recv(socketRespuestas, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
-
-		if(recibidos >= 1){
-			recibidosSize = recv(socketRespuestas, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
-			bytesRecibidos(recibidosSize);
-
-			recibir_mensaje(estructura_idPedido,RESPUESTA_CREAR_PEDIDO,socketRespuestas);
-		}
-
-		if(estructura_idPedido->idPedido != 0){
-			nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
-			if(nuevoSocketComanda < 0){
-				sem_wait(semLog);
-				log_info(logger, "Comanda esta muerta, me muero yo tambien");
-				sem_post(semLog);
-				exit(-2);
-			}
-			estructura_guardar_pedido = malloc(sizeof(guardar_pedido));
-
-			estructura_guardar_pedido->idPedido = cliente->id_global;
-			estructura_guardar_pedido->nombreRestaurante = malloc(strlen(cliente->nombre_resto)+1);
-			strcpy(estructura_guardar_pedido->nombreRestaurante, cliente->nombre_resto);
-			estructura_guardar_pedido->largoNombreRestaurante = strlen(cliente->nombre_resto);
-
-			respuesta = malloc(sizeof(respuesta_ok_error));
-			respuesta->respuesta = 0;
-
-
-			mandar_mensaje(estructura_guardar_pedido,GUARDAR_PEDIDO,nuevoSocketComanda);
-
-			recibidos = recv(nuevoSocketComanda, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
-
-			if(recibidos >= 1){
-				recibidosSize = recv(nuevoSocketComanda, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
-				bytesRecibidos(recibidosSize);
-
-				recibir_mensaje(respuesta,RESPUESTA_GUARDAR_PEDIDO,nuevoSocketComanda);
-			}
-
-			if(respuesta->respuesta == 1){
-				mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socketCliente);
-				cliente->id_pedido_resto = estructura_idPedido->idPedido;
-
-			}else{
-				respuesta->respuesta = 0;
-				mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socketCliente);
-			}
-			free(estructura_guardar_pedido->nombreRestaurante);
-			free(estructura_guardar_pedido);
-			free(respuesta);
-
-		}else{
-			respuesta = malloc(sizeof(respuesta_ok_error));
-			respuesta->respuesta = 0;
-			mandar_mensaje(respuesta,RESPUESTA_CREAR_PEDIDO,socketCliente);
-			free(respuesta);
-		}
-		close(socketRespuestas);
-		close(nuevoSocketComanda);
-		break;
-
-	case CONSULTAR_PLATOS:
-
-		socketRespuestas = establecer_conexion(resto->ip,resto->puerto);
-
-		mensajeConsultarPlatos = malloc(sizeof(obtener_restaurante));
-		mensajeConsultarPlatos->largoNombreRestaurante = strlen(resto->nombre_resto);
-		mensajeConsultarPlatos->nombreRestaurante = malloc(strlen(resto->nombre_resto)+1);
-		strcpy(mensajeConsultarPlatos->nombreRestaurante, resto->nombre_resto);
-
-		mandar_mensaje(mensajeConsultarPlatos,CONSULTAR_PLATOS, socketRespuestas);
-
-		recibidos = recv(socketRespuestas, &cod_op, sizeof(codigo_operacion), MSG_WAITALL);
-
-		if(recibidos >= 1){
-			recibidosSize = recv(socketRespuestas, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
-			bytesRecibidos(recibidosSize);
-
-			estructura_consultar_platos = malloc(sizeAAllocar);
-
-			recibir_mensaje(estructura_consultar_platos,RESPUESTA_CONSULTAR_PLATOS,socketRespuestas);
-
-			mandar_mensaje(estructura_consultar_platos,RESPUESTA_CONSULTAR_PLATOS, socketCliente);
-
-			free(estructura_consultar_platos->nombresPlatos);
-			free(estructura_consultar_platos);
-		} else{
-			printf("Hubo un problema al recibir consultar platos del restaurante");
-		}
-
-		free(mensajeConsultarPlatos->nombreRestaurante);
-		free(mensajeConsultarPlatos);
-		close(socketRespuestas);
-		break;
-
-	default:
-		break;
-	}
-}
-*/
-
-
 //************* FUNCIONES DE SERVER *************
 
 void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t sizeAAllocar)  {
@@ -1721,9 +1529,9 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 	 * CONSULTAR_PLATOS -> Done + Tested
 	 * CREAR_PEDIDO -> Done + Tested
 	 * ANIADIR_PLATO -> Done + Tested
-	 * CONSULTAR_PEDIDO -> Done +
-	 * CONFIRMAR_PEDIDO -> Done +
-	 * PLATO_LISTO -> Done +
+	 * CONSULTAR_PEDIDO -> Done + ROMPE CUANDO QUIERE, UN DESGRACIADO
+	 * CONFIRMAR_PEDIDO -> Done + Tested
+	 * PLATO_LISTO -> Done + Tested
 	 * REGISTRO HANDSHAKE/ASOCIACION -> Done + Tested
 	 * AGREGAR_RESTAURANTE -> Done + Tested
 	 *
@@ -1774,7 +1582,7 @@ void process_request(codigo_operacion cod_op, int32_t socket_cliente, uint32_t s
 			recibidoPlatoListo = malloc(sizeof(plato_listo));
 			recibir_mensaje(recibidoPlatoListo,PLATO_LISTO,socket_cliente);
 			platoListo(recibidoPlatoListo,socket_cliente);
-			free(recibidoPlatoListo); //todo ver si esto no rompe nada
+			free(recibidoPlatoListo);
 			break;
 
 		case CONFIRMAR_PEDIDO:
@@ -1838,7 +1646,7 @@ void serve_client(int32_t* socket)
 			{
 				recibidosSize = recv(*socket, &sizeAAllocar, sizeof(sizeAAllocar), MSG_WAITALL); //saca el tamaño de lo que sigue en el buffer
 				bytesRecibidos(recibidosSize);
-				printf("Tamaño de lo que sigue en el buffer: %u.\n", sizeAAllocar);
+				//printf("Tamaño de lo que sigue en el buffer: %u.\n", sizeAAllocar);
 
 				process_request(cod_op, *socket, sizeAAllocar);
 			}

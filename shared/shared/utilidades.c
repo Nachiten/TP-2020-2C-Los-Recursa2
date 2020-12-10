@@ -137,7 +137,7 @@ void los_recv_repetitivos(int32_t socket_conexion_establecida, uint32_t *exito, 
 	if(cod_op != 0)
 	{
 		*exito = 1;
-		printf("Tamaño del Payload: %i.\n", *sizeAAllocar);
+		//printf("Tamaño del Payload: %i.\n", *sizeAAllocar);
 	}
 }
 
@@ -177,6 +177,6 @@ void los_recv_repetitivos_VERSIONESPECIAL(int32_t socket_conexion_establecida, u
 	if(*cod_op != 0)
 	{
 		*exito = 1;
-		printf("Tamaño del Payload: %i.\n", *sizeAAllocar);
+		//printf("Tamaño del Payload: %i.\n", *sizeAAllocar);
 	}
 }

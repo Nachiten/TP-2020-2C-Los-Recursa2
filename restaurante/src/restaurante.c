@@ -234,7 +234,7 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
 	guardar_pedido* datosPedido = malloc(sizeof(guardar_pedido));
 	datosPedido->idPedido = id;
 	datosPedido->largoNombreRestaurante = strlen(nombreRestaurante);
-	datosPedido->nombreRestaurante = malloc(strlen(nombreRestaurante) +1);
+	datosPedido->nombreRestaurante = malloc(strlen(nombreRestaurante)+1);
 	strcpy(datosPedido->nombreRestaurante,nombreRestaurante);
 
 	mandar_mensaje(datosPedido,OBTENER_PEDIDO,nuevoSocketSindicato);
@@ -247,6 +247,24 @@ void confirmar_Pedido(int32_t id, int32_t socket_cliente){
     recibir_mensaje(pedido,RESPUESTA_OBTENER_PEDIDO,nuevoSocketSindicato);
 
     close(nuevoSocketSindicato);
+
+    if(strcmp(pedido->comidas,"[]") == 0){
+    	//el pedido a confirmar esta sin platos aniadidos en sindicato, deberia denegar la operacion
+    	sem_wait(semLog);
+		log_error(logger, "[RESTAURANTE] El pedido %d no tiene platos aniadidos, no se lo puede confirmar.", id);
+		sem_post(semLog);
+		respuesta_ok_error* respuestaConfirmacion = malloc(sizeof(respuesta_ok_error));
+		mandar_mensaje(respuestaConfirmacion, RESPUESTA_CONFIRMAR_PEDIDO, socket_cliente);
+		free(respuestaConfirmacion);
+		free(datosPedido->nombreRestaurante);
+		free(datosPedido);
+		free(pedido->comidas);
+		free(pedido->cantListas);
+		free(pedido->cantTotales);
+		free(pedido);
+		return;
+    }
+
 
     respuesta_ok_error* respuestaAMandar = malloc(sizeof(respuesta_ok_error));
     respuestaAMandar->respuesta = 0;

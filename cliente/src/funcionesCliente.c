@@ -158,7 +158,9 @@ void mostrar_el_estado_del_pedido_consultar_pedido(consultar_pedido* estructuraC
 	if(estructuraRespuestaConsultarPedido->estado == 0)
 	{
 		sem_wait(semLog);
-		log_error(logger, "El pedido < %d > no esta asociado a ningun restaurante en los registros internos.", estructuraConsultarPedido->idPedido);
+		log_error(logger, "El pedido < %d > no existe, ya fue entregado previamente"
+				" o no tiene ningun plato agregado actualmente en los registros internos."
+				, estructuraConsultarPedido->idPedido);
 		sem_post(semLog);
 	}
 

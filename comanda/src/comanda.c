@@ -181,7 +181,7 @@ void escuchar_mensajes(int32_t* socket_conexion_establecida)
 
 		if(cod_op != 0)
 		{
-			printf("Tamaño del Payload: %i.\n", sizeAAllocar);
+			//printf("Tamaño del Payload: %i.\n", sizeAAllocar);
 		}
 
 		//mando lo que me llego para que lo procesen
@@ -390,15 +390,15 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
         	{
         		puts("El restaurante solicitado no existe.");
         		resultadoObtenerPedido->estado = NADA_CARGADO;
-        		resultadoObtenerPedido->comidas = malloc(3);
+        		resultadoObtenerPedido->sizeComidas = strlen("[]");
+        		resultadoObtenerPedido->comidas = malloc(strlen("[]")+1);
+        		resultadoObtenerPedido->sizeCantTotales = strlen("[]");
+        		resultadoObtenerPedido->cantTotales = malloc(strlen("[]")+1);
+        		resultadoObtenerPedido->sizeCantListas = strlen("[]");
+        		resultadoObtenerPedido->cantListas = malloc(strlen("[]")+1);
         		strcpy(resultadoObtenerPedido->comidas, "[]");
-        		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
-        		resultadoObtenerPedido->cantTotales = malloc(3);
-        		strcpy(resultadoObtenerPedido->cantTotales, "[]");
-        		resultadoObtenerPedido->sizeCantTotales = strlen(resultadoObtenerPedido->cantTotales);
-        		resultadoObtenerPedido->cantListas = malloc(3);
-        		strcpy(resultadoObtenerPedido->cantListas, "[]");
-        		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
+				strcpy(resultadoObtenerPedido->cantTotales, "[]");
+				strcpy(resultadoObtenerPedido->cantListas, "[]");
         	}
 
         	//la tabla si existe, buscamos el segmento...
@@ -434,15 +434,15 @@ void procesar_mensaje(codigo_operacion cod_op, int32_t sizeAAllocar, int32_t el_
         		{
         			puts("El pedido solicitado no existe o no tiene platos cargados.");
         			resultadoObtenerPedido->estado = NADA_CARGADO;
-            		resultadoObtenerPedido->comidas = malloc(3);
-            		strcpy(resultadoObtenerPedido->comidas, "[]");
-            		resultadoObtenerPedido->sizeComidas = strlen(resultadoObtenerPedido->comidas);
-            		resultadoObtenerPedido->cantTotales = malloc(3);
-            		strcpy(resultadoObtenerPedido->cantTotales, "[]");
-            		resultadoObtenerPedido->sizeCantTotales = strlen(resultadoObtenerPedido->cantTotales);
-            		resultadoObtenerPedido->cantListas = malloc(3);
-            		strcpy(resultadoObtenerPedido->cantListas, "[]");
-            		resultadoObtenerPedido->sizeCantListas = strlen(resultadoObtenerPedido->cantListas);
+					resultadoObtenerPedido->sizeComidas = strlen("[]");
+					resultadoObtenerPedido->comidas = malloc(strlen("[]")+1);
+					resultadoObtenerPedido->sizeCantTotales = strlen("[]");
+					resultadoObtenerPedido->cantTotales = malloc(strlen("[]")+1);
+					resultadoObtenerPedido->sizeCantListas = strlen("[]");
+					resultadoObtenerPedido->cantListas = malloc(strlen("[]")+1);
+					strcpy(resultadoObtenerPedido->comidas, "[]");
+					strcpy(resultadoObtenerPedido->cantTotales, "[]");
+					strcpy(resultadoObtenerPedido->cantListas, "[]");
         		}
         	}
 

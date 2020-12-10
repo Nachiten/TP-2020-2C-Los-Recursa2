@@ -260,7 +260,7 @@ void obtenerInputConsolaCliente(){
 		if(exito == 1) {
 			recibir_mensaje(estructuraRespuesta,RESPUESTA_SELECCIONAR_R, socketCliente);
 			sem_wait(semLog);
-			log_info(logger, "El intento de seleccionar el restaurante %s fue: %s.\n",
+			log_info(logger, "El intento de seleccionar el restaurante %s fue: %s.",
 					estructuraSeleccRestaur->nombreRestaurante,
 					resultadoDeRespuesta(estructuraRespuesta->respuesta));
 			sem_post(semLog);
@@ -301,8 +301,16 @@ void obtenerInputConsolaCliente(){
 		respuesta_obtener_restaurante* estructuraRespuestaObtenerRestaurante = malloc(sizeof(respuesta_obtener_restaurante));
 		recibir_mensaje(estructuraRespuestaObtenerRestaurante, RESPUESTA_OBTENER_REST, socketCliente);
 		sem_wait(semLog);
-		log_info(logger, "Los platos del restaurante < %s > son: %s\n", estructuraObtenerRestaurante->nombreRestaurante, estructuraRespuestaObtenerRestaurante->platos);
-		log_info(logger, "La cantidad de cocineros del restaurante < %s > son: %d\n", estructuraObtenerRestaurante->nombreRestaurante, estructuraRespuestaObtenerRestaurante->cantidadCocineros);
+		log_info(logger, "Los datos del restaurante < %s > son: Platos: %s, Cocineros: %d. Hornos: %d."
+				" Coordenadas: [%d|%d]. Afinidades: %s. CantPedidos: %d.",
+				estructuraObtenerRestaurante->nombreRestaurante,
+				estructuraRespuestaObtenerRestaurante->platos,
+				estructuraRespuestaObtenerRestaurante->cantidadCocineros,
+				estructuraRespuestaObtenerRestaurante->cantHornos,
+				estructuraRespuestaObtenerRestaurante->posX,
+				estructuraRespuestaObtenerRestaurante->posY,
+				estructuraRespuestaObtenerRestaurante->afinidades,
+				estructuraRespuestaObtenerRestaurante->cantPedidos);
 		sem_post(semLog);
 		free(estructuraRespuestaObtenerRestaurante->platos);
 		free(estructuraRespuestaObtenerRestaurante->afinidades);
@@ -539,7 +547,6 @@ void obtenerInputConsolaCliente(){
 		free(mensajeCrearPedido->id);
 		free(mensajeCrearPedido);
 		close(socketCliente);
-
 		break;
 
 
@@ -802,7 +809,7 @@ void obtenerInputConsolaCliente(){
 		{
 			recibir_mensaje(estructuraRespuesta, RESPUESTA_FINALIZAR_PEDIDO ,socketCliente);
 			sem_wait(semLog);
-			log_info(logger, "El intento de Finalizar un Pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
+			log_info(logger, "El intento de finalizar un pedido fue: %s.\n", resultadoDeRespuesta(estructuraRespuesta->respuesta));
 			sem_post(semLog);
 		} else {
 			printf("Ocurrió un error al intentar recibir la respuesta de este mensaje.\n");
