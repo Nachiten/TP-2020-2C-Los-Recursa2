@@ -259,12 +259,12 @@ void hiloBlock_Ready(){
 
 					repartidorActual->tiempoDescansado++;
 
-					log_trace(logger, "[BLOCK] El pedido %i ya descanso %i ciclos.", pedidoActual->pedidoID, repartidorActual->tiempoDescansado);
+					log_trace(logger, "[BLOCK] El pedido %d ya descanso %d ciclos.", pedidoActual->pedidoIDGlobal, repartidorActual->tiempoDescansado);
 
 					// Ya descanso lo que tenia que descansar
 					if (repartidorActual->tiempoDescansado == repartidorActual->tiempoDescanso){
 
-						log_trace(logger, "[BLOCK] El pedido %i ya descanso todos los %i ciclos que necesitaba.", pedidoActual->pedidoID, repartidorActual->tiempoDescansado);
+						log_trace(logger, "[BLOCK] El pedido %d ya descanso todos los %d ciclos que necesitaba.", pedidoActual->pedidoIDGlobal, repartidorActual->tiempoDescansado);
 
 						if (pedidoActual->proximoEstado == READY){
 							// Cuando termina de descansar y tiene que continuar rafagas
@@ -295,7 +295,7 @@ void hiloBlock_Ready(){
 					// Ya esta listo el pedido
 					if (checkearPedidoListo(pedidoActual->pedidoIDGlobal)){
 						sem_wait(semLog);
-						log_trace(logger, "[BLOCK] El pedido de IDGlobal: %d ya esta listo.\n", pedidoActual->pedidoIDGlobal);
+						log_trace(logger, "[BLOCK] El pedido de IDGlobal: %d ya esta listo.", pedidoActual->pedidoIDGlobal);
                         sem_post(semLog);
 
 						// Debe descansar antes de volver a ready
@@ -306,7 +306,7 @@ void hiloBlock_Ready(){
 						// No esta cansado, va a ready
 						} else {
 							sem_wait(semLog);
-							log_info(logger, "[READY] Ingresa pedido %i por ya estar listo.", pedidoActual->pedidoID);
+							log_info(logger, "[READY] Ingresa pedido %d por ya estar listo.", pedidoActual->pedidoIDGlobal);
 							sem_post(semLog);
 							moverPedidoDeBlockAReady(indicePedido);
 							indicePedido--;
@@ -316,7 +316,7 @@ void hiloBlock_Ready(){
 					// No esta listo
 					} else {
 						sem_wait(semLog);
-						log_trace(logger, "[BLOCK] El pedido %i todavia no esta listo.\n", pedidoActual->pedidoID);
+						log_trace(logger, "[BLOCK] El pedido %d todavia no esta listo.", pedidoActual->pedidoIDGlobal);
 						sem_post(semLog);
 					}
 
@@ -325,7 +325,7 @@ void hiloBlock_Ready(){
 				case ESPERANDO_EXIT:
 
 					// Se entrega el pedido
-					log_info(logger, "[BLOCK] Repartidor %i entrega pedido %i.", pedidoActual->repartidorAsignado->numeroRepartidor, pedidoActual->pedidoID);
+					log_info(logger, "[BLOCK] Repartidor %i entrega pedido %d.", pedidoActual->repartidorAsignado->numeroRepartidor, pedidoActual->pedidoIDGlobal);
 					//pedido_entregado(pedidoActual); esto ya no seria necesario broder
 
 					// Debe descansar antes de volver a ready
@@ -342,7 +342,7 @@ void hiloBlock_Ready(){
 					break;
 
 				default:
-					printf("[BLOCK | ERROR] El pedido %i esta en blocked pero no se le asigno por que esta bloqueado.\n", pedidoActual->pedidoID);
+					printf("[BLOCK | ERROR] El pedido %d esta en blocked pero no se le asigno el por que esta bloqueado.", pedidoActual->pedidoIDGlobal);
 					exit(5);
 
 					break;
@@ -365,20 +365,20 @@ void hiloExec(int* numHiloExecPuntero){
 
 		if (pedidoAEjecutar != NULL){
 
-			log_info(logger, "[EXEC-%i] Ingresa pedido %i. Instruciones restantes: %i",
-					numHiloExec, pedidoAEjecutar->pedidoID, pedidoAEjecutar->instruccionesTotales);
+			log_info(logger, "[EXEC-%i] Ingresa pedido %d. Instruciones restantes: %d",
+					numHiloExec, pedidoAEjecutar->pedidoIDGlobal, pedidoAEjecutar->instruccionesTotales);
 
 			int cantidadCiclos = 1;
 
 			// Calculo si tiene que desalojar o no y por que razon
 			while (sigoEjecutando(pedidoAEjecutar)){
 				waitSemaforoHabilitarCicloExec(numHiloExec);
-				log_trace(logger, "[EXEC-%i] Ejecuto ciclo numero: %i.", numHiloExec, cantidadCiclos);
+				log_trace(logger, "[EXEC-%i] Ejecuto ciclo numero: %d.", numHiloExec, cantidadCiclos);
 
 				pedidoAEjecutar->instruccionesRealizadas++;
 				pedidoAEjecutar->repartidorAsignado->instruccionesRealizadas++;
 
-				log_trace(logger, "[EXEC-%i] Instrucciones restantes: %i.", numHiloExec, pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
+				log_trace(logger, "[EXEC-%i] Instrucciones restantes: %d.", numHiloExec, pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
 
 				signalSemaforoFinalizarCicloExec(numHiloExec);
 
@@ -389,7 +389,7 @@ void hiloExec(int* numHiloExecPuntero){
 
 		} else {
 			waitSemaforoHabilitarCicloExec(numHiloExec);
-			log_trace(logger, "[EXEC-%i] Desperdicio un ciclo porque no hay nadie en ready.", numHiloExec);
+			log_trace(logger, "[EXEC-%d] Desperdicio un ciclo porque no hay nadie en ready.", numHiloExec);
 			signalSemaforoFinalizarCicloExec(numHiloExec);
 		}
 
@@ -416,7 +416,7 @@ int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
 				                            + (1-alpha)*pedidoEnEjecucion->estimacionAnterior;
 		repartidorActual->instruccionesRealizadas = 0;
 
-		log_info(logger, "[BLOCK] Ingresa pedido %i por estar cansado.", pedidoEnEjecucion->pedidoID);
+		log_info(logger, "[BLOCK] Ingresa pedido %i por estar cansado.", pedidoEnEjecucion->pedidoIDGlobal);
 
 		retorno = 0;
 	}

@@ -54,7 +54,7 @@ void bytesRecibidos (int32_t cantidad)
 
 	if(cantidad > 0)
 	{
-		printf("Recibí %d bytes sin crashear (Todavía).\n",cantidad);
+		//printf("Recibí %d bytes sin crashear (Todavía).\n",cantidad);
 	}
 }
 
@@ -67,7 +67,7 @@ void bytesEnviados (int32_t cantidad)
 
 	if(cantidad > 0)
 	{
-		printf("Envié %d bytes sin crashear (Todavía).\n",cantidad);
+		//printf("Envié %d bytes sin crashear (Todavía).\n",cantidad);
 	}
 }
 

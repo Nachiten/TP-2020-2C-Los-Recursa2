@@ -19,7 +19,7 @@ void inicializarRestaurante(char* elPathDeLaConfig){
 
     strcat(nombreRestaurante,"\0");
 
-    logger = cargarUnLog(LOG_PATH, "Restaurante");
+    logger = cargarUnLog(LOG_PATH, nombreRestaurante);
 
     log_info(logger, "Obtuve de config el nombre: %s" , nombreRestaurante);
 

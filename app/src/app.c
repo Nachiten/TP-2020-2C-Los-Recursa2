@@ -1226,6 +1226,16 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 		return;
 	}
 
+	sem_wait(mutexListaPedidos);
+	elPedidoBuscado = list_get(listaPedidos, indicePedidoBuscado);
+
+	mandar_mensaje(notificacionPlatoListo, PLATO_LISTO, elPedidoBuscado->socket_cliente);
+	bytesRecibidos(recv(elPedidoBuscado->socket_cliente, &codigoRecibido, sizeof(codigo_operacion), MSG_WAITALL));
+	bytesRecibidos(recv(elPedidoBuscado->socket_cliente, &sizePayload, sizeof(uint32_t), MSG_WAITALL));
+	//aca validaria zZz pero el cliente, es crack, no pasa naranja
+
+	recibir_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO, elPedidoBuscado->socket_cliente);
+
 	nuevoSocketComanda = establecer_conexion(ip_commanda,puerto_commanda);
 	if(nuevoSocketComanda < 0){
 		sem_wait(semLog);
@@ -1288,13 +1298,12 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 				contadorListas += atoi(listaComidasListas[i]);
 			    i++;
 			}
+
+
 			//el pedido esta terminado
 			if(contadorTotales == contadorListas){
 
-				sem_wait(mutexListaPedidos);
-				elPedidoBuscado = list_get(listaPedidos, indicePedidoBuscado);
 				guardarPedidoListo(elPedidoBuscado->id_pedido_global);
-				sem_post(mutexListaPedidos);
 
 				sem_wait(semLog);
 				log_info(logger, "[APP] El pedido <%d> del restaurante <%s> ha sido cocinado en su totalidad."
@@ -1326,6 +1335,7 @@ void platoListo(plato_listo* notificacionPlatoListo, int32_t socket_cliente){
 		sem_post(semLog);
 		close(nuevoSocketComanda);
 	}
+	sem_post(mutexListaPedidos);
 	mandar_mensaje(respuestaNotificacion, RESPUESTA_PLATO_LISTO, socket_cliente);
 	free(respuestaNotificacion);
 }
