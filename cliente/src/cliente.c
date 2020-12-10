@@ -42,7 +42,7 @@ int main(int cantArg, char* argumentos[]){
 	strcat(idCliente,"\0");
 
 	//Dejo cargado un logger para loguear los eventos.
-	logger = cargarUnLogDeCliente(LOG_PATH, "Cliente");
+	logger = cargarUnLogDeCliente(LOG_PATH, idCliente);
 
 	//Preparar consola que se mantendra activa hasta la terminacion del proceso (hilo)  WIP
 

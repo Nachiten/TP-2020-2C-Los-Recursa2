@@ -290,7 +290,7 @@ void hiloBlock_Ready(){
 
 						} else {
 							sem_wait(semLog);
-							log_error(logger, "BLOCK | ERROR: El proximo estado del pedido %d tiene un valor invalido.", pedidoActual->pedidoIDGlobal);
+							log_error(logger, "[BLOCK] El proximo estado del pedido %d tiene un valor invalido.", pedidoActual->pedidoIDGlobal);
 							sem_post(semLog);
 							exit(7);
 						}
@@ -342,6 +342,7 @@ void hiloBlock_Ready(){
 					if (pedidoActual->repartidorAsignado->cansado){
 						pedidoActual->accionBlocked = DESCANSANDO;
 						pedidoActual->proximoEstado = EXIT;
+						pedidoActual->repartidorAsignado->tiempoDescansado = 0;
 
 					// No esta cansado, va a exit
 					} else {
@@ -474,7 +475,7 @@ int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
 			pedidoEnEjecucion->estimacionActual = alpha*pedidoEnEjecucion->instruccionesAnteriores
 												+ (1-alpha)*pedidoEnEjecucion->estimacionAnterior;
 			sem_wait(semLog);
-			log_info(logger, "[BLOCK] Pedido %d llega al cliente en posicion [%d-%d].", pedidoEnEjecucion->pedidoIDGlobal, pedidoEnEjecucion->posClienteX, pedidoEnEjecucion->posClienteY);
+			log_info(logger, "[BLOCK] El repartidor del pedido %d llega al cliente en posicion [%d-%d].", pedidoEnEjecucion->pedidoIDGlobal, pedidoEnEjecucion->posClienteX, pedidoEnEjecucion->posClienteY);
 			sem_post(semLog);
 		} else {
 			sem_wait(semLog);
@@ -807,7 +808,7 @@ void agregarAExit(pcb_pedido* elPCBQueFinalizo){
 	int32_t nuevoSocketComanda;
 
 	sem_wait(semLog);
-	log_info(logger, "[EXIT] Pedido de IDGlobal: <%d> e IDResto: <%d> esta en exit por haber llegado a la posicion del cliente."
+	log_info(logger, "[EXIT] El pedido de IDGlobal: <%d> e IDResto: <%d> esta en exit porque su repartidor ha llegado a la posicion del cliente."
 			, elPCBQueFinalizo->pedidoIDGlobal, elPCBQueFinalizo->pedidoID);
 	sem_post(semLog);
 
