@@ -309,6 +309,7 @@ void hiloBlock_Ready(){
 						if (pedidoActual->repartidorAsignado->cansado){
 							pedidoActual->accionBlocked = DESCANSANDO;
 							pedidoActual->proximoEstado = READY;
+							pedidoActual->repartidorAsignado->tiempoDescansado = 0;
 
 						// No esta cansado, va a ready
 						} else {
@@ -351,7 +352,7 @@ void hiloBlock_Ready(){
 
 				default:
 					sem_wait(semLog);
-					log_error(logger, "[BLOCK | ERROR] El pedido %d esta en block pero no se le asigno el por que esta bloqueado.", pedidoActual->pedidoIDGlobal);
+					log_error(logger, "[BLOCK] El pedido %d esta en block pero no se le asigno el por que esta bloqueado.", pedidoActual->pedidoIDGlobal);
 					sem_post(semLog);
 					exit(5);
 					break;
@@ -374,7 +375,7 @@ void hiloExec(int* numHiloExecPuntero){
 
 		if (pedidoAEjecutar != NULL){
             sem_wait(semLog);
-			log_info(logger, "[EXEC-%d] Ingresa pedido %d. Instruciones restantes: %d",
+			log_info(logger, "[EXEC-%d] Ingresa pedido %d. Instruciones restantes para arribar al objetivo actual: %d",
 					numHiloExec, pedidoAEjecutar->pedidoIDGlobal, pedidoAEjecutar->instruccionesTotales);
             sem_post(semLog);
 			int cantidadCiclos = 1;
@@ -382,16 +383,15 @@ void hiloExec(int* numHiloExecPuntero){
 			// Calculo si tiene que desalojar o no y por que razon
 			while (sigoEjecutando(pedidoAEjecutar)){
 				waitSemaforoHabilitarCicloExec(numHiloExec);
-				sem_wait(semLog);
-				log_trace(logger, "[EXEC-%d] Ejecuto ciclo numero: %d.", numHiloExec, cantidadCiclos);
-                sem_post(semLog);
 				pedidoAEjecutar->instruccionesRealizadas++;
 				pedidoAEjecutar->repartidorAsignado->instruccionesRealizadas++;
-                sem_wait(semLog);
-				log_trace(logger, "[EXEC-%d] Instrucciones restantes: %d.", numHiloExec, pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
+				sem_wait(semLog);
+				log_trace(logger, "[EXEC-%d] Repartidor %d invierte ciclo en avanzar una posicion para el pedido %d."
+						" Para llegar al objetivo actual, requiere %d ciclos adicionales."
+						, pedidoAEjecutar->repartidorAsignado->numeroRepartidor, pedidoAEjecutar->pedidoIDGlobal
+						, pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
                 sem_post(semLog);
 				signalSemaforoFinalizarCicloExec(numHiloExec);
-
 				cantidadCiclos++;
 			}
 
@@ -428,7 +428,7 @@ int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
 				                            + (1-alpha)*pedidoEnEjecucion->estimacionAnterior;
 		repartidorActual->instruccionesRealizadas = 0;
 		sem_wait(semLog);
-		log_info(logger, "[BLOCK] Ingresa pedido %i por estar cansado.", pedidoEnEjecucion->pedidoIDGlobal);
+		log_info(logger, "[BLOCK] Ingresa pedido %d por estar cansado.", pedidoEnEjecucion->pedidoIDGlobal);
 		sem_post(semLog);
 		retorno = 0;
 	}
@@ -462,7 +462,7 @@ int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
 			pedidoEnEjecucion->instruccionesAnteriores = pedidoEnEjecucion->instruccionesTotales;
 			pedidoEnEjecucion->instruccionesTotales = distanciaDeRepartidorAObjetivo(pedidoEnEjecucion->repartidorAsignado,pedidoEnEjecucion);
 			sem_wait(semLog);
-			log_info(logger, "[BLOCK] Ingresa pedido %i para esperar mensaje.", pedidoEnEjecucion->pedidoID);
+			log_info(logger, "[BLOCK] Ingresa pedido %d para esperar mensaje.", pedidoEnEjecucion->pedidoIDGlobal);
 			sem_post(semLog);
 		} else if (pedidoEnEjecucion->objetivo == CLIENTE){
 			pedidoEnEjecucion->accionBlocked = ESPERANDO_EXIT;
@@ -477,11 +477,10 @@ int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
 			sem_post(semLog);
 		} else {
 			sem_wait(semLog);
-			log_error(logger, "[ERROR | EXEC] El objetivo del pedido %d es invalido.", pedidoEnEjecucion->pedidoIDGlobal);
+			log_error(logger, "[EXEC] El objetivo del pedido %d es invalido.", pedidoEnEjecucion->pedidoIDGlobal);
 			sem_post(semLog);
 			exit(6);
 		}
-
 		retorno = 0;
 	}
 
