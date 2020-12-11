@@ -382,7 +382,7 @@ void terminarPedido(char* nombreRestaurant, int IDPedido, uint32_t socketCliente
 
 	char* nuevosDatosPedido = cambiarEstadoPedidoA("Terminado", datosPedido);
 
-	printf("Nuevos datos pedido:\n%s", nuevosDatosPedido);
+	//printf("Nuevos datos pedido:\n%s", nuevosDatosPedido);
 
 	/*
 	 * 1 - Calcular cantidad de bloques a utilizar
