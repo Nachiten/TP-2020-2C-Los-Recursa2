@@ -261,15 +261,15 @@ void hiloBlock_Ready(){
 
 					repartidorActual->tiempoDescansado++;
                     sem_wait(semLog);
-					log_trace(logger, "[BLOCK] El repartidor %d del pedido %d ya descanso %d ciclos, le faltan %d.",
-							repartidorActual->numeroRepartidor, pedidoActual->pedidoIDGlobal, repartidorActual->tiempoDescansado
+					log_trace(logger, "[BLOCK] El repartidor %d con el pedido de idGlobal: %d e idResto: %d ya descanso %d ciclos, le faltan %d.",
+							repartidorActual->numeroRepartidor, pedidoActual->pedidoIDGlobal, pedidoActual->pedidoID, repartidorActual->tiempoDescansado
 							, repartidorActual->tiempoDescanso-repartidorActual->tiempoDescansado);
                     sem_post(semLog);
 					// Ya descanso lo que tenia que descansar
 					if (repartidorActual->tiempoDescansado == repartidorActual->tiempoDescanso){
 						sem_wait(semLog);
-						log_trace(logger, "[BLOCK] El repartidor %d del pedido %d ya descanso todos los %d ciclos que necesitaba."
-							,repartidorActual->numeroRepartidor	, pedidoActual->pedidoIDGlobal, repartidorActual->tiempoDescansado);
+						log_trace(logger, "[BLOCK] El repartidor %d con el pedido de idGlobal: %d e idResto: %d ya descanso todos los %d ciclos que necesitaba."
+							,repartidorActual->numeroRepartidor	, pedidoActual->pedidoIDGlobal, pedidoActual->pedidoID, repartidorActual->tiempoDescansado);
 						sem_post(semLog);
 						if (pedidoActual->proximoEstado == READY){
 							// Cuando termina de descansar y tiene que continuar rafagas
@@ -277,8 +277,8 @@ void hiloBlock_Ready(){
 							pedidoActual->repartidorAsignado->tiempoDescansado = 0;
 							pedidoActual->repartidorAsignado->cansado = 0;
 							sem_wait(semLog);
-							log_info(logger, "[READY] Ingresa el repartidor %d del pedido %d por terminar de descansar."
-									, pedidoActual->repartidorAsignado->numeroRepartidor , pedidoActual->pedidoIDGlobal);
+							log_info(logger, "[READY] Ingresa el repartidor %d con el pedido de idGlobal: %d e idResto: %d por terminar de descansar."
+									, pedidoActual->repartidorAsignado->numeroRepartidor , pedidoActual->pedidoIDGlobal, pedidoActual->pedidoID);
 							sem_post(semLog);
 							moverPedidoDeBlockAReady(indicePedido);
 							indicePedido--;
@@ -291,7 +291,8 @@ void hiloBlock_Ready(){
 
 						} else {
 							sem_wait(semLog);
-							log_error(logger, "[BLOCK] El proximo estado del pedido %d tiene un valor invalido.", pedidoActual->pedidoIDGlobal);
+							log_error(logger, "[BLOCK] El proximo estado del pedido de idGlobal: %d e idResto: %d tiene un valor invalido.",
+									pedidoActual->pedidoIDGlobal, pedidoActual->pedidoID);
 							sem_post(semLog);
 							exit(7);
 						}
@@ -303,7 +304,7 @@ void hiloBlock_Ready(){
 					// Ya esta listo el pedido
 					if (checkearPedidoListo(pedidoActual->pedidoIDGlobal)){
 						sem_wait(semLog);
-						log_trace(logger, "[BLOCK] El pedido de IDGlobal: %d ya esta listo.", pedidoActual->pedidoIDGlobal);
+						log_trace(logger, "[BLOCK] El pedido de idGlobal: %d e idResto: %d ya esta listo.", pedidoActual->pedidoIDGlobal, pedidoActual->pedidoID);
                         sem_post(semLog);
 
 						// Debe descansar antes de volver a ready
@@ -315,8 +316,8 @@ void hiloBlock_Ready(){
 						// No esta cansado, va a ready
 						} else {
 							sem_wait(semLog);
-							log_info(logger, "[READY] Ingresa el repartidor %d del pedido %d por ya estar listo el mensaje que esperaba (El restaurante tiene todos los platos listos)."
-									,pedidoActual->repartidorAsignado->numeroRepartidor , pedidoActual->pedidoIDGlobal);
+							log_info(logger, "[READY] Ingresa el repartidor %d con el pedido de idGlobal: %d e idResto: %d por ya estar listo el mensaje que esperaba (El restaurante tiene todos los platos listos)."
+								,pedidoActual->repartidorAsignado->numeroRepartidor , pedidoActual->pedidoIDGlobal, pedidoActual->pedidoID);
 							sem_post(semLog);
 							moverPedidoDeBlockAReady(indicePedido);
 							indicePedido--;
@@ -326,7 +327,8 @@ void hiloBlock_Ready(){
 					// No esta listo
 					} else {
 						sem_wait(semLog);
-						log_trace(logger, "[BLOCK] El pedido %d todavia no esta listo.", pedidoActual->pedidoIDGlobal);
+						log_trace(logger, "[BLOCK] El pedido de idGlobal: %d e idResto: %d todavia no esta listo."
+								, pedidoActual->pedidoIDGlobal, pedidoActual->pedidoID);
 						sem_post(semLog);
 					}
 
@@ -336,8 +338,8 @@ void hiloBlock_Ready(){
 
 					// Se entrega el pedido
 					sem_wait(semLog);
-					log_info(logger, "[BLOCK] Repartidor %d entrega pedido %d en la posicion del cliente: [%d|%d]."
-							, pedidoActual->repartidorAsignado->numeroRepartidor, pedidoActual->pedidoIDGlobal
+					log_info(logger, "[BLOCK] Repartidor %d entrega pedido de idGlobal: %d e idResto: %d en la posicion del cliente: [%d|%d]."
+							, pedidoActual->repartidorAsignado->numeroRepartidor, pedidoActual->pedidoIDGlobal, pedidoActual->pedidoID
 							, pedidoActual->posClienteX, pedidoActual->posClienteY);
 					sem_post(semLog);
 					//pedido_entregado(pedidoActual); esto ya no seria necesario broder
@@ -357,7 +359,8 @@ void hiloBlock_Ready(){
 
 				default:
 					sem_wait(semLog);
-					log_error(logger, "[BLOCK] El pedido %d esta en block pero no se le asigno el por que esta bloqueado.", pedidoActual->pedidoIDGlobal);
+					log_error(logger, "[BLOCK] El pedido de idGlobal: %d e idResto: %d esta en block pero no se le asigno el por que esta bloqueado."
+							, pedidoActual->pedidoIDGlobal, pedidoActual->pedidoID);
 					sem_post(semLog);
 					exit(5);
 					break;
@@ -380,10 +383,10 @@ void hiloExec(int* numHiloExecPuntero){
 
 		if (pedidoAEjecutar != NULL){
             sem_wait(semLog);
-			log_info(logger, "[EXEC-%d] Ingresa el repartidor %d del pedido %d."
+			log_info(logger, "[EXEC-%d] Ingresa el repartidor %d con el pedido de idGlobal: %d e idResto: %d."
 					" Instruciones restantes para arribar al objetivo actual: %d",
 					numHiloExec, pedidoAEjecutar->repartidorAsignado->numeroRepartidor
-					,pedidoAEjecutar->pedidoIDGlobal, pedidoAEjecutar->instruccionesTotales);
+					,pedidoAEjecutar->pedidoIDGlobal, pedidoAEjecutar->pedidoID, pedidoAEjecutar->instruccionesTotales);
             sem_post(semLog);
 			int cantidadCiclos = 1;
 
@@ -393,10 +396,10 @@ void hiloExec(int* numHiloExecPuntero){
 				pedidoAEjecutar->instruccionesRealizadas++;
 				pedidoAEjecutar->repartidorAsignado->instruccionesRealizadas++;
 				sem_wait(semLog);
-				log_trace(logger, "[EXEC-%d] Repartidor %d invierte ciclo en avanzar una posicion para el pedido %d."
+				log_trace(logger, "[EXEC-%d] Repartidor %d invierte ciclo en avanzar una posicion con el pedido de idGlobal: %d e idResto: %d."
 						" Para llegar al objetivo actual, todavia requiere %d ciclos adicionales."
 						,numHiloExec , pedidoAEjecutar->repartidorAsignado->numeroRepartidor, pedidoAEjecutar->pedidoIDGlobal
-					    ,pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
+					    ,pedidoAEjecutar->pedidoID,pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
                 sem_post(semLog);
 				signalSemaforoFinalizarCicloExec(numHiloExec);
 				cantidadCiclos++;
@@ -435,8 +438,8 @@ int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
 				                            + (1-alpha)*pedidoEnEjecucion->estimacionAnterior;
 		repartidorActual->instruccionesRealizadas = 0;
 		sem_wait(semLog);
-		log_info(logger, "[BLOCK] Ingresa el repartidor %d del pedido %d por estar cansado.",
-				pedidoEnEjecucion->repartidorAsignado->numeroRepartidor, pedidoEnEjecucion->pedidoIDGlobal);
+		log_info(logger, "[BLOCK] Ingresa el repartidor %d con el pedido de idGlobal: %d e idResto: %d por estar cansado.",
+				pedidoEnEjecucion->repartidorAsignado->numeroRepartidor, pedidoEnEjecucion->pedidoIDGlobal, pedidoEnEjecucion->pedidoID);
 		sem_post(semLog);
 		retorno = 0;
 	}
@@ -481,12 +484,15 @@ int sigoEjecutando(pcb_pedido* pedidoEnEjecucion){
 			pedidoEnEjecucion->estimacionActual = alpha*pedidoEnEjecucion->instruccionesAnteriores
 												+ (1-alpha)*pedidoEnEjecucion->estimacionAnterior;
 			sem_wait(semLog);
-			log_info(logger, "[BLOCK] El repartidor %d del pedido %d llega al cliente en posicion: [%d-%d]."
-					,pedidoEnEjecucion->repartidorAsignado->numeroRepartidor , pedidoEnEjecucion->pedidoIDGlobal, pedidoEnEjecucion->posClienteX, pedidoEnEjecucion->posClienteY);
+			log_info(logger, "[BLOCK] El repartidor %d con el pedido de idGlobal: %d e idResto: %d llega al cliente en posicion: [%d|%d]."
+					,pedidoEnEjecucion->repartidorAsignado->numeroRepartidor
+					,pedidoEnEjecucion->pedidoIDGlobal, pedidoEnEjecucion->pedidoID
+					,pedidoEnEjecucion->posClienteX, pedidoEnEjecucion->posClienteY);
 			sem_post(semLog);
 		} else {
 			sem_wait(semLog);
-			log_error(logger, "[EXEC] El objetivo del pedido %d es invalido.", pedidoEnEjecucion->pedidoIDGlobal);
+			log_error(logger, "[EXEC] El objetivo del pedido de idGlobal: %d e idResto: %d es invalido.",
+					pedidoEnEjecucion->pedidoIDGlobal, pedidoEnEjecucion->pedidoID);
 			sem_post(semLog);
 			exit(6);
 		}
@@ -661,9 +667,9 @@ int estaDesocupado(repartidor* unRepartidor){
 void asignarRepartidorAPedido(pcb_pedido* unPedido){
 	// Filtro la lista y solo dejo los repartidores que no estan ocupados
 	t_list* repartidoresDisponibles = list_filter(repartidores, (void*)estaDesocupado);
-
-	printf("Hay %i repartidores disponibles\n", list_size(repartidoresDisponibles));
-
+    sem_wait(semLog);
+	log_trace(logger, "[NEW-READY] Hay %d repartidores disponibles.", list_size(repartidoresDisponibles));
+    sem_post(semLog);
 	int mejorDistancia;
 	repartidor* mejorRepartidor;
 	unPedido->objetivo = RESTAURANTE;
@@ -689,8 +695,8 @@ void asignarRepartidorAPedido(pcb_pedido* unPedido){
 
 	}
     sem_wait(semLog);
-	log_info(logger, "[NEW] Se asigna el repartidor: %d al pedido: %d. Posicion repartidor: [%d-%d]. Posicion Restaurant: [%d-%d].",
-			mejorRepartidor->numeroRepartidor, unPedido->pedidoIDGlobal, mejorRepartidor->posX, mejorRepartidor->posY, unPedido->posRestauranteX, unPedido->posRestauranteY);
+	log_info(logger, "[NEW] Se asigna el repartidor %d al pedido de idGlobal: %d e idResto: %d. Posicion repartidor: [%d|%d]. Posicion Restaurant: [%d|%d].",
+			mejorRepartidor->numeroRepartidor, unPedido->pedidoIDGlobal, unPedido->pedidoID, mejorRepartidor->posX, mejorRepartidor->posY, unPedido->posRestauranteX, unPedido->posRestauranteY);
     sem_post(semLog);
 	// Asigno el repartidor al pedido, ahora está ocupado
 	mejorRepartidor->asignado = 1;
@@ -705,7 +711,7 @@ void asignarRepartidorAPedido(pcb_pedido* unPedido){
 	unPedido->proximoEstado = READY;
 
 	sem_wait(semLog);
-	log_info(logger,"[READY] Ingresa el pedido %d desde NEW.", unPedido->pedidoIDGlobal);
+	log_info(logger,"[READY] Ingresa el pedido de idGlobal: %d e idResto: %d desde NEW.", unPedido->pedidoIDGlobal, unPedido->pedidoID);
 	sem_post(semLog);
 	agregarAReady(unPedido);
 
@@ -789,7 +795,7 @@ void agregarANew(pcb_pedido* unPedido)
 	queue_push(colaNew, unPedido);
 
 	sem_wait(semLog);
-	log_info(logger, "[NEW] Entra el nuevo pedido %d a la cola.", unPedido->pedidoIDGlobal);
+	log_info(logger, "[NEW] Entra el pedido de idGlobal: %d e idResto: %d a la cola.", unPedido->pedidoIDGlobal, unPedido->pedidoID);
 	sem_post(semLog);
 
 	sem_post(mutexNew);
