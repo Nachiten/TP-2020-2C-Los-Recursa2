@@ -80,9 +80,13 @@ void obtenerMetadataRestaurante(){
 
 		// SI > 0 => True, si = 0 => false
 		if (cantidadDeElementosEnArray(listaPlatos)){
-			printf("Hay platos.\n");
+			sem_wait(semLog);
+			log_info(logger, "Metadata obtenida correctamente de sindicato, hay platos.");
+			sem_post(semLog);
 		} else {
-			printf("No hay platos (no hay restaurant).\n");
+			sem_wait(semLog);
+			log_error(logger, "Metadata obtenida incorrectamente de sindicato, procedo a fallecer.");
+			sem_post(semLog);
 			exit(-2);
 		}
 
@@ -92,7 +96,10 @@ void obtenerMetadataRestaurante(){
 		free(estructuraRespuestaObtenerRestaurante);
 
     }else{
-    	puts("Hubo un problemita al recibir la metadata de sindicatox.\n");
+    	sem_wait(semLog);
+		log_error(logger, "Metadata obtenida incorrectamente de sindicato, procedo a fallecer.");
+		sem_post(semLog);
+    	exit(-2);
     }
     close(socket_sindicato);
 
@@ -384,7 +391,7 @@ void agregarABlock(pcb_plato* elPlato){
 	sem_wait(mutexBlock);
 	list_add(colaBlock, elPlato);
 	sem_wait(semLog);
-	log_trace(logger, "[BLOCK] Ingresa el plato %s del pedido %d.\n", elPlato->nombrePlato, elPlato->idPedido);
+	log_trace(logger, "[BLOCK] Ingresa el plato %s del pedido %d.", elPlato->nombrePlato, elPlato->idPedido);
 	sem_post(semLog);
 	sem_post(mutexBlock);
 
