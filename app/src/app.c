@@ -179,7 +179,7 @@ void seleccionarRestaurante(seleccionar_restaurante* seleccRestoRecibido, int32_
 			//el cliente no hizo el handshake, no deberia pasar nunca
 			//no puedo hacer nadaxd
 			sem_wait(semLog);
-			log_error(logger, "[APP] De Alguna manera, hay un cliente que no hizo el handshake y me mando seleccionar.");
+			log_error(logger, "[APP] De Alguna manera, hay un cliente que no hizo el handshake y me mando un seleccionar.");
 			sem_post(semLog);
 		} else {
 			//le seteo el restaurante que quiere en esta ocasion
@@ -256,7 +256,7 @@ void consultarPlatos(consultar_platos* consultarPlatosRecibido, int32_t socket_c
 
 				if(codigoRecibido != RESPUESTA_CONSULTAR_PLATOS){
 					sem_wait(semLog);
-					log_error(logger, "El restaurante me contesto cualquier verdura en lugar de sus platos.");
+					log_error(logger, "[APP] El restaurante me contesto cualquier verdura en lugar de sus platos.");
 					sem_post(semLog);
                     //exit(-2);
 				}
@@ -284,7 +284,7 @@ void consultarPlatos(consultar_platos* consultarPlatosRecibido, int32_t socket_c
 				free(platosRespondidos);
 			}
 			sem_wait(semLog);
-			log_error(logger,"[APP] El restaurante magicamente dejo de existir en nuestros registros");
+			log_error(logger,"[APP] El restaurante magicamente dejo de existir en nuestros registros.");
 			sem_post(semLog);
 		}else{
 			sem_wait(semLog);
