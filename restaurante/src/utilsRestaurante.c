@@ -92,9 +92,7 @@ void obtenerMetadataRestaurante(){
 		free(estructuraRespuestaObtenerRestaurante);
 
     }else{
-    	sem_wait(semLog);
 		log_error(logger, "Metadata obtenida incorrectamente de sindicato, procedo a fallecer.");
-		sem_post(semLog);
     	exit(-2);
     }
     close(socket_sindicato);
