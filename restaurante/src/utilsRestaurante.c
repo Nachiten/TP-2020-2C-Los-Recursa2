@@ -80,9 +80,9 @@ void obtenerMetadataRestaurante(){
 
 		// SI > 0 => True, si = 0 => false
 		if (cantidadDeElementosEnArray(listaPlatos)){
-			printf("Hay platos.\n");
+			log_info(logger, "Metadata obtenida correctamente de sindicato, hay platos.");
 		} else {
-			printf("No hay platos (no hay restaurant).\n");
+			log_error(logger, "Metadata obtenida incorrectamente de sindicato, procedo a fallecer.");
 			exit(-2);
 		}
 
@@ -92,7 +92,8 @@ void obtenerMetadataRestaurante(){
 		free(estructuraRespuestaObtenerRestaurante);
 
     }else{
-    	puts("Hubo un problemita al recibir la metadata de sindicatox.\n");
+		log_error(logger, "Metadata obtenida incorrectamente de sindicato, procedo a fallecer.");
+    	exit(-2);
     }
     close(socket_sindicato);
 
@@ -203,12 +204,13 @@ void crearHilosPlanificacion(){
 
 
 void chequearSiElPedidoEstaListo(int idDelPedidoSospechoso){
-	int32_t nuevoSocketSindicato, sizePayload, indicePedidoBuscado;
+	int32_t nuevoSocketSindicato, sizePayload;
 	respuesta_ok_error* respuestaTerminacion;
 	obtener_pedido* elPedidoAObtener;
 	respuesta_obtener_pedido* elPedidoObtenido;
 	codigo_operacion codigoRecibido;
-	perfil_pedido* elPedidoAsociado;
+//	perfil_pedido* elPedidoAsociado;
+//	int32_t indicePedidoBuscado;
 	guardar_pedido* notificacionPedidoTerminado;
 
 	nuevoSocketSindicato = establecer_conexion(ip_sindicato,puerto_sindicato);
@@ -254,7 +256,7 @@ void chequearSiElPedidoEstaListo(int idDelPedidoSospechoso){
 	}
 	//el pedido esta terminado
 	if(contadorTotales == contadorListas){
-		indicePedidoBuscado = buscar_pedido_por_id(idDelPedidoSospechoso);
+		//indicePedidoBuscado = buscar_pedido_por_id(idDelPedidoSospechoso);
 
 		/*
 		sem_wait(semListaPedidos);
@@ -383,7 +385,7 @@ void agregarABlock(pcb_plato* elPlato){
 	sem_wait(mutexBlock);
 	list_add(colaBlock, elPlato);
 	sem_wait(semLog);
-	log_trace(logger, "[BLOCK] Ingresa el plato %s del pedido %d.\n", elPlato->nombrePlato, elPlato->idPedido);
+	log_trace(logger, "[BLOCK] Ingresa el plato %s del pedido %d.", elPlato->nombrePlato, elPlato->idPedido);
 	sem_post(semLog);
 	sem_post(mutexBlock);
 

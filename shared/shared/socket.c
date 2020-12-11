@@ -1705,7 +1705,7 @@ void desserializar_ok_fail(respuesta_ok_error* estructura, int32_t socket_client
 	//saco el resultado de la consulta
 	bytesRecibidos(recv(socket_cliente, &(estructura->respuesta), sizeof(estructura->respuesta), MSG_WAITALL));
 
-	printf("El resultado de la consulta es: %u.\n", estructura->respuesta);
+	//printf("El resultado de la consulta es: %u.\n", estructura->respuesta);
 }
 
 void desserializar_guardar_pedido(guardar_pedido* estructura, int32_t socket_cliente)
