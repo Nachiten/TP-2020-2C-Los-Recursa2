@@ -80,13 +80,9 @@ void obtenerMetadataRestaurante(){
 
 		// SI > 0 => True, si = 0 => false
 		if (cantidadDeElementosEnArray(listaPlatos)){
-			sem_wait(semLog);
 			log_info(logger, "Metadata obtenida correctamente de sindicato, hay platos.");
-			sem_post(semLog);
 		} else {
-			sem_wait(semLog);
 			log_error(logger, "Metadata obtenida incorrectamente de sindicato, procedo a fallecer.");
-			sem_post(semLog);
 			exit(-2);
 		}
 
