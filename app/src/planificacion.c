@@ -393,12 +393,36 @@ void hiloExec(int* numHiloExecPuntero){
 			// Calculo si tiene que desalojar o no y por que razon
 			while (sigoEjecutando(pedidoAEjecutar)){
 				waitSemaforoHabilitarCicloExec(numHiloExec);
+
+				if(pedidoAEjecutar->repartidorAsignado->movimientosRequeridosEnX == 0){
+
+					if(pedidoAEjecutar->repartidorAsignado->movimientosRequeridosEnY > 0){
+						pedidoAEjecutar->repartidorAsignado->movimientosRequeridosEnY--;
+						pedidoAEjecutar->repartidorAsignado->posY++;
+					} else {
+						pedidoAEjecutar->repartidorAsignado->movimientosRequeridosEnY++;
+						pedidoAEjecutar->repartidorAsignado->posY--;
+					}
+
+				} else {
+
+					if(pedidoAEjecutar->repartidorAsignado->movimientosRequeridosEnX > 0){
+						pedidoAEjecutar->repartidorAsignado->movimientosRequeridosEnX--;
+						pedidoAEjecutar->repartidorAsignado->posX++;
+					} else {
+						pedidoAEjecutar->repartidorAsignado->movimientosRequeridosEnX++;
+						pedidoAEjecutar->repartidorAsignado->posX--;
+					}
+
+				}
 				pedidoAEjecutar->instruccionesRealizadas++;
 				pedidoAEjecutar->repartidorAsignado->instruccionesRealizadas++;
 				sem_wait(semLog);
-				log_trace(logger, "[EXEC-%d] Repartidor %d invierte ciclo en avanzar una posicion con el pedido de idGlobal: %d e idResto: %d."
-						" Para llegar al objetivo actual, todavia requiere %d ciclos adicionales."
-						,numHiloExec , pedidoAEjecutar->repartidorAsignado->numeroRepartidor, pedidoAEjecutar->pedidoIDGlobal
+				log_info(logger, "[EXEC-%d] Repartidor %d invierte ciclo en moverse hacia la posicion: [%d|%d] con el pedido de idGlobal: %d e idResto: %d."
+						" Para llegar al objetivo actual, todavia requiere %d movimiento/s adicional/es."
+						,numHiloExec , pedidoAEjecutar->repartidorAsignado->numeroRepartidor
+						,pedidoAEjecutar->repartidorAsignado->posX, pedidoAEjecutar->repartidorAsignado->posY
+						,pedidoAEjecutar->pedidoIDGlobal
 					    ,pedidoAEjecutar->pedidoID,pedidoAEjecutar->instruccionesTotales - pedidoAEjecutar->instruccionesRealizadas);
                 sem_post(semLog);
 				signalSemaforoFinalizarCicloExec(numHiloExec);
@@ -742,7 +766,7 @@ uint32_t valor_para_switch_case_planificacion(char* algoritmo) {
 }
 
 // Calculo la distancia entre dos puntos
-int distanciaDeRepartidorAObjetivo(repartidor* unRepartidor, pcb_pedido* elPedido){
+int distanciaDeRepartidorAObjetivo(repartidor* elRepartidorEncargado, pcb_pedido* elPedido){
 
 	int posObjetivoX;
 	int posObjetivoY;
@@ -755,9 +779,11 @@ int distanciaDeRepartidorAObjetivo(repartidor* unRepartidor, pcb_pedido* elPedid
 		posObjetivoY = elPedido->posClienteY;
 	}
 
-	int posXRepartidor = unRepartidor->posX;
-	int posYRepartidor = unRepartidor->posY;
+	int posXRepartidor = elRepartidorEncargado->posX;
+	int posYRepartidor = elRepartidorEncargado->posY;
 
+	elRepartidorEncargado->movimientosRequeridosEnX = posObjetivoX - posXRepartidor;
+	elRepartidorEncargado->movimientosRequeridosEnY = posObjetivoY - posYRepartidor;
 
 	int distanciaX = modulo(posXRepartidor - posObjetivoX);
 	int distanciaY = modulo(posYRepartidor - posObjetivoY);
@@ -779,12 +805,6 @@ void printearValorSemaforo(sem_t* unSemaforo, char* nombre){
 	printf("Valor semaforo %s es: %i\n", nombre, *valorSemaforo);
 }
 
-/*
- * Al generar el pcb_pedido deben estar fijados estos valores:
- * posObjetivoX, posObjetivoY = Posicion restaurant
- * pedidoID,
- *
- */
 
 // Agrega el nuevo pedido a la cola NEW
 void agregarANew(pcb_pedido* unPedido)
@@ -825,7 +845,10 @@ void agregarAExit(pcb_pedido* elPCBQueFinalizo){
 	sem_post(semLog);
 
 	eliminarPedidoListo(elPCBQueFinalizo->pedidoIDGlobal);
+	elPCBQueFinalizo->repartidorAsignado->movimientosRequeridosEnX = 0;
+	elPCBQueFinalizo->repartidorAsignado->movimientosRequeridosEnY = 0;
 	elPCBQueFinalizo->repartidorAsignado->asignado = 0;
+
 
 	//antes de hacerle free al pcb y al perfil_pedido, tengo que hacer DOS COSAS (maybe 3):
 	//-> Informar a comanda un FINALIZAR_PEDIDO del pedido que acaba de llegar a exit.
@@ -956,6 +979,8 @@ void leerPlanificacionConfig(t_config* config){
 		miRepartidor->tiempoDescansado = 0;
 		miRepartidor->cansado = 0;
 		miRepartidor->instruccionesRealizadas = 0;
+		miRepartidor->movimientosRequeridosEnX = 0;
+		miRepartidor->movimientosRequeridosEnY = 0;
 
 		freeDeArray(posiciones);
 

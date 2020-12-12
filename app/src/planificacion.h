@@ -88,6 +88,8 @@ typedef struct{
 	int cansado;
 	// Esta asignado a algun pedido
 	int asignado;
+	int movimientosRequeridosEnX;
+	int movimientosRequeridosEnY;
 }repartidor;
 
 typedef struct{
