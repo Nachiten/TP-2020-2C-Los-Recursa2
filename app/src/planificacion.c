@@ -715,7 +715,6 @@ void asignarRepartidorAPedido(pcb_pedido* unPedido){
 	sem_post(semLog);
 	agregarAReady(unPedido);
 
-	// Debug
 }
 
 uint32_t valor_para_switch_case_planificacion(char* algoritmo) {

@@ -336,7 +336,7 @@ void agregarANew(pcb_plato* unPlato)
 
 	//LOG DE ENUNCIADO!!!!1!1!
 	sem_wait(semLog);
-	log_info(logger, "[NEW] Entra el nuevo plato < %s >, del pedido < %d >"
+	log_info(logger, "[NEW] Entra el PCB del plato < %s >, del pedido < %d >"
 			,unPlato->nombrePlato, unPlato->idPedido);
 	sem_post(semLog);
 
