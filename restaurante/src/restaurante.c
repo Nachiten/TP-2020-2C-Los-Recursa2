@@ -650,7 +650,7 @@ void serve_client(int32_t* socket)
 
 			if(cod_op != 0)
 			{
-				printf("Tamaño de lo que sigue en el buffer: %u.\n", sizeAAllocar);
+				//printf("Tamaño de lo que sigue en el buffer: %u.\n", sizeAAllocar);
 			}
 
 			//mando lo que me llego para que lo procesen
