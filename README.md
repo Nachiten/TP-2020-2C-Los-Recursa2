@@ -1,7 +1,6 @@
 # tp-2020-2c-Los-Recursa2
 
-Este es un TP del 2C de 2020 de Sitemas Operativos en UTN FRBA.
-
+Este es un TP del 2C de 2020 de Sistemas Operativos en UTN FRBA.
 Este TP fue APROBADO.
 
 Consigna:
